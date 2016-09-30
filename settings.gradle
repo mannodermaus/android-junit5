@@ -1,0 +1,3 @@
+rootProject.name = GROUP_ID
+
+include ':android-junit5'
