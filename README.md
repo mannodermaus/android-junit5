@@ -6,10 +6,8 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] unit tests 
 ```groovy
 buildscript {
     repositories {
-        // 1. Add the repository (JCenter coming soon...)
-        maven {
-            url "http://dl.bintray.com/aurae/maven"
-        }
+        // 1. Make sure to include jcenter in your repositories
+        jcenter()
     }
     dependencies {
         // 2. Add the plugin as a classpath dependency
