@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         // 2. Add the plugin as a classpath dependency
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M2"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M3"
     }
 }
 
@@ -37,7 +37,7 @@ However, there are some additional properties that you can apply:
 ```groovy
 junitPlatform {
     // The JUnit Jupiter dependency version to use; "5.+" by default
-    jupiterVersion "5.0.0-M2"
+    jupiterVersion "5.0.0-M3"
 }
 ```
 
