@@ -10,7 +10,11 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-    compile "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
+
+    testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
+        transitive = false
+    }
+    testRuntime "junit:junit:$JUNIT4_VERSION"
 }
 
 version = VERSION_NAME

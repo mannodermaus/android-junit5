@@ -1,5 +1,6 @@
 package de.mannodermaus.gradle.anj5
 
+import org.gradle.api.Project
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
 /**
@@ -7,6 +8,10 @@ import org.junit.platform.gradle.plugin.JUnitPlatformExtension
  * This extends the functionality available through JUnitPlatformExtension
  */
 class AndroidJUnit5Extension extends JUnitPlatformExtension {
+
+    AndroidJUnit5Extension(Project project) {
+        super(project)
+    }
 
     /**
      * The version of JUnit Jupiter to use.

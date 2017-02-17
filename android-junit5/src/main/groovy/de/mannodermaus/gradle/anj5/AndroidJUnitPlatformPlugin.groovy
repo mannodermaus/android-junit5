@@ -8,6 +8,9 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.util.GradleVersion
 import org.junit.platform.console.ConsoleLauncher
 import org.junit.platform.gradle.plugin.EnginesExtension
+import org.junit.platform.gradle.plugin.FiltersExtension
+import org.junit.platform.gradle.plugin.PackagesExtension
+import org.junit.platform.gradle.plugin.SelectorsExtension
 import org.junit.platform.gradle.plugin.TagsExtension
 
 public class AndroidJUnitPlatformPlugin implements Plugin<Project> {
@@ -28,9 +31,12 @@ public class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             throw new ProjectConfigurationException("The junit-platform-gradle-plugin needs to be added as a classpath dependency", t)
         }
 
-        def junitExtension = project.extensions.create(EXTENSION_NAME, AndroidJUnit5Extension)
-        junitExtension.extensions.create('tags', TagsExtension)
-        junitExtension.extensions.create('engines', EnginesExtension)
+        def junitExtension = project.extensions.create(EXTENSION_NAME, AndroidJUnit5Extension, project)
+        junitExtension.extensions.create('selectors', SelectorsExtension)
+        junitExtension.extensions.create('filters', FiltersExtension)
+        junitExtension.filters.extensions.create('packages', PackagesExtension)
+        junitExtension.filters.extensions.create('tags', TagsExtension)
+        junitExtension.filters.extensions.create('engines', EnginesExtension)
 
         // configuration.defaultDependencies used below was introduced in Gradle 2.5
         if (GradleVersion.current().compareTo(GradleVersion.version('2.5')) < 0) {
@@ -43,6 +49,9 @@ public class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         def junitConf = project.configurations.maybeCreate('junitPlatform')
         junitConf.defaultDependencies { deps ->
             def version = junitExtension.platformVersion
+            if (version == null) {
+                version = readVersionFromPropertiesFile()
+            }
             deps.add(project.dependencies.create("org.junit.platform:junit-platform-launcher:${version}"))
             deps.add(project.dependencies.create("org.junit.platform:junit-platform-console:${version}"))
         }
@@ -57,6 +66,14 @@ public class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         project.afterEvaluate {
             configure(project, junitExtension)
         }
+    }
+
+    private String readVersionFromPropertiesFile() {
+        Properties properties = new Properties()
+        getClass().getResourceAsStream("version.properties").withCloseable { inputStream ->
+            properties.load(inputStream)
+        }
+        return properties.getProperty("version")
     }
 
     private void configure(Project project, junitExtension) {
@@ -129,11 +146,20 @@ public class AndroidJUnitPlatformPlugin implements Plugin<Project> {
                 description: 'Runs tests on the JUnit Platform.') { junitTask ->
 
             junitTask.inputs.property('enableStandardTestTask', junitExtension.enableStandardTestTask)
-            junitTask.inputs.property('includedEngines', junitExtension.engines.include)
-            junitTask.inputs.property('excludedEngines', junitExtension.engines.exclude)
-            junitTask.inputs.property('includedTags', junitExtension.tags.include)
-            junitTask.inputs.property('excludedTags', junitExtension.tags.exclude)
-            junitTask.inputs.property('includeClassNamePattern', junitExtension.includeClassNamePattern)
+            junitTask.inputs.property('selectors.uris', junitExtension.selectors.uris)
+            junitTask.inputs.property('selectors.files', junitExtension.selectors.files)
+            junitTask.inputs.property('selectors.directories', junitExtension.selectors.directories)
+            junitTask.inputs.property('selectors.packages', junitExtension.selectors.packages)
+            junitTask.inputs.property('selectors.classes', junitExtension.selectors.classes)
+            junitTask.inputs.property('selectors.methods', junitExtension.selectors.methods)
+            junitTask.inputs.property('selectors.resources', junitExtension.selectors.resources)
+            junitTask.inputs.property('filters.engines.include', junitExtension.filters.engines.include)
+            junitTask.inputs.property('filters.engines.exclude', junitExtension.filters.engines.exclude)
+            junitTask.inputs.property('filters.tags.include', junitExtension.filters.tags.include)
+            junitTask.inputs.property('filters.tags.exclude', junitExtension.filters.tags.exclude)
+            junitTask.inputs.property('filters.includeClassNamePatterns', junitExtension.filters.includeClassNamePatterns)
+            junitTask.inputs.property('filters.packages.include', junitExtension.filters.packages.include)
+            junitTask.inputs.property('filters.packages.exclude', junitExtension.filters.packages.exclude)
 
             def reportsDir = junitExtension.reportsDir ?: project.file("build/test-results/junit-platform")
             junitTask.outputs.dir reportsDir
@@ -176,50 +202,83 @@ public class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         testTask.enabled = junitExtension.enableStandardTestTask
     }
 
-    private static ArrayList<String> buildArgs(project, junitExtension, reportsDir) {
+    private List<String> buildArgs(project, junitExtension, reportsDir) {
 
-        def args = ['--hide-details', '--all']
+        def args = []
 
-        if (junitExtension.includeClassNamePattern) {
-            args.add('-n')
-            args.add(junitExtension.includeClassNamePattern)
+        if (junitExtension.details) {
+            args.add('--details')
+            args.add(junitExtension.details.name())
         }
 
-        junitExtension.tags.include.each { tag ->
-            args.add('-t')
-            args.add(tag)
-        }
+        addSelectors(project, junitExtension.selectors, args)
+        addFilters(junitExtension.filters, args)
 
-        junitExtension.tags.exclude.each { tag ->
-            args.add('-T')
-            args.add(tag)
-        }
-
-        junitExtension.engines.include.each { engineId ->
-            args.add('-e')
-            args.add(engineId)
-        }
-
-        junitExtension.engines.exclude.each { engineId ->
-            args.add('-E')
-            args.add(engineId)
-        }
-
-        args.add('-r')
+        args.add('--reports-dir')
         args.add(reportsDir.getAbsolutePath())
 
-        def rootDirs = []
-        project.sourceSets.each { sourceSet ->
-            rootDirs.add(sourceSet.output.classesDir)
-            rootDirs.add(sourceSet.output.resourcesDir)
-            rootDirs.addAll(sourceSet.output.dirs.files)
-        }
-
-        rootDirs.each { File root ->
-            args.add(root.getAbsolutePath())
-        }
-
         return args
+    }
+
+    private void addFilters(filters, args) {
+        filters.includeClassNamePatterns.each { pattern ->
+            args.addAll(['-n', pattern])
+        }
+        filters.excludeClassNamePatterns.each { pattern ->
+            args.addAll(['-N', pattern])
+        }
+        filters.packages.include.each { includedPackage ->
+            args.addAll(['--include-package',includedPackage])
+        }
+        filters.packages.exclude.each { excludedPackage ->
+            args.addAll(['--exclude-package',excludedPackage])
+        }
+        filters.tags.include.each { tag ->
+            args.addAll(['-t', tag])
+        }
+        filters.tags.exclude.each { tag ->
+            args.addAll(['-T', tag])
+        }
+        filters.engines.include.each { engineId ->
+            args.addAll(['-e', engineId])
+        }
+        filters.engines.exclude.each { engineId ->
+            args.addAll(['-E', engineId])
+        }
+    }
+
+    private void addSelectors(project, selectors, args) {
+        if (selectors.empty) {
+            def rootDirs = []
+            project.sourceSets.each { sourceSet ->
+                rootDirs.add(sourceSet.output.classesDir)
+                rootDirs.add(sourceSet.output.resourcesDir)
+                rootDirs.addAll(sourceSet.output.dirs.files)
+            }
+            args.addAll(['--scan-class-path', rootDirs.join(File.pathSeparator)])
+        } else {
+            selectors.uris.each { uri ->
+                args.addAll(['-u', uri])
+            }
+            selectors.files.each { file ->
+                args.addAll(['-f', file])
+            }
+            selectors.directories.each { directory ->
+                args.addAll(['-d', directory])
+            }
+            selectors.packages.each { aPackage ->
+                args.addAll(['-p', aPackage])
+            }
+            selectors.classes.each { aClass ->
+                args.addAll(['-c', aClass])
+            }
+            selectors.methods.each { method ->
+                args.addAll(['-m', method])
+            }
+            selectors.resources.each { resource ->
+                args.addAll(['-r', resource])
+            }
+        }
     }
 
     private static boolean isAndroidProject(Project project) {
