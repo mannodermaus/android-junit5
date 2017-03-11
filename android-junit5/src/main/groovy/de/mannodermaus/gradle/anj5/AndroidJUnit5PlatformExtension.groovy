@@ -7,9 +7,9 @@ import org.junit.platform.gradle.plugin.JUnitPlatformExtension
  * Core configuration options for the Android JUnit 5 Gradle plugin.
  * This extends the functionality available through JUnitPlatformExtension
  */
-class AndroidJUnit5Extension extends JUnitPlatformExtension {
+class AndroidJUnit5PlatformExtension extends JUnitPlatformExtension {
 
-    AndroidJUnit5Extension(Project project) {
+    AndroidJUnit5PlatformExtension(Project project) {
         super(project)
     }
 

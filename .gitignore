@@ -1,7 +1,8 @@
 *.iml
 .gradle
 local.properties
-.idea/
+.idea/*
+!.idea/runConfigurations
 .DS_Store
 build/
 captures/
