@@ -10,7 +10,12 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-    compile "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
+
+    testCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
+    testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
+        transitive = false
+    }
+    testCompile "junit:junit:$JUNIT4_VERSION"
 }
 
 version = VERSION_NAME
@@ -19,14 +24,15 @@ bintray {
     user = project.ext.bintrayUser
     key = project.ext.bintrayApiKey
     configurations = ['archives']
+    dryRun = false
     pkg {
         repo = 'maven'
         name = ARTIFACT_ID
         userOrg = properties.get("BINTRAY_USER")
-        licenses = ['EPL-1.0']
+        licenses = ["EPL-1.0"]
         publish = true
         publicDownloadNumbers = true
-        vcsUrl = 'https://github.com/aurae/android-junit5'
+        vcsUrl = VCS_URL
         version {
             name = VERSION_NAME
             desc = DESCRIPTION
@@ -38,9 +44,17 @@ publishing {
     publications {
         library(MavenPublication) {
             from components.java
+            artifact sourcesJar
+            artifact javadocJar
             groupId GROUP_ID
             artifactId ARTIFACT_ID
             version VERSION_NAME
+            pom.withXml {
+                def root = asNode()
+                root.appendNode("description", DESCRIPTION)
+                root.appendNode("name", ARTIFACT_ID)
+                root.appendNode("url", VCS_URL)
+            }
         }
     }
 }
