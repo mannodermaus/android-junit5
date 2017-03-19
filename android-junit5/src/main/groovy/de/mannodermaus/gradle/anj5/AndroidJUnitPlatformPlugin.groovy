@@ -8,23 +8,18 @@ import org.gradle.util.GradleVersion
 import org.junit.platform.console.ConsoleLauncher
 import org.junit.platform.gradle.plugin.*
 
-import java.lang.reflect.Method
-
 /**
  * Android JUnit Platform plugin for Gradle.
  *
  * Unfortunately, because of the restricted visibility of the plugin's members,
  * a lot of its functionality in regards to setup & configuration needs to be duplicated
- * in this class, even though it extends the "pure-Java plugin" and shares a lot
+ * in this class, even though it extends the "pure-Java plugin" and shares some
  * of its work.
  */
 class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
     private static final String EXTENSION_NAME = 'junitPlatform'
     private static final String TASK_NAME = 'junitPlatformTest'
-
-    /* Reflectively accessed because of restricted visibility in the super-class */
-    private Method buildArgsMethod
 
     /**
      * This method doesn't call through to super.apply().
@@ -36,15 +31,6 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         // Validate that an Android plugin is applied
         if (!isAndroidProject(project)) {
             throw new ProjectConfigurationException("The android or android-library plugin must be applied to this project", null)
-        }
-
-        // Obtain a handle to the private "buildArgs" method, since that cuts down
-        // on the amount of code duplication going on in this class
-        try {
-            buildArgsMethod = JUnitPlatformPlugin.class.getDeclaredMethod("buildArgs", Object.class, Object.class, Object.class)
-            buildArgsMethod.setAccessible(true)
-        } catch (NoSuchMethodError error) {
-            throw new ProjectConfigurationException("Unexpected missing junit-plugin class definition.", error)
         }
 
         // Construct the platform extension (use our Android variant of the Extension class though)
@@ -107,41 +93,47 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             def testedVariantScope = testedVariantData.scope
             def testedScopeJavaOutputs = testedVariantScope.hasProperty("javaOutputs") ? testedVariantScope.javaOutputs : testedVariantScope.javaOuptuts
 
+            // Collect the root directories for unit tests from the variant's scopes
+            def testRootDirs = []
+            testRootDirs.add(variantScope.javaOutputDir)
+            testRootDirs.add(testedVariantScope.javaOutputDir)
+
             // Setup classpath for this variant's tests and add the test task
             // (refer to com.android.build.gradle.tasks.factory.UnitTestConfigAction)
             // 1) Add the compiler's classpath
-            def classpaths = new ArrayList<>()
+            def classpath = []
             if (variantData.javacTask) {
                 def javaCompiler = variant.javaCompiler
-                classpaths.add(javaCompiler.classpath)
-                classpaths.add(javaCompiler.outputs.files)
+                classpath.add(javaCompiler.classpath)
+                classpath.add(javaCompiler.outputs.files)
             } else {
-                classpaths.add(testedScopeJavaOutputs)
-                classpaths.add(scopeJavaOutputs)
+                classpath.add(testedScopeJavaOutputs)
+                classpath.add(scopeJavaOutputs)
             }
 
             // 2) Add the testApk configuration
             def testApk = project.configurations.findByName("testApk")
             if (testApk != null) {
-                classpaths.add(testApk)
+                classpath.add(testApk)
             }
 
             // 3) Add test resources
-            classpaths.add(variantData.javaResourcesForUnitTesting)
-            classpaths.add(testedVariantData.javaResourcesForUnitTesting)
+            classpath.add(variantData.javaResourcesForUnitTesting)
+            classpath.add(testedVariantData.javaResourcesForUnitTesting)
 
             // 4) Add filtered boot classpath
             def globalScope = variantScope.globalScope
-            classpaths.add(globalScope.androidBuilder.getBootClasspath(false).findAll { it.name != "android.jar" })
+            classpath.add(globalScope.androidBuilder.getBootClasspath(false).findAll { it.name != "android.jar" })
 
             // 5) Add mocked version of android.jar
-            classpaths.add(globalScope.mockableAndroidJarFile)
+            classpath.add(globalScope.mockableAndroidJarFile)
 
             addJunitPlatformTask(
                     project: project,
                     junitExtension: junitExtension,
                     nameSuffix: nameSuffix,
-                    classpath: project.files(classpaths),
+                    classpath: project.files(classpath),
+                    testRootDirs: testRootDirs,
                     dependentTasks: Collections.singletonList("assemble${nameSuffix}UnitTest"))
         }
     }
@@ -150,6 +142,7 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         Project project = map.project as Project
         def junitExtension = map.junitExtension
         def classpath = map.classpath
+        def testRootDirs = map.testRootDirs
         String nameSuffix = map.getOrDefault("nameSuffix", "")
         def dependentTasks = map.dependentTasks
 
@@ -194,7 +187,26 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             junitTask.classpath = classpath + project.configurations.junitPlatform
 
             junitTask.main = ConsoleLauncher.class.getName()
-            junitTask.args buildArgsMethod.invoke(this, project, junitExtension, reportsDir)
+            junitTask.args buildArgs(project, junitExtension, reportsDir, testRootDirs)
+
+            doFirst {
+                project.logger.info("CLASS PATH ==")
+                classpath.each {
+                    project.logger.info("$it")
+                }
+                project.logger.info("=============")
+                project.logger.info("TASK ARGS ===")
+                project.logger.info("${junitTask.args.join(" ")}")
+                project.logger.info("=============")
+
+//                def rootDirs = []
+//                project.sourceSets.each { sourceSet ->
+//                    rootDirs.add(sourceSet.output.classesDir)
+//                    rootDirs.add(sourceSet.output.resourcesDir)
+//                    rootDirs.addAll(sourceSet.output.dirs.files)
+//                }
+//                args.addAll(['--scan-class-path', rootDirs.join(File.pathSeparator)])
+            }
         }
     }
 
@@ -213,6 +225,71 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         def testTask = project.tasks.getByName('test')
         testTask.dependsOn junitTask
         testTask.enabled = junitExtension.enableStandardTestTask
+    }
+
+    private List<String> buildArgs(project, junitExtension, reportsDir, testRootDirs) {
+
+        def args = ['--hide-details']
+
+        addSelectors(project, junitExtension.selectors, testRootDirs, args)
+        addFilters(junitExtension.filters, args)
+
+        args.add('--reports-dir')
+        args.add(reportsDir.getAbsolutePath())
+
+        return args
+    }
+
+    private void addFilters(filters, args) {
+        filters.includeClassNamePatterns.each { pattern ->
+            args.addAll(['-n', pattern])
+        }
+        filters.packages.include.each { includedPackage ->
+            args.addAll(['--include-package',includedPackage])
+        }
+        filters.packages.exclude.each { excludedPackage ->
+            args.addAll(['--exclude-package',excludedPackage])
+        }
+        filters.tags.include.each { tag ->
+            args.addAll(['-t', tag])
+        }
+        filters.tags.exclude.each { tag ->
+            args.addAll(['-T', tag])
+        }
+        filters.engines.include.each { engineId ->
+            args.addAll(['-e', engineId])
+        }
+        filters.engines.exclude.each { engineId ->
+            args.addAll(['-E', engineId])
+        }
+    }
+
+    private void addSelectors(project, selectors, testRootDirs, args) {
+        if (selectors.empty) {
+            args.addAll(['--scan-class-path', testRootDirs.join(File.pathSeparator)])
+        } else {
+            selectors.uris.each { uri ->
+                args.addAll(['-u', uri])
+            }
+            selectors.files.each { file ->
+                args.addAll(['-f', file])
+            }
+            selectors.directories.each { directory ->
+                args.addAll(['-d', directory])
+            }
+            selectors.packages.each { aPackage ->
+                args.addAll(['-p', aPackage])
+            }
+            selectors.classes.each { aClass ->
+                args.addAll(['-c', aClass])
+            }
+            selectors.methods.each { method ->
+                args.addAll(['-m', method])
+            }
+            selectors.resources.each { resource ->
+                args.addAll(['-r', resource])
+            }
+        }
     }
 
     private static boolean isAndroidProject(Project project) {
