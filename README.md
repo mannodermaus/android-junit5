@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         // 2. Add the plugin as a classpath dependency
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M3"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M4"
     }
 }
 
@@ -22,6 +22,9 @@ apply plugin: "de.mannodermaus.android-junit5"
 dependencies {
     // 4. Add the testCompile dependencies on JUnit Jupiter
     testCompile junitJupiter()
+
+    // 5. (Optional) Add the testCompile dependency on the JUnit Vintage Engine
+    testCompile junitVintage()
 }
 ```
 
@@ -36,8 +39,10 @@ However, there are some additional properties that you can apply:
 
 ```groovy
 junitPlatform {
-    // The JUnit Jupiter dependency version to use; "5.+" by default
-    jupiterVersion "5.0.0-M3"
+    // The JUnit Jupiter dependency version to use; "5.0.0-M4" by default
+    jupiterVersion "5.0.0-M4"
+    // The JUnit Vintage Engine dependency version to use; "4.12.0-M4" by default
+    vintageVersion "4.12.0-M4"
 }
 ```
 
