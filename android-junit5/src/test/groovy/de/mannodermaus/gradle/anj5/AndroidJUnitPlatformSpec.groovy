@@ -2,11 +2,13 @@ package de.mannodermaus.gradle.anj5
 
 import org.gradle.api.Project
 import org.gradle.api.internal.plugins.PluginApplicationException
-import org.gradle.internal.resolve.ModuleVersionNotFoundException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
 class AndroidJUnitPlatformSpec extends Specification {
+
+    private static final AGP_VERSION_2_X = "2.4.0-alpha7"
+    private static final AGP_VERSION_3_X = "3.0.0-alpha1"
 
     private static final COMPILE_SDK = 25
     private static final BUILD_TOOLS = "25.0.2"
@@ -15,6 +17,12 @@ class AndroidJUnitPlatformSpec extends Specification {
     private static final VERSION_CODE = 1
     private static final VERSION_NAME = "1.0"
     private static final APPLICATION_ID = "org.junit.android.sample"
+    private static final ANDROID_MANIFEST = """
+        <manifest
+            xmlns:android="schemas.android.com/apk/res/android"
+            package="$APPLICATION_ID">
+        </manifest>
+    """
 
     /* SDK Directory, taken from the project itself and setup */
     static String sdkDir
@@ -65,6 +73,8 @@ class AndroidJUnitPlatformSpec extends Specification {
         when:
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
         p.apply plugin: 'com.android.application'
         p.apply plugin: 'de.mannodermaus.android-junit5'
@@ -91,15 +101,8 @@ class AndroidJUnitPlatformSpec extends Specification {
         when:
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
-
-        // Library projects require an AndroidManifest
-        def mainDir = p.file("src/main")
-        mainDir.mkdirs()
-        p.file("${mainDir.absolutePath}/AndroidManifest.xml").withWriter {
-            it.write(
-                    "<manifest package=\"$APPLICATION_ID\"></manifest>"
-            )
-        }
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
         p.apply plugin: 'com.android.library'
         p.apply plugin: 'de.mannodermaus.android-junit5'
@@ -118,6 +121,8 @@ class AndroidJUnitPlatformSpec extends Specification {
         when:
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
         p.apply plugin: 'com.android.application'
         p.apply plugin: 'de.mannodermaus.android-junit5'
@@ -133,11 +138,15 @@ class AndroidJUnitPlatformSpec extends Specification {
                 versionName VERSION_NAME
             }
 
+            flavorDimensions "plan"
+
             productFlavors {
                 free {
+                    dimension "plan"
                 }
 
                 paid {
+                    dimension "plan"
                 }
             }
         }
@@ -156,6 +165,8 @@ class AndroidJUnitPlatformSpec extends Specification {
 
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
         p.apply plugin: 'com.android.application'
         p.apply plugin: 'de.mannodermaus.android-junit5'
@@ -176,33 +187,30 @@ class AndroidJUnitPlatformSpec extends Specification {
             jupiterVersion nonExistentVersion
         }
         p.dependencies {
-            testCompile junitJupiter()
+            testApi junitJupiter()
+            testRuntimeOnly junitRuntime()
         }
 
         then:
-        try {
-            p.evaluate()
-            throw new AssertionError("Expected ${ModuleVersionNotFoundException.class.name}, but wasn't thrown")
+        p.evaluate()
 
-        } catch (Throwable expected) {
-            while (expected != null) {
-                if (expected instanceof ModuleVersionNotFoundException) {
-                    assert expected.message.contains("Could not find org.junit.jupiter:junit-jupiter-engine:$nonExistentVersion.")
-                    break
-                }
-                expected = expected.cause
-            }
+        def testApiDeps = p.configurations.getByName("testApi").dependencies
+        assert testApiDeps.find {
+            it.group == "org.junit.jupiter" && it.name == "junit-jupiter-api" && it.version == nonExistentVersion
+        } != null
 
-            if (expected == null) {
-                throw new AssertionError("Expected ${ModuleVersionNotFoundException.class.name}, but wasn't thrown")
-            }
-        }
+        def testRuntimeDeps = p.configurations.getByName("testRuntimeOnly").dependencies
+        assert testRuntimeDeps.find {
+            it.group == "org.junit.jupiter" && it.name == "junit-jupiter-engine" && it.version == nonExistentVersion
+        } != null
     }
 
-    def "junit jupiter dependency extension works"() {
+    def "dependency extensions work"() {
         when:
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
         p.apply plugin: 'com.android.application'
         p.apply plugin: 'de.mannodermaus.android-junit5'
@@ -219,11 +227,18 @@ class AndroidJUnitPlatformSpec extends Specification {
             }
         }
         p.dependencies {
-            testCompile junitJupiter()
+            testApi junitJupiter()
+            testRuntimeOnly junitRuntime()
+            testRuntimeOnly junitVintage()
         }
 
         then:
-        def testCompileDeps = p.configurations.getByName("testCompile").dependencies
-        testCompileDeps.find { it.group == "org.junit.jupiter" && it.name == "junit-jupiter-engine" } != null
+        def testRuntimeDeps = p.configurations.getByName("testRuntimeOnly").dependencies
+        assert testRuntimeDeps.find {
+            it.group == "org.junit.jupiter" && it.name == "junit-jupiter-engine"
+        } != null
+        assert testRuntimeDeps.find {
+            it.group == "org.junit.vintage" && it.name == "junit-vintage-engine"
+        } != null
     }
 }

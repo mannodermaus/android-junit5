@@ -60,6 +60,11 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         project.dependencies.ext.junitJupiter = {
             def jupiterVersion = junitExtension.jupiterVersion
             project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
+        }
+
+        // Add a junitRuntime() dependency handler
+        project.dependencies.ext.junitRuntime = {
+            def jupiterVersion = junitExtension.jupiterVersion
             project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
         }
 
@@ -86,12 +91,12 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             // Obtain variant properties
             def variantData = variant.variantData
             def variantScope = variantData.scope
-            def scopeJavaOutputs = variantScope.hasProperty("javaOutputs") ? variantScope.javaOutputs : variantScope.javaOuptuts
+            def scopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(variantScope)
 
             // Obtain tested variant properties
             def testedVariantData = variant.testedVariant.variantData
             def testedVariantScope = testedVariantData.scope
-            def testedScopeJavaOutputs = testedVariantScope.hasProperty("javaOutputs") ? testedVariantScope.javaOutputs : testedVariantScope.javaOuptuts
+            def testedScopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(testedVariantScope)
 
             // Collect the root directories for unit tests from the variant's scopes
             def testRootDirs = []
@@ -111,10 +116,13 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
                 classpath.add(scopeJavaOutputs)
             }
 
-            // 2) Add the testApk configuration
-            def testApk = project.configurations.findByName("testApk")
-            if (testApk != null) {
-                classpath.add(testApk)
+            // 2) Add the runtime configurations
+            def testRuntime = project.configurations.findByName("testRuntimeOnly")
+            if (testRuntime == null) {
+                testRuntime = project.configurations.findByName("testApk")
+            }
+            if (testRuntime != null) {
+                classpath.add(testRuntime)
             }
 
             // 3) Add test resources
@@ -123,7 +131,9 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
             // 4) Add filtered boot classpath
             def globalScope = variantScope.globalScope
-            classpath.add(globalScope.androidBuilder.getBootClasspath(false).findAll { it.name != "android.jar" })
+            classpath.add(globalScope.androidBuilder.getBootClasspath(false).findAll {
+                it.name != "android.jar"
+            })
 
             // 5) Add mocked version of android.jar
             classpath.add(globalScope.mockableAndroidJarFile)
@@ -245,10 +255,10 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             args.addAll(['-n', pattern])
         }
         filters.packages.include.each { includedPackage ->
-            args.addAll(['--include-package',includedPackage])
+            args.addAll(['--include-package', includedPackage])
         }
         filters.packages.exclude.each { excludedPackage ->
-            args.addAll(['--exclude-package',excludedPackage])
+            args.addAll(['--exclude-package', excludedPackage])
         }
         filters.tags.include.each { tag ->
             args.addAll(['-t', tag])
