@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
@@ -25,6 +26,13 @@ sourceSets {
         java.srcDir "src/testAgp3x/groovy"
         compileClasspath += sourceSets.test.output
         runtimeClasspath += sourceSets.test.output
+    }
+}
+
+idea {
+    module {
+        testSourceDirs += file("src/testAgp2x/groovy")
+        testSourceDirs += file("src/testAgp3x/groovy")
     }
 }
 
