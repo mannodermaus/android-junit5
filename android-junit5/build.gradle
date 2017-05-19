@@ -6,17 +6,56 @@ apply plugin: 'com.jfrog.bintray'
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
 
+configurations {
+    testAgp2xCompile {
+        extendsFrom configurations.testCompile
+    }
+    testAgp3xCompile {
+        extendsFrom configurations.testCompile
+    }
+}
+
+sourceSets {
+    testAgp2x {
+        java.srcDir "src/testAgp2x/groovy"
+        compileClasspath += sourceSets.test.output
+        runtimeClasspath += sourceSets.test.output
+    }
+    testAgp3x {
+        java.srcDir "src/testAgp3x/groovy"
+        compileClasspath += sourceSets.test.output
+        runtimeClasspath += sourceSets.test.output
+    }
+}
+
 dependencies {
     compile gradleApi()
     compile localGroovy()
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
 
-    testCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
+    testCompile "junit:junit:$JUNIT4_VERSION"
     testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
         transitive = false
     }
-    testCompile "junit:junit:$JUNIT4_VERSION"
+
+    testAgp2xCompile "com.android.tools.build:gradle:2.3.2"
+    testAgp3xCompile "com.android.tools.build:gradle:3.0.0-alpha1"
 }
+
+// Run Unit Tests against Android Gradle Plugin version 2.x
+task testAgp2x(type: Test) {
+    testClassesDirs = sourceSets.testAgp2x.output.classesDirs
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.testAgp2x.runtimeClasspath
+}
+
+// Run Unit Tests against Android Gradle Plugin version 3.x
+task testAgp3x(type: Test) {
+    testClassesDirs = sourceSets.testAgp3x.output.classesDirs
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.testAgp3x.runtimeClasspath
+}
+
+// Combine all tests when executing the main JUnit task
+tasks.getByName("test").dependsOn(testAgp2x, testAgp3x)
 
 version = VERSION_NAME
 
