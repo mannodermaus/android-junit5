@@ -9,8 +9,11 @@ import org.junit.platform.gradle.plugin.JUnitPlatformExtension
  */
 class AndroidJUnit5PlatformExtension extends JUnitPlatformExtension {
 
+    private static final String PLATFORM_VERSION = "1.0.0-M4"
+
     AndroidJUnit5PlatformExtension(Project project) {
         super(project)
+        platformVersion = PLATFORM_VERSION
     }
 
     /**
