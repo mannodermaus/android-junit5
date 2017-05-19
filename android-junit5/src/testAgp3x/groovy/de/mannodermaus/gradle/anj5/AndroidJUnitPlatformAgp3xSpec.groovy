@@ -34,7 +34,6 @@ class AndroidJUnitPlatformAgp3xSpec extends AndroidJUnitPlatformSpec {
         }
         p.dependencies {
             testApi junitJupiter()
-            testRuntimeOnly junitRuntime()
         }
 
         then:
@@ -45,13 +44,12 @@ class AndroidJUnitPlatformAgp3xSpec extends AndroidJUnitPlatformSpec {
             it.group == "org.junit.jupiter" && it.name == "junit-jupiter-api" && it.version == nonExistentVersion
         } != null
 
-        def testRuntimeDeps = p.configurations.getByName("testRuntimeOnly").dependencies
-        assert testRuntimeDeps.find {
-            it.group == "org.junit.jupiter" && it.name == "junit-jupiter-engine" && it.version == nonExistentVersion
+        assert testApiDeps.find {
+            it.group == "junit" && it.name == "junit" && it.version == "4.12"
         } != null
     }
 
-    def "dependency extensions work"() {
+    def "show warning if depending on junitVintage() directly"() {
         when:
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
@@ -74,17 +72,13 @@ class AndroidJUnitPlatformAgp3xSpec extends AndroidJUnitPlatformSpec {
         }
         p.dependencies {
             testApi junitJupiter()
-            testRuntimeOnly junitRuntime()
             testRuntimeOnly junitVintage()
         }
 
         then:
-        def testRuntimeDeps = p.configurations.getByName("testRuntimeOnly").dependencies
-        assert testRuntimeDeps.find {
-            it.group == "org.junit.jupiter" && it.name == "junit-jupiter-engine"
-        } != null
-        assert testRuntimeDeps.find {
-            it.group == "org.junit.vintage" && it.name == "junit-vintage-engine"
-        } != null
+        p.evaluate()
+        // Unsure how to capture the output directly
+        // (Project.logging listeners don't seem to work)
+        assert true == true
     }
 }
