@@ -18,6 +18,10 @@ import org.junit.platform.gradle.plugin.*
  */
 class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
+    private static final String LOG_TAG = "[android-junit5]"
+
+    private static final String VINTAGE_WARNING = "AGPBI: {\"kind\":\"warning\",\"text\":\"$LOG_TAG You don't need to depend on junitVintage() directly anymore!\",\"sources\":[{},{}]}"
+
     private static final String EXTENSION_NAME = 'junitPlatform'
     private static final String TASK_NAME = 'junitPlatformTest'
 
@@ -51,22 +55,34 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         // by this plugin.
         def configuration = project.configurations.maybeCreate('junitPlatform')
         configuration.defaultDependencies { deps ->
-            def version = junitExtension.platformVersion
-            deps.add(project.dependencies.create("org.junit.platform:junit-platform-launcher:${version}"))
-            deps.add(project.dependencies.create("org.junit.platform:junit-platform-console:${version}"))
+            // By default, include both TestEngines
+            // and the Launcher-related dependencies
+            // on the runtime classpath
+            def platformVersion = junitExtension.platformVersion
+            deps.add(project.dependencies.create("org.junit.platform:junit-platform-launcher:${platformVersion}"))
+            deps.add(project.dependencies.create("org.junit.platform:junit-platform-console:${platformVersion}"))
+
+            def jupiterVersion = junitExtension.jupiterVersion
+            deps.add(project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}"))
+
+            def vintageVersion = junitExtension.vintageVersion
+            deps.add(project.dependencies.create("org.junit.vintage:junit-vintage-engine:${vintageVersion}"))
         }
 
         // Add a junitJupiter() dependency handler
         project.dependencies.ext.junitJupiter = {
             def jupiterVersion = junitExtension.jupiterVersion
-            project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
-            project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
+
+            return [
+                    project.dependencies.create("junit:junit:4.12"),
+                    project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"),
+            ]
         }
 
         // Add a junitVintage() dependency handler
         project.dependencies.ext.junitVintage = {
-            def vintageVersion = junitExtension.vintageVersion
-            project.dependencies.create("org.junit.vintage:junit-vintage-engine:${vintageVersion}")
+            project.logger.warn(VINTAGE_WARNING)
+            return []
         }
 
         project.afterEvaluate {
@@ -86,12 +102,12 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             // Obtain variant properties
             def variantData = variant.variantData
             def variantScope = variantData.scope
-            def scopeJavaOutputs = variantScope.hasProperty("javaOutputs") ? variantScope.javaOutputs : variantScope.javaOuptuts
+            def scopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(variantScope)
 
             // Obtain tested variant properties
             def testedVariantData = variant.testedVariant.variantData
             def testedVariantScope = testedVariantData.scope
-            def testedScopeJavaOutputs = testedVariantScope.hasProperty("javaOutputs") ? testedVariantScope.javaOutputs : testedVariantScope.javaOuptuts
+            def testedScopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(testedVariantScope)
 
             // Collect the root directories for unit tests from the variant's scopes
             def testRootDirs = []
@@ -111,11 +127,14 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
                 classpath.add(scopeJavaOutputs)
             }
 
-            // 2) Add the testApk configuration
-            def testApk = project.configurations.findByName("testApk")
-            if (testApk != null) {
-                classpath.add(testApk)
-            }
+            // 2) Add the runtime configurations
+//            def testRuntime = project.configurations.findByName("testRuntimeOnly")
+//            if (testRuntime == null) {
+//                testRuntime = project.configurations.findByName("testApk")
+//            }
+//            if (testRuntime != null) {
+//                classpath.add(testRuntime)
+//            }
 
             // 3) Add test resources
             classpath.add(variantData.javaResourcesForUnitTesting)
@@ -123,7 +142,9 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
             // 4) Add filtered boot classpath
             def globalScope = variantScope.globalScope
-            classpath.add(globalScope.androidBuilder.getBootClasspath(false).findAll { it.name != "android.jar" })
+            classpath.add(globalScope.androidBuilder.getBootClasspath(false).findAll {
+                it.name != "android.jar"
+            })
 
             // 5) Add mocked version of android.jar
             classpath.add(globalScope.mockableAndroidJarFile)
@@ -151,6 +172,11 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
                 type: JavaExec,
                 group: 'verification',
                 description: 'Runs tests on the JUnit Platform.') { junitTask ->
+
+            // Disable the default Unit Test task, since we're running JUnit 5 anyway
+            def defaultTestTask = project.tasks.findByName("test${nameSuffix}UnitTest")
+            defaultTestTask.setEnabled(false)
+            defaultTestTask.dependsOn += junitTask
 
             junitTask.inputs.property('enableStandardTestTask', junitExtension.enableStandardTestTask)
             junitTask.inputs.property('selectors.uris', junitExtension.selectors.uris)
@@ -188,25 +214,6 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
             junitTask.main = ConsoleLauncher.class.getName()
             junitTask.args buildArgs(project, junitExtension, reportsDir, testRootDirs)
-
-            doFirst {
-                project.logger.info("CLASS PATH ==")
-                classpath.each {
-                    project.logger.info("$it")
-                }
-                project.logger.info("=============")
-                project.logger.info("TASK ARGS ===")
-                project.logger.info("${junitTask.args.join(" ")}")
-                project.logger.info("=============")
-
-//                def rootDirs = []
-//                project.sourceSets.each { sourceSet ->
-//                    rootDirs.add(sourceSet.output.classesDir)
-//                    rootDirs.add(sourceSet.output.resourcesDir)
-//                    rootDirs.addAll(sourceSet.output.dirs.files)
-//                }
-//                args.addAll(['--scan-class-path', rootDirs.join(File.pathSeparator)])
-            }
         }
     }
 
@@ -245,10 +252,10 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             args.addAll(['-n', pattern])
         }
         filters.packages.include.each { includedPackage ->
-            args.addAll(['--include-package',includedPackage])
+            args.addAll(['--include-package', includedPackage])
         }
         filters.packages.exclude.each { excludedPackage ->
-            args.addAll(['--exclude-package',excludedPackage])
+            args.addAll(['--exclude-package', excludedPackage])
         }
         filters.tags.include.each { tag ->
             args.addAll(['-t', tag])
