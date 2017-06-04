@@ -1,5 +1,7 @@
 package de.mannodermaus.gradle.anj5
 
+import com.android.build.gradle.internal.scope.VariantScope
+import com.github.zafarkhaja.semver.Version
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
@@ -91,6 +93,8 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
     }
 
     private void configure(Project project, AndroidJUnit5PlatformExtension junitExtension) {
+        def agpVersion = Version.valueOf(com.android.builder.Version.ANDROID_GRADLE_PLUGIN_VERSION)
+
         // Add the test task to each of the project's unit test variants
         def allVariants = isAndroidLibrary(project) ? "libraryVariants" : "applicationVariants"
         def testVariants = project.android[allVariants].findAll { it.hasProperty("unitTestVariant") }
@@ -101,13 +105,14 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
             // Obtain variant properties
             def variantData = variant.variantData
-            def variantScope = variantData.scope
-            def scopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(variantScope)
+            VariantScope variantScope = variantData.scope
+            def scopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(agpVersion, variantScope)
 
             // Obtain tested variant properties
             def testedVariantData = variant.testedVariant.variantData
-            def testedVariantScope = testedVariantData.scope
-            def testedScopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(testedVariantScope)
+            VariantScope testedVariantScope = testedVariantData.scope
+
+            def testedScopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(agpVersion, testedVariantScope)
 
             // Collect the root directories for unit tests from the variant's scopes
             def testRootDirs = []
@@ -128,13 +133,13 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             }
 
             // 2) Add the runtime configurations
-//            def testRuntime = project.configurations.findByName("testRuntimeOnly")
-//            if (testRuntime == null) {
-//                testRuntime = project.configurations.findByName("testApk")
-//            }
-//            if (testRuntime != null) {
-//                classpath.add(testRuntime)
-//            }
+            def testRuntime = project.configurations.findByName("testRuntimeOnly")
+            if (testRuntime == null) {
+                testRuntime = project.configurations.findByName("testApk")
+            }
+            if (testRuntime != null) {
+                classpath.add(testRuntime)
+            }
 
             // 3) Add test resources
             classpath.add(variantData.javaResourcesForUnitTesting)

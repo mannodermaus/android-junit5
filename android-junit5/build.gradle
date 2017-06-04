@@ -19,11 +19,15 @@ configurations {
 sourceSets {
     testAgp2x {
         java.srcDir "src/testAgp2x/groovy"
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
         compileClasspath += sourceSets.test.output
         runtimeClasspath += sourceSets.test.output
     }
     testAgp3x {
         java.srcDir "src/testAgp3x/groovy"
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
         compileClasspath += sourceSets.test.output
         runtimeClasspath += sourceSets.test.output
     }
@@ -39,15 +43,16 @@ idea {
 dependencies {
     compile gradleApi()
     compile localGroovy()
+    compile "com.github.zafarkhaja:java-semver:$SEMVER_VERSION"
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
+    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
 
     testCompile "junit:junit:$JUNIT4_VERSION"
-    testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
-        transitive = false
-    }
+    testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
+    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 
-    testAgp2xCompile "com.android.tools.build:gradle:2.3.2"
-    testAgp3xCompile "com.android.tools.build:gradle:3.0.0-alpha1"
+    testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
+    testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 }
 
 // Run Unit Tests against Android Gradle Plugin version 2.x
