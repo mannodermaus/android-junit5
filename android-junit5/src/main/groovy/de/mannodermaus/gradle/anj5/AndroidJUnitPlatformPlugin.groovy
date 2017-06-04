@@ -1,5 +1,6 @@
 package de.mannodermaus.gradle.anj5
 
+import com.android.SdkConstants
 import com.android.build.gradle.internal.scope.VariantScope
 import com.github.zafarkhaja.semver.Version
 import org.gradle.api.GradleException
@@ -22,7 +23,8 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
 
     private static final String LOG_TAG = "[android-junit5]"
 
-    private static final String VINTAGE_WARNING = "AGPBI: {\"kind\":\"warning\",\"text\":\"$LOG_TAG You don't need to depend on junitVintage() directly anymore!\",\"sources\":[{},{}]}"
+    private static
+    final String VINTAGE_WARNING = "AGPBI: {\"kind\":\"warning\",\"text\":\"$LOG_TAG You don't need to depend on junitVintage() directly anymore!\",\"sources\":[{},{}]}"
 
     private static final String EXTENSION_NAME = 'junitPlatform'
     private static final String TASK_NAME = 'junitPlatformTest'
@@ -113,13 +115,13 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             // Obtain variant properties
             def variantData = variant.variantData
             VariantScope variantScope = variantData.scope
-            def scopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(agpVersion, variantScope)
+            def scopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(project, agpVersion, variantScope)
 
             // Obtain tested variant properties
             def testedVariantData = variant.testedVariant.variantData
             VariantScope testedVariantScope = testedVariantData.scope
 
-            def testedScopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(agpVersion, testedVariantScope)
+            def testedScopeJavaOutputs = AndroidJUnit5Compat.getJavaOutputDirs(project, agpVersion, testedVariantScope)
 
             // Collect the root directories for unit tests from the variant's scopes
             def testRootDirs = []
@@ -134,19 +136,10 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
                 def javaCompiler = variant.javaCompiler
                 classpath.add(javaCompiler.classpath)
                 classpath.add(javaCompiler.outputs.files)
-            } else {
-                classpath.add(testedScopeJavaOutputs)
-                classpath.add(scopeJavaOutputs)
             }
 
-            // 2) Add the runtime configurations
-            def testRuntime = project.configurations.findByName("testRuntimeOnly")
-            if (testRuntime == null) {
-                testRuntime = project.configurations.findByName("testApk")
-            }
-            if (testRuntime != null) {
-                classpath.add(testRuntime)
-            }
+            classpath.add(testedScopeJavaOutputs)
+            classpath.add(scopeJavaOutputs)
 
             // 3) Add test resources
             classpath.add(variantData.javaResourcesForUnitTesting)
@@ -155,7 +148,7 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
             // 4) Add filtered boot classpath
             def globalScope = variantScope.globalScope
             classpath.add(globalScope.androidBuilder.getBootClasspath(false).findAll {
-                it.name != "android.jar"
+                it.name != SdkConstants.FN_FRAMEWORK_LIBRARY
             })
 
             // 5) Add mocked version of android.jar

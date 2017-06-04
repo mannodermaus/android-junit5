@@ -5,6 +5,16 @@ import org.gradle.testfixtures.ProjectBuilder
 
 class AndroidJUnitPlatformAgp3xSpec extends AndroidJUnitPlatformSpec {
 
+    @Override
+    protected String testCompileDependency() {
+        return "testApi"
+    }
+
+    @Override
+    protected String testRuntimeDependency() {
+        return "testRuntimeOnly"
+    }
+
     def "custom junit jupiter version"() {
         when:
         def nonExistentVersion = "0.0.0"
@@ -33,7 +43,8 @@ class AndroidJUnitPlatformAgp3xSpec extends AndroidJUnitPlatformSpec {
             jupiterVersion nonExistentVersion
         }
         p.dependencies {
-            testApi junitJupiter()
+            // "testCompile" or "testApi"
+            invokeMethod(testCompileDependency(), junitJupiter())
         }
 
         then:
@@ -47,38 +58,5 @@ class AndroidJUnitPlatformAgp3xSpec extends AndroidJUnitPlatformSpec {
         assert testApiDeps.find {
             it.group == "junit" && it.name == "junit" && it.version == "4.12"
         } != null
-    }
-
-    def "show warning if depending on junitVintage() directly"() {
-        when:
-        Project p = ProjectBuilder.builder().withParent(testRoot).build()
-        p.file(".").mkdir()
-        p.file("src/main").mkdirs()
-        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
-
-        p.apply plugin: 'com.android.application'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
-        p.android {
-            compileSdkVersion COMPILE_SDK
-            buildToolsVersion BUILD_TOOLS
-
-            defaultConfig {
-                applicationId APPLICATION_ID
-                minSdkVersion MIN_SDK
-                targetSdkVersion TARGET_SDK
-                versionCode VERSION_CODE
-                versionName VERSION_NAME
-            }
-        }
-        p.dependencies {
-            testApi junitJupiter()
-            testRuntimeOnly junitVintage()
-        }
-
-        then:
-        p.evaluate()
-        // Unsure how to capture the output directly
-        // (Project.logging listeners don't seem to work)
-        assert true == true
     }
 }

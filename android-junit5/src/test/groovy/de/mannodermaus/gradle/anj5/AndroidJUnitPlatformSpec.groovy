@@ -57,6 +57,12 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         testRoot.file("local.properties").withWriter { it.write(sdkDir) }
     }
 
+    /* Abstract */
+
+    protected abstract String testCompileDependency()
+    protected abstract String testRuntimeDependency()
+
+
     /* Test Cases */
 
     def "requires android plugin"() {
@@ -119,6 +125,85 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestRelease")
     }
 
+    def "classpath assembled correctly"() {
+        when:
+        // Prepare another test project to link to
+        Project testApkProject = ProjectBuilder.builder()
+                .withParent(testRoot)
+                .withName("library")
+                .build()
+        testApkProject.file(".").mkdir()
+        testApkProject.file("src/main").mkdirs()
+        testApkProject.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        testApkProject.apply plugin: 'com.android.library'
+        testApkProject.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+        }
+
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: 'com.android.application'
+        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.repositories {
+            jcenter()
+        }
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+
+            defaultConfig {
+                applicationId APPLICATION_ID
+                minSdkVersion MIN_SDK
+                targetSdkVersion TARGET_SDK
+                versionCode VERSION_CODE
+                versionName VERSION_NAME
+            }
+        }
+        p.dependencies {
+            // "testApk" or "testRuntimeOnly"
+            add(testRuntimeDependency(), testApkProject)
+        }
+        p.evaluate()
+
+        then:
+        // Check that all expected folders are contained in the JUnit task's classpath
+        [p.tasks.getByName("junitPlatformTestDebug"),
+         p.tasks.getByName("junitPlatformTestRelease")].forEach { task ->
+            def classpath = task.classpath.collect { it.absolutePath }
+
+//            println "---- $task.name"
+//            classpath.each {
+//                println "  > $it"
+//            }
+
+            // Source set's outputs
+            assert classpath.find { it.contains("test/build/intermediates/classes/") } != null
+            assert classpath.find { it.contains("test/build/intermediates/classes/test/") } != null
+
+            // Annotation Processor outputs
+            assert classpath.find { it.contains("test/build/generated/source/apt/") } != null
+            assert classpath.find { it.contains("test/build/generated/source/apt/test/") } != null
+
+            // Resource Files
+            assert classpath.find { it.contains("test/build/intermediates/sourceFolderJavaResources/") } != null
+            assert classpath.find { it.contains("test/build/intermediates/sourceFolderJavaResources/test/") } != null
+
+            // Mockable android.jar
+            assert classpath.find { it.contains("build/generated/mockable-android-") } != null
+
+            // Runtime Library dependency (each version stores it slightly differently)
+            assert classpath.find {
+                it.contains("library/build/outputs/") ||
+                        it.contains("library/build/intermediates/")
+            } != null
+        }
+    }
+
     def "application with product flavors"() {
         when:
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
@@ -159,5 +244,44 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestFreeRelease")
         p.tasks.getByName("junitPlatformTestPaidDebug")
         p.tasks.getByName("junitPlatformTestPaidRelease")
+    }
+
+    def "show warning if depending on junitVintage() directly"() {
+        when:
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: 'com.android.application'
+        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+
+            defaultConfig {
+                applicationId APPLICATION_ID
+                minSdkVersion MIN_SDK
+                targetSdkVersion TARGET_SDK
+                versionCode VERSION_CODE
+                versionName VERSION_NAME
+            }
+        }
+        p.repositories {
+            jcenter()
+        }
+        p.dependencies {
+            // "testCompile" or "testApi"
+            invokeMethod(testCompileDependency(), junitJupiter())
+            // "testApk" or "testRuntimeOnly"
+            invokeMethod(testRuntimeDependency(), junitVintage())
+        }
+
+        then:
+        p.evaluate()
+        // Unsure how to capture the output directly
+        // (Project.logging listeners don't seem to work)
+        assert true == true
     }
 }

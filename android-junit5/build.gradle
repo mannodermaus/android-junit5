@@ -45,11 +45,10 @@ dependencies {
     compile localGroovy()
     compile "com.github.zafarkhaja:java-semver:$SEMVER_VERSION"
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
+    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 
     testCompile "junit:junit:$JUNIT4_VERSION"
     testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
-    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 
     testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
     testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
@@ -68,7 +67,10 @@ task testAgp3x(type: Test) {
 }
 
 // Combine all tests when executing the main JUnit task
-tasks.getByName("test").dependsOn(testAgp2x, testAgp3x)
+tasks.getByName("test").dependsOn(
+        testAgp2x,
+        testAgp3x
+)
 
 version = VERSION_NAME
 
