@@ -172,6 +172,10 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         String nameSuffix = map.getOrDefault("nameSuffix", "")
         def dependentTasks = map.dependentTasks
 
+        project.logger.info("$LOG_TAG Creating JUnit 5 Task for variant '$nameSuffix'...")
+        project.logger.info("$LOG_TAG Test Root Dirs: $testRootDirs")
+        project.logger.info("$LOG_TAG Classpath: $classpath.asPath")
+
         project.task(
                 TASK_NAME + nameSuffix,
                 type: JavaExec,
