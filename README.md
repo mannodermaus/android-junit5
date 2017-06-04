@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         // 2. Add the plugin as a classpath dependency
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M4-rev1"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M4-rev2"
     }
 }
 
@@ -22,6 +22,9 @@ apply plugin: "de.mannodermaus.android-junit5"
 dependencies {
     // 4. Add the testCompile dependencies on JUnit Jupiter
     testCompile junitJupiter()
+
+    // 5. If you need parameterized tests:
+    testCompile junitParams()
 }
 ```
 
