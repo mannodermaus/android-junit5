@@ -76,10 +76,12 @@ class AndroidJUnitPlatformPlugin extends JUnitPlatformPlugin {
         // Add a junitJupiter() dependency handler
         project.dependencies.ext.junitJupiter = {
             def jupiterVersion = junitExtension.jupiterVersion
+            def platformVersion = junitExtension.platformVersion
 
             return [
                     project.dependencies.create("junit:junit:4.12"),
                     project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"),
+                    project.dependencies.create("org.junit.platform:junit-platform-engine:${platformVersion}"),
             ]
         }
 
