@@ -1,4 +1,4 @@
-package de.mannodermaus.gradle.anj5
+package de.mannodermaus.gradle.plugins.android_junit5
 
 import org.gradle.api.Project
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
@@ -7,11 +7,11 @@ import org.junit.platform.gradle.plugin.JUnitPlatformExtension
  * Core configuration options for the Android JUnit 5 Gradle plugin.
  * This extends the functionality available through JUnitPlatformExtension
  */
-class AndroidJUnit5PlatformExtension extends JUnitPlatformExtension {
+class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
     private static final String PLATFORM_VERSION = "1.0.0-M4"
 
-    AndroidJUnit5PlatformExtension(Project project) {
+    AndroidJUnitPlatformExtension(Project project) {
         super(project)
         platformVersion = PLATFORM_VERSION
     }

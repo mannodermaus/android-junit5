@@ -50,6 +50,7 @@ dependencies {
     testCompile "junit:junit:$JUNIT4_VERSION"
     testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
 
+    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
     testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
     testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 }

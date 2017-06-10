@@ -1,9 +1,11 @@
-package de.mannodermaus.gradle.anj5
+package de.mannodermaus.gradle.plugins.android_junit5
 
+import com.android.builder.Version
 import org.gradle.api.Project
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.internal.resolve.ModuleVersionNotFoundException
 import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 /**
@@ -47,6 +49,10 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
                     "Either local.properties file in folder '${projectRoot.absolutePath}' is missing, " +
                     "or it doesn't include the required 'sdk.dir' statement!")
         }
+    }
+
+    private static boolean isAgp3x() {
+        return Version.ANDROID_GRADLE_PLUGIN_VERSION.startsWith("3.")
     }
 
     /* Before Each */
@@ -186,22 +192,12 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
             assert classpath.find { it.contains("test/build/intermediates/classes/") } != null
             assert classpath.find { it.contains("test/build/intermediates/classes/test/") } != null
 
-            // Annotation Processor outputs
-            assert classpath.find { it.contains("test/build/generated/source/apt/") } != null
-            assert classpath.find { it.contains("test/build/generated/source/apt/test/") } != null
-
             // Resource Files
             assert classpath.find { it.contains("test/build/intermediates/sourceFolderJavaResources/") } != null
             assert classpath.find { it.contains("test/build/intermediates/sourceFolderJavaResources/test/") } != null
 
             // Mockable android.jar
             assert classpath.find { it.contains("build/generated/mockable-android-") } != null
-
-            // Runtime Library dependency (each version stores it slightly differently)
-            assert classpath.find {
-                it.contains("library/build/outputs/") ||
-                        it.contains("library/build/intermediates/")
-            } != null
         }
     }
 
@@ -286,6 +282,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         assert true == true
     }
 
+    @IgnoreIf({AndroidJUnitPlatformSpec.isAgp3x()})
     def "custom junit jupiter version"() {
         when:
         def nonExistentVersion = "0.0.0"
