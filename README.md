@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         // 2. Add the plugin as a classpath dependency
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M4-rev2"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M4-rev3"
     }
 }
 
@@ -23,20 +23,22 @@ dependencies {
     // 4. Add the testCompile dependencies on JUnit Jupiter
     testCompile junitJupiter()
 
-    // 5. If you need parameterized tests:
+    // 5. (Optional) If you need "parameterized tests"
     testCompile junitParams()
 }
 ```
 
 ## Usage
 
-This plugin configures the `junitPlatform` task for each registered build variant of a project. Starting with version `1.0.0-M4-rev1`, the plugin automatically attaches both the Jupiter & Vintage Engines.
+This plugin configures the `junitPlatform` task for each registered build variant of a project.
+It automatically attaches both the Jupiter & Vintage Engines during the execution phase of your tests.
 
 Further instructions on how to write JUnit 5 tests can be found [in their User Guide][junit5ug].
 
 ## Extras
 
-Inside the configuration closure applied by the plugin, you can specify the same properties as you would for a Java-based project with the JUnit Platform Gradle plugin.
+Inside the configuration closure applied by the plugin, you can specify the same properties as you would
+for a Java-based project with the JUnit Platform Gradle plugin.
 However, there are some additional properties that you can apply:
 
 ```groovy
