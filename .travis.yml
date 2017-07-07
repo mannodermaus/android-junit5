@@ -12,13 +12,10 @@ android:
 jdk:
 - oraclejdk8
 
-script: ./gradlew clean check --stacktrace
+script: ./gradlew clean check --info --stacktrace
 
 after_success:
 - ./scripts/deploy_snapshot.sh
-
-after_failure:
-- cat /home/travis/build/aurae/android-junit5/android-junit5/build/reports/tests/testAgp2x/index.html
 
 deploy:
   provider: script
