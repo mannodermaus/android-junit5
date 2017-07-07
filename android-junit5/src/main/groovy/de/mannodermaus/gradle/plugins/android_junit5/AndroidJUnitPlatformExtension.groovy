@@ -9,7 +9,7 @@ import org.junit.platform.gradle.plugin.JUnitPlatformExtension
  */
 class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
-    private static final String PLATFORM_VERSION = "1.0.0-M4"
+    private static final String PLATFORM_VERSION = "1.0.0-M5"
 
     AndroidJUnitPlatformExtension(Project project) {
         super(project)
@@ -21,12 +21,12 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
      *
      * Defaults to {@code '5.0.0-M4'}.
      */
-    String jupiterVersion = '5.0.0-M4'
+    String jupiterVersion = '5.0.0-M5'
 
     /**
      * The version of JUnit Vintage Engine to use.
      *
      * Defaults to {@code '4.12.0-M4'}.
      */
-    String vintageVersion = '4.12.0-M4'
+    String vintageVersion = '4.12.0-M5'
 }

@@ -175,7 +175,7 @@ class AndroidJUnit5Test extends JavaExec {
 
         private List<String> buildArgs(project, junitExtension, reportsDir, testRootDirs) {
 
-            def args = ['--hide-details']
+            def args = ['--details tree']
 
             addSelectors(project, junitExtension.selectors, testRootDirs, args)
             addFilters(junitExtension.filters, args)
