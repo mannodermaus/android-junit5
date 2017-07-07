@@ -6,18 +6,35 @@ buildscript {
     }
     dependencies {
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$BINTRAY_PLUGIN_VERSION"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$JFROG_PLUGIN_VERSION"
     }
 }
 
-Properties properties = new Properties()
-properties.load(new FileInputStream(new File(rootProject.projectDir, "local.properties")))
+// Populate deployment credentials:
+// * Local development - stored in properties file
+// * CI Server - stored in environment variables
+def deploymentUser = ""
+def deploymentPass = ""
+
+def credentialsFile = new File(project.rootDir, "local.properties")
+if (credentialsFile.exists()) {
+    Properties properties = new Properties()
+    credentialsFile.withReader { properties.load(it) }
+    deploymentUser = properties.get("BINTRAY_USER")
+    deploymentPass = properties.get("BINTRAY_API_KEY")
+
+} else {
+    deploymentUser = System.getenv("bintrayUser")
+    deploymentPass = System.getenv("bintrayKey")
+}
+
 allprojects {
     repositories {
         google()
         jcenter()
     }
     ext {
-        bintrayUser = properties.get('BINTRAY_USER')
-        bintrayApiKey = properties.get('BINTRAY_API_KEY')
+        bintrayUser = deploymentUser
+        bintrayKey = deploymentPass
     }
 }

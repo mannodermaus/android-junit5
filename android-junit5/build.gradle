@@ -1,11 +1,21 @@
-apply plugin: 'groovy'
-apply plugin: 'idea'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: "groovy"
+apply plugin: "idea"
+apply plugin: "maven"
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.bintray"
+apply plugin: "com.jfrog.artifactory"
 
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
+
+// ------------------------------------------------------------------------------------------------
+// Test Setup
+//
+// We run our unit tests against multiple versions of the Android Gradle Plugin,
+// in order to support logical & structural intricacies of both the 2.x & 3.x line of plugins.
+// To achieve this, several new source sets & configurations for each branch are created here,
+// which are derived from the common "test" scope.
+// ------------------------------------------------------------------------------------------------
 
 configurations {
     testAgp2xCompile {
@@ -40,21 +50,6 @@ idea {
     }
 }
 
-dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile "com.github.zafarkhaja:java-semver:$SEMVER_VERSION"
-    compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
-
-    testCompile "junit:junit:$JUNIT4_VERSION"
-    testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
-
-    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
-    testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
-    testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
-}
-
 // Run Unit Tests against Android Gradle Plugin version 2.x
 task testAgp2x(type: Test) {
     testClassesDirs = sourceSets.testAgp2x.output.classesDirs
@@ -73,27 +68,50 @@ tasks.getByName("test").dependsOn(
         testAgp3x
 )
 
-version = VERSION_NAME
+// ------------------------------------------------------------------------------------------------
+// Dependency Definitions
+// ------------------------------------------------------------------------------------------------
 
-bintray {
-    user = project.ext.bintrayUser
-    key = project.ext.bintrayApiKey
-    configurations = ['archives']
-    dryRun = false
-    pkg {
-        repo = 'maven'
-        name = ARTIFACT_ID
-        userOrg = properties.get("BINTRAY_USER")
-        licenses = ["EPL-1.0"]
-        publish = true
-        publicDownloadNumbers = true
-        vcsUrl = VCS_URL
-        version {
-            name = VERSION_NAME
-            desc = DESCRIPTION
-        }
-    }
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile "com.github.zafarkhaja:java-semver:$SEMVER_VERSION"
+    compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
+    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
+
+    testCompile "junit:junit:$JUNIT4_VERSION"
+    testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
+
+    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
+    testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
+    testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 }
+
+// ------------------------------------------------------------------------------------------------
+// Deployment Setup
+//
+// Releases are pushed to jcenter via Bintray, and snapshots are pushed to OJO Artifactory.
+// This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
+// ------------------------------------------------------------------------------------------------
+
+// Include sources.jar archive in each release
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+// Include javadoc.jar archive in each release
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+version = VERSION_NAME
 
 publishing {
     publications {
@@ -114,25 +132,49 @@ publishing {
     }
 }
 
+// Copy POM to location expected by Bintray
 task copyPom(type: Copy) {
-    from 'build/publications/library'
-    into 'build/poms'
-    include 'pom-default.xml'
+    from "build/publications/library"
+    into "build/poms"
+    include "pom-default.xml"
 }
 
 publish.dependsOn copyPom
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+// Configure deployment of release versions to Bintray
+bintray {
+    user = project.ext.bintrayUser
+    key = project.ext.bintrayKey
+    configurations = ["archives"]
+    dryRun = false
+    pkg {
+        repo = "maven"
+        name = ARTIFACT_ID
+        userOrg = project.ext.bintrayUser
+        licenses = ["EPL-1.0"]
+        publish = true
+        publicDownloadNumbers = true
+        vcsUrl = VCS_URL
+        version {
+            name = VERSION_NAME
+            desc = DESCRIPTION
+        }
+    }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+// Configure deployment of snapshots to Artifactory
+artifactory {
+    contextUrl = "https://oss.jfrog.org/artifactory"
+    publish {
+        repository {
+            repoKey = VERSION_NAME.endsWith("SNAPSHOT") ? "oss-snapshot-local" : "oss-release-local"
+            username = project.ext.bintrayUser
+            password = project.ext.bintrayKey
+            maven = true
+        }
+        defaults {
+            publishArtifacts = true
+            publications("library")
+        }
+    }
 }

@@ -1,0 +1,31 @@
+language: android
+
+env:
+  global:
+  - bintrayUser=aurae
+  - secure: VoY/zWE7itJmukAZt1Zw43jFzOk2ssWbpWhydYLiaRvplYVJvXTCSve4ZDpBhxPAlta2Kpfr9H8bwuaYCEtS+ovhi/q8Fo97YXiGdkHwEXJPal2n4O/XEj5hFr1BxIDTEwFBtGD/iQWZL/MVRaWFrfuMWajMZhDQkGz+DwRog4XCaw6UcEofW9kzfPG1T94C/bAIETrad4bfHKSbORVd2SbyPCFHkFH+YB/eWVqK2N5PuiPaet+EzcX/sxAFnwD6kF/uj3KxTlii/Yw8bM6LrPEWyyuMDglHN3LTevZ1CwT1oy8AUZaFzx246SL+Osn6t9WHoL1p3ltTS9O7sNL6WSyCP+JFYXF8iaF9USaINy/vcZFPsKdcCpgLPjSF/4mgXcjPc5KRao3tZOoamyvXuiGg7lfwUBl82t73ItlnSGgInAyUSesVrQ2gJNsVHdRqvOmVPBGXZ3lWb4GHksfQzLO210M7Tiu6leacWEbsYWmAsRER87qdUu7lY2b3wYJB7NhXX5AMZYINSzfCDVrThTWLXUU554D/3TmTKz/ROab2QxR/Qxh5i4ZJ/0MNdcM+qp8ORq6WlwGTUhCmD83XtiuBF3s/JW1WybsqC4Ppo23YuItqgfmMZWk75xLqpi48078vNgtEE/1YE2tvxd7ddfeT3eNLt7qrfj7Hu+r3L5A=
+
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-26.0.0
+  - android-26
+
+jdk:
+- oraclejdk8
+
+before_install:
+  - echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+script: ./gradlew clean check --info --stacktrace
+
+after_success:
+- ./scripts/deploy_snapshot.sh
+
+deploy:
+  provider: script
+  script: ./scripts/deploy_release.sh
+  on:
+    tags: true
+    repo: aurae/android-junit5
