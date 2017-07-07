@@ -10,7 +10,9 @@ buildscript {
     }
 }
 
-// Populate deployment credentials
+// Populate deployment credentials:
+// * Local development - stored in properties file
+// * CI Server - stored in environment variables
 def deploymentUser = ""
 def deploymentPass = ""
 
@@ -18,12 +20,12 @@ def credentialsFile = new File(project.rootDir, "local.properties")
 if (credentialsFile.exists()) {
     Properties properties = new Properties()
     credentialsFile.withReader { properties.load(it) }
-    deploymentUser = properties.get('BINTRAY_USER')
-    deploymentPass = properties.get('BINTRAY_API_KEY')
+    deploymentUser = properties.get("BINTRAY_USER")
+    deploymentPass = properties.get("BINTRAY_API_KEY")
 
 } else {
-    deploymentUser = System.getenv('bintrayUser')
-    deploymentPass = System.getenv('bintrayKey')
+    deploymentUser = System.getenv("bintrayUser")
+    deploymentPass = System.getenv("bintrayKey")
 }
 
 allprojects {
