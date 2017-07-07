@@ -12,7 +12,7 @@ artifactory {
         }
         defaults {
             publishArtifacts = true
-            publications('maven')
+            publications('library')
         }
     }
 }
