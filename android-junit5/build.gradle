@@ -77,7 +77,7 @@ version = VERSION_NAME
 
 bintray {
     user = project.ext.bintrayUser
-    key = project.ext.bintrayApiKey
+    key = project.ext.bintrayKey
     configurations = ['archives']
     dryRun = false
     pkg {
@@ -136,3 +136,5 @@ artifacts {
     archives sourcesJar
     archives javadocJar
 }
+
+apply from: rootProject.file('gradle/gradle-artifactory-upload.gradle')
