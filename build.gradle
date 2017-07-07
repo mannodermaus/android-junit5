@@ -10,15 +10,29 @@ buildscript {
     }
 }
 
-Properties properties = new Properties()
-properties.load(new FileInputStream(new File(rootProject.projectDir, "local.properties")))
+// Populate deployment credentials
+def deploymentUser = ""
+def deploymentPass = ""
+
+def credentialsFile = new File(project.rootDir, "local.properties")
+if (credentialsFile.exists()) {
+    Properties properties = new Properties()
+    credentialsFile.withReader { properties.load(it) }
+    deploymentUser = properties.get('BINTRAY_USER')
+    deploymentPass = properties.get('BINTRAY_API_KEY')
+
+} else {
+    deploymentUser = System.getenv('bintrayUser')
+    deploymentPass = System.getenv('bintrayKey')
+}
+
 allprojects {
     repositories {
         google()
         jcenter()
     }
     ext {
-        bintrayUser = properties.get('BINTRAY_USER')
-        bintrayKey = properties.get('BINTRAY_API_KEY')
+        bintrayUser = deploymentUser
+        bintrayKey = deploymentPass
     }
 }
