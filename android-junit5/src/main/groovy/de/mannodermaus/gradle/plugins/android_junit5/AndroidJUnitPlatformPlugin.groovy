@@ -77,11 +77,19 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         project.dependencies.ext.junitJupiter = {
             def jupiterVersion = junitExtension.jupiterVersion
             def platformVersion = junitExtension.platformVersion
+            def vintageVersion = junitExtension.vintageVersion
 
             return [
                     project.dependencies.create("junit:junit:4.12"),
                     project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"),
                     project.dependencies.create("org.junit.platform:junit-platform-engine:${platformVersion}"),
+
+                    // Only needed to run tests in an Android Studio that bundles an older version
+                    // (see also http://junit.org/junit5/docs/current/user-guide/#running-tests-ide-intellij-idea)
+                    project.dependencies.create("org.junit.platform:junit-platform-launcher:$platformVersion"),
+                    project.dependencies.create("org.junit.platform:junit-platform-console:$platformVersion"),
+                    project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"),
+                    project.dependencies.create("org.junit.vintage:junit-vintage-engine:$vintageVersion"),
             ]
         }
 
