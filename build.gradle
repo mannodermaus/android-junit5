@@ -2,30 +2,34 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$BINTRAY_PLUGIN_VERSION"
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$JFROG_PLUGIN_VERSION"
     }
 }
 
 // Populate deployment credentials:
 // * Local development - stored in properties file
 // * CI Server - stored in environment variables
-def deploymentUser = ""
-def deploymentPass = ""
+def bintrayUser = ""
+def bintrayKey = ""
+def sonatypeUser = ""
+def sonatypePass = ""
 
 def credentialsFile = new File(project.rootDir, "local.properties")
 if (credentialsFile.exists()) {
     Properties properties = new Properties()
     credentialsFile.withReader { properties.load(it) }
-    deploymentUser = properties.get("BINTRAY_USER")
-    deploymentPass = properties.get("BINTRAY_API_KEY")
+    bintrayUser = properties.get("BINTRAY_USER")
+    bintrayKey = properties.get("BINTRAY_KEY")
+    sonatypeUser = properties.get("SONATYPE_USER")
+    sonatypePass = properties.get("SONATYPE_PASS")
 
 } else {
-    deploymentUser = System.getenv("bintrayUser")
-    deploymentPass = System.getenv("bintrayKey")
+    bintrayUser = System.getenv("bintrayUser")
+    bintrayKey = System.getenv("bintrayKey")
+    sonatypeUser = System.getenv("sonatypeUser")
+    sonatypePass = System.getenv("sonatypePass")
 }
 
 allprojects {
@@ -33,8 +37,10 @@ allprojects {
         google()
         jcenter()
     }
-    ext {
-        bintrayUser = deploymentUser
-        bintrayKey = deploymentPass
-    }
+
+    // Store deployment credentials
+    ext.bintrayUser = bintrayUser
+    ext.bintrayKey = bintrayKey
+    ext.sonatypeUser = sonatypeUser
+    ext.sonatypePass = sonatypePass
 }

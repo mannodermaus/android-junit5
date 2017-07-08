@@ -3,7 +3,6 @@ apply plugin: "idea"
 apply plugin: "maven"
 apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
-apply plugin: "com.jfrog.artifactory"
 
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
@@ -90,7 +89,7 @@ dependencies {
 // ------------------------------------------------------------------------------------------------
 // Deployment Setup
 //
-// Releases are pushed to jcenter via Bintray, and snapshots are pushed to OJO Artifactory.
+// Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 
@@ -141,40 +140,42 @@ task copyPom(type: Copy) {
 
 publish.dependsOn copyPom
 
-// Configure deployment of release versions to Bintray
-bintray {
-    user = project.ext.bintrayUser
-    key = project.ext.bintrayKey
-    configurations = ["archives"]
-    dryRun = false
-    pkg {
-        repo = "maven"
-        name = ARTIFACT_ID
-        userOrg = project.ext.bintrayUser
-        licenses = ["EPL-1.0"]
-        publish = true
-        publicDownloadNumbers = true
-        vcsUrl = VCS_URL
-        version {
-            name = VERSION_NAME
-            desc = DESCRIPTION
+project.configure(project) {
+    if (project.version.endsWith("-SNAPSHOT")) {
+        // Configure deployment of snapshot versions to Sonatype OSS
+        project.publishing {
+            repositories {
+                maven {
+                    name "snapshot"
+                    credentials {
+                        username project.ext.sonatypeUser
+                        password project.ext.sonatypePass
+                    }
+                    url "https://oss.sonatype.org/content/repositories/snapshots"
+                }
+            }
         }
-    }
-}
 
-// Configure deployment of snapshots to Artifactory
-artifactory {
-    contextUrl = "https://oss.jfrog.org/artifactory"
-    publish {
-        repository {
-            repoKey = VERSION_NAME.endsWith("SNAPSHOT") ? "oss-snapshot-local" : "oss-release-local"
-            username = project.ext.bintrayUser
-            password = project.ext.bintrayKey
-            maven = true
-        }
-        defaults {
-            publishArtifacts = true
-            publications("library")
+    } else {
+        // Configure deployment of release versions to Bintray
+        project.bintray {
+            user = project.ext.bintrayUser
+            key = project.ext.bintrayKey
+            configurations = ["archives"]
+            dryRun = false
+            pkg {
+                repo = "maven"
+                name = ARTIFACT_ID
+                userOrg = project.ext.bintrayUser
+                licenses = ["EPL-1.0"]
+                publish = true
+                publicDownloadNumbers = true
+                vcsUrl = VCS_URL
+                version {
+                    name = VERSION_NAME
+                    desc = DESCRIPTION
+                }
+            }
         }
     }
 }

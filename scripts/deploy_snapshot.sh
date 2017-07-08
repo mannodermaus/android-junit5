@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Deploy a jar, source jar, and javadoc jar to Sonatype's snapshot repo.
+#
+# Adapted from https://coderwall.com/p/9b_lfq and
+# http://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/
 
 SLUG="aurae/android-junit5"
 JDK="oraclejdk8"
@@ -16,6 +21,6 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "Skipping snapshot deployment: wrong branch. Expected '$BRANCH' but was '$TRAVIS_BRANCH'."
 else
   echo "Deploying snapshot..."
-  ./gradlew artifactoryPublish
+  ./gradlew publishLibraryPublicationToSnapshotRepository
   echo "Snapshot deployed!"
 fi
