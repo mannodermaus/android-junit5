@@ -8,29 +8,25 @@ buildscript {
     }
 }
 
-// Populate deployment credentials:
-// * Local development - stored in properties file
-// * CI Server - stored in environment variables
-def bintrayUser = ""
-def bintrayKey = ""
-def sonatypeUser = ""
-def sonatypePass = ""
+// Populate deployment credentials in an environment-aware fashion.
+//
+// * Local development:
+//      Stored in local.properties file on the machine
+// * CI Server:
+//      Stored in environment variables before launch
+Properties properties = new Properties()
 
 def credentialsFile = new File(project.rootDir, "local.properties")
 if (credentialsFile.exists()) {
-    Properties properties = new Properties()
     credentialsFile.withReader { properties.load(it) }
-    bintrayUser = properties.get("BINTRAY_USER")
-    bintrayKey = properties.get("BINTRAY_KEY")
-    sonatypeUser = properties.get("SONATYPE_USER")
-    sonatypePass = properties.get("SONATYPE_PASS")
-
-} else {
-    bintrayUser = System.getenv("bintrayUser")
-    bintrayKey = System.getenv("bintrayKey")
-    sonatypeUser = System.getenv("sonatypeUser")
-    sonatypePass = System.getenv("sonatypePass")
 }
+
+// @formatter:off
+def bintrayUser     = properties.get("BINTRAY_USER",    System.getenv("bintrayUser"))
+def bintrayKey      = properties.get("BINTRAY_KEY",     System.getenv("bintrayKey"))
+def sonatypeUser    = properties.get("SONATYPE_USER",   System.getenv("sonatypeUser"))
+def sonatypePass    = properties.get("SONATYPE_PASS",   System.getenv("sonatypePass"))
+// @formatter:on
 
 allprojects {
     repositories {

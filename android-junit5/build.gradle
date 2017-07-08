@@ -167,7 +167,7 @@ project.configure(project) {
                 repo = "maven"
                 name = ARTIFACT_ID
                 userOrg = project.ext.bintrayUser
-                licenses = ["EPL-1.0"]
+                licenses = [LICENCE_NAME]
                 publish = true
                 publicDownloadNumbers = true
                 vcsUrl = VCS_URL
