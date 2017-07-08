@@ -176,13 +176,12 @@ class AndroidJUnit5Test extends JavaExec {
         private List<String> buildArgs(project, junitExtension, reportsDir, testRootDirs) {
             def args = []
 
-            args.add("--details ${junitExtension.details.toString()}")
+            args.addAll(['--details', junitExtension.details.toString()])
 
             addSelectors(project, junitExtension.selectors, testRootDirs, args)
             addFilters(junitExtension.filters, args)
 
-            args.add("--reports-dir")
-            args.add(reportsDir.getAbsolutePath())
+            args.addAll(['--reports-dir', reportsDir.getAbsolutePath()])
 
             return args
         }
