@@ -1,4 +1,6 @@
 buildscript {
+    ext.kotlinVersion = "1.1.3-2"
+
     repositories {
         google()
         jcenter()
@@ -7,10 +9,12 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
         classpath "de.mannodermaus.gradle.plugins:android-junit5:$VERSION_NAME"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 
 apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
 apply plugin: "de.mannodermaus.android-junit5"
 
 android {
@@ -29,9 +33,15 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
     }
+
+    sourceSets {
+        test.java.srcDirs += "src/test/kotlin"
+    }
 }
 
 dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
     testImplementation junitJupiter()
     testImplementation junitParams()
 }

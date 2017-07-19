@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Unit Tests of Sample" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="Sample: Run Unit Tests" type="AndroidJUnit" factoryName="Android JUnit">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <module name="sample" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
