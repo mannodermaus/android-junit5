@@ -243,45 +243,6 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestPaidRelease")
     }
 
-    def "show warning if depending on junitVintage() directly"() {
-        when:
-        Project p = ProjectBuilder.builder().withParent(testRoot).build()
-
-        p.file(".").mkdir()
-        p.file("src/main").mkdirs()
-        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
-
-        p.apply plugin: 'com.android.application'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
-        p.android {
-            compileSdkVersion COMPILE_SDK
-            buildToolsVersion BUILD_TOOLS
-
-            defaultConfig {
-                applicationId APPLICATION_ID
-                minSdkVersion MIN_SDK
-                targetSdkVersion TARGET_SDK
-                versionCode VERSION_CODE
-                versionName VERSION_NAME
-            }
-        }
-        p.repositories {
-            jcenter()
-        }
-        p.dependencies {
-            // "testCompile" or "testApi"
-            invokeMethod(testCompileDependency(), junitJupiter())
-            // "testApk" or "testRuntimeOnly"
-            invokeMethod(testRuntimeDependency(), junitVintage())
-        }
-
-        then:
-        p.evaluate()
-        // Unsure how to capture the output directly
-        // (Project.logging listeners don't seem to work)
-        assert true == true
-    }
-
     @IgnoreIf({AndroidJUnitPlatformSpec.isAgp3x()})
     def "custom junit jupiter version"() {
         when:

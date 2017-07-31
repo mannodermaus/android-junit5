@@ -20,13 +20,6 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
 
     static final String LOG_TAG = "[android-junit5]"
 
-    private static final String VINTAGE_WARNING =
-            "AGPBI: {" +
-                    '"kind":"warning",' +
-                    '"text":' + "\"$LOG_TAG You don't need to depend on junitVintage() directly anymore!\"," +
-                    '"sources":[{},{}]' +
-                    '}'
-
     static final String EXTENSION_NAME = 'junitPlatform'
 
     /**
@@ -98,12 +91,6 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             def jupiterVersion = junitExtension.jupiterVersion
 
             return project.dependencies.create("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
-        }
-
-        // Add a junitVintage() dependency handler
-        project.dependencies.ext.junitVintage = {
-            project.logger.warn(VINTAGE_WARNING)
-            return []
         }
 
         project.afterEvaluate {
