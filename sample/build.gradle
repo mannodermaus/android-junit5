@@ -21,7 +21,7 @@ apply plugin: "de.mannodermaus.android-junit5"
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample"
