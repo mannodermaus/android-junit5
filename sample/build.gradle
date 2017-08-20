@@ -60,6 +60,6 @@ afterEvaluate {
             into "build/intermediates/classes/test/$name"
         }
 
-        project.tasks.getByName("assemble${name.capitalize()}UnitTest").dependsOn copyTask
+        project.tasks.getByName("compile${name.capitalize()}UnitTestSources").finalizedBy copyTask
     }
 }

@@ -19,7 +19,6 @@
     <envs />
     <patterns />
     <method>
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="assembleDebugUnitTest assembleReleaseUnitTest" externalProjectPath="$PROJECT_DIR$/sample" vmOptions="" scriptParameters="" />
       <option name="Android.Gradle.BeforeRunTask" enabled="true" goal="" />
     </method>
   </configuration>
