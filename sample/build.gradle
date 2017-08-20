@@ -20,6 +20,13 @@ apply plugin: "kotlin-android"
 apply plugin: "de.mannodermaus.android-junit5"
 
 android {
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // A Note to my forgetful self:
+    //
+    // When updating these values, make sure
+    // to always update the Travis CI .yml config
+    // & the plugin's AndroidJUnitPlatformSpec, too
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     compileSdkVersion 26
     buildToolsVersion "26.0.1"
 
