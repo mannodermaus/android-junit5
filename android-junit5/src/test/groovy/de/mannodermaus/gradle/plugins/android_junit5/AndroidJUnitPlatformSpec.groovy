@@ -67,8 +67,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
     /* Abstract */
 
     protected abstract String testCompileDependency()
-    protected abstract String testRuntimeDependency()
 
+    protected abstract String testRuntimeDependency()
 
     /* Test Cases */
 
@@ -243,7 +243,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestPaidRelease")
     }
 
-    @IgnoreIf({AndroidJUnitPlatformSpec.isAgp3x()})
+    @IgnoreIf({ AndroidJUnitPlatformSpec.isAgp3x() })
     def "custom junit jupiter version"() {
         when:
         def nonExistentVersion = "0.0.0"
