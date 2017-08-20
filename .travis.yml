@@ -25,6 +25,11 @@ script: ./gradlew :android-junit5:clean :android-junit5:check --info --stacktrac
 after_success:
 - ./scripts/deploy_snapshot.sh
 
+after_failure:
+- cat /home/travis/build/aurae/android-junit5/android-junit5/build/reports/tests/test/index.html
+- cat /home/travis/build/aurae/android-junit5/android-junit5/build/reports/tests/testAgp2x/index.html
+- cat /home/travis/build/aurae/android-junit5/android-junit5/build/reports/tests/testAgp3x/index.html
+
 deploy:
   provider: script
   script: ./scripts/deploy_release.sh
