@@ -33,6 +33,24 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
     /* SDK Directory, taken from the project itself and setup */
     static String sdkDir
 
+    @Lazy
+    private static final boolean isAgp3x = {
+        Version.ANDROID_GRADLE_PLUGIN_VERSION.startsWith("3.")
+    }
+
+    @Lazy
+    private static final boolean hasInternetAccess = {
+        try {
+            def url = new URL("https://www.google.com")
+            def conn = url.openConnection()
+            conn.connect()
+            true
+
+        } catch (UnknownHostException ignored) {
+            false
+        }
+    }
+
     /* Per-test root project */
     Project testRoot
 
@@ -49,20 +67,6 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
             throw new AssertionError("'sdk.dir' couldn't be found. " +
                     "Either local.properties file in folder '${projectRoot.absolutePath}' is missing, " +
                     "or it doesn't include the required 'sdk.dir' statement!")
-        }
-    }
-
-    private static boolean isAgp3x() {
-        return Version.ANDROID_GRADLE_PLUGIN_VERSION.startsWith("3.")
-    }
-
-    private static boolean hasInternetAccess() {
-        try {
-            // TODO Easier and/or more lightweight detection method?
-            return InetAddress.getByName("https://google.com").isReachable(1000)
-
-        } catch (UnknownHostException ignored) {
-            return false
         }
     }
 
@@ -144,7 +148,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
     }
 
     @SuppressWarnings("UnnecessaryQualifiedReference")
-    @Requires({ AndroidJUnitPlatformSpec.hasInternetAccess() })
+    @Requires({ AndroidJUnitPlatformSpec.hasInternetAccess })
     def "classpath assembled correctly"() {
         when:
         // Prepare another test project to link to
@@ -257,8 +261,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
     }
 
     @SuppressWarnings("UnnecessaryQualifiedReference")
-    @IgnoreIf({ AndroidJUnitPlatformSpec.isAgp3x() })
-    @Requires({ AndroidJUnitPlatformSpec.hasInternetAccess() })
+    @Requires({ AndroidJUnitPlatformSpec.hasInternetAccess })
+    @IgnoreIf({ AndroidJUnitPlatformSpec.isAgp3x })
     def "custom junit jupiter version"() {
         when:
         def nonExistentVersion = "0.0.0"
