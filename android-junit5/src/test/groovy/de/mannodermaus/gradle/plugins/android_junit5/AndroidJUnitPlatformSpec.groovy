@@ -6,6 +6,7 @@ import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.internal.resolve.ModuleVersionNotFoundException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.IgnoreIf
+import spock.lang.Requires
 import spock.lang.Specification
 
 /**
@@ -53,6 +54,16 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
 
     private static boolean isAgp3x() {
         return Version.ANDROID_GRADLE_PLUGIN_VERSION.startsWith("3.")
+    }
+
+    private static boolean hasInternetAccess() {
+        try {
+            // TODO Easier and/or more lightweight detection method?
+            return InetAddress.getByName("https://google.com").isReachable(1000)
+
+        } catch (UnknownHostException ignored) {
+            return false
+        }
     }
 
     /* Before Each */
@@ -132,6 +143,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestRelease")
     }
 
+    @SuppressWarnings("UnnecessaryQualifiedReference")
+    @Requires({ AndroidJUnitPlatformSpec.hasInternetAccess() })
     def "classpath assembled correctly"() {
         when:
         // Prepare another test project to link to
@@ -243,7 +256,9 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestPaidRelease")
     }
 
-    @IgnoreIf({ isAgp3x() })
+    @SuppressWarnings("UnnecessaryQualifiedReference")
+    @IgnoreIf({ AndroidJUnitPlatformSpec.isAgp3x() })
+    @Requires({ AndroidJUnitPlatformSpec.hasInternetAccess() })
     def "custom junit jupiter version"() {
         when:
         def nonExistentVersion = "0.0.0"
@@ -292,6 +307,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
                     assert expected.message.contains("$nonExistentVersion")
                     break
                 }
+
                 expected = expected.cause
             }
 
