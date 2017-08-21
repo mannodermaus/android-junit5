@@ -18,15 +18,11 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
     /**
      * The version of JUnit Jupiter to use.
-     *
-     * Defaults to {@code '5.0.0-RC2'}.
      */
-    String jupiterVersion = '5.0.0-RC2'
+    String jupiterVersion = "5.0.0-RC2"
 
     /**
      * The version of JUnit Vintage Engine to use.
-     *
-     * Defaults to {@code '4.12.0-RC2'}.
      */
-    String vintageVersion = '4.12.0-RC2'
+    String vintageVersion = "4.12.0-RC2"
 }

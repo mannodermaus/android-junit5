@@ -115,24 +115,24 @@ class AndroidJUnit5Test extends JavaExec {
 
         private void configureTaskInputs(AndroidJUnit5Test task, AndroidJUnitPlatformExtension junitExtension) {
             // Setup JUnit 5 properties
-            task.inputs.property('enableStandardTestTask', junitExtension.enableStandardTestTask)
-            task.inputs.property('selectors.uris', junitExtension.selectors.uris)
-            task.inputs.property('selectors.files', junitExtension.selectors.files)
-            task.inputs.property('selectors.directories', junitExtension.selectors.directories)
-            task.inputs.property('selectors.packages', junitExtension.selectors.packages)
-            task.inputs.property('selectors.classes', junitExtension.selectors.classes)
-            task.inputs.property('selectors.methods', junitExtension.selectors.methods)
-            task.inputs.property('selectors.resources', junitExtension.selectors.resources)
-            task.inputs.property('filters.engines.include', junitExtension.filters.engines.include)
-            task.inputs.property('filters.engines.exclude', junitExtension.filters.engines.exclude)
-            task.inputs.property('filters.tags.include', junitExtension.filters.tags.include)
-            task.inputs.property('filters.tags.exclude', junitExtension.filters.tags.exclude)
-            task.inputs.property('filters.includeClassNamePatterns', junitExtension.filters.includeClassNamePatterns)
-            task.inputs.property('filters.packages.include', junitExtension.filters.packages.include)
-            task.inputs.property('filters.packages.exclude', junitExtension.filters.packages.exclude)
+            task.inputs.property("enableStandardTestTask", junitExtension.enableStandardTestTask)
+            task.inputs.property("selectors.uris", junitExtension.selectors.uris)
+            task.inputs.property("selectors.files", junitExtension.selectors.files)
+            task.inputs.property("selectors.directories", junitExtension.selectors.directories)
+            task.inputs.property("selectors.packages", junitExtension.selectors.packages)
+            task.inputs.property("selectors.classes", junitExtension.selectors.classes)
+            task.inputs.property("selectors.methods", junitExtension.selectors.methods)
+            task.inputs.property("selectors.resources", junitExtension.selectors.resources)
+            task.inputs.property("filters.engines.include", junitExtension.filters.engines.include)
+            task.inputs.property("filters.engines.exclude", junitExtension.filters.engines.exclude)
+            task.inputs.property("filters.tags.include", junitExtension.filters.tags.include)
+            task.inputs.property("filters.tags.exclude", junitExtension.filters.tags.exclude)
+            task.inputs.property("filters.includeClassNamePatterns", junitExtension.filters.includeClassNamePatterns)
+            task.inputs.property("filters.packages.include", junitExtension.filters.packages.include)
+            task.inputs.property("filters.packages.exclude", junitExtension.filters.packages.exclude)
 
             if (junitExtension.logManager) {
-                systemProperty 'java.util.logging.manager', junitExtension.logManager
+                systemProperty "java.util.logging.manager", junitExtension.logManager
             }
         }
 
@@ -176,64 +176,64 @@ class AndroidJUnit5Test extends JavaExec {
         private List<String> buildArgs(project, junitExtension, reportsDir, testRootDirs) {
             def args = []
 
-            args.addAll(['--details', junitExtension.details.toString()])
+            args.addAll(["--details", junitExtension.details.toString()])
 
             addSelectors(project, junitExtension.selectors, testRootDirs, args)
             addFilters(junitExtension.filters, args)
 
-            args.addAll(['--reports-dir', reportsDir.getAbsolutePath()])
+            args.addAll(["--reports-dir", reportsDir.getAbsolutePath()])
 
             return args
         }
 
         private void addFilters(filters, args) {
             filters.includeClassNamePatterns.each { pattern ->
-                args.addAll(['-n', pattern])
+                args.addAll(["-n", pattern])
             }
             filters.packages.include.each { includedPackage ->
-                args.addAll(['--include-package', includedPackage])
+                args.addAll(["--include-package", includedPackage])
             }
             filters.packages.exclude.each { excludedPackage ->
-                args.addAll(['--exclude-package', excludedPackage])
+                args.addAll(["--exclude-package", excludedPackage])
             }
             filters.tags.include.each { tag ->
-                args.addAll(['-t', tag])
+                args.addAll(["-t", tag])
             }
             filters.tags.exclude.each { tag ->
-                args.addAll(['-T', tag])
+                args.addAll(["-T", tag])
             }
             filters.engines.include.each { engineId ->
-                args.addAll(['-e', engineId])
+                args.addAll(["-e", engineId])
             }
             filters.engines.exclude.each { engineId ->
-                args.addAll(['-E', engineId])
+                args.addAll(["-E", engineId])
             }
         }
 
         private void addSelectors(project, selectors, testRootDirs, args) {
             if (selectors.empty) {
-                args.addAll(['--scan-class-path', testRootDirs.join(File.pathSeparator)])
+                args.addAll(["--scan-class-path", testRootDirs.join(File.pathSeparator)])
             } else {
                 selectors.uris.each { uri ->
-                    args.addAll(['-u', uri])
+                    args.addAll(["-u", uri])
                 }
                 selectors.files.each { file ->
-                    args.addAll(['-f', file])
+                    args.addAll(["-f", file])
                 }
                 selectors.directories.each { directory ->
-                    args.addAll(['-d', directory])
+                    args.addAll(["-d", directory])
                 }
                 selectors.packages.each { aPackage ->
-                    args.addAll(['-p', aPackage])
+                    args.addAll(["-p", aPackage])
                 }
                 selectors.classes.each { aClass ->
-                    args.addAll(['-c', aClass])
+                    args.addAll(["-c", aClass])
                 }
                 selectors.methods.each { method ->
-                    args.addAll(['-m', method])
+                    args.addAll(["-m", method])
                 }
                 selectors.resources.each { resource ->
-                    args.addAll(['-r', resource])
+                    args.addAll(["-r", resource])
                 }
             }
         }

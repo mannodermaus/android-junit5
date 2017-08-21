@@ -20,7 +20,7 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
 
     static final String LOG_TAG = "[android-junit5]"
 
-    static final String EXTENSION_NAME = 'junitPlatform'
+    static final String EXTENSION_NAME = "junitPlatform"
 
     /**
      * This method doesn't call through to super.apply().
@@ -36,21 +36,21 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
 
         // Construct the platform extension (use our Android variant of the Extension class though)
         def junitExtension = project.extensions.create(EXTENSION_NAME, AndroidJUnitPlatformExtension, project)
-        junitExtension.extensions.create('selectors', SelectorsExtension)
-        junitExtension.extensions.create('filters', FiltersExtension)
-        junitExtension.filters.extensions.create('packages', PackagesExtension)
-        junitExtension.filters.extensions.create('tags', TagsExtension)
-        junitExtension.filters.extensions.create('engines', EnginesExtension)
+        junitExtension.extensions.create("selectors", SelectorsExtension)
+        junitExtension.extensions.create("filters", FiltersExtension)
+        junitExtension.filters.extensions.create("packages", PackagesExtension)
+        junitExtension.filters.extensions.create("tags", TagsExtension)
+        junitExtension.filters.extensions.create("engines", EnginesExtension)
 
         // configuration.defaultDependencies used below was introduced in Gradle 2.5
-        if (GradleVersion.current() < GradleVersion.version('2.5')) {
-            throw new GradleException('android-junit5 plugin requires Gradle version 2.5 or higher')
+        if (GradleVersion.current() < GradleVersion.version("2.5")) {
+            throw new GradleException("android-junit5 plugin requires Gradle version 2.5 or higher")
         }
 
         // Add required JUnit Platform dependencies to a custom configuration that
         // will later be used to create the classpath for the custom task created
         // by this plugin.
-        def configuration = project.configurations.maybeCreate('junitPlatform')
+        def configuration = project.configurations.maybeCreate("junitPlatform")
         configuration.defaultDependencies { deps ->
             // By default, include both TestEngines
             // and the Launcher-related dependencies

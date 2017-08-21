@@ -7,12 +7,12 @@ package de.mannodermaus.gradle.plugins.android_junit5
 class AndroidJUnitPlatformAgp2xSpec extends AndroidJUnitPlatformSpec {
 
     @Override
-    protected String testCompileDependency() {
+    protected String testCompileDependencyName() {
         return "testCompile"
     }
 
     @Override
-    protected String testRuntimeDependency() {
+    protected String testRuntimeDependencyName() {
         return "testApk"
     }
 }

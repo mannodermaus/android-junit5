@@ -66,9 +66,9 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
 
     /* Abstract */
 
-    protected abstract String testCompileDependency()
+    protected abstract String testCompileDependencyName()
 
-    protected abstract String testRuntimeDependency()
+    protected abstract String testRuntimeDependencyName()
 
     /* Test Cases */
 
@@ -77,7 +77,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         Project p = ProjectBuilder.builder().withParent(testRoot).build()
         p.file(".").mkdir()
 
-        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.apply plugin: "de.mannodermaus.android-junit5"
 
         then:
         def e = thrown(PluginApplicationException)
@@ -91,8 +91,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.file("src/main").mkdirs()
         p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
-        p.apply plugin: 'com.android.application'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
         p.android {
             compileSdkVersion COMPILE_SDK
             buildToolsVersion BUILD_TOOLS
@@ -119,8 +119,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.file("src/main").mkdirs()
         p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
-        p.apply plugin: 'com.android.library'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.apply plugin: "com.android.library"
+        p.apply plugin: "de.mannodermaus.android-junit5"
         p.android {
             compileSdkVersion COMPILE_SDK
             buildToolsVersion BUILD_TOOLS
@@ -143,7 +143,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         testApkProject.file("src/main").mkdirs()
         testApkProject.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
-        testApkProject.apply plugin: 'com.android.library'
+        testApkProject.apply plugin: "com.android.library"
         testApkProject.android {
             compileSdkVersion COMPILE_SDK
             buildToolsVersion BUILD_TOOLS
@@ -154,8 +154,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.file("src/main").mkdirs()
         p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
-        p.apply plugin: 'com.android.application'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
         p.repositories {
             jcenter()
         }
@@ -173,7 +173,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         }
         p.dependencies {
             // "testApk" or "testRuntimeOnly"
-            add(testRuntimeDependency(), testApkProject)
+            add(testRuntimeDependencyName(), testApkProject)
         }
         p.evaluate()
 
@@ -208,8 +208,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.file("src/main").mkdirs()
         p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
-        p.apply plugin: 'com.android.application'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
         p.android {
             compileSdkVersion COMPILE_SDK
             buildToolsVersion BUILD_TOOLS
@@ -243,7 +243,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.tasks.getByName("junitPlatformTestPaidRelease")
     }
 
-    @IgnoreIf({ AndroidJUnitPlatformSpec.isAgp3x() })
+    @IgnoreIf({ isAgp3x() })
     def "custom junit jupiter version"() {
         when:
         def nonExistentVersion = "0.0.0"
@@ -253,8 +253,8 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.file("src/main").mkdirs()
         p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
 
-        p.apply plugin: 'com.android.application'
-        p.apply plugin: 'de.mannodermaus.android-junit5'
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
         p.android {
             compileSdkVersion COMPILE_SDK
             buildToolsVersion BUILD_TOOLS
@@ -276,7 +276,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         }
         p.dependencies {
             // "testCompile" or "testApi"
-            invokeMethod(testCompileDependency(), junitJupiter())
+            invokeMethod(testCompileDependencyName(), junitJupiter())
         }
 
         then:
