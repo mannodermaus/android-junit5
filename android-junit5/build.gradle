@@ -74,14 +74,11 @@ tasks.getByName("test").dependsOn(
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile "com.github.zafarkhaja:java-semver:$SEMVER_VERSION"
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
+    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
 
     testCompile "junit:junit:$JUNIT4_VERSION"
     testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
-
-    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
     testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
     testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
 }
