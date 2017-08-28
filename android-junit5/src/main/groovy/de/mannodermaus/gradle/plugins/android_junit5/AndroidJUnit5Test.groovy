@@ -116,6 +116,7 @@ class AndroidJUnit5Test extends JavaExec {
         private void configureTaskInputs(AndroidJUnit5Test task, AndroidJUnitPlatformExtension junitExtension) {
             // Setup JUnit 5 properties
             task.inputs.property("enableStandardTestTask", junitExtension.enableStandardTestTask)
+            task.inputs.property("configurationParameters", junitExtension.configurationParameters)
             task.inputs.property("selectors.uris", junitExtension.selectors.uris)
             task.inputs.property("selectors.files", junitExtension.selectors.files)
             task.inputs.property("selectors.directories", junitExtension.selectors.directories)
@@ -176,10 +177,16 @@ class AndroidJUnit5Test extends JavaExec {
         private List<String> buildArgs(project, junitExtension, reportsDir, testRootDirs) {
             def args = []
 
-            args.addAll(["--details", junitExtension.details.toString()])
+            if (junitExtension.details) {
+                args.addAll(["--details", junitExtension.details.name()])
+            }
 
             addSelectors(project, junitExtension.selectors, testRootDirs, args)
             addFilters(junitExtension.filters, args)
+
+            junitExtension.configurationParameters.each { key, value ->
+                args.addAll("--config", "${key}=${value}")
+            }
 
             args.addAll(["--reports-dir", reportsDir.getAbsolutePath()])
 
@@ -189,6 +196,9 @@ class AndroidJUnit5Test extends JavaExec {
         private void addFilters(filters, args) {
             filters.includeClassNamePatterns.each { pattern ->
                 args.addAll(["-n", pattern])
+            }
+            filters.excludeClassNamePatterns.each { pattern ->
+                args.addAll(['-N', pattern])
             }
             filters.packages.include.each { includedPackage ->
                 args.addAll(["--include-package", includedPackage])
