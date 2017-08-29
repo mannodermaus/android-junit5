@@ -75,13 +75,13 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
+    compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
 
     testCompile "junit:junit:$JUNIT4_VERSION"
     testCompile("org.spockframework:spock-core:$SPOCK_VERSION") { transitive = false }
-    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
-    testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_2X"
-    testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION_3X"
+    testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
+    testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
+    testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 }
 
 // ------------------------------------------------------------------------------------------------
