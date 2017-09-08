@@ -17,7 +17,7 @@ buildscript {
 Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
 
 **Note**: This plugin also supports the Release Candidates of JUnit 5.
-However, as of Android Studio 3.0 Beta 4, there is an internal issue with how tests are executed from the IDE
+However, as of Android Studio 3.0 Beta 5, there is an internal issue with how tests are executed from the IDE
 related to a removed API in JUnit 5 still accessed from Android Studio's build of IntelliJ.
 If you run your JUnit 5 tests directly from Android Studio *right now*, they will fail with a `NoSuchMethodError`.
 
