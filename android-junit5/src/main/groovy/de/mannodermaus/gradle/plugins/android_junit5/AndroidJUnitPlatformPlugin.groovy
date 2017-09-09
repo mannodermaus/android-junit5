@@ -84,7 +84,7 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             def platformVersion = junitExtension.platformVersion
             def vintageVersion = junitExtension.vintageVersion
 
-            return [
+            def libraries = [
                     project.dependencies.create("junit:junit:4.12"),
                     project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"),
                     project.dependencies.create("org.junit.platform:junit-platform-engine:${platformVersion}"),
@@ -96,6 +96,13 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
                     project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"),
                     project.dependencies.create("org.junit.vintage:junit-vintage-engine:$vintageVersion"),
             ]
+
+            if (project.properties["android.injected.invoked.from.ide"] == true) {
+                // Android Studio build: Include the JUnit 5 Runtime JAR manually
+                libraries += project.dependencies.create(project.files("libs/junit5-rt.jar"))
+            }
+
+            return libraries
         }
 
         project.dependencies.ext.junit5Params = {
