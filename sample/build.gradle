@@ -57,8 +57,8 @@ android {
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    testImplementation junitJupiter()
-    testImplementation junitParams()
+    testImplementation junit5()
+    testImplementation junit5Params()
 }
 
 // IJ doesn't recognize Kotlin test classes properly,
