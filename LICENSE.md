@@ -1,7 +1,9 @@
 Open Source Licenses
 ====================
 
-This repository includes multiple licenses:
+The individual modules use different open source licenses:
 
-- The bundled `junit5-rt.jar` is taken from intellij-community & released under [Apache License v2.0](LICENSE-apache.md)
-- The remaining code mirrors JUnit 5's license & is released under [Eclipse Public License v2.0](LICENSE-epl2.md)
+- `android-junit5-embedded-runtime` uses [Apache License v2.0](android-junit5-embedded-runtime/LICENSE.md)
+- All other modules use [Eclipse Public License v2.0](android-junit5/LICENSE.md)
+
+Please see the `LICENSE.md` files in the subfolders for details.

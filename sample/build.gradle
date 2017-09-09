@@ -9,15 +9,9 @@ buildscript {
 
     dependencies {
         //noinspection GradleDynamicVersion
-        classpath ("de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3") {
-//            changing = true
-        }
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:+"
         classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-    }
-
-    configurations.classpath {
-//        resolutionStrategy.cacheChangingModulesFor 0, "minutes"
     }
 }
 

@@ -117,12 +117,12 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             groupId GROUP_ID
-            artifactId ARTIFACT_ID
+            artifactId PLUGIN_ARTIFACT_ID
             version VERSION_NAME
             pom.withXml {
                 def root = asNode()
-                root.appendNode("description", DESCRIPTION)
-                root.appendNode("name", ARTIFACT_ID)
+                root.appendNode("description", PLUGIN_DESCRIPTION)
+                root.appendNode("name", PLUGIN_ARTIFACT_ID)
                 root.appendNode("url", VCS_URL)
             }
         }
@@ -163,9 +163,9 @@ project.configure(project) {
             dryRun = false
             pkg {
                 repo = "maven"
-                name = ARTIFACT_ID
+                name = PLUGIN_ARTIFACT_ID
                 userOrg = project.ext.bintrayUser
-                licenses = [LICENCE_NAME]
+                licenses = [PLUGIN_LICENSE_NAME]
                 publish = true
                 publicDownloadNumbers = true
                 vcsUrl = VCS_URL
