@@ -295,7 +295,7 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         }
         p.dependencies {
             // "testCompile" or "testApi"
-            invokeMethod(testCompileDependencyName(), junitJupiter())
+            invokeMethod(testCompileDependencyName(), junit5())
         }
 
         then:

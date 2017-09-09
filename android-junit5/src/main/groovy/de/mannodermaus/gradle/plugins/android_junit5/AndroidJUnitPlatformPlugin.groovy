@@ -31,8 +31,8 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
                 '}'
     }
 
-    private static final String JUNITJUPITER_DEPENDENCY_WARNING = dependencyDeprecationWarning("junitJupiter", "junitPlatform")
-    private static final String JUNITPARAMS_DEPENDENCY_WARNING = dependencyDeprecationWarning("junitParams", "junitJupiterParams")
+    private static final String JUNITJUPITER_DEPENDENCY_WARNING = dependencyDeprecationWarning("junitJupiter", "junit5")
+    private static final String JUNITPARAMS_DEPENDENCY_WARNING = dependencyDeprecationWarning("junitParams", "junit5Params")
 
     /**
      * This method doesn't call through to super.apply().
@@ -79,7 +79,7 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         }
 
         // Configure dependency handlers
-        project.dependencies.ext.junitPlatform = {
+        project.dependencies.ext.junit5 = {
             def jupiterVersion = junitExtension.jupiterVersion
             def platformVersion = junitExtension.platformVersion
             def vintageVersion = junitExtension.vintageVersion
@@ -98,7 +98,7 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             ]
         }
 
-        project.dependencies.ext.junitJupiterParams = {
+        project.dependencies.ext.junit5Params = {
             def jupiterVersion = junitExtension.jupiterVersion
 
             return project.dependencies.create("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
@@ -107,12 +107,12 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         // Add deprecated dependency handlers
         project.dependencies.ext.junitJupiter = {
             project.logger.warn(JUNITJUPITER_DEPENDENCY_WARNING)
-            return project.dependencies.ext.junitPlatform()
+            return project.dependencies.ext.junit5()
         }
 
         project.dependencies.ext.junitParams = {
             project.logger.warn(JUNITPARAMS_DEPENDENCY_WARNING)
-            return project.dependencies.ext.junitJupiterParams()
+            return project.dependencies.ext.junit5Params()
         }
 
         project.afterEvaluate {
