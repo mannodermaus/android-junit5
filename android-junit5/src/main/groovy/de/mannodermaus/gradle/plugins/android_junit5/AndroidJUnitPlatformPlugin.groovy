@@ -22,6 +22,18 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
 
     static final String EXTENSION_NAME = "junitPlatform"
 
+    private static String dependencyDeprecationWarning(oldName, newName) {
+        return "AGPBI: {" +
+                '"kind":"warning",' +
+                '"text":' + "\"$LOG_TAG The $oldName() dependency handler is deprecated " +
+                "and will be removed in a future release. Use $newName() instead!\"," +
+                '"sources":[{},{}]' +
+                '}'
+    }
+
+    private static final String JUNITJUPITER_DEPENDENCY_WARNING = dependencyDeprecationWarning("junitJupiter", "junitPlatform")
+    private static final String JUNITPARAMS_DEPENDENCY_WARNING = dependencyDeprecationWarning("junitParams", "junitJupiterParams")
+
     /**
      * This method doesn't call through to super.apply().
      * This is intentional, and prevents clashing between our Android-specific extension
@@ -66,8 +78,8 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             deps.add(project.dependencies.create("org.junit.vintage:junit-vintage-engine:${vintageVersion}"))
         }
 
-        // Add a junitJupiter() dependency handler
-        project.dependencies.ext.junitJupiter = {
+        // Configure dependency handlers
+        project.dependencies.ext.junitPlatform = {
             def jupiterVersion = junitExtension.jupiterVersion
             def platformVersion = junitExtension.platformVersion
             def vintageVersion = junitExtension.vintageVersion
@@ -86,11 +98,21 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             ]
         }
 
-        // Add a junitParams() dependency handler
-        project.dependencies.ext.junitParams = {
+        project.dependencies.ext.junitJupiterParams = {
             def jupiterVersion = junitExtension.jupiterVersion
 
             return project.dependencies.create("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
+        }
+
+        // Add deprecated dependency handlers
+        project.dependencies.ext.junitJupiter = {
+            project.logger.warn(JUNITJUPITER_DEPENDENCY_WARNING)
+            return project.dependencies.ext.junitPlatform
+        }
+
+        project.dependencies.ext.junitParams = {
+            project.logger.warn(JUNITPARAMS_DEPENDENCY_WARNING)
+            return project.dependencies.ext.junitJupiterParams
         }
 
         project.afterEvaluate {
