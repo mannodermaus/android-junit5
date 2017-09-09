@@ -1,4 +1,4 @@
 rootProject.name = GROUP_ID
 
 include ':android-junit5'
-include ':sample'
+//include ':sample'
