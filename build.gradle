@@ -22,10 +22,10 @@ if (credentialsFile.exists()) {
 }
 
 // @formatter:off
-def bintrayUser     = properties.get("BINTRAY_USER",    System.getenv("bintrayUser"))
-def bintrayKey      = properties.get("BINTRAY_KEY",     System.getenv("bintrayKey"))
-def sonatypeUser    = properties.get("SONATYPE_USER",   System.getenv("sonatypeUser"))
-def sonatypePass    = properties.get("SONATYPE_PASS",   System.getenv("sonatypePass"))
+def bintrayUser     = properties.getProperty("BINTRAY_USER",    System.getenv("bintrayUser"))
+def bintrayKey      = properties.getProperty("BINTRAY_KEY",     System.getenv("bintrayKey"))
+def sonatypeUser    = properties.getProperty("SONATYPE_USER",   System.getenv("sonatypeUser"))
+def sonatypePass    = properties.getProperty("SONATYPE_PASS",   System.getenv("sonatypePass"))
 // @formatter:on
 
 allprojects {
