@@ -9,15 +9,15 @@ buildscript {
 
     dependencies {
         //noinspection GradleDynamicVersion
-        classpath ("de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3-rev1-SNAPSHOT") {
-            changing = true
+        classpath ("de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3") {
+//            changing = true
         }
         classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 
     configurations.classpath {
-        resolutionStrategy.cacheChangingModulesFor 5, "minutes"
+//        resolutionStrategy.cacheChangingModulesFor 0, "minutes"
     }
 }
 
@@ -57,8 +57,9 @@ android {
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    testImplementation junit5()
-    testImplementation junit5Params()
+    testImplementation junitJupiter()
+    testImplementation junitParams()
+    testCompileOnly project(":android-junit5-embedded-runtime")
 }
 
 // IJ doesn't recognize Kotlin test classes properly,

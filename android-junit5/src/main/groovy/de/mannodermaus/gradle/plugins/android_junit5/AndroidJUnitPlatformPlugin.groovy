@@ -94,10 +94,7 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
                     project.dependencies.create("org.junit.platform:junit-platform-launcher:$platformVersion"),
                     project.dependencies.create("org.junit.platform:junit-platform-console:$platformVersion"),
                     project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"),
-                    project.dependencies.create("org.junit.vintage:junit-vintage-engine:$vintageVersion"),
-
-                    // IntelliJ JUnit 5 Runtime, bundled to compensate for outdated Android Studio builds
-                    project.dependencies.create(project.files("libs/junit5-rt.jar"))
+                    project.dependencies.create("org.junit.vintage:junit-vintage-engine:$vintageVersion")
             ]
         }
 

@@ -1,0 +1,110 @@
+apply plugin: "java-library"
+apply plugin: "maven"
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.bintray"
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+// ------------------------------------------------------------------------------------------------
+// Dependency Definitions
+// ------------------------------------------------------------------------------------------------
+
+dependencies {
+    implementation files("libs/junit5-rt.jar")
+}
+
+// ------------------------------------------------------------------------------------------------
+// Deployment Setup
+//
+// Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
+// This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
+// ------------------------------------------------------------------------------------------------
+
+// Include sources.jar archive in each release
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+// Include javadoc.jar archive in each release
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+project.ext.artifactId = "android-junit5-embedded-runtime"
+version = VERSION_NAME
+
+publishing {
+    publications {
+        library(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId GROUP_ID
+            artifactId project.ext.artifactId
+            version VERSION_NAME
+            pom.withXml {
+                def root = asNode()
+                root.appendNode("description", DESCRIPTION)
+                root.appendNode("name", project.ext.artifactId)
+                root.appendNode("url", VCS_URL)
+            }
+        }
+    }
+}
+
+// Copy POM to location expected by Bintray
+task copyPom(type: Copy) {
+    from "build/publications/library"
+    into "build/poms"
+    include "pom-default.xml"
+}
+
+publish.dependsOn copyPom
+
+project.configure(project) {
+    if (project.version.endsWith("-SNAPSHOT")) {
+        // Configure deployment of snapshot versions to Sonatype OSS
+        project.publishing {
+            repositories {
+                maven {
+                    name "snapshot"
+                    credentials {
+                        username project.ext.sonatypeUser
+                        password project.ext.sonatypePass
+                    }
+                    url "https://oss.sonatype.org/content/repositories/snapshots"
+                }
+            }
+        }
+
+    } else {
+        // Configure deployment of release versions to Bintray
+        project.bintray {
+            user = project.ext.bintrayUser
+            key = project.ext.bintrayKey
+            configurations = ["archives"]
+            dryRun = false
+            pkg {
+                repo = "maven"
+                name = project.ext.artifactId
+                userOrg = project.ext.bintrayUser
+                licenses = [LICENCE_NAME]
+                publish = true
+                publicDownloadNumbers = true
+                vcsUrl = VCS_URL
+                version {
+                    name = VERSION_NAME
+                    desc = DESCRIPTION
+                }
+            }
+        }
+    }
+}
