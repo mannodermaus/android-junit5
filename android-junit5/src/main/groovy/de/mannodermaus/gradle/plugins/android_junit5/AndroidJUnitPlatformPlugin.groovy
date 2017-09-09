@@ -107,12 +107,12 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         // Add deprecated dependency handlers
         project.dependencies.ext.junitJupiter = {
             project.logger.warn(JUNITJUPITER_DEPENDENCY_WARNING)
-            return project.dependencies.ext.junitPlatform
+            return project.dependencies.ext.junitPlatform()
         }
 
         project.dependencies.ext.junitParams = {
             project.logger.warn(JUNITPARAMS_DEPENDENCY_WARNING)
-            return project.dependencies.ext.junitJupiterParams
+            return project.dependencies.ext.junitJupiterParams()
         }
 
         project.afterEvaluate {
