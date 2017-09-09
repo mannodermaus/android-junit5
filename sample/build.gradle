@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         //noinspection GradleDynamicVersion
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:+"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3-rev1-SNAPSHOT"
         classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
@@ -51,8 +51,8 @@ android {
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    testImplementation junitJupiter()
-    testImplementation junitParams()
+    testImplementation junit5()
+    testImplementation junit5Params()
     testCompileOnly project(":android-junit5-embedded-runtime")
 }
 

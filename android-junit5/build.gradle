@@ -171,7 +171,7 @@ project.configure(project) {
                 vcsUrl = VCS_URL
                 version {
                     name = VERSION_NAME
-                    desc = DESCRIPTION
+                    desc = PLUGIN_DESCRIPTION
                 }
             }
         }

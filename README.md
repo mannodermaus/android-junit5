@@ -9,20 +9,12 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] unit tests 
 ```groovy
 buildscript {
     dependencies {
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-M6"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3-rev1"
     }
 }
 ```
 
 Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
-
-**Note**: This plugin also supports the Release Candidates of JUnit 5.
-However, as of Android Studio 3.0 Beta 5, there is an internal issue with how tests are executed from the IDE
-related to a removed API in JUnit 5 still accessed from Android Studio's build of IntelliJ.
-If you run your JUnit 5 tests directly from Android Studio *right now*, they will fail with a `NoSuchMethodError`.
-
-If you are running the latest version of IDEA itself, or you only ever run tests from the command line,
-it's safe to upgrade this plugin to the *actual* most recent version, `1.0.0-RC3`.
 
 ## Setup
 
@@ -31,10 +23,22 @@ apply plugin: "com.android.application"
 apply plugin: "de.mannodermaus.android-junit5"
 
 dependencies {
-    testApi junitJupiter()
+    testImplementation junit5()
 
     // (Optional) If you need "parameterized tests"
-    testApi junitParams()
+    testImplementation junit5Params()
+    
+    // For Android Studio users:
+    //
+    // All versions up to and including AS 3.0 Beta 5 use a build of IntelliJ IDEA
+    // that depends on APIs of an outdated Milestone Release of JUnit 5.
+    // Therefore, your tests will fail with a NoSuchMethodError
+    // when executed from Android Studio directly.
+    //
+    // To prevent this, there is a separate library you can apply here.
+    // It provides a copy of the JUnit 5 Runtime used in a more recent build
+    // of IntelliJ, overriding the one embedded in Android Studio.
+    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
 }
 ```
 
@@ -55,9 +59,9 @@ However, there are some additional properties that you can apply:
 ```groovy
 junitPlatform {
     // The JUnit Jupiter dependency version to use; matches the platform's milestone by default
-    jupiterVersion "5.0.0-M6"
+    jupiterVersion "5.0.0-RC3"
     // The JUnit Vintage Engine dependency version to use; matches the platform's milestone by default
-    vintageVersion "4.12.0-M6"
+    vintageVersion "4.12.0-RC3"
 }
 ```
 
