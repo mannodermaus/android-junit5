@@ -9,7 +9,7 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] unit tests 
 ```groovy
 buildscript {
     dependencies {
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3-rev1"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0"
     }
 }
 ```
@@ -38,7 +38,7 @@ dependencies {
     // To prevent this, there is a separate library you can apply here.
     // It provides a copy of the JUnit 5 Runtime used in a more recent build
     // of IntelliJ, overriding the one embedded in Android Studio.
-    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
+    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0"
 }
 ```
 
@@ -58,10 +58,10 @@ However, there are some additional properties that you can apply:
 
 ```groovy
 junitPlatform {
-    // The JUnit Jupiter dependency version to use; matches the platform's milestone by default
-    jupiterVersion "5.0.0-RC3"
-    // The JUnit Vintage Engine dependency version to use; matches the platform's milestone by default
-    vintageVersion "4.12.0-RC3"
+    // The JUnit Jupiter dependency version to use; matches the platform's version by default
+    jupiterVersion "5.0.0"
+    // The JUnit Vintage Engine dependency version to use; matches the platform's version by default
+    vintageVersion "4.12.0"
 }
 ```
 
@@ -69,4 +69,4 @@ junitPlatform {
  [junit5ug]: http://junit.org/junit5/docs/current/user-guide
  [travisci]: https://travis-ci.org/aurae/android-junit5
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
- [sampletests]: https://github.com/aurae/android-junit5/tree/master/sample/src/test
+ [sampletests]: sample/src/test

@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         //noinspection GradleDynamicVersion
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-RC3-rev1-SNAPSHOT"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0-SNAPSHOT"
         classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
