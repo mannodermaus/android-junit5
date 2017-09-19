@@ -38,7 +38,12 @@ dependencies {
     // To prevent this, there is a separate library you can apply here.
     // It provides a copy of the JUnit 5 Runtime used in a more recent build
     // of IntelliJ, overriding the one embedded in Android Studio.
-    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0"
+    //
+    // Please note the version of this dependency! There was an issue with the deployment
+    // of the "1.0.0" JAR, so that one actually won't work as advertised. Please explicitly
+    // depend on this version instead; there won't be any incompatibilities with the main plugin,
+    // since this doesn't share any connection with it. Sorry for the inconvenience!
+    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
 }
 ```
 
