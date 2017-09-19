@@ -1,5 +1,7 @@
 package de.mannodermaus.gradle.plugins.android_junit5
 
+import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoExtension
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
@@ -25,4 +27,11 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
      * The version of JUnit Vintage Engine to use.
      */
     String vintageVersion = "4.12.0"
+
+    /**
+     * Configuration of Jacoco Code Coverage reports.
+     */
+    void jacoco(Action<AndroidJUnit5JacocoExtension> closure) {
+        closure.execute(getProperty(AndroidJUnitPlatformPlugin.JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension)
+    }
 }

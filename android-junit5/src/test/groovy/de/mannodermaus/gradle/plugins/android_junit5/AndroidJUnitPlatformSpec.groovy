@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.android_junit5
 
 import com.android.builder.Version
+import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoReport
 import org.gradle.api.Project
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.internal.resolve.ModuleVersionNotFoundException
@@ -123,8 +124,12 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.evaluate()
 
         then:
-        p.tasks.getByName("junitPlatformTestDebug")
-        p.tasks.getByName("junitPlatformTestRelease")
+        def variantTasks = [
+                p.tasks.getByName("junitPlatformTestDebug"),
+                p.tasks.getByName("junitPlatformTestRelease")
+        ]
+        def defaultTask = p.tasks.getByName("junitPlatformTest")
+        assert defaultTask.getDependsOn().containsAll(variantTasks)
     }
 
     def "basic library setup"() {
@@ -143,8 +148,12 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.evaluate()
 
         then:
-        p.tasks.getByName("junitPlatformTestDebug")
-        p.tasks.getByName("junitPlatformTestRelease")
+        def variantTasks = [
+                p.tasks.getByName("junitPlatformTestDebug"),
+                p.tasks.getByName("junitPlatformTestRelease")
+        ]
+        def defaultTask = p.tasks.getByName("junitPlatformTest")
+        assert defaultTask.getDependsOn().containsAll(variantTasks)
     }
 
     @SuppressWarnings("UnnecessaryQualifiedReference")
@@ -158,7 +167,9 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
                 .build()
         testApkProject.file(".").mkdir()
         testApkProject.file("src/main").mkdirs()
-        testApkProject.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+        testApkProject.file("src/main/AndroidManifest.xml").withWriter {
+            it.write(ANDROID_MANIFEST)
+        }
 
         testApkProject.apply plugin: "com.android.library"
         testApkProject.android {
@@ -210,8 +221,12 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
             assert classpath.find { it.contains("test/build/intermediates/classes/test/") } != null
 
             // Resource Files
-            assert classpath.find { it.contains("test/build/intermediates/sourceFolderJavaResources/") } != null
-            assert classpath.find { it.contains("test/build/intermediates/sourceFolderJavaResources/test/") } != null
+            assert classpath.find {
+                it.contains("test/build/intermediates/sourceFolderJavaResources/")
+            } != null
+            assert classpath.find {
+                it.contains("test/build/intermediates/sourceFolderJavaResources/test/")
+            } != null
 
             // Mockable android.jar
             assert classpath.find { it.contains("build/generated/mockable-android-") } != null
@@ -254,10 +269,14 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
         p.evaluate()
 
         then:
-        p.tasks.getByName("junitPlatformTestFreeDebug")
-        p.tasks.getByName("junitPlatformTestFreeRelease")
-        p.tasks.getByName("junitPlatformTestPaidDebug")
-        p.tasks.getByName("junitPlatformTestPaidRelease")
+        def variantTasks = [
+                p.tasks.getByName("junitPlatformTestFreeDebug"),
+                p.tasks.getByName("junitPlatformTestFreeRelease"),
+                p.tasks.getByName("junitPlatformTestPaidDebug"),
+                p.tasks.getByName("junitPlatformTestPaidRelease")
+        ]
+        def defaultTask = p.tasks.getByName("junitPlatformTest")
+        assert defaultTask.getDependsOn().containsAll(variantTasks)
     }
 
     @SuppressWarnings("UnnecessaryQualifiedReference")
@@ -319,5 +338,175 @@ abstract class AndroidJUnitPlatformSpec extends Specification {
                 throw new AssertionError("Expected ${ModuleVersionNotFoundException.class.name}, but wasn't thrown")
             }
         }
+    }
+
+    def "jacoco in app module"() {
+        when:
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
+        p.apply plugin: "jacoco"
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+
+            defaultConfig {
+                applicationId APPLICATION_ID
+                minSdkVersion MIN_SDK
+                targetSdkVersion TARGET_SDK
+                versionCode VERSION_CODE
+                versionName VERSION_NAME
+            }
+        }
+        p.evaluate()
+
+        then:
+        p.tasks.getByName("jacocoTestReport")
+        p.tasks.getByName("jacocoTestReportDebug")
+        p.tasks.getByName("jacocoTestReportRelease")
+    }
+
+    def "jacoco in library module"() {
+        when:
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: "com.android.library"
+        p.apply plugin: "de.mannodermaus.android-junit5"
+        p.apply plugin: "jacoco"
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+        }
+        p.evaluate()
+
+        then:
+        def variantTasks = [
+                p.tasks.getByName("jacocoTestReportDebug"),
+                p.tasks.getByName("jacocoTestReportRelease")
+        ]
+        def defaultTask = p.tasks.getByName("jacocoTestReport")
+        assert defaultTask.getDependsOn().containsAll(variantTasks)
+    }
+
+    def "jacoco in app module with flavors"() {
+        when:
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
+        p.apply plugin: "jacoco"
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+
+            defaultConfig {
+                applicationId APPLICATION_ID
+                minSdkVersion MIN_SDK
+                targetSdkVersion TARGET_SDK
+                versionCode VERSION_CODE
+                versionName VERSION_NAME
+            }
+
+            flavorDimensions "plan"
+
+            productFlavors {
+                free {
+                    dimension "plan"
+                }
+
+                paid {
+                    dimension "plan"
+                }
+            }
+        }
+        p.evaluate()
+
+        then:
+        def variantTasks = [
+                p.tasks.getByName("jacocoTestReportFreeDebug"),
+                p.tasks.getByName("jacocoTestReportFreeRelease"),
+                p.tasks.getByName("jacocoTestReportPaidDebug"),
+                p.tasks.getByName("jacocoTestReportPaidRelease")
+        ]
+        def defaultTask = p.tasks.getByName("jacocoTestReport")
+        assert defaultTask.getDependsOn().containsAll(variantTasks)
+    }
+
+    def "doesnt add jacoco coverage report tasks if plugin not applied"() {
+        when:
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+
+            defaultConfig {
+                applicationId APPLICATION_ID
+                minSdkVersion MIN_SDK
+                targetSdkVersion TARGET_SDK
+                versionCode VERSION_CODE
+                versionName VERSION_NAME
+            }
+        }
+        p.evaluate()
+
+        then:
+        p.tasks.findByName("jacocoTestReport") == null
+        p.tasks.findByName("jacocoTestReportDebug") == null
+        p.tasks.findByName("jacocoTestReportRelease") == null
+    }
+
+    @SuppressWarnings("GroovyPointlessBoolean")
+    def "jacoco configuration works OK"() {
+        when:
+        Project p = ProjectBuilder.builder().withParent(testRoot).build()
+        p.file(".").mkdir()
+        p.file("src/main").mkdirs()
+        p.file("src/main/AndroidManifest.xml").withWriter { it.write(ANDROID_MANIFEST) }
+
+        p.apply plugin: "com.android.application"
+        p.apply plugin: "de.mannodermaus.android-junit5"
+        p.apply plugin: "jacoco"
+        p.android {
+            compileSdkVersion COMPILE_SDK
+            buildToolsVersion BUILD_TOOLS
+
+            defaultConfig {
+                applicationId APPLICATION_ID
+                minSdkVersion MIN_SDK
+                targetSdkVersion TARGET_SDK
+                versionCode VERSION_CODE
+                versionName VERSION_NAME
+            }
+        }
+        p.junitPlatform {
+            jacoco {
+                xmlReport false
+                htmlReport false
+                csvReport true
+            }
+        }
+        p.evaluate()
+
+        then:
+        def jacocoTask = p.tasks.getByName("jacocoTestReportDebug") as AndroidJUnit5JacocoReport
+        assert jacocoTask.reports.xml.enabled == false
+        assert jacocoTask.reports.html.enabled == false
+        assert jacocoTask.reports.csv.enabled == true
     }
 }
