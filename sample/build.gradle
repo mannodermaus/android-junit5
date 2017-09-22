@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlinVersion = "1.1.4-3"
+    ext.kotlinVersion = "1.1.50"
 
     repositories {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
@@ -50,11 +50,11 @@ android {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
     testImplementation junit5()
     testImplementation junit5Params()
-    testCompileOnly project(":android-junit5-embedded-runtime")
+    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
 }
 
 // IJ doesn't recognize Kotlin test classes properly,
