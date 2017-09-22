@@ -5,7 +5,7 @@
 # Adapted from https://coderwall.com/p/9b_lfq and
 # http://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/
 
-SLUG="aurae/android-junit5"
+SLUG="mannodermaus/android-junit5"
 JDK="oraclejdk8"
 BRANCH="master"
 

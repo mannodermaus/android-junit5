@@ -1,6 +1,6 @@
 # android-junit5
 
-[![Travis Build Status](https://travis-ci.org/aurae/android-junit5.svg?branch=master)][travisci]
+[![Travis Build Status](https://travis-ci.org/mannodermaus/android-junit5.svg?branch=master)][travisci]
 
 A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] unit tests in Android environments.
 
@@ -72,6 +72,6 @@ junitPlatform {
 
  [junit5gh]: https://github.com/junit-team/junit5
  [junit5ug]: http://junit.org/junit5/docs/current/user-guide
- [travisci]: https://travis-ci.org/aurae/android-junit5
+ [travisci]: https://travis-ci.org/mannodermaus/android-junit5
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
  [sampletests]: sample/src/test
