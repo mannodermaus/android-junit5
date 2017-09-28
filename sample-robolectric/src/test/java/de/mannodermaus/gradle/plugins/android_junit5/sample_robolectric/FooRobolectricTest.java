@@ -7,11 +7,11 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
-public class FooTest {
+public class FooRobolectricTest {
 
     @Test
     public void noCodeCoverage() {
-        final int result = new Foo().bar();
+        final int result = new Foo().junit4robolectric();
 
         assertEquals(-1, result);
     }
