@@ -7,7 +7,7 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
-public final class FooTest {
+public class FooTest {
 
     @Test
     public void noCodeCoverage() {
