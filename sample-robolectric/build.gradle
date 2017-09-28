@@ -41,10 +41,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
         sourceCompatibility JavaVersion.VERSION_1_7
     }
-
-    sourceSets {
-        test.java.srcDirs += "src/test/kotlin"
-    }
 }
 
 dependencies {
