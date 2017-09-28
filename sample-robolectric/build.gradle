@@ -1,5 +1,7 @@
 buildscript {
+    ext.junit4Version = "4.12"
     ext.robolectricVersion = "3.4.2"
+    ext.mockitoVersion = "1.10.19"
 
     repositories {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
@@ -46,7 +48,8 @@ android {
 dependencies {
     testCompile junit5()
     testCompile junit5Params()
-    testCompile 'junit:junit:4.12'
+    testCompile "junit:junit:$junit4Version"
     testCompile "org.robolectric:robolectric:$robolectricVersion"
+    testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
 }
