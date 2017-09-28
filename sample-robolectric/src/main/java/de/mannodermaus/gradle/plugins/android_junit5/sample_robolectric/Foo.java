@@ -10,6 +10,10 @@ public class Foo {
         return -1;
     }
 
+    public int junit4mockito() {
+        return -1;
+    }
+
     public int junit5() {
         return -1;
     }
