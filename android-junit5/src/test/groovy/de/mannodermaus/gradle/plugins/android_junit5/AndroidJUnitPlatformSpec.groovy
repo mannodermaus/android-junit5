@@ -18,7 +18,7 @@ import spock.lang.Specification
 abstract class AndroidJUnitPlatformSpec extends Specification {
 
     protected static final COMPILE_SDK = 26
-    protected static final BUILD_TOOLS = "26.0.1"
+    protected static final BUILD_TOOLS = "26.0.2"
     protected static final MIN_SDK = 26
     protected static final TARGET_SDK = 26
     protected static final VERSION_CODE = 1
