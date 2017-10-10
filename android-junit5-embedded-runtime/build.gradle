@@ -32,6 +32,7 @@ shadowJar {
 }
 
 build.finalizedBy shadowJar
+publish.dependsOn shadowJar
 
 // ------------------------------------------------------------------------------------------------
 // Deployment Setup
