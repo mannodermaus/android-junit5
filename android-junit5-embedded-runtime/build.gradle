@@ -1,10 +1,10 @@
 buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:$SHADOW_PLUGIN_VERSION"
-    }
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath "com.github.jengelman.gradle.plugins:shadow:$SHADOW_PLUGIN_VERSION"
+  }
 }
 
 apply plugin: "java-library"
@@ -13,25 +13,25 @@ apply plugin: "maven-publish"
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "com.jfrog.bintray"
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
-
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
-// This module exports a "fat JAR" with the embedded junit5-rt from IntelliJ IDEA,
+// This module exports a "fat JAR" containing embedded JARs from IntelliJ IDEA,
 // using a shadowed JAR that overrides the default build artifact.
+//
+// Path to this JAR inside an IntelliJ IDEA package:
+// "plugins/junit/lib/junit5-rt.jar"
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
-    implementation files("libs/junit5-rt.jar")
+  implementation files("libs/junit5-rt.jar")
 }
 
 shadowJar {
-    // Remove '-all' suffix from the generated JAR
-    classifier = null
+  // Remove '-all' suffix from the generated JAR
+  classifier = null
 }
 
-build.doLast { shadowJar.execute() }
+build.finalizedBy shadowJar
 
 // ------------------------------------------------------------------------------------------------
 // Deployment Setup
@@ -42,76 +42,75 @@ build.doLast { shadowJar.execute() }
 
 // Include sources.jar archive in each release
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = "sources"
-    from sourceSets.main.allSource
+  classifier = "sources"
+  from sourceSets.main.allSource
 }
 
 // Include javadoc.jar archive in each release
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = "javadoc"
-    from javadoc.destinationDir
+  classifier = "javadoc"
+  from javadoc.destinationDir
 }
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
+  archives sourcesJar
+  archives javadocJar
 }
 
 version = VERSION_NAME
 
 publishing {
-    publications {
-        library(MavenPublication) {
-            project.shadow.component(it)
-        }
+  publications {
+    library(MavenPublication) {
+      project.shadow.component(it)
     }
+  }
 }
 
 // Copy POM to location expected by Bintray
 task copyPom(type: Copy) {
-    from "build/publications/library"
-    into "build/poms"
-    include "pom-default.xml"
+  from "build/publications/library"
+  into "build/poms"
+  include "pom-default.xml"
 }
 
 publish.dependsOn copyPom
 
 project.configure(project) {
-    if (project.version.endsWith("-SNAPSHOT")) {
-        // Configure deployment of snapshot versions to Sonatype OSS
-        project.publishing {
-            repositories {
-                maven {
-                    name "snapshot"
-                    credentials {
-                        username project.ext.sonatypeUser
-                        password project.ext.sonatypePass
-                    }
-                    url "https://oss.sonatype.org/content/repositories/snapshots"
-                }
-            }
+  if (project.version.endsWith("-SNAPSHOT")) {
+    // Configure deployment of snapshot versions to Sonatype OSS
+    project.publishing {
+      repositories {
+        maven {
+          name "snapshot"
+          credentials {
+            username project.ext.sonatypeUser
+            password project.ext.sonatypePass
+          }
+          url "https://oss.sonatype.org/content/repositories/snapshots"
         }
-
-    } else {
-        // Configure deployment of release versions to Bintray
-        project.bintray {
-            user = project.ext.bintrayUser
-            key = project.ext.bintrayKey
-            configurations = ["archives"]
-            dryRun = false
-            pkg {
-                repo = "maven"
-                name = RUNTIME_ARTIFACT_ID
-                userOrg = project.ext.bintrayUser
-                licenses = [RUNTIME_LICENSE_NAME]
-                publish = true
-                publicDownloadNumbers = true
-                vcsUrl = VCS_URL
-                version {
-                    name = VERSION_NAME
-                    desc = RUNTIME_DESCRIPTION
-                }
-            }
-        }
+      }
     }
+  } else {
+    // Configure deployment of release versions to Bintray
+    project.bintray {
+      user = project.ext.bintrayUser
+      key = project.ext.bintrayKey
+      configurations = ["archives"]
+      dryRun = false
+      pkg {
+        repo = "maven"
+        name = RUNTIME_ARTIFACT_ID
+        userOrg = project.ext.bintrayUser
+        licenses = [RUNTIME_LICENSE_NAME]
+        publish = true
+        publicDownloadNumbers = true
+        vcsUrl = VCS_URL
+        version {
+          name = VERSION_NAME
+          desc = RUNTIME_DESCRIPTION
+        }
+      }
+    }
+  }
 }

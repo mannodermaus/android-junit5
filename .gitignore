@@ -3,6 +3,7 @@
 local.properties
 .idea/*
 !.idea/runConfigurations
+!.idea/codeStyleSettings.xml
 .DS_Store
 build/
 captures/

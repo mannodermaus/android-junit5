@@ -1,18 +1,18 @@
 buildscript {
-    ext.kotlinVersion = "1.1.50"
+  ext.kotlinVersion = "1.1.51"
 
-    repositories {
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        google()
-        jcenter()
-    }
+  repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    google()
+    jcenter()
+  }
 
-    dependencies {
-        //noinspection GradleDynamicVersion
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0.1-SNAPSHOT"
-        classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-    }
+  dependencies {
+    //noinspection GradleDynamicVersion
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0.1-SNAPSHOT"
+    classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+  }
 }
 
 apply plugin: "com.android.application"
@@ -21,54 +21,54 @@ apply plugin: "de.mannodermaus.android-junit5"
 apply plugin: "jacoco"
 
 android {
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // A Note to my forgetful self:
-    //
-    // When updating these values, make sure
-    // to always update the Travis CI .yml config
-    // & the plugin's AndroidJUnitPlatformSpec, too
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // A Note to my forgetful self:
+  //
+  // When updating these values, make sure
+  // to always update the Travis CI .yml config
+  // & the plugin's AndroidJUnitPlatformSpec, too
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  compileSdkVersion 26
+  buildToolsVersion "26.0.2"
 
-    defaultConfig {
-        applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample"
-        minSdkVersion 15
-        targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
-    }
+  defaultConfig {
+    applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample"
+    minSdkVersion 15
+    targetSdkVersion 26
+    versionCode 1
+    versionName "1.0"
+  }
 
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
-    }
-
-    sourceSets {
-        test.java.srcDirs += "src/test/kotlin"
-    }
+  sourceSets {
+    test.java.srcDirs += "src/test/kotlin"  
+  }
+  
+  compileOptions {
+    targetCompatibility 1.8
+    sourceCompatibility 1.8
+  }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    testImplementation junit5()
-    testImplementation junit5Params()
-    testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
+  testImplementation junit5()
+  testImplementation junit5Params()
+  testCompileOnly "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
 }
 
 // IJ doesn't recognize Kotlin test classes properly,
 // so we copy them over manually
 
 afterEvaluate {
-    android.buildTypes.all {
-        def name = it.name
+  android.buildTypes.all {
+    def name = it.name
 
-        def copyTask = project.task(type: Copy, "copyKotlin${name.capitalize()}UnitTestClasses") {
-            from "build/tmp/kotlin-classes/${name}UnitTest"
-            into "build/intermediates/classes/test/$name"
-        }
-
-        project.tasks.getByName("compile${name.capitalize()}UnitTestSources").finalizedBy copyTask
+    def copyTask = project.task(type: Copy, "copyKotlin${name.capitalize()}UnitTestClasses") {
+      from "build/tmp/kotlin-classes/${name}UnitTest"
+      into "build/intermediates/classes/test/$name"
     }
+
+    project.tasks.getByName("compile${name.capitalize()}UnitTestSources").finalizedBy copyTask
+  }
 }

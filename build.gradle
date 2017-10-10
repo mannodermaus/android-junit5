@@ -1,11 +1,11 @@
 buildscript {
-    repositories {
-        google()
-        jcenter()
-    }
-    dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$BINTRAY_PLUGIN_VERSION"
-    }
+  repositories {
+    google()
+    jcenter()
+  }
+  dependencies {
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$BINTRAY_PLUGIN_VERSION"
+  }
 }
 
 // Populate deployment credentials in an environment-aware fashion.
@@ -18,25 +18,23 @@ Properties properties = new Properties()
 
 def credentialsFile = new File(project.rootDir, "local.properties")
 if (credentialsFile.exists()) {
-    credentialsFile.withReader { properties.load(it) }
+  credentialsFile.withReader { properties.load(it) }
 }
 
-// @formatter:off
-def bintrayUser     = properties.getProperty("BINTRAY_USER",    System.getenv("bintrayUser"))
-def bintrayKey      = properties.getProperty("BINTRAY_KEY",     System.getenv("bintrayKey"))
-def sonatypeUser    = properties.getProperty("SONATYPE_USER",   System.getenv("sonatypeUser"))
-def sonatypePass    = properties.getProperty("SONATYPE_PASS",   System.getenv("sonatypePass"))
-// @formatter:on
+def bintrayUser = properties.getProperty("BINTRAY_USER", System.getenv("bintrayUser"))
+def bintrayKey = properties.getProperty("BINTRAY_KEY", System.getenv("bintrayKey"))
+def sonatypeUser = properties.getProperty("SONATYPE_USER", System.getenv("sonatypeUser"))
+def sonatypePass = properties.getProperty("SONATYPE_PASS", System.getenv("sonatypePass"))
 
 allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
+  repositories {
+    google()
+    jcenter()
+  }
 
-    // Store deployment credentials
-    ext.bintrayUser = bintrayUser
-    ext.bintrayKey = bintrayKey
-    ext.sonatypeUser = sonatypeUser
-    ext.sonatypePass = sonatypePass
+  // Store deployment credentials
+  ext.bintrayUser = bintrayUser
+  ext.bintrayKey = bintrayKey
+  ext.sonatypeUser = sonatypeUser
+  ext.sonatypePass = sonatypePass
 }
