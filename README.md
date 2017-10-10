@@ -66,7 +66,7 @@ To work around this, there is a separate dependency you can add to the *test* sc
 of your project in Android Studio 3. It provides its own copy of the JUnit 5 Runtime
 provided by a more recent build of IntelliJ, overriding the one embedded in Android Studio.
 
-To use this, add the following line alongside the other `junit5()` dependency:
+To use this, add the following line alongside the other `junit5()` dependencies:
 
 ```groovy
 testCompileOnly junit5EmbeddedRuntime()
