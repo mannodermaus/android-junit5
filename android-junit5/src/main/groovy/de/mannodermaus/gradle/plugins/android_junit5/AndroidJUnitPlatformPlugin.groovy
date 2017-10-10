@@ -107,6 +107,12 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
       return project.dependencies.create("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     }
 
+    project.dependencies.ext.junit5EmbeddedRuntime = {
+      def embeddedRuntimeVersion = junitExtension.embeddedRuntimeVersion
+
+      return project.dependencies.create("de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:$embeddedRuntimeVersion")
+    }
+
     project.afterEvaluate {
       configure(project)
     }

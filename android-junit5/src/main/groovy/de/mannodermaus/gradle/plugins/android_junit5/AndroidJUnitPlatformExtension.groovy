@@ -26,6 +26,10 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   String vintageVersion = "4.12.1"
 
   /**
+   * The version of the JUnit 5 Embedded Runtime to use.*/
+  String embeddedRuntimeVersion = "1.0.0-RC3-rev1"
+
+  /**
    * Configuration of Jacoco Code Coverage reports.*/
   void jacoco(Action<AndroidJUnit5JacocoExtension> closure) {
     closure.execute(getProperty(
