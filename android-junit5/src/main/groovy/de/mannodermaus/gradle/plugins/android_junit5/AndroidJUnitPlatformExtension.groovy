@@ -27,7 +27,7 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
   /**
    * The version of the JUnit 5 Embedded Runtime to use.*/
-  String embeddedRuntimeVersion = "1.0.0-RC3-rev1"
+  String embeddedRuntimeVersion = "1.0.10"
 
   /**
    * Configuration of Jacoco Code Coverage reports.*/

@@ -125,6 +125,6 @@ Please see the `LICENSE.md` files in the subfolders for more details.
  [travisci]: https://travis-ci.org/mannodermaus/android-junit5
  [as2issue]: https://github.com/mannodermaus/android-junit5/issues/19
  [jacoco]: http://www.eclemma.org/jacoco
- [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
+ [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots/de/mannodermaus/gradle/plugins
  [sampletests]: sample/src/test
  [licensefile]: LICENSE.md
