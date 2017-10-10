@@ -66,14 +66,14 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
             // and the Launcher-related dependencies
             // on the runtime classpath
             def platformVersion = junitExtension.platformVersion
-            deps.add(project.dependencies.create("org.junit.platform:junit-platform-launcher:${platformVersion}"))
-            deps.add(project.dependencies.create("org.junit.platform:junit-platform-console:${platformVersion}"))
+            deps.add(project.dependencies.create("org.junit.platform:junit-platform-launcher:$platformVersion"))
+            deps.add(project.dependencies.create("org.junit.platform:junit-platform-console:$platformVersion"))
 
             def jupiterVersion = junitExtension.jupiterVersion
-            deps.add(project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}"))
+            deps.add(project.dependencies.create("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"))
 
             def vintageVersion = junitExtension.vintageVersion
-            deps.add(project.dependencies.create("org.junit.vintage:junit-vintage-engine:${vintageVersion}"))
+            deps.add(project.dependencies.create("org.junit.vintage:junit-vintage-engine:$vintageVersion"))
         }
 
         // Configure dependency handlers
@@ -84,8 +84,8 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
 
             return [
                     project.dependencies.create("junit:junit:4.12"),
-                    project.dependencies.create("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"),
-                    project.dependencies.create("org.junit.platform:junit-platform-engine:${platformVersion}"),
+                    project.dependencies.create("org.junit.jupiter:junit-jupiter-api:$jupiterVersion"),
+                    project.dependencies.create("org.junit.platform:junit-platform-engine:$platformVersion"),
 
                     // Only needed to run tests in an Android Studio that bundles an older version
                     // (see also http://junit.org/junit5/docs/current/user-guide/#running-tests-ide-intellij-idea)
@@ -99,7 +99,7 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
         project.dependencies.ext.junit5Params = {
             def jupiterVersion = junitExtension.jupiterVersion
 
-            return project.dependencies.create("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
+            return project.dependencies.create("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
         }
 
         project.afterEvaluate {
