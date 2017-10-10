@@ -20,6 +20,9 @@ targetCompatibility = JavaVersion.VERSION_1_6
 // Dependency Definitions
 // This module exports a "fat JAR" containing embedded JARs from IntelliJ IDEA,
 // using a shadowed JAR that overrides the default build artifact.
+//
+// Path to this JAR inside an IntelliJ IDEA package:
+// "plugins/junit/lib/junit5-rt.jar"
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
@@ -31,7 +34,7 @@ shadowJar {
   classifier = null
 }
 
-build.doLast { shadowJar.execute() }
+build.finalizedBy shadowJar
 
 // ------------------------------------------------------------------------------------------------
 // Deployment Setup
