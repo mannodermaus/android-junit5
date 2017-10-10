@@ -27,6 +27,9 @@ dependencies {
 
     // (Optional) If you need "parameterized tests"
     testImplementation junit5Params()
+    
+    // (Optional) For running tests inside Android Studio 3.x
+    testCompileOnly junit5EmbeddedRuntime()
 }
 ```
 
