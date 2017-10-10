@@ -11,7 +11,7 @@ buildscript {
 
     dependencies {
         //noinspection GradleDynamicVersion
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.0.1-SNAPSHOT"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.10"
         classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
     }
 }
@@ -29,7 +29,7 @@ android {
     // & the plugin's AndroidJUnitPlatformSpec, too
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample_robolectric"
@@ -51,5 +51,5 @@ dependencies {
     testCompile "junit:junit:$junit4Version"
     testCompile "org.robolectric:robolectric:$robolectricVersion"
     testCompile "org.mockito:mockito-all:$mockitoVersion"
-    testCompile "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.0-RC3-rev1"
+    testCompile "de.mannodermaus.gradle.plugins:android-junit5-embedded-runtime:1.0.10"
 }
