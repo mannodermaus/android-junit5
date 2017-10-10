@@ -29,7 +29,7 @@ android {
     // & the plugin's AndroidJUnitPlatformSpec, too
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample"
