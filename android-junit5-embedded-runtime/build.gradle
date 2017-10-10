@@ -13,9 +13,6 @@ apply plugin: "maven-publish"
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "com.jfrog.bintray"
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
-
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
 // This module exports a "fat JAR" containing embedded JARs from IntelliJ IDEA,
