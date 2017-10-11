@@ -80,6 +80,29 @@ dependencies {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Resource Processing
+// ------------------------------------------------------------------------------------------------
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+// Replace tokens in the "versions.properties" resource file
+processResources {
+  def versions = [
+      ANDROID_JUNIT5_VERSION: VERSION_NAME,
+      JUNIT4_VERSION: JUNIT4_VERSION,
+      JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
+      JUNIT_JUPITER_VERSION: JUNIT_JUPITER_VERSION,
+      JUNIT_VINTAGE_VERSION: JUNIT_VINTAGE_VERSION
+  ]
+
+  inputs.properties(versions)
+  from(sourceSets.main.resources.srcDirs) {
+    include '**/versions.properties'
+    filter(ReplaceTokens, tokens: versions)
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Deployment Setup
 //
 // Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.

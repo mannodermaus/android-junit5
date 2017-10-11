@@ -10,24 +10,17 @@ import org.junit.platform.gradle.plugin.JUnitPlatformExtension
  * This extends the functionality available through JUnitPlatformExtension*/
 class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
-  private static final String PLATFORM_VERSION = "1.0.1"
-
   AndroidJUnitPlatformExtension(Project project) {
     super(project)
-    platformVersion = PLATFORM_VERSION
   }
 
   /**
    * The version of JUnit Jupiter to use.*/
-  String jupiterVersion = "5.0.1"
+  String jupiterVersion
 
   /**
    * The version of JUnit Vintage Engine to use.*/
-  String vintageVersion = "4.12.1"
-
-  /**
-   * The version of the JUnit 5 Embedded Runtime to use.*/
-  String embeddedRuntimeVersion = "1.0.10"
+  String vintageVersion
 
   /**
    * Configuration of Jacoco Code Coverage reports.*/
