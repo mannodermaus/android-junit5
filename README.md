@@ -2,15 +2,15 @@
 
 [![Travis Build Status](https://travis-ci.org/mannodermaus/android-junit5.svg?branch=master)][travisci]
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] unit tests in Android environments.
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments.
 
 ## Download
 
 ```groovy
 buildscript {
-    dependencies {
-        classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.10"
-    }
+  dependencies {
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.10"
+  }
 }
 ```
 
@@ -23,13 +23,13 @@ apply plugin: "com.android.application"
 apply plugin: "de.mannodermaus.android-junit5"
 
 dependencies {
-    testImplementation junit5()
+  testImplementation junit5()
 
-    // (Optional) If you need "parameterized tests"
-    testImplementation junit5Params()
+  // (Optional) If you need "parameterized tests"
+  testImplementation junit5Params()
     
-    // (Optional) For running tests inside Android Studio 3.x
-    testCompileOnly junit5EmbeddedRuntime()
+  // (Optional) For running tests inside Android Studio 3.x (see below for details)
+  testCompileOnly junit5EmbeddedRuntime()
 }
 ```
 
@@ -72,10 +72,10 @@ provided by a more recent build of IntelliJ, overriding the one embedded in Andr
 To use this, add the following line alongside the other `junit5()` dependencies:
 
 ```groovy
-testCompileOnly junit5EmbeddedRuntime()
+dependencies {
+  testCompileOnly junit5EmbeddedRuntime()
+}
 ```
-
-*As mentioned above, this will **only** fix Test Execution from Android Studio 3.*
 
 ## Extras
 
@@ -87,10 +87,10 @@ However, there are some additional properties that you can apply:
 
 ```groovy
 junitPlatform {
-    // The JUnit Jupiter dependency version to use; matches the platform's version by default
-    jupiterVersion "5.0.1"
-    // The JUnit Vintage Engine dependency version to use; matches the platform's version by default
-    vintageVersion "4.12.1"
+  // The JUnit Jupiter dependency version to use; matches the platform's version by default
+  jupiterVersion "5.0.1"
+  // The JUnit Vintage Engine dependency version to use; matches the platform's version by default
+  vintageVersion "4.12.1"
 }
 ```
 
@@ -105,6 +105,8 @@ You can however customize the reports JaCoCo should generate.
 Configuration is applied through the `jacoco` clause inside the plugin's DSL:
 
 ```groovy
+apply plugin: "jacoco"
+
 junitPlatform {
   jacoco {
     csvReport true
