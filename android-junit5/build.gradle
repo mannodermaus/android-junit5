@@ -1,8 +1,53 @@
 apply plugin: "groovy"
+apply plugin: "java-gradle-plugin"
 apply plugin: "idea"
 apply plugin: "maven"
 apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
+
+// ------------------------------------------------------------------------------------------------
+// Plugin Resource Setup
+//
+// This block generates required resource files
+// that provide additional configuration to the plugin.
+// This includes setting up the plugin identifiers
+// with which the plugin can be applied to consumer projects,
+// as well as the population of marker tokens inside
+// the versions.properties resource file.
+// ------------------------------------------------------------------------------------------------
+
+final def pluginClassName = "de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin"
+
+gradlePlugin {
+  plugins {
+    shortIdentifier {
+      id = "android-junit5"
+      implementationClass = pluginClassName
+    }
+    longIdentifier {
+      id = "de.mannodermaus.android-junit5"
+      implementationClass = pluginClassName
+    }
+  }
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+processResources {
+  def versions = [
+      ANDROID_JUNIT5_VERSION: VERSION_NAME,
+      JUNIT4_VERSION: JUNIT4_VERSION,
+      JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
+      JUNIT_JUPITER_VERSION: JUNIT_JUPITER_VERSION,
+      JUNIT_VINTAGE_VERSION: JUNIT_VINTAGE_VERSION
+  ]
+
+  inputs.properties(versions)
+  from(sourceSets.main.resources.srcDirs) {
+    include '**/versions.properties'
+    filter(ReplaceTokens, tokens: versions)
+  }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Test Setup
@@ -77,29 +122,6 @@ dependencies {
   testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
   testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
   testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-}
-
-// ------------------------------------------------------------------------------------------------
-// Resource Processing
-// ------------------------------------------------------------------------------------------------
-
-import org.apache.tools.ant.filters.ReplaceTokens
-
-// Replace tokens in the "versions.properties" resource file
-processResources {
-  def versions = [
-      ANDROID_JUNIT5_VERSION: VERSION_NAME,
-      JUNIT4_VERSION: JUNIT4_VERSION,
-      JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
-      JUNIT_JUPITER_VERSION: JUNIT_JUPITER_VERSION,
-      JUNIT_VINTAGE_VERSION: JUNIT_VINTAGE_VERSION
-  ]
-
-  inputs.properties(versions)
-  from(sourceSets.main.resources.srcDirs) {
-    include '**/versions.properties'
-    filter(ReplaceTokens, tokens: versions)
-  }
 }
 
 // ------------------------------------------------------------------------------------------------
