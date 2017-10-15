@@ -54,7 +54,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
 > in the same way. Therefore, please resort to using Gradle for unit testing in Android Studio 2.
 
 
-All versions up to and including **Android Studio 3.0 Beta 7** are built
+All versions up to and including **Android Studio 3.0 RC 1** are built
 on a version of IntelliJ IDEA that depends on outdated JUnit 5 APIs.
 Therefore, your tests will fail with an Exception similar to the following when you try to
 launch your tests from inside the IDE (using an *Android JUnit* Run Configuration):
