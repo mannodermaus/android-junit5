@@ -30,7 +30,8 @@ abstract class BasePluginSpec extends Specification {
   // recreated for each executed test case
   private Project testRoot
 
-  /** Before Each **/
+  /* Before Each **/
+
   def setup() {
     testRoot = factory.newRootProject()
   }
