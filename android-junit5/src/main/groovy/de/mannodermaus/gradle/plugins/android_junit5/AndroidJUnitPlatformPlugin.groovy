@@ -13,9 +13,11 @@ import org.gradle.api.ProjectConfigurationException
 import org.gradle.util.GradleVersion
 import org.junit.platform.gradle.plugin.*
 
-/**
+/*
  * Android JUnit Platform plugin for Gradle.
- * Configures JUnit 5 tasks on all variants of an Android project.*/
+ * Configures JUnit 5 tasks on all variants of an Android project.
+ */
+
 @SuppressWarnings("GrMethodMayBeStatic")
 class AndroidJUnitPlatformPlugin implements Plugin<Project> {
 
@@ -40,22 +42,17 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
   static final String JUNIT_VINTAGE_VERSION_PROP = "junitVintageVersion"
   static final String JUNIT4_VERSION_PROP = "junit4Version"
 
-  /**
-   * This method doesn't call through to super.apply().
-   * This is intentional, and prevents clashing between our Android-specific extension
-   * & the junit-platform one.*/
   @Override
   void apply(Project project) {
+    if (GradleVersion.current() < GradleVersion.version(MIN_REQUIRED_GRADLE_VERSION)) {
+      throw new GradleException(
+          "android-junit5 plugin requires Gradle version $MIN_REQUIRED_GRADLE_VERSION or higher")
+    }
+
     // Validate that an Android plugin is applied
     if (!isAndroidProject(project)) {
       throw new ProjectConfigurationException(
           "The android or android-library plugin must be applied to this project", null)
-    }
-
-    // configuration.defaultDependencies used below was introduced in Gradle 2.5
-    if (GradleVersion.current() < GradleVersion.version(MIN_REQUIRED_GRADLE_VERSION)) {
-      throw new GradleException(
-          "android-junit5 plugin requires Gradle version $MIN_REQUIRED_GRADLE_VERSION or higher")
     }
 
     configureExtensions(project)
@@ -66,8 +63,10 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     }
   }
 
-  /**
-   * Read the content of the versions configuration file & return its properties.*/
+  /*
+   * Read the content of the versions configuration file & return its properties.
+   */
+
   private static def readVersionsFromProperties() {
     Properties properties = new Properties()
     def stream = AndroidJUnitPlatformPlugin.class.getResourceAsStream(VERSIONS_PROP_RESOURCE_NAME)
@@ -75,8 +74,10 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     return properties
   }
 
-  /**
-   * Configures the exposed extensions for JUnit 5 customization on the given project.*/
+  /*
+   * Configures the exposed extensions for JUnit 5 customization on the given project.
+   */
+
   private def configureExtensions(Project project) {
     // Construct the platform extension (use our Android variant of the Extension class though)
     def junit5 = project.extensions.create(EXTENSION_NAME, AndroidJUnitPlatformExtension, project)
@@ -89,8 +90,10 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     return junit5
   }
 
-  /**
-   * Configures the required dependencies for JUnit 5 on the given project.*/
+  /*
+   * Configures the required dependencies for JUnit 5 on the given project.
+   */
+
   private def configureDependencies(Project project) {
     // Fallback versions read from a configuration file,
     // used whenever no explicit version is present
@@ -99,9 +102,11 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     createDependencyHandlers(project, defaultVersions)
   }
 
-  /**
+  /*
    * Add required JUnit Platform dependencies to a custom configuration that
-   * will later be used to create the classpath for the custom task created by this plugin.*/
+   * will later be used to create the classpath for the custom task created by this plugin.
+   */
+
   private def createConfiguration(Project project, Properties defaultVersions) {
     def junit5 = project.extensions.getByName(EXTENSION_NAME) as AndroidJUnitPlatformExtension
 
@@ -129,14 +134,16 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     }
   }
 
-  /**
+  /*
    * Add custom dependency handlers, providing convenience for users seeking to include
    * all relevant JUnit 5 dependencies at once.
    *
    * This adds the following handlers:
    * - junit5()
    * - junit5Params()
-   * - junit5EmbeddedRuntime()*/
+   * - junit5EmbeddedRuntime()
+   */
+
   private def createDependencyHandlers(Project project, Properties defaultVersions) {
     def junit5 = project.extensions.getByName(EXTENSION_NAME) as AndroidJUnitPlatformExtension
 
@@ -180,8 +187,8 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     }
   }
 
-  /**
-   * Add relevant JUnit 5 tasks for test execution & coverage reports to the given project.*/
+  /* Add relevant JUnit 5 tasks for test execution & coverage reports to the given project. */
+
   private def configureTasks(Project project) {
     // Add the test task to each of the project's unit test variants,
     // and connect a Code Coverage report to it if Jacoco is enabled.

@@ -23,16 +23,15 @@ android {
   // A Note to my forgetful self:
   //
   // When updating these values, make sure
-  // to always update the Travis CI .yml config
-  // & the plugin's AndroidJUnitPlatformSpec, too
+  // to always update the Travis CI .yml config, too
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  compileSdkVersion 26
-  buildToolsVersion "26.0.2"
+  compileSdkVersion COMPILE_SDK_VERSION
+  buildToolsVersion BUILD_TOOLS_VERSION
 
   defaultConfig {
     applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample"
-    minSdkVersion 15
-    targetSdkVersion 26
+    minSdkVersion MIN_SDK_VERSION
+    targetSdkVersion TARGET_SDK_VERSION
     versionCode 1
     versionName "1.0"
   }
@@ -42,8 +41,8 @@ android {
   }
   
   compileOptions {
-    targetCompatibility 1.8
-    sourceCompatibility 1.8
+    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_8
   }
 }
 

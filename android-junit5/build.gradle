@@ -36,18 +36,49 @@ gradlePlugin {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
-  def versions = [ANDROID_JUNIT5_VERSION: VERSION_NAME,
-                  JUNIT4_VERSION        : JUNIT4_VERSION,
-                  JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
-                  JUNIT_JUPITER_VERSION : JUNIT_JUPITER_VERSION,
-                  JUNIT_VINTAGE_VERSION : JUNIT_VINTAGE_VERSION]
+  def tokens = [ANDROID_JUNIT5_VERSION: VERSION_NAME,
+                JUNIT4_VERSION        : JUNIT4_VERSION,
+                JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
+                JUNIT_JUPITER_VERSION : JUNIT_JUPITER_VERSION,
+                JUNIT_VINTAGE_VERSION : JUNIT_VINTAGE_VERSION]
 
-  inputs.properties(versions)
+  inputs.properties(tokens)
+
   from(sourceSets.main.resources.srcDirs) {
     include '**/versions.properties'
-    filter(ReplaceTokens, tokens: versions)
+    filter(ReplaceTokens, tokens: tokens)
   }
 }
+
+processTestResources {
+  def tokens = [COMPILE_SDK_VERSION: COMPILE_SDK_VERSION,
+                BUILD_TOOLS_VERSION: BUILD_TOOLS_VERSION,
+                MIN_SDK_VERSION    : MIN_SDK_VERSION,
+                TARGET_SDK_VERSION : TARGET_SDK_VERSION]
+
+  inputs.properties(tokens)
+
+  from(sourceSets.test.resources.srcDirs) {
+    include '**/testenv.properties'
+    filter(ReplaceTokens, tokens: tokens)
+  }
+}
+
+// https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
+// Write the plugin's classpath to a file to share with the tests
+task createTestClasspathManifest {
+  def outputDir = file("$buildDir/resources/test")
+
+  inputs.files sourceSets.main.runtimeClasspath
+  outputs.dir outputDir
+
+  doLast {
+    outputDir.mkdirs()
+    file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
+  }
+}
+
+processTestResources.finalizedBy createTestClasspathManifest
 
 // ------------------------------------------------------------------------------------------------
 // Test Setup
@@ -98,6 +129,7 @@ idea {
   module {
     testSourceDirs += file(srcRoot2x)
     testSourceDirs += file(srcRoot3x)
+    scopes.TEST.plus += [configurations.testAgp2xCompile, configurations.testAgp3xCompile]
   }
 }
 
