@@ -21,8 +21,6 @@ class AndroidJUnit5JacocoReport extends JacocoReport {
     return "Generates Jacoco coverage reports for the ${variant.name.capitalize()} variant."
   }
 
-  /**
-   * ConfigAction for a Jacoco task.*/
   static class ConfigAction implements TaskConfigAction<AndroidJUnit5JacocoReport> {
 
     private static final String TASK_NAME_DEFAULT = "jacocoTestReport"

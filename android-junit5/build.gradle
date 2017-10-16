@@ -4,6 +4,7 @@ apply plugin: "idea"
 apply plugin: "maven"
 apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
+apply plugin: "jacoco"
 
 // ------------------------------------------------------------------------------------------------
 // Plugin Resource Setup
@@ -16,7 +17,8 @@ apply plugin: "com.jfrog.bintray"
 // the versions.properties resource file.
 // ------------------------------------------------------------------------------------------------
 
-final def pluginClassName = "de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin"
+final def pluginClassName =
+    "de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin"
 
 gradlePlugin {
   plugins {
@@ -34,20 +36,49 @@ gradlePlugin {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
-  def versions = [
-      ANDROID_JUNIT5_VERSION: VERSION_NAME,
-      JUNIT4_VERSION: JUNIT4_VERSION,
-      JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
-      JUNIT_JUPITER_VERSION: JUNIT_JUPITER_VERSION,
-      JUNIT_VINTAGE_VERSION: JUNIT_VINTAGE_VERSION
-  ]
+  def tokens = [ANDROID_JUNIT5_VERSION: VERSION_NAME,
+                JUNIT4_VERSION        : JUNIT4_VERSION,
+                JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
+                JUNIT_JUPITER_VERSION : JUNIT_JUPITER_VERSION,
+                JUNIT_VINTAGE_VERSION : JUNIT_VINTAGE_VERSION]
 
-  inputs.properties(versions)
+  inputs.properties(tokens)
+
   from(sourceSets.main.resources.srcDirs) {
     include '**/versions.properties'
-    filter(ReplaceTokens, tokens: versions)
+    filter(ReplaceTokens, tokens: tokens)
   }
 }
+
+processTestResources {
+  def tokens = [COMPILE_SDK_VERSION: COMPILE_SDK_VERSION,
+                BUILD_TOOLS_VERSION: BUILD_TOOLS_VERSION,
+                MIN_SDK_VERSION    : MIN_SDK_VERSION,
+                TARGET_SDK_VERSION : TARGET_SDK_VERSION]
+
+  inputs.properties(tokens)
+
+  from(sourceSets.test.resources.srcDirs) {
+    include '**/testenv.properties'
+    filter(ReplaceTokens, tokens: tokens)
+  }
+}
+
+// https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
+// Write the plugin's classpath to a file to share with the tests
+task createTestClasspathManifest {
+  def outputDir = file("$buildDir/resources/test")
+
+  inputs.files sourceSets.main.runtimeClasspath
+  outputs.dir outputDir
+
+  doLast {
+    outputDir.mkdirs()
+    file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
+  }
+}
+
+processTestResources.finalizedBy createTestClasspathManifest
 
 // ------------------------------------------------------------------------------------------------
 // Test Setup
@@ -57,6 +88,11 @@ processResources {
 // To achieve this, several new source sets & configurations for each branch are created here,
 // which are derived from the common "test" scope.
 // ------------------------------------------------------------------------------------------------
+
+final def srcRoot2x = "src/testAgp2x/groovy"
+final def srcRoot3x = "src/testAgp3x/groovy"
+final def jacocoData2x = "$buildDir/jacoco/testAgp2x.exec"
+final def jacocoData3x = "$buildDir/jacoco/testAgp3x.exec"
 
 configurations {
   testAgp2xCompile {
@@ -69,14 +105,14 @@ configurations {
 
 sourceSets {
   testAgp2x {
-    java.srcDir "src/testAgp2x/groovy"
+    java.srcDir srcRoot2x
     compileClasspath += sourceSets.main.output
     runtimeClasspath += sourceSets.main.output
     compileClasspath += sourceSets.test.output
     runtimeClasspath += sourceSets.test.output
   }
   testAgp3x {
-    java.srcDir "src/testAgp3x/groovy"
+    java.srcDir srcRoot3x
     compileClasspath += sourceSets.main.output
     runtimeClasspath += sourceSets.main.output
     compileClasspath += sourceSets.test.output
@@ -84,10 +120,16 @@ sourceSets {
   }
 }
 
+jacocoTestReport {
+  additionalSourceDirs = files(srcRoot2x, srcRoot3x)
+  executionData = files(jacocoData2x, jacocoData3x)
+}
+
 idea {
   module {
-    testSourceDirs += file("src/testAgp2x/groovy")
-    testSourceDirs += file("src/testAgp3x/groovy")
+    testSourceDirs += file(srcRoot2x)
+    testSourceDirs += file(srcRoot3x)
+    scopes.TEST.plus += [configurations.testAgp2xCompile, configurations.testAgp3xCompile]
   }
 }
 
@@ -104,8 +146,7 @@ task testAgp3x(type: Test) {
 }
 
 // Combine all tests when executing the main JUnit task
-tasks.getByName("test").dependsOn(testAgp2x,
-    testAgp3x)
+tasks.getByName("test").dependsOn(testAgp2x, testAgp3x)
 
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions

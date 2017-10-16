@@ -12,6 +12,7 @@
         <list>
           <option value=":android-junit5:clean" />
           <option value=":android-junit5:test" />
+          <option value=":android-junit5:jacocoTestReport" />
         </list>
       </option>
       <option name="vmOptions" value="" />

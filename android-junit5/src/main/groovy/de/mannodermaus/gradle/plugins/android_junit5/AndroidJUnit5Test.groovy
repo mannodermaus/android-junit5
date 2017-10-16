@@ -15,11 +15,13 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.junit.platform.console.ConsoleLauncher
 
-/**
+/*
  * Task class used for unit tests driven by JUnit 5.
  * Its API mimics the Android Gradle Plugin's {@link AndroidUnitTest}
  * pretty closely, and it takes advantage of the efforts related to
- * classpath construction prevalent in the platform's default implementation.*/
+ * classpath construction prevalent in the platform's default implementation.
+ */
+
 class AndroidJUnit5Test extends JavaExec {
 
   FileCollection resCollection
@@ -53,8 +55,6 @@ class AndroidJUnit5Test extends JavaExec {
     return project.tasks.create(configAction.getName(), configAction.getType(), configAction)
   }
 
-  /**
-   * ConfigAction for a JUnit 5 task.*/
   static class ConfigAction implements TaskConfigAction<AndroidJUnit5Test> {
 
     private static final String TASK_NAME_DEFAULT = "junitPlatformTest"
@@ -225,44 +225,27 @@ class AndroidJUnit5Test extends JavaExec {
     }
 
     private void addFilters(filters, args) {
-      filters.includeClassNamePatterns.each { pattern -> args.addAll(["-n", pattern])
-      }
-      filters.excludeClassNamePatterns.each { pattern -> args.addAll(['-N', pattern])
-      }
-      filters.packages.include.each {
-        includedPackage -> args.addAll(["--include-package", includedPackage])
-      }
-      filters.packages.exclude.each {
-        excludedPackage -> args.addAll(["--exclude-package", excludedPackage])
-      }
-      filters.tags.include.each { tag -> args.addAll(["-t", tag])
-      }
-      filters.tags.exclude.each { tag -> args.addAll(["-T", tag])
-      }
-      filters.engines.include.each { engineId -> args.addAll(["-e", engineId])
-      }
-      filters.engines.exclude.each { engineId -> args.addAll(["-E", engineId])
-      }
+      filters.includeClassNamePatterns.each { args.addAll(["-n", it]) }
+      filters.excludeClassNamePatterns.each { args.addAll(['-N', it]) }
+      filters.packages.include.each { args.addAll(["--include-package", it]) }
+      filters.packages.exclude.each { args.addAll(["--exclude-package", it]) }
+      filters.tags.include.each { args.addAll(["-t", it]) }
+      filters.tags.exclude.each { args.addAll(["-T", it]) }
+      filters.engines.include.each { args.addAll(["-e", it]) }
+      filters.engines.exclude.each { args.addAll(["-E", it]) }
     }
 
     private void addSelectors(project, selectors, testRootDirs, args) {
       if (selectors.empty) {
         args.addAll(["--scan-class-path", testRootDirs.join(File.pathSeparator)])
       } else {
-        selectors.uris.each { uri -> args.addAll(["-u", uri])
-        }
-        selectors.files.each { file -> args.addAll(["-f", file])
-        }
-        selectors.directories.each { directory -> args.addAll(["-d", directory])
-        }
-        selectors.packages.each { aPackage -> args.addAll(["-p", aPackage])
-        }
-        selectors.classes.each { aClass -> args.addAll(["-c", aClass])
-        }
-        selectors.methods.each { method -> args.addAll(["-m", method])
-        }
-        selectors.resources.each { resource -> args.addAll(["-r", resource])
-        }
+        selectors.uris.each { args.addAll(["-u", it]) }
+        selectors.files.each { args.addAll(["-f", it]) }
+        selectors.directories.each { args.addAll(["-d", it]) }
+        selectors.packages.each { args.addAll(["-p", it]) }
+        selectors.classes.each { args.addAll(["-c", it]) }
+        selectors.methods.each { args.addAll(["-m", it]) }
+        selectors.resources.each { args.addAll(["-r", it]) }
       }
     }
   }
