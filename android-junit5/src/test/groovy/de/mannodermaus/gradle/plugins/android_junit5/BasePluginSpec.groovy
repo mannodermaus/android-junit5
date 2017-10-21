@@ -277,7 +277,7 @@ abstract class BasePluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
 
-  def "Presence of Kotlin plugin will add a dedicated Test Root Directory"() {
+  def "Application: Kotlin Integration"() {
     when:
     def project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -286,12 +286,46 @@ abstract class BasePluginSpec extends Specification {
         .buildAndEvaluate()
 
     then:
-    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5Test
-    def debugClasspath = runDebug.args[runDebug.args.indexOf("--scan-class-path") + 1]
-    assert debugClasspath.contains("/build/tmp/kotlin-classes/debugUnitTest")
+    project.tasks.getByName("copyKotlinUnitTestClassesDebug")
+    project.tasks.getByName("copyKotlinUnitTestClassesRelease")
+  }
 
-    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5Test
-    def releaseClasspath = runRelease.args[runRelease.args.indexOf("--scan-class-path") + 1]
-    assert releaseClasspath.contains("/build/tmp/kotlin-classes/releaseUnitTest")
+  def "Library: Kotlin Integration"() {
+    when:
+    def project = factory.newProject(rootProject())
+        .asAndroidLibrary()
+        .applyJunit5Plugin()
+        .applyKotlinPlugin()
+        .buildAndEvaluate()
+
+    then:
+    project.tasks.getByName("copyKotlinUnitTestClassesDebug")
+    project.tasks.getByName("copyKotlinUnitTestClassesRelease")
+  }
+
+  def "Application: Kotlin Tasks not added if plugin absent"() {
+    when:
+    def project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .applyKotlinPlugin(false)
+        .buildAndEvaluate()
+
+    then:
+    project.tasks.findByName("copyKotlinUnitTestClassesDebug") == null
+    project.tasks.findByName("copyKotlinUnitTestClassesRelease") == null
+  }
+
+  def "Library: Kotlin Tasks not added if plugin absent"() {
+    when:
+    def project = factory.newProject(rootProject())
+        .asAndroidLibrary()
+        .applyJunit5Plugin()
+        .applyKotlinPlugin(false)
+        .buildAndEvaluate()
+
+    then:
+    project.tasks.findByName("copyKotlinUnitTestClassesDebug") == null
+    project.tasks.findByName("copyKotlinUnitTestClassesRelease") == null
   }
 }

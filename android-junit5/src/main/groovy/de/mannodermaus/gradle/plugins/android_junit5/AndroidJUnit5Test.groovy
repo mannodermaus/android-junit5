@@ -117,10 +117,6 @@ class AndroidJUnit5Test extends JavaExec {
                           // e.g. "build/intermediates/classes/test/debug/..."
                           variant.unitTestVariant.variantData.scope.javaOutputDir]
 
-      if (config.kotlinPluginApplied) {
-        testRootDirs += "$project.buildDir/tmp/kotlin-classes/${variant.name}UnitTest"
-      }
-
       project.logger.info(
           "$AndroidJUnitPlatformPlugin.LOG_TAG: Assembled JUnit 5 Task '$task.name':")
       testRootDirs.each {

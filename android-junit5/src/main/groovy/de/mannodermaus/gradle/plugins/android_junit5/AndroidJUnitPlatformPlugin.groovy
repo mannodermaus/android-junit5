@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.android_junit5
 import com.android.build.gradle.api.BaseVariant
 import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoExtension
 import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.android_junit5.kotlin.AndroidJUnit5CopyKotlin
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -198,12 +199,17 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
     def testVariants = project.android[allVariants].findAll { it.hasProperty("unitTestVariant") }
 
     def isJacocoApplied = projectConfig.jacocoPluginApplied
+    def isKotlinApplied = projectConfig.kotlinPluginApplied
 
     testVariants.each { variant ->
       def testTask = AndroidJUnit5Test.create(projectConfig, variant as BaseVariant)
 
       if (isJacocoApplied) {
         AndroidJUnit5JacocoReport.create(project, testTask)
+      }
+
+      if (isKotlinApplied) {
+        AndroidJUnit5CopyKotlin.create(project, testTask)
       }
     }
   }
