@@ -5,7 +5,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.10"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.11"
     classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
   }
@@ -50,20 +50,4 @@ dependencies {
   testImplementation junit5()
   testImplementation junit5Params()
   testCompileOnly junit5EmbeddedRuntime()
-}
-
-// IJ doesn't recognize Kotlin test classes properly,
-// so we copy them over manually
-
-afterEvaluate {
-  android.buildTypes.all {
-    def name = it.name
-
-    def copyTask = project.task(type: Copy, "copyKotlin${name.capitalize()}UnitTestClasses") {
-      from "build/tmp/kotlin-classes/${name}UnitTest"
-      into "build/intermediates/classes/test/$name"
-    }
-
-    project.tasks.getByName("compile${name.capitalize()}UnitTestSources").finalizedBy copyTask
-  }
 }
