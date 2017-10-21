@@ -9,7 +9,7 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in An
 ```groovy
 buildscript {
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.10"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.11"
   }
 }
 ```
