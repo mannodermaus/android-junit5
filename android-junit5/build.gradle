@@ -160,6 +160,7 @@ dependencies {
 
   testCompile "junit:junit:$JUNIT4_VERSION"
   testCompile "org.spockframework:spock-core:$SPOCK_VERSION"
+  testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
   testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
   testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
   testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"

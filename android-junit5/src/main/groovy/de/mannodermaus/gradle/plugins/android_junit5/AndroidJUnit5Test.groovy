@@ -50,9 +50,9 @@ class AndroidJUnit5Test extends JavaExec {
     return assetsCollection
   }
 
-  static AndroidJUnit5Test create(Project project, BaseVariant variant) {
-    def configAction = new ConfigAction(project, variant)
-    return project.tasks.create(configAction.getName(), configAction.getType(), configAction)
+  static AndroidJUnit5Test create(ProjectConfig config, BaseVariant variant) {
+    def configAction = new ConfigAction(config, variant)
+    return config.project.tasks.create(configAction.getName(), configAction.getType(), configAction)
   }
 
   static class ConfigAction implements TaskConfigAction<AndroidJUnit5Test> {
@@ -60,12 +60,14 @@ class AndroidJUnit5Test extends JavaExec {
     private static final String TASK_NAME_DEFAULT = "junitPlatformTest"
     private static final String TASK_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 
+    private final ProjectConfig config
     private final Project project
     private final BaseVariant variant
     private final VariantScope scope
 
-    ConfigAction(Project project, BaseVariant variant) {
-      this.project = project
+    ConfigAction(ProjectConfig config, BaseVariant variant) {
+      this.config = config
+      this.project = config.project
       this.variant = variant
       this.scope = variant.variantData.scope
     }
@@ -114,6 +116,11 @@ class AndroidJUnit5Test extends JavaExec {
                           scope.javaOutputDir,
                           // e.g. "build/intermediates/classes/test/debug/..."
                           variant.unitTestVariant.variantData.scope.javaOutputDir]
+
+      if (config.kotlinPluginApplied) {
+        testRootDirs += "$project.buildDir/tmp/kotlin-classes/${variant.name}UnitTest"
+      }
+
       project.logger.info(
           "$AndroidJUnitPlatformPlugin.LOG_TAG: Assembled JUnit 5 Task '$task.name':")
       testRootDirs.each {

@@ -1,8 +1,5 @@
 package de.mannodermaus.gradle.plugins.android_junit5
 
-import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.LibraryPlugin
-import com.android.build.gradle.TestPlugin
 import com.android.build.gradle.api.BaseVariant
 import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoExtension
 import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoReport
@@ -42,6 +39,8 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
   static final String JUNIT_VINTAGE_VERSION_PROP = "junitVintageVersion"
   static final String JUNIT4_VERSION_PROP = "junit4Version"
 
+  private ProjectConfig projectConfig
+
   @Override
   void apply(Project project) {
     if (GradleVersion.current() < GradleVersion.version(MIN_REQUIRED_GRADLE_VERSION)) {
@@ -49,8 +48,10 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
           "android-junit5 plugin requires Gradle version $MIN_REQUIRED_GRADLE_VERSION or higher")
     }
 
+    this.projectConfig = new ProjectConfig(project)
+
     // Validate that an Android plugin is applied
-    if (!isAndroidProject(project)) {
+    if (!projectConfig.androidPluginApplied) {
       throw new ProjectConfigurationException(
           "The android or android-library plugin must be applied to this project", null)
     }
@@ -192,30 +193,18 @@ class AndroidJUnitPlatformPlugin implements Plugin<Project> {
   private def configureTasks(Project project) {
     // Add the test task to each of the project's unit test variants,
     // and connect a Code Coverage report to it if Jacoco is enabled.
-    def allVariants = isAndroidLibrary(project) ? "libraryVariants" : "applicationVariants"
+    def allVariants = projectConfig.androidLibraryPluginApplied ? "libraryVariants" :
+        "applicationVariants"
     def testVariants = project.android[allVariants].findAll { it.hasProperty("unitTestVariant") }
 
-    def isJacocoApplied = isJacocoPluginApplied(project)
+    def isJacocoApplied = projectConfig.jacocoPluginApplied
 
     testVariants.each { variant ->
-      def testTask = AndroidJUnit5Test.create(project, variant as BaseVariant)
+      def testTask = AndroidJUnit5Test.create(projectConfig, variant as BaseVariant)
 
       if (isJacocoApplied) {
         AndroidJUnit5JacocoReport.create(project, testTask)
       }
     }
-  }
-
-  private static boolean isAndroidProject(Project project) {
-    return project.plugins.findPlugin(AppPlugin.class) || project.plugins.findPlugin(
-        TestPlugin.class) || isAndroidLibrary(project)
-  }
-
-  private static boolean isAndroidLibrary(Project project) {
-    return project.plugins.findPlugin(LibraryPlugin.class)
-  }
-
-  private static boolean isJacocoPluginApplied(Project project) {
-    return project.plugins.findPlugin("jacoco")
   }
 }

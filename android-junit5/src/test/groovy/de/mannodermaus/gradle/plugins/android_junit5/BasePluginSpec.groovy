@@ -75,14 +75,14 @@ abstract class BasePluginSpec extends Specification {
 
     project.file("build.gradle").withWriter {
       it.write("""
-        buildscript {
-            dependencies {
-                classpath files($environment.pluginClasspath)
-            }
-        }
+          buildscript {
+              dependencies {
+                  classpath files($environment.pluginClasspathString)
+              }
+          }
 
-        apply plugin: "de.mannodermaus.android-junit5"
-""")
+          apply plugin: "de.mannodermaus.android-junit5"
+  """)
     }
 
     def result = GradleRunner.create()
@@ -275,5 +275,23 @@ abstract class BasePluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReport") == null
     project.tasks.findByName("jacocoTestReportDebug") == null
     project.tasks.findByName("jacocoTestReportRelease") == null
+  }
+
+  def "Presence of Kotlin plugin will add a dedicated Test Root Directory"() {
+    when:
+    def project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .applyKotlinPlugin()
+        .buildAndEvaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5Test
+    def debugClasspath = runDebug.args[runDebug.args.indexOf("--scan-class-path") + 1]
+    assert debugClasspath.contains("/build/tmp/kotlin-classes/debugUnitTest")
+
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5Test
+    def releaseClasspath = runRelease.args[runRelease.args.indexOf("--scan-class-path") + 1]
+    assert releaseClasspath.contains("/build/tmp/kotlin-classes/releaseUnitTest")
   }
 }

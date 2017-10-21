@@ -30,7 +30,13 @@ class TestEnvironment {
   final int targetSdkVersion
 
   // Plugin Classpath for Unit Tests based on Gradle TestKit
-  final String pluginClasspath
+  final List<File> pluginClasspathFiles
+  @Lazy String pluginClasspathString = {
+    pluginClasspathFiles
+        .collect { it.absolutePath.replace('\\', '\\\\') }
+        .collect { "'$it'" }
+        .join(", ")
+  }()
 
   TestEnvironment() {
     androidSdkFolder = loadAndroidSdkFolder()
@@ -41,7 +47,7 @@ class TestEnvironment {
     minSdkVersion = envProps.getProperty(MIN_SDK_PROP_NAME).toInteger()
     targetSdkVersion = envProps.getProperty(TARGET_SDK_PROP_NAME).toInteger()
 
-    pluginClasspath = loadPluginClasspath()
+    pluginClasspathFiles = loadPluginClasspath()
   }
 
   private File loadAndroidSdkFolder() {
@@ -67,17 +73,13 @@ class TestEnvironment {
     return envProps
   }
 
-  private String loadPluginClasspath() {
+  private List<File> loadPluginClasspath() {
     def pluginClasspathResource = getClass().getResource("/plugin-classpath.txt")
     if (pluginClasspathResource == null) {
       throw new IllegalStateException(
           "Did not find plugin classpath resource, run `testClasses` build task.")
     }
 
-    return pluginClasspathResource.readLines()
-        .collect { new File(it) }
-        .collect { it.absolutePath.replace('\\', '\\\\') }
-        .collect { "'$it'" }
-        .join(", ")
+    return pluginClasspathResource.readLines().collect { new File(it) }
   }
 }

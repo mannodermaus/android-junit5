@@ -37,6 +37,7 @@ class TestProjectFactory {
     private String appId = "com.example.android"
     private boolean applyJunit5Plugin = true
     private boolean applyJacocoPlugin = false
+    private boolean applyKotlinPlugin = false
 
     private TestProjectBuilder(Project parent, String name = null) {
       def builder = ProjectBuilder.builder().withParent(parent)
@@ -78,6 +79,11 @@ class TestProjectFactory {
       return this
     }
 
+    TestProjectBuilder applyKotlinPlugin(boolean state = true) {
+      applyKotlinPlugin = state
+      return this
+    }
+
     Project build() {
       // Write out required Android file structure
       project.file(".").mkdir()
@@ -105,6 +111,10 @@ class TestProjectFactory {
 
       if (applyJacocoPlugin) {
         project.apply plugin: "jacoco"
+      }
+
+      if (applyKotlinPlugin) {
+        project.apply plugin: "kotlin-android"
       }
 
       // Default configuration
