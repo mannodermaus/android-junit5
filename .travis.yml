@@ -26,9 +26,9 @@ after_success:
 - ./scripts/deploy_snapshot.sh
 
 after_failure:
-- cat /home/travis/build/mannodermaus/android-junit5/android-junit5/build/reports/tests/test/index.html
-- cat /home/travis/build/mannodermaus/android-junit5/android-junit5/build/reports/tests/testAgp2x/index.html
-- cat /home/travis/build/mannodermaus/android-junit5/android-junit5/build/reports/tests/testAgp3x/index.html
+- cat $TRAVIS_BUILD_DIR/android-junit5/build/reports/tests/test/index.html
+- cat $TRAVIS_BUILD_DIR/android-junit5/build/reports/tests/testAgp2x/index.html
+- cat $TRAVIS_BUILD_DIR/android-junit5/build/reports/tests/testAgp3x/index.html
 
 deploy:
   provider: script
