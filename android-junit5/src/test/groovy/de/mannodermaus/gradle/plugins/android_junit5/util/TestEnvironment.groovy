@@ -55,7 +55,7 @@ class TestEnvironment {
     File localPropsFile = new File(rootFile, ANDROID_SDK_FILE_NAME)
     if (!localPropsFile.exists()) {
       throw new AssertionError(
-          "'sdk.dir' couldn't be found. Either local.properties file in folder '${projectRoot.absolutePath}' is missing, " +
+          "'sdk.dir' couldn't be found. Either local.properties file in folder '${rootFile.absolutePath}' is missing, " +
               "or it doesn't include the required 'sdk.dir' statement!")
     }
     def sdkFolderProp = localPropsFile.readLines()
