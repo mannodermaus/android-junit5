@@ -67,6 +67,8 @@ class TestEnvironment {
               "it doesn't include the required 'sdk.dir' statement, " +
               "or there is no ANDROID_HOME environment variable!")
     }
+
+    return folder
   }
 
   @Nullable
