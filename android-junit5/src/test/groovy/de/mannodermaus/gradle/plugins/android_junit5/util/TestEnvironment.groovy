@@ -2,6 +2,8 @@ package de.mannodermaus.gradle.plugins.android_junit5.util
 
 import com.android.annotations.Nullable
 
+import static StringUtils.splitClasspath
+
 /*
  * Encapsulates environment properties related to running
  * Unit Tests that interface with an Android SDK installation.
@@ -35,10 +37,7 @@ class TestEnvironment {
   // Plugin Classpath for Unit Tests based on Gradle TestKit
   final List<File> pluginClasspathFiles
   @Lazy String pluginClasspathString = {
-    pluginClasspathFiles
-        .collect { it.absolutePath.replace('\\', '\\\\') }
-        .collect { "'$it'" }
-        .join(", ")
+    splitClasspath(pluginClasspathFiles)
   }()
 
   TestEnvironment() {

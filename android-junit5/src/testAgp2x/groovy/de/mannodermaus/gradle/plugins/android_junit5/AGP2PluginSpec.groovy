@@ -6,6 +6,7 @@ import org.gradle.api.Project
  * Unit testing the integration of JUnit 5
  * with the Android Gradle Plugin version 2.
  */
+
 class AGP2PluginSpec extends BasePluginSpec {
 
   def "Application: Custom Product Flavors"() {

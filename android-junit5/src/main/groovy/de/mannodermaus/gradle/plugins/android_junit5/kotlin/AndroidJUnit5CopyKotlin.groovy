@@ -45,7 +45,7 @@ class AndroidJUnit5CopyKotlin extends Copy {
     @Override
     void execute(AndroidJUnit5CopyKotlin copyTask) {
       copyTask.from "$project.buildDir/tmp/kotlin-classes/${variant.name}UnitTest"
-      copyTask.into "$project.buildDir/intermediates/classes/test/$variant.name"
+      copyTask.into "$project.buildDir/intermediates/classes/test/$variant.flavorName/$variant.buildType.name"
       copyTask.group = TASK_GROUP
 
       testTask.dependsOn copyTask
