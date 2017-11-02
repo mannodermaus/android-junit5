@@ -31,10 +31,14 @@ dependencies {
 shadowJar {
   // Remove '-all' suffix from the generated JAR
   classifier = null
+  version = VERSION_NAME
 }
 
-build.finalizedBy shadowJar
-publish.dependsOn shadowJar
+// Replace the default JAR task with the "shadow version",
+// to avoid accidentally overriding it with the empty, non-shadowed JAR
+// upon deploying a version to users via Bintray or Sonatype OSS
+jar.enabled = false
+jar.dependsOn shadowJar
 
 // ------------------------------------------------------------------------------------------------
 // Deployment Setup
@@ -83,8 +87,7 @@ def verifyJarNotEmpty = {
   // Manually verify that the JAR file isn't "empty"
   // before attempting the upload. This happens on accidental
   // upload attempts without first deploying the shadowJar.
-  def jarFileName = file("$buildDir/libs/${project.name}-${VERSION_NAME}.jar")
-  def jarFile = new JarFile(jarFileName)
+  def jarFile = new JarFile(shadowJar.archivePath)
   if (jarFile.getEntry("com") == null) {
     throw new AssertionError("The embedded-runtime JAR is empty!")
   }
@@ -106,7 +109,6 @@ project.configure(project) {
       }
     }
     publish.doFirst verifyJarNotEmpty
-
   } else {
     // Configure deployment of release versions to Bintray
     project.bintray {
