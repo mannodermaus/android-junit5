@@ -1,3 +1,5 @@
+import java.util.jar.JarFile
+
 buildscript {
   repositories {
     jcenter()
@@ -77,6 +79,17 @@ task copyPom(type: Copy) {
 
 publish.dependsOn copyPom
 
+def verifyJarNotEmpty = {
+  // Manually verify that the JAR file isn't "empty"
+  // before attempting the upload. This happens on accidental
+  // upload attempts without first deploying the shadowJar.
+  def jarFileName = file("$buildDir/libs/${project.name}-${VERSION_NAME}.jar")
+  def jarFile = new JarFile(jarFileName)
+  if (jarFile.getEntry("com") == null) {
+    throw new AssertionError("The embedded-runtime JAR is empty!")
+  }
+}
+
 project.configure(project) {
   if (project.version.endsWith("-SNAPSHOT")) {
     // Configure deployment of snapshot versions to Sonatype OSS
@@ -92,6 +105,8 @@ project.configure(project) {
         }
       }
     }
+    publish.doFirst verifyJarNotEmpty
+
   } else {
     // Configure deployment of release versions to Bintray
     project.bintray {
@@ -113,5 +128,7 @@ project.configure(project) {
         }
       }
     }
+
+    bintrayUpload.doFirst verifyJarNotEmpty
   }
 }
