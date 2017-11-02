@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.android_junit5
 import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.android_junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.android_junit5.util.TestProjectFactory
+import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.internal.plugins.PluginApplicationException
@@ -34,6 +35,10 @@ abstract class BasePluginSpec extends Specification {
 
   def setup() {
     testRoot = factory.newRootProject()
+  }
+
+  def cleanup() {
+    FileUtils.deleteDirectory(testRoot.rootDir)
   }
 
   protected final Project rootProject() {
