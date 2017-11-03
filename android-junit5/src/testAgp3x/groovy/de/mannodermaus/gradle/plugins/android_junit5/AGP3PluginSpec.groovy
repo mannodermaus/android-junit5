@@ -75,4 +75,31 @@ class AGP3PluginSpec extends BasePluginSpec {
     assert runAll.getDependsOn()
         .containsAll([runDebugFree, runDebugPaid, runReleaseFree, runReleasePaid])
   }
+
+  def "Feature: Basic Integration"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidFeature()
+        .applyJunit5Plugin()
+        .build()
+
+    project.android {
+      buildTypes {
+        staging {}
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    // These statements automatically assert the existence of the tasks,
+    // and raise an Exception if absent
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug")
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease")
+    def runStaging = project.tasks.getByName("junitPlatformTestStaging")
+    def runAll = project.tasks.getByName("junitPlatformTest")
+
+    // Assert that dependency chain is valid
+    assert runAll.getDependsOn().containsAll([runDebug, runRelease, runStaging])
+  }
 }

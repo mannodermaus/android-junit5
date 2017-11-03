@@ -28,7 +28,7 @@ class TestProjectFactory {
   class TestProjectBuilder {
 
     enum Type {
-      UNSET, APPLICATION, LIBRARY
+      UNSET, APPLICATION, LIBRARY, FEATURE
     }
 
     private final Project project
@@ -57,6 +57,15 @@ class TestProjectFactory {
       }
 
       projectType = Type.APPLICATION
+      return this
+    }
+
+    TestProjectBuilder asAndroidFeature() {
+      if (projectType != Type.UNSET) {
+        throw new IllegalArgumentException("Project type already set to $projectType")
+      }
+
+      projectType = Type.FEATURE
       return this
     }
 
@@ -98,6 +107,10 @@ class TestProjectFactory {
       switch (projectType) {
         case Type.APPLICATION:
           project.apply plugin: "com.android.application"
+          break
+
+        case Type.FEATURE:
+          project.apply plugin: "com.android.feature"
           break
 
         case Type.LIBRARY:
