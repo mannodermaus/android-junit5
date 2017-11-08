@@ -59,7 +59,7 @@ abstract class BasePluginSpec extends Specification {
 
     then:
     def expect = thrown(PluginApplicationException)
-    expect.cause.message == "The android or android-library plugin must be applied to this project"
+    expect.cause.message == "An Android plugin must be applied to this project"
   }
 
   def "Requires Gradle 2.5 or later"() {
