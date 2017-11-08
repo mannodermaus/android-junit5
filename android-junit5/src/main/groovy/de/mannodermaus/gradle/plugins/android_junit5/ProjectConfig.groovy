@@ -11,9 +11,9 @@ class ProjectConfig {
     TEST("com.android.test", "applicationVariants"),
     LIBRARY("com.android.library", "libraryVariants"),
 
-    // Although there are "featureVariants" for modules with the FeaturePlugin,
-        // there is no distinct per-feature test task.
-        // Therefore, we use the default library variants
+    // Although there are "featureVariants" for modules applying the Feature plugin,
+        // there is no distinct per-feature test task per se.
+        // Therefore, we use the default library variants here
         FEATURE("com.android.feature", "libraryVariants")
 
     private final String pluginId
