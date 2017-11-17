@@ -16,6 +16,9 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.junit.platform.console.ConsoleLauncher
 
+import static de.mannodermaus.gradle.plugins.junit5.Constants.EXTENSION_NAME
+import static de.mannodermaus.gradle.plugins.junit5.Constants.LOG_TAG
+
 /*
  * Task class used for unit tests driven by JUnit 5.
  * Its API mimics the Android Gradle Plugin's {@link AndroidUnitTest}
@@ -93,8 +96,7 @@ class AndroidJUnit5Test extends JavaExec {
 
       // Configure JUnit 5 properties
       AndroidJUnitPlatformExtension junitExtension =
-          project.extensions.getByName(
-              AndroidJUnitPlatformPlugin.EXTENSION_NAME) as AndroidJUnitPlatformExtension
+          project.extensions.getByName(EXTENSION_NAME) as AndroidJUnitPlatformExtension
       configureTaskInputs(task, junitExtension)
       configureTaskDependencies(task, junitExtension)
       def reportsDir = configureTaskOutputs(task, junitExtension)
@@ -116,16 +118,15 @@ class AndroidJUnit5Test extends JavaExec {
                           // e.g. "build/intermediates/classes/test/debug/..."
                           variant.unitTestVariant.variantData.scope.javaOutputDir]
 
-      project.logger.info(
-          "$AndroidJUnitPlatformPlugin.LOG_TAG: Assembled JUnit 5 Task '$task.name':")
+      project.logger.info("$LOG_TAG: Assembled JUnit 5 Task '$task.name':")
       testRootDirs.each {
-        project.logger.info("$AndroidJUnitPlatformPlugin.LOG_TAG: |__ $it")
+        project.logger.info("$LOG_TAG: |__ $it")
       }
 
       task.main = ConsoleLauncher.class.getName()
       task.args buildArgs(project, junitExtension, reportsDir, testRootDirs)
 
-      project.logger.info("$AndroidJUnitPlatformPlugin.LOG_TAG: * JUnit 5 Arguments: $task.args")
+      project.logger.info("$LOG_TAG: * JUnit 5 Arguments: $task.args")
 
       // Hook into main JUnit 5 task
       def defaultJUnit5Task = findOrCreateJUnit5Task()

@@ -31,7 +31,7 @@ abstract class BasePluginSpec extends Specification {
   // recreated for each executed test case
   private Project testRoot
 
-  /* Before Each **/
+  /* Before Each */
 
   def setup() {
     testRoot = factory.newRootProject()
@@ -96,7 +96,7 @@ abstract class BasePluginSpec extends Specification {
         .buildAndFail()
 
     then:
-    result.output.contains("android-junit5 plugin requires Gradle version 2.5 or higher")
+    result.output.contains("android-junit5 plugin requires Gradle 2.5 or later")
   }
 
   def "Dependency Handler Creation"() {
@@ -130,6 +130,7 @@ abstract class BasePluginSpec extends Specification {
     project.evaluate()
 
     then:
+    println "JUNIT5 PROP: $project.dependencies.junit5"
     def ju5Deps = project.dependencies.junit5() as List<Dependency>
     assert ju5Deps.find { it.group == "org.junit.platform" && it.version == "1.3.3.7" } != null
     assert ju5Deps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null

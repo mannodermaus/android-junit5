@@ -3,18 +3,21 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.tasks.jacoco.AndroidJUnit5JacocoExtension
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.plugins.ExtensionContainer
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
 import javax.annotation.Nullable
 
+import static de.mannodermaus.gradle.plugins.junit5.Constants.JACOCO_EXTENSION_NAME
+
 /*
  * Core configuration options for the Android JUnit 5 Gradle plugin.
- * This extends the functionality available through JUnitPlatformExtension
+ * This extends the functionality available through the Java-based JUnitPlatformExtension.
+ *
+ * Note: Because the inheritance chain of this class reaches into the JUnit 5 codebase
+ * written in Groovy, this class cannot be easily translated into Kotlin.
  */
 
-class AndroidJUnitPlatformExtension extends JUnitPlatformExtension implements ExtensionAware {
+class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
   AndroidJUnitPlatformExtension(Project project) {
     super(project)
@@ -31,12 +34,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension implements Ex
   /* Configuration of Jacoco Code Coverage reports. */
 
   void jacoco(Action<AndroidJUnit5JacocoExtension> closure) {
-    closure.execute(getProperty(
-        de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin.JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension)
-  }
-
-  @Override
-  ExtensionContainer getExtensions() {
-    return super.extensions
+    closure.execute(getProperty(JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension)
   }
 }

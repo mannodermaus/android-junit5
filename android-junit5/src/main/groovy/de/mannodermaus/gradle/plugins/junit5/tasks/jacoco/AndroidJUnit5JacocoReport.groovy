@@ -3,11 +3,13 @@ package de.mannodermaus.gradle.plugins.junit5.tasks.jacoco
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.TaskConfigAction
 import com.android.build.gradle.internal.scope.VariantScope
-import de.mannodermaus.gradle.plugins.junit5.tasks.unit.AndroidJUnit5Test
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
+import de.mannodermaus.gradle.plugins.junit5.tasks.unit.AndroidJUnit5Test
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testing.jacoco.tasks.JacocoReport
+
+import static de.mannodermaus.gradle.plugins.junit5.Constants.*
 
 class AndroidJUnit5JacocoReport extends JacocoReport {
 
@@ -64,9 +66,9 @@ class AndroidJUnit5JacocoReport extends JacocoReport {
 
       // Hook in plugin configuration parameters
       def junitExtension = project.extensions.getByName(
-          AndroidJUnitPlatformPlugin.EXTENSION_NAME) as AndroidJUnitPlatformExtension
+          EXTENSION_NAME) as AndroidJUnitPlatformExtension
       def jacocoExtension = junitExtension.extensions.getByName(
-          AndroidJUnitPlatformPlugin.JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension
+          JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension
 
       reportTask.reports {
         csv.enabled jacocoExtension.csvReport
@@ -75,13 +77,10 @@ class AndroidJUnit5JacocoReport extends JacocoReport {
       }
 
       project.logger.info(
-          "$AndroidJUnitPlatformPlugin.LOG_TAG: Assembled Jacoco Code Coverage for JUnit 5 Task '$testTask.name':")
-      project.logger.info(
-          "$AndroidJUnitPlatformPlugin.LOG_TAG: |__ Execution Data: ${reportTask.executionData.asPath}")
-      project.logger.info(
-          "$AndroidJUnitPlatformPlugin.LOG_TAG: |__ Source Dirs: ${reportTask.sourceDirectories.asPath}")
-      project.logger.info(
-          "$AndroidJUnitPlatformPlugin.LOG_TAG: |__ Class Dirs: ${reportTask.classDirectories.asPath}")
+          "$LOG_TAG: Assembled Jacoco Code Coverage for JUnit 5 Task '$testTask.name':")
+      project.logger.info("$LOG_TAG: |__ Execution Data: ${reportTask.executionData.asPath}")
+      project.logger.info("$LOG_TAG: |__ Source Dirs: ${reportTask.sourceDirectories.asPath}")
+      project.logger.info("$LOG_TAG: |__ Class Dirs: ${reportTask.classDirectories.asPath}")
 
       // Hook into main Jacoco task
       def defaultJacocoTask = findOrCreateJacocoTask()

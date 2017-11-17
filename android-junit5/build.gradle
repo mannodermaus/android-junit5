@@ -7,7 +7,15 @@ apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
 apply plugin: "jacoco"
 
-// Compilation Tweaks (Groovy first, Kotlin second)
+// ------------------------------------------------------------------------------------------------
+// Compilation Tweaks
+//
+// The plugin currently consists of a codebase wherein Groovy & Kotlin coexist.
+// Therefore, the compilation chain has to be well-defined to allow Kotlin
+// to call into Groovy code.
+//
+// The other way around ("call Kotlin from Groovy") is prohibited explicitly.
+// ------------------------------------------------------------------------------------------------
 compileGroovy.dependsOn = compileGroovy.taskDependencies.values - "compileJava"
 compileKotlin.dependsOn compileGroovy
 compileKotlin.classpath += files(compileGroovy.destinationDir)
