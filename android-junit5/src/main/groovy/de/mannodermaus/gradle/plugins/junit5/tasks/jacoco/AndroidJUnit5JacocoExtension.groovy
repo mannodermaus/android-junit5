@@ -1,4 +1,4 @@
-package de.mannodermaus.gradle.plugins.android_junit5.jacoco
+package de.mannodermaus.gradle.plugins.junit5.tasks.jacoco
 
 /*
  * Configuration of Jacoco Code Coverage integration with JUnit 5.

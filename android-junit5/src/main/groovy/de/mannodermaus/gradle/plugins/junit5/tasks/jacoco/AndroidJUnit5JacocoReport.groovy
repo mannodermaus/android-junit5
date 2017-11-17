@@ -1,11 +1,10 @@
-package de.mannodermaus.gradle.plugins.android_junit5.jacoco
+package de.mannodermaus.gradle.plugins.junit5.tasks.jacoco
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.TaskConfigAction
 import com.android.build.gradle.internal.scope.VariantScope
-import de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnit5Test
-import de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformExtension
-import de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin
+import de.mannodermaus.gradle.plugins.junit5.tasks.unit.AndroidJUnit5Test
+import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testing.jacoco.tasks.JacocoReport

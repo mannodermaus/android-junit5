@@ -1,10 +1,11 @@
-package de.mannodermaus.gradle.plugins.android_junit5
+package de.mannodermaus.gradle.plugins.junit5.tasks.unit
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.TaskConfigAction
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.android.builder.core.VariantType
+import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import groovy.transform.PackageScope
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -50,9 +51,9 @@ class AndroidJUnit5Test extends JavaExec {
     return assetsCollection
   }
 
-  static AndroidJUnit5Test create(ProjectConfig config, BaseVariant variant) {
-    def configAction = new ConfigAction(config, variant)
-    return config.project.tasks.create(configAction.getName(), configAction.getType(), configAction)
+  static AndroidJUnit5Test create(Project project, BaseVariant variant) {
+    def configAction = new ConfigAction(project, variant)
+    return project.tasks.create(configAction.getName(), configAction.getType(), configAction)
   }
 
   static class ConfigAction implements TaskConfigAction<AndroidJUnit5Test> {
@@ -60,14 +61,12 @@ class AndroidJUnit5Test extends JavaExec {
     private static final String TASK_NAME_DEFAULT = "junitPlatformTest"
     private static final String TASK_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 
-    private final ProjectConfig config
     private final Project project
     private final BaseVariant variant
     private final VariantScope scope
 
-    ConfigAction(ProjectConfig config, BaseVariant variant) {
-      this.config = config
-      this.project = config.project
+    ConfigAction(Project project, BaseVariant variant) {
+      this.project = project
       this.variant = variant
       this.scope = variant.variantData.scope
     }

@@ -7,6 +7,12 @@ apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
 apply plugin: "jacoco"
 
+// Compilation Tweaks (Groovy first, Kotlin second)
+compileGroovy.dependsOn = compileGroovy.taskDependencies.values - "compileJava"
+compileKotlin.dependsOn compileGroovy
+compileKotlin.classpath += files(compileGroovy.destinationDir)
+classes.dependsOn compileKotlin
+
 // ------------------------------------------------------------------------------------------------
 // Plugin Resource Setup
 //
@@ -19,7 +25,7 @@ apply plugin: "jacoco"
 // ------------------------------------------------------------------------------------------------
 
 final def pluginClassName =
-    "de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin"
+    "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
 
 gradlePlugin {
   plugins {
@@ -189,7 +195,7 @@ dependencies {
   compile "org.codehaus.groovy:groovy:$GROOVY_VERSION"
   compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
   compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-  compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
+  compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 
   testCompile "junit:junit:$JUNIT4_VERSION"
   testCompile "commons-lang:commons-lang:2.6"

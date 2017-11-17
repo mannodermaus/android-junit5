@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.android_junit5
 
-import de.mannodermaus.gradle.plugins.android_junit5.jacoco.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.jacoco.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.android_junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.android_junit5.util.TestProjectFactory
 import org.apache.commons.io.FileUtils
