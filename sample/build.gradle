@@ -1,13 +1,10 @@
 buildscript {
   repositories {
-    google()
     jcenter()
   }
 
   dependencies {
     classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.12"
-    classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
   }
 }
 
