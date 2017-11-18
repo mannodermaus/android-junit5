@@ -1,4 +1,6 @@
-package de.mannodermaus.gradle.plugins.android_junit5
+package de.mannodermaus.gradle.plugins.junit5
+
+import de.mannodermaus.gradle.plugins.junit5.BaseFunctionalSpec
 
 /*
  * Unit testing the functionality of JUnit 5

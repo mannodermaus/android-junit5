@@ -1,4 +1,4 @@
-package de.mannodermaus.gradle.plugins.android_junit5.util
+package de.mannodermaus.gradle.plugins.junit5.util
 
 class StringUtils {
 

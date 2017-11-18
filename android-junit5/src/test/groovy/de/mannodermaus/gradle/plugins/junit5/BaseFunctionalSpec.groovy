@@ -1,7 +1,7 @@
-package de.mannodermaus.gradle.plugins.android_junit5
+package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.android_junit5.util.FileLanguage
-import de.mannodermaus.gradle.plugins.android_junit5.util.TestEnvironment
+import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage
+import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import org.apache.commons.lang.StringUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -13,7 +13,7 @@ import spock.lang.Specification
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import static de.mannodermaus.gradle.plugins.android_junit5.util.StringUtils.splitClasspath
+import static de.mannodermaus.gradle.plugins.junit5.util.StringUtils.splitClasspath
 
 /*
  * Base class for functional tests of the plugin

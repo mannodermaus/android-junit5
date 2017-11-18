@@ -1,8 +1,8 @@
-package de.mannodermaus.gradle.plugins.android_junit5
+package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.tasks.jacoco.AndroidJUnit5JacocoReport
-import de.mannodermaus.gradle.plugins.android_junit5.util.TestEnvironment
-import de.mannodermaus.gradle.plugins.android_junit5.util.TestProjectFactory
+import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
+import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
@@ -130,7 +130,6 @@ abstract class BasePluginSpec extends Specification {
     project.evaluate()
 
     then:
-    println "JUNIT5 PROP: $project.dependencies.junit5"
     def ju5Deps = project.dependencies.junit5() as List<Dependency>
     assert ju5Deps.find { it.group == "org.junit.platform" && it.version == "1.3.3.7" } != null
     assert ju5Deps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null

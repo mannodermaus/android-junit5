@@ -162,6 +162,9 @@ task testAgp3x(type: Test) {
 
 // Combine all tests when executing the main JUnit task
 tasks.getByName("test").dependsOn(testAgp2x, testAgp3x)
+tasks.withType(Test) {
+  maxParallelForks = Runtime.runtime.availableProcessors()
+}
 
 // https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
 // Write the plugin's classpath to a file to share with the tests
@@ -206,7 +209,8 @@ dependencies {
   compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 
   testCompile "junit:junit:$JUNIT4_VERSION"
-  testCompile "commons-lang:commons-lang:2.6"
+  testCompile "commons-io:commons-io:$APACHE_COMMONS_VERSION"
+  testCompile "commons-lang:commons-lang:$APACHE_COMMONS_VERSION"
   testCompile "org.spockframework:spock-core:$SPOCK_VERSION"
   testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
   testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"

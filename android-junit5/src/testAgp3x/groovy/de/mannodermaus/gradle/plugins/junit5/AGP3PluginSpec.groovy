@@ -1,5 +1,6 @@
-package de.mannodermaus.gradle.plugins.android_junit5
+package de.mannodermaus.gradle.plugins.junit5
 
+import de.mannodermaus.gradle.plugins.junit5.BasePluginSpec
 import org.gradle.api.Project
 
 /*
