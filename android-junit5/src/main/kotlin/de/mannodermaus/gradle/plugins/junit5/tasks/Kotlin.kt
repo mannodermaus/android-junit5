@@ -36,6 +36,5 @@ open class AndroidJUnit5CopyKotlin : Copy() {
 
       testTask.dependsOn(copyTask)
     }
-
   }
 }

@@ -5,6 +5,7 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -13,6 +14,8 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.util.GradleVersion
 import org.junit.platform.gradle.plugin.EnginesExtension
 import org.junit.platform.gradle.plugin.FiltersExtension
@@ -36,7 +39,10 @@ fun loadProperties(resource: String): Properties {
   return properties
 }
 
-/* Extension Functions */
+/*
+ * "Extension" Extension Functions:
+ * Shorthand properties to access different plugins' extension models.
+ */
 
 val AndroidJUnitPlatformExtension.selectors
   get() = extensionByName<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
@@ -55,6 +61,15 @@ val FiltersExtension.engines
 
 val AndroidJUnitPlatformExtension.jacoco
   get() = extensionByName<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
+
+val Project.junit5
+  get() = extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
+
+val Project.jacoco
+  get() = extensionByName<JacocoPluginExtension>("jacoco")
+
+val AndroidJUnit5UnitTest.jacoco
+  get() = extensionByName<JacocoTaskExtension>("jacoco")
 
 /* Interoperability layer for Gradle */
 
@@ -81,7 +96,7 @@ inline fun <reified T> Any.createExtension(
  * Obtain an Extension by name & directly cast it to the expected type.
  */
 @Suppress("UNCHECKED_CAST")
-fun <T> Any.extensionByName(name: String): T {
+private fun <T> Any.extensionByName(name: String): T {
   if (this !is ExtensionAware) {
     throw IllegalArgumentException("Argument is not ExtensionAware: $this")
   }
@@ -93,7 +108,7 @@ fun <T> Any.extensionByName(name: String): T {
  * Log the provided info message using the plugin's Log Tag.
  */
 fun Project.logInfo(text: String) {
-  logger.info("${LOG_TAG}: $text")
+  logger.info("$LOG_TAG: $text")
 }
 
 /**
@@ -157,7 +172,7 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
 fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): Any {
   val versions = Versions(
       project = this,
-      extension = extensionByName(EXTENSION_NAME),
+      extension = project.junit5,
       defaults = defaults)
   return config(versions)
 }

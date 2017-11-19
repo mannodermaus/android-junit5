@@ -1,3 +1,5 @@
+import com.android.build.gradle.BaseExtension
+
 buildscript {
   repositories {
     jcenter()
@@ -12,6 +14,20 @@ apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "de.mannodermaus.android-junit5"
 apply plugin: "jacoco"
+
+project.afterEvaluate {
+
+  def mi = BaseExtension.class.getDeclaredField("extraModelInfo")
+  mi.accessible = true
+
+  def val = mi.get(android)
+  println "Extra Model Info: $val"
+
+  val.class.getDeclaredFields().each {
+    it.accessible = true
+    println " |__ $it --> ${it.get(val)}"
+  }
+}
 
 android {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -51,4 +67,9 @@ dependencies {
   testImplementation junit5()
   testImplementation junit5Params()
   testCompileOnly junit5EmbeddedRuntime()
+}
+
+project.afterEvaluate {
+//  tasks.getByName("copyKotlinUnitTestClassesDebug").enabled = false
+//  tasks.getByName("junitPlatformTestDebug").enabled = false
 }

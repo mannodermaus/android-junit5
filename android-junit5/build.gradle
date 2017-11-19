@@ -83,6 +83,7 @@ dependencies {
 
   // Dependent Plugins
   compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
+  compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
   compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 }
 

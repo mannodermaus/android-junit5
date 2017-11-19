@@ -6,13 +6,12 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.android.builder.core.VariantType
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
-import de.mannodermaus.gradle.plugins.junit5.EXTENSION_NAME
 import de.mannodermaus.gradle.plugins.junit5.engines
-import de.mannodermaus.gradle.plugins.junit5.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.filters
 import de.mannodermaus.gradle.plugins.junit5.getExcludeClassNamePatterns
 import de.mannodermaus.gradle.plugins.junit5.getIncludeClassNamePatterns
 import de.mannodermaus.gradle.plugins.junit5.isEmpty
+import de.mannodermaus.gradle.plugins.junit5.junit5
 import de.mannodermaus.gradle.plugins.junit5.logInfo
 import de.mannodermaus.gradle.plugins.junit5.packages
 import de.mannodermaus.gradle.plugins.junit5.selectors
@@ -80,7 +79,7 @@ open class AndroidJUnit5UnitTest : JavaExec() {
           "for the ${variant.name.capitalize()} variant."
 
       // JUnit 5 properties configuration
-      val junit5 = project.extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
+      val junit5 = project.junit5
       configureTaskInputs(task, junit5)
       configureTaskDependencies(task, junit5)
       val reportsDir = configureTaskOutputs(task, junit5)

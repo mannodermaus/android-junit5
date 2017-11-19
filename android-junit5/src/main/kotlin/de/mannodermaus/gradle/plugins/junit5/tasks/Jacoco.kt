@@ -1,12 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
-import de.mannodermaus.gradle.plugins.junit5.JACOCO_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.jacoco
 import de.mannodermaus.gradle.plugins.junit5.logInfo
 import de.mannodermaus.gradle.plugins.junit5.maybeCreate
 import org.gradle.api.Project
-import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
-import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
 private const val TASK_NAME_DEFAULT = "jacocoTestReport"
@@ -53,7 +50,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
     override fun execute(reportTask: AndroidJUnit5JacocoReport) {
       // Project-level configuration
-      val projectJacoco = project.extensionByName<JacocoPluginExtension>(JACOCO_PLUGIN_EXT)
+      val projectJacoco = project.jacoco
       projectJacoco.applyTo(testTask)
       reportTask.dependsOn(testTask)
       reportTask.group = GROUP_REPORTING
@@ -61,7 +58,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
           "for the ${variant.name.capitalize()} variant."
 
       // Task-level Configuration
-      val taskJacoco = testTask.extensionByName<JacocoTaskExtension>(JACOCO_TASK_EXT)
+      val taskJacoco = testTask.jacoco
       reportTask.executionData = project.files(taskJacoco.destinationFile.path)
       reportTask.classDirectories = project.files(scope.javaOutputDir)
       reportTask.sourceDirectories = project.files(variant.sourceSets
@@ -70,9 +67,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
           .map { it.path })
 
       // Apply JUnit 5 configuration parameters
-      val junit5Jacoco = junit5
-          .extensionByName<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
-
+      val junit5Jacoco = junit5.jacoco
       reportTask.reports.apply {
         csv.isEnabled = junit5Jacoco.csvReport
         html.isEnabled = junit5Jacoco.htmlReport
