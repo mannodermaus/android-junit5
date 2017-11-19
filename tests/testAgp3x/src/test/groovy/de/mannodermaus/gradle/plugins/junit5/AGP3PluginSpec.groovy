@@ -135,30 +135,4 @@ class AGP3PluginSpec extends BasePluginSpec {
     project.tasks.findByName("jacocoTestReportDebug") == null
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
-
-  def "Feature: Kotlin Integration"() {
-    when:
-    def project = factory.newProject(rootProject())
-        .asAndroidFeature()
-        .applyJunit5Plugin()
-        .applyKotlinPlugin()
-        .buildAndEvaluate()
-
-    then:
-    project.tasks.getByName("copyKotlinUnitTestClassesDebug")
-    project.tasks.getByName("copyKotlinUnitTestClassesRelease")
-  }
-
-  def "Feature: Kotlin Tasks not added if plugin absent"() {
-    when:
-    def project = factory.newProject(rootProject())
-        .asAndroidFeature()
-        .applyJunit5Plugin()
-        .applyKotlinPlugin(false)
-        .buildAndEvaluate()
-
-    then:
-    project.tasks.findByName("copyKotlinUnitTestClassesDebug") == null
-    project.tasks.findByName("copyKotlinUnitTestClassesRelease") == null
-  }
 }

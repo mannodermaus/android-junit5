@@ -6,6 +6,7 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.android.builder.core.VariantType
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
+import de.mannodermaus.gradle.plugins.junit5.providers.TestRootDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.engines
 import de.mannodermaus.gradle.plugins.junit5.filters
 import de.mannodermaus.gradle.plugins.junit5.getExcludeClassNamePatterns
@@ -39,8 +40,11 @@ private const val VERIFICATION_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 open class AndroidJUnit5UnitTest : JavaExec() {
 
   companion object {
-    fun create(project: Project, variant: BaseVariant): AndroidJUnit5UnitTest {
-      val configAction = ConfigAction(project, variant)
+    fun create(
+        project: Project,
+        variant: BaseVariant,
+        additionalRoots: Set<TestRootDirectoryProvider>): AndroidJUnit5UnitTest {
+      val configAction = ConfigAction(project, variant, additionalRoots)
       return project.tasks.create(configAction.name, configAction.type, configAction)
     }
   }
@@ -58,11 +62,27 @@ open class AndroidJUnit5UnitTest : JavaExec() {
   var assetsCollection: FileCollection? = null
 
   /**
+   * Default Provider implementation for test root directories.
+   * This will look up the main & test root directories
+   * of the variant connected to a given JUnit 5 task.
+   */
+  private class DefaultTestRootDirectoryProvider(
+      private val variant: BaseVariant) : TestRootDirectoryProvider {
+    override fun testRootDirectories() = setOf(
+        // e.g. "build/intermediates/classes/debug/..."
+        variant.variantData.scope.javaOutputDir,
+        // e.g. "build/intermediates/classes/test/debug/..."
+        variant.unitTestVariant.variantData.scope.javaOutputDir
+    )
+  }
+
+  /**
    * Configuration closure for an Android JUnit5 test task.
    */
   private class ConfigAction(
       val project: Project,
-      val variant: BaseVariant
+      val variant: BaseVariant,
+      val additionalRoots: Set<TestRootDirectoryProvider>
   ) : TaskConfigAction<AndroidJUnit5UnitTest> {
 
     private val scope: VariantScope = variant.variantData.scope
@@ -94,15 +114,11 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       task.classpath = getDefaultUnitTestTask().classpath +
           project.configurations.getByName("junitPlatform")
 
-      // Aggregate the source folders for test cases
-      // (usually, the unit test variant's folders should be enough,
+      // Aggregate test root directories, starting with the default set of folders.
+      // (Usually, the unit test variant's folders should be enough,
       // however we aggregate the main scope's output as well)
-      val testRootDirs = listOf(
-          // e.g. "build/intermediates/classes/debug/..."
-          scope.javaOutputDir,
-          // e.g. "build/intermediates/classes/test/debug/..."
-          variant.unitTestVariant.variantData.scope.javaOutputDir
-      )
+      val defaultProvider = DefaultTestRootDirectoryProvider(variant)
+      val testRootDirs = defaultProvider.testRootDirectories() + additionalRoots.flatMap { it.testRootDirectories() }
 
       project.logInfo("Assembled JUnit 5 Task '$task.name':")
       testRootDirs.forEach { project.logInfo("|__ $it") }
@@ -187,7 +203,7 @@ open class AndroidJUnit5UnitTest : JavaExec() {
     private fun buildArgs(
         junit5: AndroidJUnitPlatformExtension,
         reportsDir: File,
-        testRootDirs: List<File>): List<String> {
+        testRootDirs: Set<File>): List<String> {
       val args = mutableListOf<String>()
 
       // Log Details

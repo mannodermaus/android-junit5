@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5CopyKotlin
+import de.mannodermaus.gradle.plugins.junit5.providers.KotlinTestRootDirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.providers.TestRootDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import org.gradle.api.Plugin
@@ -97,14 +98,18 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     val isKotlinApplied = projectConfig.kotlinPluginApplied
 
     testVariants.forEach { variant ->
-      val testTask = AndroidJUnit5UnitTest.create(this, variant)
-
-      if (isJacocoApplied) {
-        AndroidJUnit5JacocoReport.create(this, testTask)
+      // Aggregate non-standard test root directories
+      val rootProviders = mutableSetOf<TestRootDirectoryProvider>()
+      if (isKotlinApplied) {
+        rootProviders += KotlinTestRootDirectoryProvider(this, variant)
       }
 
-      if (isKotlinApplied) {
-        AndroidJUnit5CopyKotlin.create(this, testTask)
+      // Create JUnit 5 test task
+      val testTask = AndroidJUnit5UnitTest.create(this, variant, rootProviders)
+
+      if (isJacocoApplied) {
+        // Create a Jacoco friend task
+        AndroidJUnit5JacocoReport.create(this, testTask)
       }
     }
   }

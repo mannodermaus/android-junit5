@@ -8,8 +8,6 @@ import org.gradle.testing.jacoco.tasks.JacocoReport
 
 private const val TASK_NAME_DEFAULT = "jacocoTestReport"
 private const val GROUP_REPORTING = "reporting"
-private const val JACOCO_PLUGIN_EXT = "jacoco"
-private const val JACOCO_TASK_EXT = "jacoco"
 
 /**
  * Jacoco Test Reporting Task connected to a variant-aware JUnit 5 task.
