@@ -1,6 +1,6 @@
 apply plugin: "groovy"
-apply plugin: "java-gradle-plugin"
 apply plugin: "kotlin"
+apply plugin: "java-gradle-plugin"
 apply plugin: "idea"
 apply plugin: "maven"
 apply plugin: "maven-publish"
@@ -65,164 +65,21 @@ processResources {
   }
 }
 
-processTestResources {
-  def tokens = [COMPILE_SDK_VERSION: COMPILE_SDK_VERSION,
-                BUILD_TOOLS_VERSION: BUILD_TOOLS_VERSION,
-                MIN_SDK_VERSION    : MIN_SDK_VERSION,
-                TARGET_SDK_VERSION : TARGET_SDK_VERSION]
-
-  inputs.properties(tokens)
-
-  from(sourceSets.test.resources.srcDirs) {
-    include '**/testenv.properties'
-    filter(ReplaceTokens, tokens: tokens)
-  }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Test Setup
-//
-// We run our unit tests against multiple versions of the Android Gradle Plugin,
-// in order to support logical & structural intricacies of both the 2.x & 3.x line of plugins.
-// To achieve this, several new source sets & configurations for each branch are created here,
-// which are derived from the common "test" scope.
-// ------------------------------------------------------------------------------------------------
-
-final def srcRoot2x = "src/testAgp2x/groovy"
-final def srcRoot3x = "src/testAgp3x/groovy"
-final def jacocoData2x = "$buildDir/jacoco/testAgp2x.exec"
-final def jacocoData3x = "$buildDir/jacoco/testAgp3x.exec"
-
-configurations {
-  testAgp2xCompile {
-    description = "Dependencies used for compiling tests using Android Gradle Plugin 2.x"
-    extendsFrom configurations.testCompile
-  }
-  testAgp3xCompile {
-    description = "Dependencies used for compiling tests using Android Gradle Plugin 3.x"
-    extendsFrom configurations.testCompile
-  }
-  functionalTest {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests"
-  }
-  functionalTestAgp2x {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests with Android Gradle Plugin 2.x"
-    extendsFrom configurations.functionalTest
-  }
-  functionalTestAgp3x {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests with Android Gradle Plugin 3.x"
-    extendsFrom configurations.functionalTest
-  }
-}
-
-sourceSets {
-  testAgp2x {
-    java.srcDir srcRoot2x
-    compileClasspath += sourceSets.main.output
-    runtimeClasspath += sourceSets.main.output
-    compileClasspath += sourceSets.test.output
-    runtimeClasspath += sourceSets.test.output
-  }
-  testAgp3x {
-    java.srcDir srcRoot3x
-    compileClasspath += sourceSets.main.output
-    runtimeClasspath += sourceSets.main.output
-    compileClasspath += sourceSets.test.output
-    runtimeClasspath += sourceSets.test.output
-  }
-}
-
-jacocoTestReport {
-  additionalSourceDirs = files(srcRoot2x, srcRoot3x)
-  executionData = files(jacocoData2x, jacocoData3x)
-}
-
-idea {
-  module {
-    testSourceDirs += file(srcRoot2x)
-    testSourceDirs += file(srcRoot3x)
-    scopes.TEST.plus += [configurations.testAgp2xCompile, configurations.testAgp3xCompile]
-  }
-}
-
-// Run Unit Tests against Android Gradle Plugin version 2.x
-task testAgp2x(type: Test) {
-  testClassesDirs = sourceSets.testAgp2x.output.classesDirs
-  classpath = sourceSets.main.runtimeClasspath + sourceSets.testAgp2x.runtimeClasspath
-}
-
-// Run Unit Tests against Android Gradle Plugin version 3.x
-task testAgp3x(type: Test) {
-  testClassesDirs = sourceSets.testAgp3x.output.classesDirs
-  classpath = sourceSets.main.runtimeClasspath + sourceSets.testAgp3x.runtimeClasspath
-}
-
-// Combine all tests when executing the main JUnit task
-tasks.getByName("test").dependsOn(testAgp2x, testAgp3x)
-tasks.withType(Test) {
-  maxParallelForks = Runtime.runtime.availableProcessors()
-}
-
-// https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
-// Write the plugin's classpath to a file to share with the tests
-task createTestClasspathManifests {
-  description =
-      "Generate classpath manifests for functional tests so that they can reference locally" +
-          " built libraries for use with Gradle Test Kit"
-  def outputDir = file("$buildDir/resources/test")
-
-  inputs.files sourceSets.main.runtimeClasspath
-  inputs.files sourceSets.testAgp2x.runtimeClasspath
-  inputs.files sourceSets.testAgp3x.runtimeClasspath
-  inputs.files configurations.testAgp2xCompile
-  inputs.files configurations.testAgp3xCompile
-  outputs.dir outputDir
-
-  doLast {
-    outputDir.mkdirs()
-    file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
-    file("$outputDir/plugin-2x-classpath.txt").text =
-        sourceSets.testAgp2x.runtimeClasspath.join("\n")
-    file("$outputDir/plugin-3x-classpath.txt").text =
-        sourceSets.testAgp3x.runtimeClasspath.join("\n")
-    file("$outputDir/functional-test-compile-2x-classpath.txt").text =
-        configurations.functionalTestAgp2x.files.join("\n")
-    file("$outputDir/functional-test-compile-3x-classpath.txt").text =
-        configurations.functionalTestAgp3x.files.join("\n")
-  }
-}
-
-processTestResources.finalizedBy createTestClasspathManifests
+task test(overwrite: true) {}
 
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
+  // Language Support
   compile gradleApi()
   compile "org.codehaus.groovy:groovy:$GROOVY_VERSION"
   compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+
+  // Dependent Plugins
   compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
   compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-
-  testCompile "junit:junit:$JUNIT4_VERSION"
-  testCompile "commons-io:commons-io:$APACHE_COMMONS_VERSION"
-  testCompile "commons-lang:commons-lang:$APACHE_COMMONS_VERSION"
-  testCompile "org.spockframework:spock-core:$SPOCK_VERSION"
-  testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-  testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-  testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
-  testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-
-  functionalTest "junit:junit:$JUNIT4_VERSION"
-  functionalTest "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
-  functionalTest "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
-  functionalTest "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
-  functionalTestAgp2x "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
-  functionalTestAgp3x "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 }
 
 // ------------------------------------------------------------------------------------------------

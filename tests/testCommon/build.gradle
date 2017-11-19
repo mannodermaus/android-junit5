@@ -1,0 +1,62 @@
+import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
+
+apply from: "../common.gradle"
+apply plugin: "kotlin"
+
+configurations {
+  // Exposed to consuming test projects
+  testArtifacts
+}
+
+task testJar(type: Jar) {
+  baseName = "$project.name-test"
+  from sourceSets.test.output
+}
+
+artifacts {
+  testArtifacts testJar
+}
+
+dependencies {
+  // Main Plugin Dependencies
+  compile project(":android-junit5")
+}
+
+// Resource Writers
+task writePluginClasspath(type: WriteClasspathResource) {
+  inputFiles = sourceSets.main.runtimeClasspath
+  outputDir = file("$buildDir/resources/test")
+  resourceFileName = "plugin-classpath.txt"
+}
+
+// TODO
+// https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
+// Write the plugin's classpath to a file to share with the tests
+//task createTestClasspathManifests {
+//  description =
+//      "Generate classpath manifests for functional tests so that they can reference locally" +
+//          " built libraries for use with Gradle Test Kit"
+//  def outputDir = file("$buildDir/resources/test")
+//
+//  inputs.files sourceSets.main.runtimeClasspath
+//  inputs.files sourceSets.testAgp2x.runtimeClasspath
+//  inputs.files sourceSets.testAgp3x.runtimeClasspath
+//  inputs.files configurations.testAgp2xCompile
+//  inputs.files configurations.testAgp3xCompile
+//  outputs.dir outputDir
+//
+//  doLast {
+//    outputDir.mkdirs()
+//    file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
+//    file("$outputDir/plugin-2x-classpath.txt").text =
+//        sourceSets.testAgp2x.runtimeClasspath.join("\n")
+//    file("$outputDir/plugin-3x-classpath.txt").text =
+//        sourceSets.testAgp3x.runtimeClasspath.join("\n")
+//    file("$outputDir/functional-test-compile-2x-classpath.txt").text =
+//        configurations.functionalTestAgp2x.files.join("\n")
+//    file("$outputDir/functional-test-compile-3x-classpath.txt").text =
+//        configurations.functionalTestAgp3x.files.join("\n")
+//  }
+//}
+//
+//processTestResources.finalizedBy createTestClasspathManifests

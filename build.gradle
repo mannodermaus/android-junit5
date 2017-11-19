@@ -10,6 +10,7 @@ buildscript {
     classpath "com.github.ben-manes:gradle-versions-plugin:$VERSIONS_PLUGIN_VERSION"
     classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    classpath "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
   }
 }
 
@@ -36,6 +37,7 @@ allprojects {
     google()
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://dl.bintray.com/jetbrains/spek" }
   }
 
   // Store deployment credentials
