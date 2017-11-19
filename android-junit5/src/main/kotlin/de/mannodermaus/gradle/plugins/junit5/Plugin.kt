@@ -68,9 +68,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       withDependencies(defaults) {
         config.addAll(listOf(
             it.platform.launcher,
-            it.platform.console,
-            it.jupiter.engine,
-            it.vintage.engine
+            it.platform.console
         ))
       }
     }

@@ -65,6 +65,12 @@ processResources {
   }
 }
 
+// For some strange reason, running :android-junit5:test will
+// get the Gradle daemon stuck with an unknown cause.
+// Overwrite the test task entirely to mitigate this
+// (the actual plugin tests have their own modules anyway).
+task test(overwrite: true) {}
+
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
 // ------------------------------------------------------------------------------------------------
