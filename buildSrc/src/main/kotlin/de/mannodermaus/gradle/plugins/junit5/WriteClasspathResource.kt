@@ -29,20 +29,12 @@ open class WriteClasspathResource : DefaultTask() {
 
   @TaskAction
   fun doWork() {
-    if (inputFiles == null) {
-      throw IllegalStateException("ClasspathWriteTask requires 'inputFiles'")
-    }
-    val inputFiles = this.inputFiles!!
-
-    if (resourceFileName == null) {
-      throw IllegalStateException("ClasspathWriteTask requires 'resourceFileName'")
-    }
-    val resourceFileName = this.resourceFileName!!
-
-    if (outputDir == null) {
-      throw IllegalStateException("ClasspathWriteTask requires 'outputDir'")
-    }
-    val outputDir = this.outputDir!!
+    val inputFiles = this.inputFiles ?: throw IllegalStateException(
+        "ClasspathWriteTask requires 'inputFiles'")
+    val resourceFileName = this.resourceFileName ?: throw IllegalStateException(
+        "ClasspathWriteTask requires 'resourceFileName'")
+    val outputDir = this.outputDir ?: throw IllegalStateException(
+        "ClasspathWriteTask requires 'outputDir'")
 
     outputDir.mkdirs()
     val outputFile = File(outputDir, resourceFileName)
