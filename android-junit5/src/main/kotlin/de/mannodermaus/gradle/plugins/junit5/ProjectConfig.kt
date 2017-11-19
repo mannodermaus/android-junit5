@@ -13,7 +13,23 @@ import de.mannodermaus.gradle.plugins.junit5.Type.Test
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 
-/* Types */
+/**
+ * Utility class, used for controlled access
+ * to a Project's configuration.
+ *
+ * This class provides a safe interface to access the
+ * properties specific to the Android Gradle Plugin
+ * in a backwards-compatible manner. It will raise a
+ * [ProjectConfigurationException] early, whenever the plugin
+ * is not applied in an Android environment.
+ */
+class ProjectConfig(private val project: Project) {
+  private val type: Type<BaseExtension> = findType(project)
+
+  val unitTestVariants get() = type.variants(project.android)
+  val jacocoPluginApplied get() = project.hasPlugin("jacoco")
+  val kotlinPluginApplied get() = project.hasPlugin("kotlin-android")
+}
 
 private sealed class Type<in T : BaseExtension>(val pluginId: String) {
   abstract fun variants(extension: T): Set<BaseVariant>
@@ -57,12 +73,4 @@ private fun findType(project: Project): Type<BaseExtension> {
   } else {
     return type as Type<BaseExtension>
   }
-}
-
-class ProjectConfig(private val project: Project) {
-  private val type: Type<BaseExtension> = findType(project)
-
-  val unitTestVariants get() = type.variants(project.android)
-  val jacocoPluginApplied get() = project.hasPlugin("jacoco")
-  val kotlinPluginApplied get() = project.hasPlugin("kotlin-android")
 }

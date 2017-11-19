@@ -1,10 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
-import de.mannodermaus.gradle.plugins.junit5.Constants
+import de.mannodermaus.gradle.plugins.junit5.JACOCO_EXTENSION_NAME
 import de.mannodermaus.gradle.plugins.junit5.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.logInfo
 import de.mannodermaus.gradle.plugins.junit5.maybeCreate
-import de.mannodermaus.gradle.plugins.junit5.tasks.unit.AndroidJUnit5Test
 import org.gradle.api.Project
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
@@ -22,7 +21,7 @@ private const val JACOCO_TASK_EXT = "jacoco"
 open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
-    fun create(project: Project, testTask: AndroidJUnit5Test): AndroidJUnit5JacocoReport {
+    fun create(project: Project, testTask: AndroidJUnit5UnitTest): AndroidJUnit5JacocoReport {
       val configAction = ConfigAction(project, testTask)
       return project.tasks.create(configAction.name, configAction.type, configAction)
     }
@@ -45,7 +44,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
    */
   private class ConfigAction(
       project: Project,
-      testTask: AndroidJUnit5Test
+      testTask: AndroidJUnit5UnitTest
   ) : JUnit5TaskConfigAction<AndroidJUnit5JacocoReport>(project, testTask) {
 
     override fun getName(): String = scope.getTaskName(TASK_NAME_DEFAULT)
@@ -58,7 +57,8 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       projectJacoco.applyTo(testTask)
       reportTask.dependsOn(testTask)
       reportTask.group = GROUP_REPORTING
-      reportTask.description = "Generates Jacoco coverage reports for the ${variant.name.capitalize()} variant."
+      reportTask.description = "Generates Jacoco coverage reports " +
+          "for the ${variant.name.capitalize()} variant."
 
       // Task-level Configuration
       val taskJacoco = testTask.extensionByName<JacocoTaskExtension>(JACOCO_TASK_EXT)
@@ -71,7 +71,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
       // Apply JUnit 5 configuration parameters
       val junit5Jacoco = junit5
-          .extensionByName<AndroidJUnit5JacocoReport.Extension>(Constants.JACOCO_EXTENSION_NAME)
+          .extensionByName<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
 
       reportTask.reports.apply {
         csv.isEnabled = junit5Jacoco.csvReport

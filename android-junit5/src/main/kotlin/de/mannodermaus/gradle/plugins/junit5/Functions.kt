@@ -1,6 +1,10 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.api.UnitTestVariant
+import com.android.build.gradle.internal.api.TestedVariant
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -10,6 +14,11 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.util.GradleVersion
+import org.junit.platform.gradle.plugin.EnginesExtension
+import org.junit.platform.gradle.plugin.FiltersExtension
+import org.junit.platform.gradle.plugin.PackagesExtension
+import org.junit.platform.gradle.plugin.SelectorsExtension
+import org.junit.platform.gradle.plugin.TagsExtension
 import java.util.Properties
 
 /* General */
@@ -27,7 +36,27 @@ fun loadProperties(resource: String): Properties {
   return properties
 }
 
-/* Extension Functions & Interoperability layer for Gradle */
+/* Extension Functions */
+
+val AndroidJUnitPlatformExtension.selectors
+  get() = extensionByName<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
+
+val AndroidJUnitPlatformExtension.filters
+  get() = extensionByName<FiltersExtension>(FILTERS_EXTENSION_NAME)
+
+val FiltersExtension.tags
+  get() = extensionByName<TagsExtension>(TAGS_EXTENSION_NAME)
+
+val FiltersExtension.packages
+  get() = extensionByName<PackagesExtension>(PACKAGES_EXTENSION_NAME)
+
+val FiltersExtension.engines
+  get() = extensionByName<EnginesExtension>(ENGINES_EXTENSION_NAME)
+
+val AndroidJUnitPlatformExtension.jacoco
+  get() = extensionByName<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
+
+/* Interoperability layer for Gradle */
 
 /**
  * Create & add an Extension to the given container by name.
@@ -64,7 +93,7 @@ fun <T> Any.extensionByName(name: String): T {
  * Log the provided info message using the plugin's Log Tag.
  */
 fun Project.logInfo(text: String) {
-  logger.info("${Constants.LOG_TAG}: $text")
+  logger.info("${LOG_TAG}: $text")
 }
 
 /**
@@ -88,6 +117,15 @@ val DependencyHandler.ext: ExtraPropertiesExtension
     val aware = this as ExtensionAware
     return aware.extensions.getByName(
         ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
+  }
+
+val BaseVariant.unitTestVariant: UnitTestVariant
+  get() {
+    if (this !is TestedVariant) {
+      throw IllegalArgumentException("Argument is not TestedVariant: $this")
+    }
+
+    return this.unitTestVariant
   }
 
 /**
@@ -119,7 +157,7 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
 fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): Any {
   val versions = Versions(
       project = this,
-      extension = extensionByName(Constants.EXTENSION_NAME),
+      extension = extensionByName(EXTENSION_NAME),
       defaults = defaults)
   return config(versions)
 }

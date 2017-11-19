@@ -1,18 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.Constants.DEP_CONFIGURATION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.ENGINES_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.FILTERS_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.JACOCO_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.MIN_REQUIRED_GRADLE_VERSION
-import de.mannodermaus.gradle.plugins.junit5.Constants.PACKAGES_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.SELECTORS_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.TAGS_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.Constants.VERSIONS_RESOURCE_NAME
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5CopyKotlin
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
-import de.mannodermaus.gradle.plugins.junit5.tasks.kotlin.AndroidJUnit5CopyKotlin
-import de.mannodermaus.gradle.plugins.junit5.tasks.unit.AndroidJUnit5Test
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.junit.platform.gradle.plugin.EnginesExtension
@@ -107,7 +97,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     val isKotlinApplied = projectConfig.kotlinPluginApplied
 
     testVariants.forEach { variant ->
-      val testTask = AndroidJUnit5Test.create(this, variant)
+      val testTask = AndroidJUnit5UnitTest.create(this, variant)
 
       if (isJacocoApplied) {
         AndroidJUnit5JacocoReport.create(this, testTask)

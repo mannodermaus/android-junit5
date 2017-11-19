@@ -26,11 +26,4 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   /* The version of JUnit Vintage Engine to use. */
   @Nullable
   String vintageVersion
-
-  /* Configuration of Jacoco Code Coverage reports. */
-
-  // TODO Needed from Kotlin?
-  //  void jacoco(Action<AndroidJUnit5Jacoco.Extension> closure) {
-  //    closure.execute(getProperty(JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension)
-  //  }
 }

@@ -24,7 +24,7 @@ android {
   buildToolsVersion BUILD_TOOLS_VERSION
 
   defaultConfig {
-    applicationId "de.mannodermaus.gradle.plugins.android_junit5.sample"
+    applicationId "de.mannodermaus.gradle.plugins.junit5.sample"
     minSdkVersion MIN_SDK_VERSION
     targetSdkVersion TARGET_SDK_VERSION
     versionCode 1

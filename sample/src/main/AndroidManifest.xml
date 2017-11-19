@@ -1,2 +1,2 @@
 <!-- Nothing to see here, check out the "test" source set instead! -->
-<manifest package="de.mannodermaus.gradle.plugins.android_junit5.sample"/>
+<manifest package="de.mannodermaus.gradle.plugins.junit5.sample"/>

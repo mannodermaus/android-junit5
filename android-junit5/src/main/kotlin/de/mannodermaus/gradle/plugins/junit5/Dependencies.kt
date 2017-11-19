@@ -17,7 +17,6 @@ class Versions(
     extension: AndroidJUnitPlatformExtension,
     defaults: Properties
 ) {
-
   val jupiter = Jupiter(project, extension, defaults)
   val platform = Platform(project, extension, defaults)
   val vintage = Vintage(project, extension, defaults)
@@ -51,7 +50,7 @@ class Jupiter(
 ) : DependencyGroup(project, "org.junit.jupiter") {
 
   override fun version(): String =
-      extension.jupiterVersion ?: properties.getProperty(Constants.JUNIT_JUPITER_VERSION_PROP)
+      extension.jupiterVersion ?: properties.getProperty(JUNIT_JUPITER_VERSION_PROP)
 
   val api = dependency("junit-jupiter-api")
   val engine = dependency("junit-jupiter-engine")
@@ -68,7 +67,7 @@ class Platform(
 ) : DependencyGroup(project, "org.junit.platform") {
 
   override fun version(): String =
-      extension.platformVersion ?: properties.getProperty(Constants.JUNIT_PLATFORM_VERSION_PROP)
+      extension.platformVersion ?: properties.getProperty(JUNIT_PLATFORM_VERSION_PROP)
 
   val launcher = dependency("junit-platform-launcher")
   val console = dependency("junit-platform-console")
@@ -85,13 +84,15 @@ class Vintage(
 ) : DependencyGroup(project, "org.junit.vintage") {
 
   override fun version(): String =
-      extension.vintageVersion ?: properties.getProperty(Constants.JUNIT_VINTAGE_VERSION_PROP)
+      extension.vintageVersion ?: properties.getProperty(JUNIT_VINTAGE_VERSION_PROP)
 
   val engine = dependency("junit-vintage-engine")
 }
 
 /**
- * Transitive Dependencies related to
+ * Transitive Dependencies related to nothing in particular.
+ * Dump for all useful dependencies that aren't closely tied
+ * to the JUnit 5 namespace.
  */
 class Other(
     project: Project,
@@ -101,10 +102,10 @@ class Other(
   val embeddedRuntime = dependency(
       groupId = "de.mannodermaus.gradle.plugins",
       artifactId = "android-junit5-embedded-runtime",
-      version = properties.getProperty(Constants.ANDROID_JUNIT5_VERSION_PROP))
+      version = properties.getProperty(ANDROID_JUNIT5_VERSION_PROP))
 
   val junit4 = dependency(
       groupId = "junit",
       artifactId = "junit",
-      version = properties.getProperty(Constants.JUNIT4_VERSION_PROP))
+      version = properties.getProperty(JUNIT4_VERSION_PROP))
 }
