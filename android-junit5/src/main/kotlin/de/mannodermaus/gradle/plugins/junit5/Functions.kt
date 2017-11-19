@@ -85,7 +85,7 @@ val DependencyHandler.ext: ExtraPropertiesExtension
  * We need to wait until the configuration is evaluated by Gradle before
  * accessing our plugin Extension's parameters.
  */
-fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): Any{
+fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): Any {
   val versions = Versions(
       project = this,
       extension = extensionByName(Constants.EXTENSION_NAME),

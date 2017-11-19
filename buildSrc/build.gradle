@@ -5,8 +5,7 @@ buildscript {
   // to be able to reference version constants.
   def properties = new Properties()
   file("../gradle.properties").withReader { properties.load(it) }
-  properties.each { key, value ->
-    ext[key] = value
+  properties.each { key, value -> ext[key] = value
   }
 
   repositories {

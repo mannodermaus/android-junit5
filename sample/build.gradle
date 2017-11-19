@@ -32,9 +32,9 @@ android {
   }
 
   sourceSets {
-    test.java.srcDirs += "src/test/kotlin"  
+    test.java.srcDirs += "src/test/kotlin"
   }
-  
+
   compileOptions {
     targetCompatibility JavaVersion.VERSION_1_8
     sourceCompatibility JavaVersion.VERSION_1_8
