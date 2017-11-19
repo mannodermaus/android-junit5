@@ -1,0 +1,30 @@
+import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
+
+apply from: "../common.gradle"
+apply plugin: "kotlin"
+
+configurations {
+  // Exposed to consuming test projects
+  testArtifacts
+}
+
+task testJar(type: Jar) {
+  baseName = "$project.name-test"
+  from sourceSets.test.output
+}
+
+artifacts {
+  testArtifacts testJar
+}
+
+dependencies {
+  // Main Plugin Dependencies
+  compile project(":android-junit5")
+}
+
+// Resource Writers
+task writePluginClasspath(type: WriteClasspathResource) {
+  inputFiles = sourceSets.main.runtimeClasspath
+  outputDir = file("$buildDir/resources/test")
+  resourceFileName = "plugin-classpath.txt"
+}

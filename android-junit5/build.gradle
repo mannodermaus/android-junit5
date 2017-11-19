@@ -1,10 +1,25 @@
 apply plugin: "groovy"
+apply plugin: "kotlin"
 apply plugin: "java-gradle-plugin"
 apply plugin: "idea"
 apply plugin: "maven"
 apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
 apply plugin: "jacoco"
+
+// ------------------------------------------------------------------------------------------------
+// Compilation Tweaks
+//
+// The plugin currently consists of a codebase wherein Groovy & Kotlin coexist.
+// Therefore, the compilation chain has to be well-defined to allow Kotlin
+// to call into Groovy code.
+//
+// The other way around ("call Kotlin from Groovy") is prohibited explicitly.
+// ------------------------------------------------------------------------------------------------
+compileGroovy.dependsOn = compileGroovy.taskDependencies.values - "compileJava"
+compileKotlin.dependsOn compileGroovy
+compileKotlin.classpath += files(compileGroovy.destinationDir)
+classes.dependsOn compileKotlin
 
 // ------------------------------------------------------------------------------------------------
 // Plugin Resource Setup
@@ -18,7 +33,7 @@ apply plugin: "jacoco"
 // ------------------------------------------------------------------------------------------------
 
 final def pluginClassName =
-    "de.mannodermaus.gradle.plugins.android_junit5.AndroidJUnitPlatformPlugin"
+    "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
 
 gradlePlugin {
   plugins {
@@ -50,159 +65,25 @@ processResources {
   }
 }
 
-processTestResources {
-  def tokens = [COMPILE_SDK_VERSION: COMPILE_SDK_VERSION,
-                BUILD_TOOLS_VERSION: BUILD_TOOLS_VERSION,
-                MIN_SDK_VERSION    : MIN_SDK_VERSION,
-                TARGET_SDK_VERSION : TARGET_SDK_VERSION]
-
-  inputs.properties(tokens)
-
-  from(sourceSets.test.resources.srcDirs) {
-    include '**/testenv.properties'
-    filter(ReplaceTokens, tokens: tokens)
-  }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Test Setup
-//
-// We run our unit tests against multiple versions of the Android Gradle Plugin,
-// in order to support logical & structural intricacies of both the 2.x & 3.x line of plugins.
-// To achieve this, several new source sets & configurations for each branch are created here,
-// which are derived from the common "test" scope.
-// ------------------------------------------------------------------------------------------------
-
-final def srcRoot2x = "src/testAgp2x/groovy"
-final def srcRoot3x = "src/testAgp3x/groovy"
-final def jacocoData2x = "$buildDir/jacoco/testAgp2x.exec"
-final def jacocoData3x = "$buildDir/jacoco/testAgp3x.exec"
-
-configurations {
-  testAgp2xCompile {
-    description = "Dependencies used for compiling tests using Android Gradle Plugin 2.x"
-    extendsFrom configurations.testCompile
-  }
-  testAgp3xCompile {
-    description = "Dependencies used for compiling tests using Android Gradle Plugin 3.x"
-    extendsFrom configurations.testCompile
-  }
-  functionalTest {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests"
-  }
-  functionalTestAgp2x {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests with Android Gradle Plugin 2.x"
-    extendsFrom configurations.functionalTest
-  }
-  functionalTestAgp3x {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests with Android Gradle Plugin 3.x"
-    extendsFrom configurations.functionalTest
-  }
-}
-
-sourceSets {
-  testAgp2x {
-    java.srcDir srcRoot2x
-    compileClasspath += sourceSets.main.output
-    runtimeClasspath += sourceSets.main.output
-    compileClasspath += sourceSets.test.output
-    runtimeClasspath += sourceSets.test.output
-  }
-  testAgp3x {
-    java.srcDir srcRoot3x
-    compileClasspath += sourceSets.main.output
-    runtimeClasspath += sourceSets.main.output
-    compileClasspath += sourceSets.test.output
-    runtimeClasspath += sourceSets.test.output
-  }
-}
-
-jacocoTestReport {
-  additionalSourceDirs = files(srcRoot2x, srcRoot3x)
-  executionData = files(jacocoData2x, jacocoData3x)
-}
-
-idea {
-  module {
-    testSourceDirs += file(srcRoot2x)
-    testSourceDirs += file(srcRoot3x)
-    scopes.TEST.plus += [configurations.testAgp2xCompile, configurations.testAgp3xCompile]
-  }
-}
-
-// Run Unit Tests against Android Gradle Plugin version 2.x
-task testAgp2x(type: Test) {
-  testClassesDirs = sourceSets.testAgp2x.output.classesDirs
-  classpath = sourceSets.main.runtimeClasspath + sourceSets.testAgp2x.runtimeClasspath
-}
-
-// Run Unit Tests against Android Gradle Plugin version 3.x
-task testAgp3x(type: Test) {
-  testClassesDirs = sourceSets.testAgp3x.output.classesDirs
-  classpath = sourceSets.main.runtimeClasspath + sourceSets.testAgp3x.runtimeClasspath
-}
-
-// Combine all tests when executing the main JUnit task
-tasks.getByName("test").dependsOn(testAgp2x, testAgp3x)
-
-// https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
-// Write the plugin's classpath to a file to share with the tests
-task createTestClasspathManifests {
-  description =
-      "Generate classpath manifests for functional tests so that they can reference locally" +
-          " built libraries for use with Gradle Test Kit"
-  def outputDir = file("$buildDir/resources/test")
-
-  inputs.files sourceSets.main.runtimeClasspath
-  inputs.files sourceSets.testAgp2x.runtimeClasspath
-  inputs.files sourceSets.testAgp3x.runtimeClasspath
-  inputs.files configurations.testAgp2xCompile
-  inputs.files configurations.testAgp3xCompile
-  outputs.dir outputDir
-
-  doLast {
-    outputDir.mkdirs()
-    file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
-    file("$outputDir/plugin-2x-classpath.txt").text =
-        sourceSets.testAgp2x.runtimeClasspath.join("\n")
-    file("$outputDir/plugin-3x-classpath.txt").text =
-        sourceSets.testAgp3x.runtimeClasspath.join("\n")
-    file("$outputDir/functional-test-compile-2x-classpath.txt").text =
-        configurations.functionalTestAgp2x.files.join("\n")
-    file("$outputDir/functional-test-compile-3x-classpath.txt").text =
-        configurations.functionalTestAgp3x.files.join("\n")
-  }
-}
-
-processTestResources.finalizedBy createTestClasspathManifests
+// For some strange reason, running :android-junit5:test will
+// get the Gradle daemon stuck with an unknown cause.
+// Overwrite the test task entirely to mitigate this
+// (the actual plugin tests have their own modules anyway).
+task test(overwrite: true) {}
 
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
+  // Language Support
   compile gradleApi()
   compile "org.codehaus.groovy:groovy:$GROOVY_VERSION"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+
+  // Dependent Plugins
   compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-  compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
-
-  testCompile "junit:junit:$JUNIT4_VERSION"
-  testCompile "commons-lang:commons-lang:2.6"
-  testCompile "org.spockframework:spock-core:$SPOCK_VERSION"
-  testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-  testCompileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-  testAgp2xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
-  testAgp3xCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
-
-  functionalTest "junit:junit:$JUNIT4_VERSION"
-  functionalTest "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
-  functionalTest "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
-  functionalTest "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
-  functionalTestAgp2x "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
-  functionalTestAgp3x "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
+  compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -211,89 +92,22 @@ dependencies {
 // Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
-
-// Include sources.jar archive in each release
-task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier = "sources"
-  from sourceSets.main.allSource
-}
-
-// Include javadoc.jar archive in each release
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = "javadoc"
-  from javadoc.destinationDir
-}
-
-artifacts {
-  archives sourcesJar
-  archives javadocJar
-}
-
-version = VERSION_NAME
-
-publishing {
-  publications {
-    library(MavenPublication) {
-      from components.java
-      artifact sourcesJar
-      artifact javadocJar
-      groupId GROUP_ID
-      artifactId PLUGIN_ARTIFACT_ID
-      version VERSION_NAME
-      pom.withXml {
-        def root = asNode()
-        root.appendNode("description", PLUGIN_DESCRIPTION)
-        root.appendNode("name", PLUGIN_ARTIFACT_ID)
-        root.appendNode("url", VCS_URL)
-      }
-    }
-  }
-}
-
-// Copy POM to location expected by Bintray
-task copyPom(type: Copy) {
-  from "build/publications/library"
-  into "build/poms"
-  include "pom-default.xml"
-}
-
-publish.dependsOn copyPom
-
-project.configure(project) {
-  if (project.version.endsWith("-SNAPSHOT")) {
-    // Configure deployment of snapshot versions to Sonatype OSS
-    project.publishing {
-      repositories {
-        maven {
-          name "snapshot"
-          credentials {
-            username project.ext.sonatypeUser
-            password project.ext.sonatypePass
-          }
-          url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-      }
-    }
-  } else {
-    // Configure deployment of release versions to Bintray
-    project.bintray {
-      user = project.ext.bintrayUser
-      key = project.ext.bintrayKey
-      configurations = ["archives"]
-      dryRun = false
-      pkg {
-        repo = "maven"
-        name = PLUGIN_ARTIFACT_ID
-        userOrg = project.ext.bintrayUser
-        licenses = [PLUGIN_LICENSE_NAME]
-        publish = true
-        publicDownloadNumbers = true
-        vcsUrl = VCS_URL
-        version {
-          name = VERSION_NAME
-          desc = PLUGIN_DESCRIPTION
-        }
-      }
-    }
-  }
-}
+project.ext.deployConfig = [artifactId      : PLUGIN_ARTIFACT_ID,
+                            license         : PLUGIN_LICENSE_NAME,
+                            description     : PLUGIN_DESCRIPTION,
+                            beforePublishDo : null,
+                            mavenPublication: {
+                              from components.java
+                              artifact sourcesJar
+                              artifact javadocJar
+                              groupId GROUP_ID
+                              artifactId PLUGIN_ARTIFACT_ID
+                              version VERSION_NAME
+                              pom.withXml {
+                                def root = asNode()
+                                root.appendNode("description", PLUGIN_DESCRIPTION)
+                                root.appendNode("name", PLUGIN_ARTIFACT_ID)
+                                root.appendNode("url", VCS_URL)
+                              }
+                            }]
+apply from: "$rootDir/gradle/deployment.gradle"

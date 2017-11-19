@@ -20,15 +20,15 @@ jdk:
 before_install:
 - echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-script: ./gradlew clean build --info --stacktrace
+script: ./gradlew clean build --stacktrace
 
 after_success:
 - ./scripts/deploy_snapshot.sh
 
 after_failure:
-- cat $TRAVIS_BUILD_DIR/android-junit5/build/reports/tests/test/index.html
-- cat $TRAVIS_BUILD_DIR/android-junit5/build/reports/tests/testAgp2x/index.html
-- cat $TRAVIS_BUILD_DIR/android-junit5/build/reports/tests/testAgp3x/index.html
+- cat $TRAVIS_BUILD_DIR/tests/testCommon/build/reports/tests/test/index.html
+- cat $TRAVIS_BUILD_DIR/tests/testAgp2x/build/reports/tests/test/index.html
+- cat $TRAVIS_BUILD_DIR/tests/testAgp3x/build/reports/tests/test/index.html
 
 deploy:
   provider: script

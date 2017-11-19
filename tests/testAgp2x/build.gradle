@@ -1,0 +1,22 @@
+import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
+
+apply from: "../common.gradle"
+
+dependencies {
+  testCompile project(path: ":testCommon", configuration: "testArtifacts")
+  testCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
+  functionalTest "com.android.tools.build:gradle:$ANDROID_PLUGIN_2X_VERSION"
+}
+
+// Resource Writers
+task writePluginClasspath(type: WriteClasspathResource) {
+  inputFiles = sourceSets.test.runtimeClasspath
+  outputDir = file("$buildDir/resources/test")
+  resourceFileName = "plugin-2x-classpath.txt"
+}
+
+task writeFunctionalTestCompileClasspath(type: WriteClasspathResource) {
+  inputFiles = configurations.functionalTest
+  outputDir = file("$buildDir/resources/test")
+  resourceFileName = "functional-test-compile-2x-classpath.txt"
+}
