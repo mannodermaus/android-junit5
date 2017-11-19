@@ -1,13 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.tasks.jacoco.AndroidJUnit5JacocoExtension
-import org.gradle.api.Action
 import org.gradle.api.Project
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
 import javax.annotation.Nullable
-
-import static de.mannodermaus.gradle.plugins.junit5.Constants.JACOCO_EXTENSION_NAME
 
 /*
  * Core configuration options for the Android JUnit 5 Gradle plugin.
@@ -33,7 +29,8 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
   /* Configuration of Jacoco Code Coverage reports. */
 
-  void jacoco(Action<AndroidJUnit5JacocoExtension> closure) {
-    closure.execute(getProperty(JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension)
-  }
+  // TODO Needed from Kotlin?
+  //  void jacoco(Action<AndroidJUnit5Jacoco.Extension> closure) {
+  //    closure.execute(getProperty(JACOCO_EXTENSION_NAME) as AndroidJUnit5JacocoExtension)
+  //  }
 }

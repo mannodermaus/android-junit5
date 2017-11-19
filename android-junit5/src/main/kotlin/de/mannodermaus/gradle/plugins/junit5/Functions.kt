@@ -4,9 +4,11 @@ import com.android.build.gradle.BaseExtension
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.util.GradleVersion
 import java.util.Properties
 
@@ -47,16 +49,28 @@ inline fun <reified T> Any.createExtension(
 }
 
 /**
+ * Obtain an Extension by name & directly cast it to the expected type.
+ */
+@Suppress("UNCHECKED_CAST")
+fun <T> Any.extensionByName(name: String): T {
+  if (this !is ExtensionAware) {
+    throw IllegalArgumentException("Argument is not ExtensionAware: $this")
+  }
+
+  return this.extensions.getByName(name) as T
+}
+
+/**
+ * Log the provided info message using the plugin's Log Tag.
+ */
+fun Project.logInfo(text: String) {
+  logger.info("${Constants.LOG_TAG}: $text")
+}
+
+/**
  * Shorthand function to check for the existence of a plugin on a Project.
  */
 fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null
-
-/**
- * Obtain a project's Extension by name & directly cast it.
- */
-@Suppress("UNCHECKED_CAST")
-fun <T> Project.extensionByName(name: String): T =
-    this.extensions.getByName(name) as T
 
 /**
  * Access the Android extension applied by a respective plugin.
@@ -75,6 +89,23 @@ val DependencyHandler.ext: ExtraPropertiesExtension
     return aware.extensions.getByName(
         ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
   }
+
+/**
+ * Creates a task with the given properties,
+ * unless it already exists in the task container,
+ * in which case the existing task is returned.
+ */
+@Suppress("UNCHECKED_CAST")
+fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
+  val existing = findByName(name)
+  return if (existing != null) {
+    existing
+  } else {
+    val new = create(name)
+    new.group = group
+    new
+  }
+}
 
 /**
  * Executes the given block within the context of

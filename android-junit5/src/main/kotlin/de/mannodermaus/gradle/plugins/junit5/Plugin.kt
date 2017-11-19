@@ -10,8 +10,7 @@ import de.mannodermaus.gradle.plugins.junit5.Constants.PACKAGES_EXTENSION_NAME
 import de.mannodermaus.gradle.plugins.junit5.Constants.SELECTORS_EXTENSION_NAME
 import de.mannodermaus.gradle.plugins.junit5.Constants.TAGS_EXTENSION_NAME
 import de.mannodermaus.gradle.plugins.junit5.Constants.VERSIONS_RESOURCE_NAME
-import de.mannodermaus.gradle.plugins.junit5.tasks.jacoco.AndroidJUnit5JacocoExtension
-import de.mannodermaus.gradle.plugins.junit5.tasks.jacoco.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.kotlin.AndroidJUnit5CopyKotlin
 import de.mannodermaus.gradle.plugins.junit5.tasks.unit.AndroidJUnit5Test
 import org.gradle.api.Plugin
@@ -51,7 +50,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         createExtension<TagsExtension>(TAGS_EXTENSION_NAME)
         createExtension<EnginesExtension>(ENGINES_EXTENSION_NAME)
       }
-      createExtension<AndroidJUnit5JacocoExtension>(JACOCO_EXTENSION_NAME)
+      createExtension<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
     }
   }
 
