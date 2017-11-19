@@ -10,8 +10,8 @@ apply plugin: "jacoco"
 // Add custom dependency configurations
 configurations {
   functionalTest {
-    description = "Local dependencies used for compiling & running tests source code " +
-        "inside of Gradle functional tests"
+    description = "Local dependencies used for compiling & running " +
+        "tests source code in Gradle functional tests"
   }
 }
 

@@ -1,0 +1,139 @@
+// Common logic shared across modules whose artifacts
+// are provided to jCenter and Sonatype OSS.
+//
+// This script expects a Map extension property
+// named "deployConfig" to exist on the Project instance:
+//
+// * artifactId      : (String, required)
+//    ID of the deployed library
+//
+// * license         : (String, required)
+//    License value of the deployed library
+//
+// * description     : (String, required)
+//    Description of the deployed library
+//
+// * mavenPublication: (Closure<MavenPublication>, required)
+//    Function to configure the publication to deploy
+//
+// * beforePublishDo : (Closure, optional)
+//    Function without parameters, called before deployment.
+//    To stop deployment, throw an AssertionError here
+
+/** Obtains a required parameter from a Map, or throws an Exception if it's absent */
+private def required(Map config, String property) {
+  def value = config.get(property, null)
+  if (!value) {
+    throw new IllegalStateException(
+        "Deployment for module '$name' is missing required parameter '$property'")
+  }
+  return value
+}
+
+// Access Map properties
+if (!project.ext.has("deployConfig")) {
+  throw new IllegalStateException("Deployed module '$name' requires a 'deployConfig'")
+}
+final Map deployConfig = project.ext.deployConfig
+final String artifactId = required(deployConfig, "artifactId")
+final String license = required(deployConfig, "license")
+final String description = required(deployConfig, "description")
+final Closure<MavenPublication> mavenPublication = required(deployConfig, "mavenPublication")
+final def beforePublishDo = deployConfig.get("beforePublishDo", null)
+
+// ------------------------------------------------------------------------------------------------
+// Artifacts Configuration
+// ------------------------------------------------------------------------------------------------
+
+// Include sources.jar archive in each release
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = "sources"
+  from sourceSets.main.allSource
+}
+
+// Include javadoc.jar archive in each release
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = "javadoc"
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourcesJar
+  archives javadocJar
+}
+
+// ------------------------------------------------------------------------------------------------
+// Publication Configuration
+// ------------------------------------------------------------------------------------------------
+
+version = VERSION_NAME
+
+publishing {
+  publications {
+    library(MavenPublication) {
+      mavenPublication.delegate = it
+      mavenPublication(it)
+    }
+  }
+}
+
+// Copy POM to location expected by Bintray
+task copyPom(type: Copy) {
+  from "build/publications/library"
+  into "build/poms"
+  include "pom-default.xml"
+}
+
+publish.dependsOn copyPom
+
+// ------------------------------------------------------------------------------------------------
+// Target Configuration
+// ------------------------------------------------------------------------------------------------
+
+project.configure(project) {
+  if (project.version.endsWith("-SNAPSHOT")) {
+    // Configure deployment of snapshot versions to Sonatype OSS
+    project.publishing {
+      repositories {
+        maven {
+          name "snapshot"
+          credentials {
+            username project.ext.sonatypeUser
+            password project.ext.sonatypePass
+          }
+          url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+      }
+    }
+
+    if (beforePublishDo != null) {
+      publish.doFirst beforePublishDo
+    }
+  } else {
+    // Configure deployment of release versions to Bintray
+    project.bintray {
+      user = project.ext.bintrayUser
+      key = project.ext.bintrayKey
+      configurations = ["archives"]
+      dryRun = false
+      pkg {
+        repo = "maven"
+        name = artifactId
+        userOrg = project.ext.bintrayUser
+        licenses = [license]
+        publish = true
+        publicDownloadNumbers = true
+        vcsUrl = VCS_URL
+        version {
+          name = VERSION_NAME
+          desc = description
+        }
+      }
+    }
+
+    if (beforePublishDo != null) {
+      publish.doFirst beforePublishDo
+    }
+  }
+}
+
