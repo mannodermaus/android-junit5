@@ -20,7 +20,7 @@ jdk:
 before_install:
 - echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-script: ./gradlew clean build --info --stacktrace
+script: ./gradlew clean build --stacktrace
 
 after_success:
 - ./scripts/deploy_snapshot.sh
