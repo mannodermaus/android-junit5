@@ -1,10 +1,11 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage
-import de.mannodermaus.gradle.plugins.junit5.util.StringUtils
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
+import org.apache.commons.lang.StringUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -34,7 +35,7 @@ abstract class BaseFunctionalSpec extends Specification {
 
   @Rule
   final TemporaryFolder testProjectDir = new TemporaryFolder()
-  private final TestEnvironment environment = new TestEnvironment()
+  final TestEnvironment environment = new TestEnvironment()
 
   private File buildFile
   private List<File> pluginClasspath
@@ -49,6 +50,10 @@ abstract class BaseFunctionalSpec extends Specification {
   def setup() {
     pluginClasspath = loadClassPathManifestResource(pluginClasspathResource())
     testCompileClasspath = loadClassPathManifestResource(functionalTestCompileClasspathResource())
+    def localProperties = testProjectDir.newFile("local.properties")
+    localProperties.withWriter {
+      it.write("sdk.dir=${environment.androidSdkFolder.absolutePath}")
+    }
     buildFile = testProjectDir.newFile("build.gradle")
     buildFile << """
       buildscript {

@@ -33,7 +33,14 @@ tasks.withType(WriteClasspathResource).all {
   processTestResources.finalizedBy it
 }
 
+test.testLogging {
+  events "passed", "skipped", "failed"
+}
+
 dependencies {
+  // Test Plugin Dependencies
+  testCompile project(":android-junit5")
+
   // Utilities for assertions & tests in general
   testCompile "commons-io:commons-io:$APACHE_COMMONS_VERSION"
   testCompile "commons-lang:commons-lang:$APACHE_COMMONS_VERSION"
