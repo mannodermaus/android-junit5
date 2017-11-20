@@ -3,6 +3,9 @@ package de.mannodermaus.gradle.plugins.junit5.tasks
 import de.mannodermaus.gradle.plugins.junit5.jacoco
 import de.mannodermaus.gradle.plugins.junit5.logInfo
 import de.mannodermaus.gradle.plugins.junit5.maybeCreate
+import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
+import de.mannodermaus.gradle.plugins.junit5.providers.sourceDirectories
 import org.gradle.api.Project
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
@@ -16,8 +19,10 @@ private const val GROUP_REPORTING = "reporting"
 open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
-    fun create(project: Project, testTask: AndroidJUnit5UnitTest): AndroidJUnit5JacocoReport {
-      val configAction = ConfigAction(project, testTask)
+    fun create(project: Project,
+        testTask: AndroidJUnit5UnitTest,
+        directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport {
+      val configAction = ConfigAction(project, testTask, directoryProviders)
       return project.tasks.create(configAction.name, configAction.type, configAction)
     }
   }
@@ -39,7 +44,8 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
    */
   private class ConfigAction(
       project: Project,
-      testTask: AndroidJUnit5UnitTest
+      testTask: AndroidJUnit5UnitTest,
+      private val directoryProviders: Collection<DirectoryProvider>
   ) : JUnit5TaskConfigAction<AndroidJUnit5JacocoReport>(project, testTask) {
 
     override fun getName(): String = scope.getTaskName(TASK_NAME_DEFAULT)
@@ -58,11 +64,8 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       // Task-level Configuration
       val taskJacoco = testTask.jacoco
       reportTask.executionData = project.files(taskJacoco.destinationFile.path)
-      reportTask.classDirectories = project.files(scope.javaOutputDir)
-      reportTask.sourceDirectories = project.files(variant.sourceSets
-          .map { it.javaDirectories }
-          .flatten()
-          .map { it.path })
+      reportTask.classDirectories = project.files(directoryProviders.classDirectories())
+      reportTask.sourceDirectories = project.files(directoryProviders.sourceDirectories())
 
       // Apply JUnit 5 configuration parameters
       val junit5Jacoco = junit5.jacoco
@@ -72,7 +75,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
         xml.isEnabled = junit5Jacoco.xmlReport
       }
 
-      project.logInfo("Assembled Jacoco Code Coverage for JUnit 5 Task '$testTask.name':")
+      project.logInfo("Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")
       project.logInfo("|__ Execution Data: ${reportTask.executionData.asPath}")
       project.logInfo("|__ Source Dirs: ${reportTask.sourceDirectories.asPath}")
       project.logInfo("|__ Class Dirs: ${reportTask.classDirectories.asPath}")

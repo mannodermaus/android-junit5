@@ -1,7 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.providers.KotlinTestRootDirectoryProvider
-import de.mannodermaus.gradle.plugins.junit5.providers.TestRootDirectoryProvider
+import com.android.build.gradle.api.BaseVariant
+import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import org.gradle.api.Plugin
@@ -95,22 +97,31 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     // and connect a Code Coverage report to it if Jacoco is enabled.
     val testVariants = projectConfig.unitTestVariants
     val isJacocoApplied = projectConfig.jacocoPluginApplied
-    val isKotlinApplied = projectConfig.kotlinPluginApplied
 
     testVariants.forEach { variant ->
-      // Aggregate non-standard test root directories
-      val rootProviders = mutableSetOf<TestRootDirectoryProvider>()
-      if (isKotlinApplied) {
-        rootProviders += KotlinTestRootDirectoryProvider(this, variant)
-      }
+      val directoryProviders = collectDirectoryProviders(variant)
 
       // Create JUnit 5 test task
-      val testTask = AndroidJUnit5UnitTest.create(this, variant, rootProviders)
+      val testTask = AndroidJUnit5UnitTest.create(this, variant, directoryProviders)
 
       if (isJacocoApplied) {
         // Create a Jacoco friend task
-        AndroidJUnit5JacocoReport.create(this, testTask)
+        AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
       }
     }
+  }
+
+  private fun Project.collectDirectoryProviders(variant: BaseVariant): Collection<DirectoryProvider> {
+    val providers = mutableSetOf<DirectoryProvider>()
+
+    // Default JUnit 5 directories
+    providers += JavaDirectoryProvider(variant)
+
+    // Kotlin Integration
+    if (projectConfig.kotlinPluginApplied) {
+      providers += KotlinDirectoryProvider(project, variant)
+    }
+
+    return providers
   }
 }

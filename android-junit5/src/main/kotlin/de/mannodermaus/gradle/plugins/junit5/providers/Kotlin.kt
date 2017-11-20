@@ -1,36 +1,66 @@
 package de.mannodermaus.gradle.plugins.junit5.providers
 
 import com.android.build.gradle.api.BaseVariant
+import com.android.builder.model.SourceProvider
 import de.mannodermaus.gradle.plugins.junit5.unitTestVariant
 import org.gradle.api.Project
+import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.internal.HasConvention
+import org.jetbrains.kotlin.gradle.plugin.KOTLIN_DSL_NAME
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
+
+/* Types */
 
 /**
  * Provides test root directories for Kotlin sources,
  * with which a JUnit 5 Task can be enhanced.
+ *
+ * Note: The resulting Sets might be empty for modules powered by AGP2:
+ * The legacy Kotlin integration automatically copies over Kotlin classes
+ * into the Java directories, which renders dedicated Gradle tasks useless.
  */
-class KotlinTestRootDirectoryProvider(
+class KotlinDirectoryProvider(
     private val project: Project,
-    private val variant: BaseVariant) : TestRootDirectoryProvider {
+    private val variant: BaseVariant) : DirectoryProvider {
 
-  override fun testRootDirectories(): Set<File> {
-    // Hook in the Kotlin destination directories to the JUnit 5 Task.
-    // Note: The resulting Set might be empty for modules powered by AGP2:
-    // The legacy Kotlin integration automatically copies over Kotlin classes
-    // into the Java directories, which renders dedicated Gradle tasks useless.
-    val kotlinTaskNames = listOf(
-        kotlinTaskName(variant),
-        kotlinTaskName(variant.unitTestVariant))
+  override fun mainSourceDirectories() =
+      kotlinSourceFoldersOf(variant)
 
-    return kotlinTaskNames
-        .map { project.tasks.findByName(it) }
-        .filter { it != null }
-        .map { it as KotlinCompile }
-        .map { it.destinationDir }
-        .toSet()
+  override fun mainClassDirectories() =
+      kotlinClassFoldersOf(variant)
+
+  override fun testSourceDirectories() =
+      kotlinSourceFoldersOf(variant.unitTestVariant)
+
+  override fun testClassDirectories() =
+      kotlinClassFoldersOf(variant.unitTestVariant)
+
+  /* Private */
+
+  private fun kotlinSourceFoldersOf(variant: BaseVariant) =
+      variant.sourceSets
+          .flatMap { it.kotlin.srcDirs }
+          .toSet()
+
+  private fun kotlinClassFoldersOf(variant: BaseVariant): Set<File> {
+    val kotlinTask = project.tasks.findByName(variant.kotlinTaskName) ?: return emptySet()
+    return setOf((kotlinTask as KotlinCompile).destinationDir)
   }
-
-  private fun kotlinTaskName(variant: BaseVariant) =
-      "compile${variant.name.capitalize()}Kotlin"
 }
+
+/* Extensions */
+
+private val BaseVariant.kotlinTaskName
+  get() = "compile${this.name.capitalize()}Kotlin"
+
+private val SourceProvider.kotlin: SourceDirectorySet
+  get() {
+    if (this !is HasConvention) {
+      throw IllegalArgumentException("Argument doesn't have Conventions: $this")
+    }
+
+    val kotlinConvention = this.convention.plugins[KOTLIN_DSL_NAME] as KotlinSourceSet
+    return kotlinConvention.kotlin
+  }
