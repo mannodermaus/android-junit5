@@ -179,13 +179,13 @@ abstract class BasePluginSpec extends Specification {
       buildTypes {
         staging {}
       }
+    }
 
-      project.junitPlatform {
-        jacoco {
-          xmlReport false
-          htmlReport false
-          csvReport true
-        }
+    project.junitPlatform {
+      jacoco {
+        xmlReport false
+        htmlReport false
+        csvReport true
       }
     }
 
@@ -220,6 +220,27 @@ abstract class BasePluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReport") == null
     project.tasks.findByName("jacocoTestReportDebug") == null
     project.tasks.findByName("jacocoTestReportRelease") == null
+  }
+
+  def "Application: Jacoco doesn't include Test-Scoped Sources or Classes"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .applyJacocoPlugin()
+        .buildAndEvaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("jacocoTestReportDebug") as AndroidJUnit5JacocoReport
+    def runRelease = project.tasks.getByName("jacocoTestReportRelease") as AndroidJUnit5JacocoReport
+
+    assert !runDebug.sourceDirectories.asPath.contains("src/test/java")
+    assert !runDebug.sourceDirectories.asPath.contains("src/testDebug/java")
+    assert !runRelease.sourceDirectories.asPath.contains("src/test/java")
+    assert !runRelease.sourceDirectories.asPath.contains("src/testRelease/java")
+
+    assert !runDebug.classDirectories.asPath.contains("classes/test/")
+    assert !runRelease.classDirectories.asPath.contains("classes/test/")
   }
 
   def "Library: Basic Integration"() {

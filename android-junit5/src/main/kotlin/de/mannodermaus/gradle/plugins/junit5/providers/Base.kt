@@ -47,4 +47,8 @@ interface DirectoryProvider {
 /* Extensions */
 
 fun Iterable<DirectoryProvider>.classDirectories() = flatMap { it.classDirectories() }.distinct()
+fun Iterable<DirectoryProvider>.mainClassDirectories() = flatMap { it.mainClassDirectories() }.distinct()
+fun Iterable<DirectoryProvider>.testClassDirectories() = flatMap { it.testClassDirectories() }.distinct()
 fun Iterable<DirectoryProvider>.sourceDirectories() = flatMap { it.sourceDirectories() }.distinct()
+fun Iterable<DirectoryProvider>.mainSourceDirectories() = flatMap { it.mainSourceDirectories() }.distinct()
+fun Iterable<DirectoryProvider>.testSourceDirectories() = flatMap { it.testSourceDirectories() }.distinct()
