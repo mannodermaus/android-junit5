@@ -4,8 +4,8 @@ import de.mannodermaus.gradle.plugins.junit5.jacoco
 import de.mannodermaus.gradle.plugins.junit5.logInfo
 import de.mannodermaus.gradle.plugins.junit5.maybeCreate
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
-import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
-import de.mannodermaus.gradle.plugins.junit5.providers.sourceDirectories
+import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
+import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
 import org.gradle.api.Project
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
@@ -64,8 +64,8 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       // Task-level Configuration
       val taskJacoco = testTask.jacoco
       reportTask.executionData = project.files(taskJacoco.destinationFile.path)
-      reportTask.classDirectories = project.files(directoryProviders.classDirectories())
-      reportTask.sourceDirectories = project.files(directoryProviders.sourceDirectories())
+      reportTask.classDirectories = project.files(directoryProviders.mainClassDirectories())
+      reportTask.sourceDirectories = project.files(directoryProviders.mainSourceDirectories())
 
       // Apply JUnit 5 configuration parameters
       val junit5Jacoco = junit5.jacoco

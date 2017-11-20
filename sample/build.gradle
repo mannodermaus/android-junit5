@@ -4,7 +4,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.12"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.20"
   }
 }
 
