@@ -33,6 +33,7 @@ after_failure:
 deploy:
   provider: script
   script: ./scripts/deploy_release.sh
+  skip_cleanup: true
   on:
     tags: true
     repo: mannodermaus/android-junit5
