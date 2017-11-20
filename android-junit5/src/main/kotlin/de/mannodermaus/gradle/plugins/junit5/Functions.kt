@@ -11,6 +11,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
@@ -107,8 +108,8 @@ private fun <T> Any.extensionByName(name: String): T {
 /**
  * Log the provided info message using the plugin's Log Tag.
  */
-fun Project.logInfo(text: String) {
-  logger.info("$LOG_TAG: $text")
+fun Logger.junit5Info(text: String) {
+  info("[android-junit5]: $text")
 }
 
 /**

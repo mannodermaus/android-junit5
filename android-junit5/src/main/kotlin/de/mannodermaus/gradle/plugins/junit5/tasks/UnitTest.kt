@@ -12,7 +12,7 @@ import de.mannodermaus.gradle.plugins.junit5.getExcludeClassNamePatterns
 import de.mannodermaus.gradle.plugins.junit5.getIncludeClassNamePatterns
 import de.mannodermaus.gradle.plugins.junit5.isEmpty
 import de.mannodermaus.gradle.plugins.junit5.junit5
-import de.mannodermaus.gradle.plugins.junit5.logInfo
+import de.mannodermaus.gradle.plugins.junit5.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.packages
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
@@ -91,8 +91,8 @@ open class AndroidJUnit5UnitTest : JavaExec() {
 
       // Aggregate test root directories from the given providers
       val testRootDirs = directoryProviders.classDirectories()
-      project.logInfo("Assembled JUnit 5 Task '${task.name}':")
-      testRootDirs.forEach { project.logInfo("|__ $it") }
+      project.logger.junit5Info("Assembled JUnit 5 Task '${task.name}':")
+      testRootDirs.forEach { project.logger.junit5Info("|__ $it") }
 
       // Share the task's classpath with the default unit tests managed by Android,
       // but append the JUnit Platform configuration at the end.
@@ -124,7 +124,7 @@ open class AndroidJUnit5UnitTest : JavaExec() {
 
       // Build the task arguments
       task.args = buildArgs(junit5, reportsDir, testRootDirs)
-      project.logInfo("* JUnit 5 Arguments: ${task.args.joinToString()}")
+      project.logger.junit5Info("* JUnit 5 Arguments: ${task.args.joinToString()}")
 
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = project.tasks.maybeCreate(TASK_NAME_DEFAULT)

@@ -5,11 +5,14 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.FeatureExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.TestExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.api.LibraryVariant
 import de.mannodermaus.gradle.plugins.junit5.Type.Application
 import de.mannodermaus.gradle.plugins.junit5.Type.Feature
 import de.mannodermaus.gradle.plugins.junit5.Type.Library
 import de.mannodermaus.gradle.plugins.junit5.Type.Test
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 
@@ -32,20 +35,20 @@ class ProjectConfig(private val project: Project) {
 }
 
 private sealed class Type<in T : BaseExtension>(val pluginId: String) {
-  abstract fun variants(extension: T): Set<BaseVariant>
+  abstract fun variants(extension: T): DomainObjectSet<out BaseVariant>
 
   object Application : Type<AppExtension>("com.android.application") {
-    override fun variants(extension: AppExtension): Set<BaseVariant> =
+    override fun variants(extension: AppExtension): DomainObjectSet<ApplicationVariant> =
         extension.applicationVariants
   }
 
   object Test : Type<TestExtension>("com.android.test") {
-    override fun variants(extension: TestExtension): Set<BaseVariant> =
+    override fun variants(extension: TestExtension): DomainObjectSet<ApplicationVariant> =
         extension.applicationVariants
   }
 
   object Library : Type<LibraryExtension>("com.android.library") {
-    override fun variants(extension: LibraryExtension): Set<BaseVariant> =
+    override fun variants(extension: LibraryExtension): DomainObjectSet<LibraryVariant> =
         extension.libraryVariants
   }
 
@@ -53,7 +56,7 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
   // there is no distinct per-feature test task per se.
   // Therefore, we use the default library variants here
   object Feature : Type<FeatureExtension>("com.android.feature") {
-    override fun variants(extension: FeatureExtension): Set<BaseVariant> =
+    override fun variants(extension: FeatureExtension): DomainObjectSet<LibraryVariant> =
         extension.libraryVariants
   }
 }
