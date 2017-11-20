@@ -9,7 +9,7 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in An
 ```groovy
 buildscript {
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.12"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.20"
   }
 }
 ```
@@ -88,9 +88,9 @@ However, there are some additional properties that you can apply:
 ```groovy
 junitPlatform {
   // The JUnit Jupiter dependency version to use; matches the platform's version by default
-  jupiterVersion "5.0.1"
+  jupiterVersion "5.0.2"
   // The JUnit Vintage Engine dependency version to use; matches the platform's version by default
-  vintageVersion "4.12.1"
+  vintageVersion "4.12.2"
 }
 ```
 
