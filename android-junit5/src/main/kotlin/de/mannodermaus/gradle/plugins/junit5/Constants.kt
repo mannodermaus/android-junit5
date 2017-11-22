@@ -1,7 +1,5 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-const val LOG_TAG = "[android-junit5]"
-
 const val MIN_REQUIRED_GRADLE_VERSION = "2.5"
 const val VERSIONS_RESOURCE_NAME = "versions.properties"
 

@@ -15,27 +15,20 @@ import java.io.File
  * More info:
  * https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
  */
-@Suppress("MemberVisibilityCanPrivate", "unused")
+@Suppress("unused")
 open class WriteClasspathResource : DefaultTask() {
 
   @InputFiles
-  var inputFiles: FileCollection? = null
+  lateinit var inputFiles: FileCollection
   @OutputDirectory
-  var outputDir: File? = null
-  var resourceFileName: String? = null
+  lateinit var outputDir: File
+  lateinit var resourceFileName: String
 
   override fun getDescription() = "Generates a local classpath resource for functional tests"
   override fun getGroup() = "build"
 
   @TaskAction
   fun doWork() {
-    val inputFiles = this.inputFiles ?: throw IllegalStateException(
-        "ClasspathWriteTask requires 'inputFiles'")
-    val resourceFileName = this.resourceFileName ?: throw IllegalStateException(
-        "ClasspathWriteTask requires 'resourceFileName'")
-    val outputDir = this.outputDir ?: throw IllegalStateException(
-        "ClasspathWriteTask requires 'outputDir'")
-
     outputDir.mkdirs()
     val outputFile = File(outputDir, resourceFileName)
     outputFile.writer(Charsets.UTF_8).use {

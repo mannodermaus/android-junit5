@@ -12,7 +12,7 @@ import de.mannodermaus.gradle.plugins.junit5.getExcludeClassNamePatterns
 import de.mannodermaus.gradle.plugins.junit5.getIncludeClassNamePatterns
 import de.mannodermaus.gradle.plugins.junit5.isEmpty
 import de.mannodermaus.gradle.plugins.junit5.junit5
-import de.mannodermaus.gradle.plugins.junit5.logInfo
+import de.mannodermaus.gradle.plugins.junit5.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.packages
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
@@ -89,37 +89,53 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       configureTaskDependencies(task, junit5)
       val reportsDir = configureTaskOutputs(task, junit5)
 
-      // Share the classpath with the default unit tests managed by Android,
-      // but append the JUnit Platform configuration at the end
+      // Share the task's classpath with the default unit tests managed by Android,
+      // but append the JUnit Platform configuration at the end.
       //
       // Note: the user's test runtime classpath must come first; otherwise, code
       // instrumented by Clover in JUnit's build will be shadowed by JARs pulled in
       // via the junitPlatform configuration... leading to zero code coverage for
       // the respective modules.
       val defaultTestTask = getDefaultUnitTestTask()
-      task.classpath = defaultTestTask.classpath +
+      val taskClasspath = defaultTestTask.classpath +
           project.configurations.getByName("junitPlatform")
 
       // Aggregate test root directories from the given providers
       val testRootDirs = directoryProviders.classDirectories()
-      project.logInfo("Assembled JUnit 5 Task '${task.name}':")
-      project.logInfo("Root Directories:")
-      testRootDirs.forEach { project.logInfo("|__ $it") }
+      project.logger.junit5Info("Assembled JUnit 5 Task '${task.name}':")
+      project.logger.junit5Info("Root Directories:")
+      testRootDirs.forEach { project.logger.junit5Info("|__ $it") }
 
-      // Configure main class & arguments
-      task.main = ConsoleLauncher::class.java.name
-      task.args = buildArgs(junit5, reportsDir, testRootDirs)
+      if (junit5.enableModulePath) {
+        // Set module-path and clear classpath and main class
+        task.jvmArgs(
+            "--module-path",
+            taskClasspath.asPath,
+            "--add-modules",
+            "ALL-MODULE-PATH"
+        )
+
+        task.classpath = project.files()
+        task.main = ""
+
+      } else {
+        // Use classpath property & configure ConsoleLauncher as the main class
+        task.classpath = taskClasspath
+        task.main = ConsoleLauncher::class.java.name
+      }
 
       // Apply other arguments and properties from the default test task, unless disabled
       // (these are most likely provided by the AGP's testOptions closure)
       if (junit5.applyDefaultTestOptions) {
-        task.jvmArgs = defaultTestTask.jvmArgs
-        task.systemProperties = defaultTestTask.systemProperties
+        task.jvmArgs(defaultTestTask.jvmArgs)
+        task.systemProperties(defaultTestTask.systemProperties)
         task.environment(defaultTestTask.environment)
       }
 
-      project.logInfo("Launcher Arguments: ${task.args.joinToString()}")
-      project.logInfo("JVM Arguments: ${task.jvmArgs.joinToString()}")
+      // Build the task arguments
+      task.args = buildArgs(junit5, reportsDir, testRootDirs)
+      project.logger.junit5Info("Launcher Arguments: ${task.args.joinToString()}")
+      project.logger.junit5Info("JVM Arguments: ${task.jvmArgs.joinToString()}")
 
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = project.tasks.maybeCreate(TASK_NAME_DEFAULT)
@@ -140,6 +156,7 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       task.inputs.property("selectors.classes", junit5.selectors.classes)
       task.inputs.property("selectors.methods", junit5.selectors.methods)
       task.inputs.property("selectors.resources", junit5.selectors.resources)
+      task.inputs.property("selectors.modules", junit5.selectors.modules)
       task.inputs.property("filters.engines.include", junit5.filters.engines.include)
       task.inputs.property("filters.engines.exclude", junit5.filters.engines.exclude)
       task.inputs.property("filters.tags.include", junit5.filters.tags.include)
@@ -198,14 +215,25 @@ open class AndroidJUnit5UnitTest : JavaExec() {
         testRootDirs: List<File>): List<String> {
       val args = mutableListOf<String>()
 
+      // Java 9 Module Path
+      if (junit5.enableModulePath) {
+        args += arrayOf("--module", "org.junit.platform.console")
+      }
+
       // Log Details
       junit5.details?.let { args += arrayOf("--details", it.name) }
 
       // Selectors
       if (junit5.selectors.isEmpty()) {
-        // Employ classpath scanning if no selectors are given
-        args += arrayOf("--scan-class-path",
-            testRootDirs.joinToString(separator = File.pathSeparator))
+        args += if (junit5.enableModulePath) {
+          // Employ module path scanning if that is enabled
+          arrayOf("--scan-modules")
+
+        } else {
+          // Employ classpath scanning if no selectors are given
+          arrayOf("--scan-class-path",
+              testRootDirs.joinToString(separator = File.pathSeparator))
+        }
 
       } else {
         // Otherwise, add each selector individually
@@ -216,6 +244,7 @@ open class AndroidJUnit5UnitTest : JavaExec() {
         junit5.selectors.classes.forEach { args += arrayOf("-c", it) }
         junit5.selectors.methods.forEach { args += arrayOf("-m", it) }
         junit5.selectors.resources.forEach { args += arrayOf("-r", it) }
+        junit5.selectors.modules.forEach { args += arrayOf("-o", it) }
       }
 
       // Filters

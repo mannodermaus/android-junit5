@@ -11,25 +11,18 @@ import de.mannodermaus.gradle.plugins.junit5.variantData
  */
 class JavaDirectoryProvider(private val variant: BaseVariant) : DirectoryProvider {
 
-  override fun mainSourceDirectories() =
-      javaSourceFoldersOf(variant)
-
-  override fun mainClassDirectories() =
-      javaClassFoldersOf(variant)
-
-  override fun testSourceDirectories() =
-      javaSourceFoldersOf(variant.unitTestVariant)
-
-  override fun testClassDirectories() =
-      javaClassFoldersOf(variant.unitTestVariant)
+  override fun mainSourceDirectories() = sourceFoldersOf(variant)
+  override fun testSourceDirectories() = sourceFoldersOf(variant.unitTestVariant)
+  override fun mainClassDirectories() = classFoldersOf(variant)
+  override fun testClassDirectories() = classFoldersOf(variant.unitTestVariant)
 
   /* Private */
 
-  private fun javaSourceFoldersOf(variant: BaseVariant) =
+  private fun sourceFoldersOf(variant: BaseVariant) =
       variant.sourceSets
           .flatMap { it.javaDirectories }
           .toSet()
 
-  private fun javaClassFoldersOf(variant: BaseVariant) =
+  private fun classFoldersOf(variant: BaseVariant) =
       setOf(variant.variantData.scope.javaOutputDir)
 }

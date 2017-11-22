@@ -162,8 +162,8 @@ abstract class BasePluginSpec extends Specification {
     def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
     def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
 
-    assert runDebug.jvmArgs.size() == 1 && runDebug.jvmArgs[0] == "-noverify"
-    assert runRelease.jvmArgs.isEmpty()
+    assert runDebug.jvmArgs.contains("-noverify")
+    assert !runRelease.jvmArgs.contains("-noverify")
   }
 
   def "android.testOptions: System properties are properly applied"() {
@@ -188,8 +188,7 @@ abstract class BasePluginSpec extends Specification {
     def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
     def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
 
-    assert runDebug.systemProperties.containsKey("some.prop") &&
-        runDebug.systemProperties["some.prop"] == "0815"
+    assert runDebug.systemProperties.containsKey("some.prop")
     assert !runRelease.systemProperties.containsKey("some.prop")
   }
 
@@ -215,8 +214,7 @@ abstract class BasePluginSpec extends Specification {
     def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
     def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
 
-    assert runDebug.environment.containsKey("MY_ENV_VAR") &&
-        runDebug.environment["MY_ENV_VAR"] == "MegaShark.bin"
+    assert runDebug.environment.containsKey("MY_ENV_VAR")
     assert !runRelease.environment.containsKey("MY_ENV_VAR")
   }
 
@@ -246,11 +244,11 @@ abstract class BasePluginSpec extends Specification {
     def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
     def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
 
-    assert runDebug.jvmArgs.isEmpty()
-    assert runDebug.systemProperties.isEmpty()
+    assert !runDebug.jvmArgs.contains("-noverify")
+    assert !runDebug.systemProperties.containsKey("some.prop")
     assert !runDebug.environment.containsKey("MY_ENV_VAR")
-    assert runRelease.jvmArgs.isEmpty()
-    assert runRelease.systemProperties.isEmpty()
+    assert !runRelease.jvmArgs.contains("-noverify")
+    assert !runRelease.systemProperties.containsKey("some.prop")
     assert !runRelease.environment.containsKey("MY_ENV_VAR")
   }
 

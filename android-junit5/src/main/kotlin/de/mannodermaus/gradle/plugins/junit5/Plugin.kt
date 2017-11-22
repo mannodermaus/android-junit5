@@ -1,8 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
-import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
@@ -98,7 +98,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     val testVariants = projectConfig.unitTestVariants
     val isJacocoApplied = projectConfig.jacocoPluginApplied
 
-    testVariants.forEach { variant ->
+    testVariants.all { variant ->
       val directoryProviders = collectDirectoryProviders(variant)
 
       // Create JUnit 5 test task
@@ -111,10 +111,11 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     }
   }
 
-  private fun Project.collectDirectoryProviders(variant: BaseVariant): Collection<DirectoryProvider> {
+  private fun Project.collectDirectoryProviders(
+      variant: BaseVariant): Collection<DirectoryProvider> {
     val providers = mutableSetOf<DirectoryProvider>()
 
-    // Default JUnit 5 directories
+    // Default Java directories
     providers += JavaDirectoryProvider(variant)
 
     // Kotlin Integration
