@@ -96,20 +96,30 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       // instrumented by Clover in JUnit's build will be shadowed by JARs pulled in
       // via the junitPlatform configuration... leading to zero code coverage for
       // the respective modules.
-      task.classpath = getDefaultUnitTestTask().classpath +
+      val defaultTestTask = getDefaultUnitTestTask()
+      task.classpath = defaultTestTask.classpath +
           project.configurations.getByName("junitPlatform")
 
       // Aggregate test root directories from the given providers
       val testRootDirs = directoryProviders.classDirectories()
-
       project.logInfo("Assembled JUnit 5 Task '${task.name}':")
+      project.logInfo("Root Directories:")
       testRootDirs.forEach { project.logInfo("|__ $it") }
 
       // Configure main class & arguments
       task.main = ConsoleLauncher::class.java.name
       task.args = buildArgs(junit5, reportsDir, testRootDirs)
 
-      project.logInfo("* JUnit 5 Arguments: ${task.args.joinToString()}")
+      // Apply other arguments and properties from the default test task, unless disabled
+      // (these are most likely provided by the AGP's testOptions closure)
+      if (junit5.applyDefaultTestOptions) {
+        task.jvmArgs = defaultTestTask.jvmArgs
+        task.systemProperties = defaultTestTask.systemProperties
+        task.environment(defaultTestTask.environment)
+      }
+
+      project.logInfo("Launcher Arguments: ${task.args.joinToString()}")
+      project.logInfo("JVM Arguments: ${task.jvmArgs.joinToString()}")
 
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = project.tasks.maybeCreate(TASK_NAME_DEFAULT)

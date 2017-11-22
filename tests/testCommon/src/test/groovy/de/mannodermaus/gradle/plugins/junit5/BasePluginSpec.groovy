@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import org.apache.commons.io.FileUtils
@@ -137,6 +138,120 @@ abstract class BasePluginSpec extends Specification {
 
     def ju5ParamsDeps = project.dependencies.junit5Params() as List<Dependency>
     assert ju5ParamsDeps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null
+  }
+
+  def "android.testOptions: jvmArgs are properly applied"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions {
+        unitTests.all {
+          if (it.name.contains("Debug")) {
+            jvmArgs "-noverify"
+          }
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
+
+    assert runDebug.jvmArgs.size() == 1 && runDebug.jvmArgs[0] == "-noverify"
+    assert runRelease.jvmArgs.isEmpty()
+  }
+
+  def "android.testOptions: System properties are properly applied"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions {
+        unitTests.all {
+          if (it.name.contains("Debug")) {
+            systemProperty "some.prop", "0815"
+          }
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
+
+    assert runDebug.systemProperties.containsKey("some.prop") &&
+        runDebug.systemProperties["some.prop"] == "0815"
+    assert !runRelease.systemProperties.containsKey("some.prop")
+  }
+
+  def "android.testOptions: Environment variables are properly applied"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions {
+        unitTests.all {
+          if (it.name.contains("Debug")) {
+            environment "MY_ENV_VAR", "MegaShark.bin"
+          }
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
+
+    assert runDebug.environment.containsKey("MY_ENV_VAR") &&
+        runDebug.environment["MY_ENV_VAR"] == "MegaShark.bin"
+    assert !runRelease.environment.containsKey("MY_ENV_VAR")
+  }
+
+  def "android.testOptions: Can be disabled for JUnit 5 tasks via the extension"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions {
+        unitTests.all {
+          jvmArgs "-noverify"
+          systemProperty "some.prop", "0815"
+          environment "MY_ENV_VAR", "MegaShark.bin"
+        }
+      }
+    }
+
+    project.junitPlatform {
+      applyDefaultTestOptions = false
+    }
+
+    project.evaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
+
+    assert runDebug.jvmArgs.isEmpty()
+    assert runDebug.systemProperties.isEmpty()
+    assert !runDebug.environment.containsKey("MY_ENV_VAR")
+    assert runRelease.jvmArgs.isEmpty()
+    assert runRelease.systemProperties.isEmpty()
+    assert !runRelease.environment.containsKey("MY_ENV_VAR")
   }
 
   def "Application: Basic Integration"() {
