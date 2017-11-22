@@ -25,26 +25,19 @@ class KotlinDirectoryProvider(
     private val project: Project,
     private val variant: BaseVariant) : DirectoryProvider {
 
-  override fun mainSourceDirectories() =
-      kotlinSourceFoldersOf(variant)
-
-  override fun mainClassDirectories() =
-      kotlinClassFoldersOf(variant)
-
-  override fun testSourceDirectories() =
-      kotlinSourceFoldersOf(variant.unitTestVariant)
-
-  override fun testClassDirectories() =
-      kotlinClassFoldersOf(variant.unitTestVariant)
+  override fun mainSourceDirectories() = sourceFoldersOf(variant)
+  override fun testSourceDirectories() = sourceFoldersOf(variant.unitTestVariant)
+  override fun mainClassDirectories() = classFoldersOf(variant)
+  override fun testClassDirectories() = classFoldersOf(variant.unitTestVariant)
 
   /* Private */
 
-  private fun kotlinSourceFoldersOf(variant: BaseVariant) =
+  private fun sourceFoldersOf(variant: BaseVariant) =
       variant.sourceSets
           .flatMap { it.kotlin.srcDirs }
           .toSet()
 
-  private fun kotlinClassFoldersOf(variant: BaseVariant): Set<File> {
+  private fun classFoldersOf(variant: BaseVariant): Set<File> {
     val kotlinTask = project.tasks.findByName(variant.kotlinTaskName) ?: return emptySet()
     return setOf((kotlinTask as KotlinCompile).destinationDir)
   }

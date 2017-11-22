@@ -1,7 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import de.mannodermaus.gradle.plugins.junit5.jacoco
-import de.mannodermaus.gradle.plugins.junit5.logInfo
+import de.mannodermaus.gradle.plugins.junit5.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.maybeCreate
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
@@ -75,10 +75,11 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
         xml.isEnabled = junit5Jacoco.xmlReport
       }
 
-      project.logInfo("Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")
-      project.logInfo("|__ Execution Data: ${reportTask.executionData.asPath}")
-      project.logInfo("|__ Source Dirs: ${reportTask.sourceDirectories.asPath}")
-      project.logInfo("|__ Class Dirs: ${reportTask.classDirectories.asPath}")
+      project.logger.junit5Info(
+          "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")
+      project.logger.junit5Info("|__ Execution Data: ${reportTask.executionData.asPath}")
+      project.logger.junit5Info("|__ Source Dirs: ${reportTask.sourceDirectories.asPath}")
+      project.logger.junit5Info("|__ Class Dirs: ${reportTask.classDirectories.asPath}")
 
       // Hook into the main Jacoco task
       val defaultJacocoTask = project.tasks.maybeCreate(
