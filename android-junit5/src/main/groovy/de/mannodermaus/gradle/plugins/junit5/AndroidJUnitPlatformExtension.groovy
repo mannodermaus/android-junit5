@@ -19,11 +19,23 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     super(project)
   }
 
-  /* The version of JUnit Jupiter to use. */
-  @Nullable
-  String jupiterVersion
+  /**
+   * The version of JUnit Jupiter to use.*/
+  @Nullable String jupiterVersion
 
-  /* The version of JUnit Vintage Engine to use. */
+  /**
+   * The version of JUnit Vintage Engine to use. */
   @Nullable
   String vintageVersion
+
+  /**
+   * Whether or not to apply the Android Gradle Plugin's "testOptions"
+   * to JUnit 5 tasks - true by default.
+   *
+   * Note that this will only affect the following properties assigned
+   * by a "testOptions.unitTests.all" closure:
+   *
+   * - jvmArgs
+   * - systemProperties */
+  boolean applyDefaultTestOptions = true
 }

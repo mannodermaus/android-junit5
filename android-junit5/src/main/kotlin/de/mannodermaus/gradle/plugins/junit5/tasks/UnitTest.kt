@@ -89,11 +89,6 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       configureTaskDependencies(task, junit5)
       val reportsDir = configureTaskOutputs(task, junit5)
 
-      // Aggregate test root directories from the given providers
-      val testRootDirs = directoryProviders.classDirectories()
-      project.logger.junit5Info("Assembled JUnit 5 Task '${task.name}':")
-      testRootDirs.forEach { project.logger.junit5Info("|__ $it") }
-
       // Share the task's classpath with the default unit tests managed by Android,
       // but append the JUnit Platform configuration at the end.
       //
@@ -101,12 +96,19 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       // instrumented by Clover in JUnit's build will be shadowed by JARs pulled in
       // via the junitPlatform configuration... leading to zero code coverage for
       // the respective modules.
-      val taskClasspath = getDefaultUnitTestTask().classpath +
+      val defaultTestTask = getDefaultUnitTestTask()
+      val taskClasspath = defaultTestTask.classpath +
           project.configurations.getByName("junitPlatform")
+
+      // Aggregate test root directories from the given providers
+      val testRootDirs = directoryProviders.classDirectories()
+      project.logger.junit5Info("Assembled JUnit 5 Task '${task.name}':")
+      project.logger.junit5Info("Root Directories:")
+      testRootDirs.forEach { project.logger.junit5Info("|__ $it") }
 
       if (junit5.enableModulePath) {
         // Set module-path and clear classpath and main class
-        task.jvmArgs = listOf(
+        task.jvmArgs(
             "--module-path",
             taskClasspath.asPath,
             "--add-modules",
@@ -122,9 +124,18 @@ open class AndroidJUnit5UnitTest : JavaExec() {
         task.main = ConsoleLauncher::class.java.name
       }
 
+      // Apply other arguments and properties from the default test task, unless disabled
+      // (these are most likely provided by the AGP's testOptions closure)
+      if (junit5.applyDefaultTestOptions) {
+        task.jvmArgs(defaultTestTask.jvmArgs)
+        task.systemProperties(defaultTestTask.systemProperties)
+        task.environment(defaultTestTask.environment)
+      }
+
       // Build the task arguments
       task.args = buildArgs(junit5, reportsDir, testRootDirs)
-      project.logger.junit5Info("* JUnit 5 Arguments: ${task.args.joinToString()}")
+      project.logger.junit5Info("Launcher Arguments: ${task.args.joinToString()}")
+      project.logger.junit5Info("JVM Arguments: ${task.jvmArgs.joinToString()}")
 
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = project.tasks.maybeCreate(TASK_NAME_DEFAULT)
