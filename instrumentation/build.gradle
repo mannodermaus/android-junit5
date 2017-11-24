@@ -1,0 +1,32 @@
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+  compileSdkVersion COMPILE_SDK_VERSION
+  buildToolsVersion BUILD_TOOLS_VERSION
+
+  defaultConfig {
+    minSdkVersion MIN_SDK_VERSION
+    targetSdkVersion TARGET_SDK_VERSION
+    versionCode 1
+    versionName "1.0"
+  }
+
+  sourceSets {
+    main.java.srcDirs += "src/main/kotlin"
+    test.java.srcDirs += "src/test/kotlin"
+  }
+
+  compileOptions {
+    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+  implementation "junit:junit:$JUNIT4_VERSION"
+  api "com.android.support.test:runner:1.0.1"
+  api "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
+  compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+}

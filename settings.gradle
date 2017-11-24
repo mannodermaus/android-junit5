@@ -3,6 +3,7 @@ rootProject.name = GROUP_ID
 include ":android-junit5"
 include ":android-junit5-embedded-runtime"
 include ":sample"
+include ":instrumentation"
 
 ["testCommon", "testAgp2x", "testAgp3x"].each { name ->
   include ":$name"

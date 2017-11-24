@@ -29,15 +29,24 @@ android {
     targetSdkVersion TARGET_SDK_VERSION
     versionCode 1
     versionName "1.0"
+
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
   sourceSets {
+    androidTest.java.srcDirs += "src/androidTest/kotlin"
+    main.java.srcDirs += "src/main/kotlin"
     test.java.srcDirs += "src/test/kotlin"
   }
 
   compileOptions {
     targetCompatibility JavaVersion.VERSION_1_8
     sourceCompatibility JavaVersion.VERSION_1_8
+  }
+
+  packagingOptions {
+    exclude "META-INF/LICENSE.md"
+    exclude "META-INF/LICENSE-notice.md"
   }
 }
 
@@ -47,6 +56,11 @@ junitPlatform {
 
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+
+  androidTestImplementation project(":instrumentation")
+  androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.1"
+  androidTestCompileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
 
   testImplementation junit5()
   testImplementation junit5Params()
