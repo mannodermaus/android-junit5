@@ -24,7 +24,7 @@ android {
   buildToolsVersion BUILD_TOOLS_VERSION
 
   defaultConfig {
-    applicationId "de.mannodermaus.gradle.plugins.junit5.sample"
+    applicationId "de.mannodermaus.junit5.sample"
     minSdkVersion MIN_SDK_VERSION
     targetSdkVersion TARGET_SDK_VERSION
     versionCode 1
@@ -60,6 +60,7 @@ dependencies {
 
   androidTestImplementation project(":instrumentation")
   androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.1"
+
   androidTestCompileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
 

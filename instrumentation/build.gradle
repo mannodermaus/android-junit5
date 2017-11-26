@@ -26,8 +26,8 @@ android {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
   implementation "junit:junit:$JUNIT4_VERSION"
-  api "com.android.support.test:runner:1.0.1"
-  api "com.android.support.test:rules:1.0.1"
-  api "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
+  implementation "com.android.support.test:runner:1.0.1"
+  implementation "com.android.support.test:rules:1.0.1"
+  implementation "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
   compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
 }
