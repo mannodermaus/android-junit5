@@ -41,6 +41,7 @@ dependencies {
   compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
 
   androidTestImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
+  androidTestImplementation "com.squareup.assertj:assertj-android:$ASSERTJ_ANDROID_VERSION"
   androidTestImplementation "com.android.support.test.espresso:espresso-core:$ESPRESSO_VERSION"
   androidTestCompileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"

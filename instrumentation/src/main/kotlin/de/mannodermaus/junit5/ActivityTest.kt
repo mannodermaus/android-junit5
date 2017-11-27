@@ -130,12 +130,7 @@ constructor(
     instrumentation.setInTouchMode(config.initialTouchMode)
 
     // Construct launcher Intent, injecting configuration along the way
-    val startIntent = if (intent == null) {
-      Log.i(LOG_TAG, "Launching with default: Intent(Intent.ACTION_MAIN)")
-      Intent(Intent.ACTION_MAIN)
-    } else {
-      intent
-    }
+    val startIntent = intent ?: Intent(Intent.ACTION_MAIN)
 
     if (startIntent.component == null) {
       // Fall back to the default Target Context's package name if none is set
@@ -151,7 +146,7 @@ constructor(
       startIntent.addFlags(config.launchFlags)
     }
 
-    Log.i(LOG_TAG, "Launching activity: ${startIntent.component}")
+    Log.i(LOG_TAG, "Launching activity: ${startIntent.component} with Intent: $startIntent")
 
     this._activity = config.value.java.cast(instrumentation.startActivitySync(startIntent)) as T
 

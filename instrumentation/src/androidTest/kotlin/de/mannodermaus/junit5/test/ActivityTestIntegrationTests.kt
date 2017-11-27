@@ -11,6 +11,7 @@ import de.mannodermaus.junit5.ActivityTest
 import de.mannodermaus.junit5.Tested
 import de.mannodermaus.junit5.test.activities.FirstActivity
 import de.mannodermaus.junit5.test.activities.OtherActivity
+import org.assertj.android.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -90,10 +91,7 @@ class ActivityTestIntegrationTests {
       launchFlags = Intent.FLAG_ACTIVITY_NO_HISTORY)
   @DisplayName("Launch Flags are properly applied")
   fun launchFlagsAreProperlyApplied(activity: FirstActivity) {
-    assertEquals(
-        Intent.FLAG_ACTIVITY_NO_HISTORY,
-        activity.intent.flags and Intent.FLAG_ACTIVITY_NO_HISTORY,
-        "Expected Intent flag 'NO_HISTORY' wasn't provided to Activity")
+    assertIntentHasFlag(activity.intent, Intent.FLAG_ACTIVITY_NO_HISTORY)
   }
 
   @Test
@@ -113,5 +111,27 @@ class ActivityTestIntegrationTests {
     assertThat(error.cause?.message)
         .contains("cmp=some.weird.other.package/")
         .contains("FirstActivity")
+  }
+
+  @Test
+  @ActivityTest(
+      FirstActivity::class,
+      launchActivity = false)
+  @DisplayName("Launching with custom Intent")
+  fun launchingWithCustomIntent(tested: Tested<FirstActivity>) {
+    val intent = Intent().apply {
+      action = "custom.intent.action"
+      putExtra("extraArgument", "YOLO")
+      putExtra("intArgument", 1337)
+      addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+    }
+
+    val activity = tested.launchActivity(intent)
+    assertThat(activity.intent)
+        .hasAction("custom.intent.action")
+        .hasExtra("extraArgument", "YOLO")
+        .hasExtra("intArgument", 1337)
+
+    assertIntentHasFlag(activity.intent, Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
   }
 }
