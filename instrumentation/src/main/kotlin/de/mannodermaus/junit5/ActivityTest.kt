@@ -106,7 +106,7 @@ interface Tested<out T : Activity> {
 
 /* Internal API */
 
-internal class DefaultTested<out T : Activity>
+private class DefaultTested<out T : Activity>
 constructor(
     // Configuration values provided through the test method, or its surrounding class
     val config: ActivityTest,
@@ -223,7 +223,7 @@ constructor(
  * This Extension takes the place of the ActivityTestRule
  * from the JUnit4-centered Test Support Library.
  */
-internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
+private class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
 
   private lateinit var delegate: DefaultTested<Activity>
 
@@ -318,7 +318,7 @@ internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterRes
  * Marker values representing the kind of parameter
  * used by an [ActivityTest] method.
  */
-internal sealed class ParameterType(val valid: Boolean) {
+private sealed class ParameterType(val valid: Boolean) {
 
   /* Positive */
 
