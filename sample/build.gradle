@@ -58,12 +58,6 @@ junitPlatform {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 
-  androidTestImplementation project(":instrumentation")
-  androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.1"
-
-  androidTestCompileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
-  androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
-
   testImplementation junit5()
   testImplementation junit5Params()
   testCompileOnly junit5EmbeddedRuntime()

@@ -1,11 +1,12 @@
 package de.mannodermaus.junit5
 
 import android.app.Activity
+import android.app.Instrumentation
 import android.content.Intent
-import android.support.test.rule.ActivityTestRule
+import android.os.Bundle
+import android.support.test.InstrumentationRegistry
+import android.support.test.runner.MonitoringInstrumentation
 import android.util.Log
-import de.mannodermaus.junit5.ParameterType.PLAIN
-import de.mannodermaus.junit5.ParameterType.WRAPPED
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
@@ -19,6 +20,15 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.FUNCTION
 import kotlin.reflect.KClass
+
+/* Constants */
+
+private const val ABSENT_TARGET_PACKAGE = "-"
+private const val NO_FLAGS_SET = 0
+private const val DEFAULT_LAUNCH_ACTIVITY = true
+private const val DEFAULT_INITIAL_TOUCH_MODE = true
+
+private const val LOG_TAG = "ActivityTest"
 
 /* Public API */
 
@@ -43,10 +53,11 @@ import kotlin.reflect.KClass
 @Target(CLASS, FUNCTION)
 @ExtendWith(ActivityTestExtension::class)
 annotation class ActivityTest(
-    val value: KClass<out Activity>,
-    val targetPackage: String = "",
-    val launchFlags: Int = 0,
-    val launchActivity: Boolean = true)
+    val value: KClass<out android.app.Activity>,
+    val targetPackage: String = ABSENT_TARGET_PACKAGE,
+    val launchFlags: Int = NO_FLAGS_SET,
+    val initialTouchMode: Boolean = DEFAULT_INITIAL_TOUCH_MODE,
+    val launchActivity: Boolean = DEFAULT_LAUNCH_ACTIVITY)
 
 /**
  * Controller object representing an Activity under test.
@@ -56,10 +67,128 @@ annotation class ActivityTest(
  * To obtain an instance, add a parameter of type [Tested] to your test method
  * and assign it the generic type of the Activity described in the scope's [ActivityTest].
  */
-class Tested<out T : Activity>(private val cls: Class<T>) {
+class Tested<T : android.app.Activity>(private val config: ActivityTest) {
 
-  // TODO For example - populate using ActivityTestRule<T>
-  fun launchActivity(intent: Intent? = null): T? = null
+  private val instrumentation = InstrumentationRegistry.getInstrumentation()
+
+  private var _activity: T? = null
+  var activity: T? = null
+    get() {
+      if (_activity == null) {
+        Log.w("Tested", "Activity wasn't created yet")
+      }
+      return _activity
+    }
+
+  /* Public API */
+
+  /**
+   * Launches the Activity under test.
+   *
+   * Don't call this method directly, unless you explicitly requested
+   * not to lazily launch the Activity manually using the launchActivity flag
+   * in the [ActivityTest] configuration annotation.
+   *
+   * @throws ActivityAlreadyLaunchedException if the Activity was already launched
+   */
+  @Suppress("UNCHECKED_CAST")
+  fun launchActivity(intent: Intent? = null): T {
+    if (activity != null) {
+      throw ActivityAlreadyLaunchedException()
+    }
+
+    instrumentation.setInTouchMode(config.initialTouchMode)
+
+    // Construct launcher Intent, injecting configuration along the way
+    val startIntent = if (intent == null) {
+      Log.i(LOG_TAG, "Launching with default: Intent(Intent.ACTION_MAIN)")
+      Intent(Intent.ACTION_MAIN)
+    } else {
+      intent
+    }
+
+    if (startIntent.component == null) {
+      // Fall back to the default Target Context's package name if none is set
+      val targetPackage = if (config.targetPackage == ABSENT_TARGET_PACKAGE) {
+        InstrumentationRegistry.getTargetContext().packageName
+      } else {
+        config.targetPackage
+      }
+      startIntent.setClassName(targetPackage, config.value.java.name)
+    }
+
+    if (startIntent.flags == NO_FLAGS_SET) {
+      startIntent.addFlags(config.launchFlags)
+    }
+
+    Log.i(LOG_TAG, "Launching activity: ${startIntent.component}")
+
+    this._activity = config.value.java.cast(instrumentation.startActivitySync(startIntent)) as T
+
+    instrumentation.waitForIdleSync()
+
+    if (activity == null) {
+      // Log an error message because the Activity failed to launch
+      val errorMessage = "$LOG_TAG Activity ${startIntent.component}, failed to launch"
+      val bundle = Bundle()
+      bundle.putString(Instrumentation.REPORT_KEY_STREAMRESULT, errorMessage)
+      instrumentation.sendStatus(0, bundle)
+      Log.e(LOG_TAG, errorMessage)
+    }
+
+    // Blow up if necessary
+    return activity!!
+  }
+
+  /**
+   * Finishes the currently launched Activity.
+   *
+   * @throws ActivityNotLaunchedException if the Activity is not running
+   */
+  fun finishActivity() {
+    val activity = this.activity ?: throw ActivityNotLaunchedException()
+
+    activity.finish()
+    _activity = null
+    instrumentation.waitForIdleSync()
+  }
+
+  /**
+   * This method can be used to retrieve the Activity result of an Activity that has called setResult.
+   * Usually, the result is handled in onActivityResult of parent activity, that has called startActivityForResult.
+   * This method must not be called before Activity.finish was called.
+   *
+   * @throws ActivityNotLaunchedException if the Activity is not running
+   */
+  fun getActivityResult(): Instrumentation.ActivityResult {
+    val activity = this.activity ?: throw ActivityNotLaunchedException()
+    return activity.result
+  }
+
+  /* Internal API */
+
+  internal fun onBeforeTestExecution(context: ExtensionContext) {
+    // This method is mirroring the first half of
+    // ActivityTestRule.ActivityStatement#evaluate().
+
+    // TODO Include ActivityFactory checks
+//    val monitoringInstrumentation = this.instrumentation as? MonitoringInstrumentation
+
+    if (config.launchActivity) {
+      launchActivity(null)
+    }
+  }
+
+  internal fun onAfterTestExecution(context: ExtensionContext) {
+    // This method is mirroring the second half of
+    // ActivityTestRule.ActivityStatement#evaluate().
+    val monitoringInstrumentation = this.instrumentation as? MonitoringInstrumentation
+    monitoringInstrumentation?.useDefaultInterceptingActivityFactory()
+
+    if (activity != null) {
+      finishActivity()
+    }
+  }
 }
 
 /* Internal API */
@@ -73,77 +202,94 @@ class Tested<out T : Activity>(private val cls: Class<T>) {
  */
 internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
 
-  // TODO Move to Tested<T>
-  private lateinit var delegate: ActivityTestRule<out Activity>
+  private lateinit var delegate: Tested<out android.app.Activity>
 
   /* BeforeTestExecution */
 
   override fun beforeTestExecution(context: ExtensionContext) {
-    val target = context.testedActivityClass() ?: return
+    // Construct a controlling Delegate to drive the test with
+    val config = context.findActivityTestConfig() ?: return
 
-    // TODO Move to Tested<T>
-    this.delegate = ActivityTestRule(target, true)
-    this.delegate.launchActivity(null)
+    this.delegate = Tested(config)
+    this.delegate.onBeforeTestExecution(context)
   }
 
   /* ParameterResolver */
 
   override fun supportsParameter(parameterContext: ParameterContext,
       extensionContext: ExtensionContext): Boolean {
-    val klass = extensionContext.testedActivityClass() ?: return false
-    return getParameterType(klass, parameterContext) != null
+    val config = extensionContext.findActivityTestConfig() ?: return false
+    val paramType = getParameterType(config.value, parameterContext)
+
+    return when (paramType) {
+    // Possibly a developer error; throw a descriptive exception early
+      is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(
+          expected = config.value.java,
+          actual = paramType.actual)
+
+    // Otherwise check for Unknown
+      else -> paramType != ParameterType.Unknown
+    }
   }
 
   override fun resolveParameter(parameterContext: ParameterContext,
       extensionContext: ExtensionContext): Any? {
-    val klass = extensionContext.testedActivityClass() ?: return null
-    val parameterType = getParameterType(klass, parameterContext) ?: return null
+    val config = extensionContext.findActivityTestConfig() ?: return null
+    val parameterType = getParameterType(config.value, parameterContext)
+
     return when (parameterType) {
-      PLAIN -> delegate.activity
-      WRAPPED -> Tested(klass)
+      ParameterType.Activity -> delegate.activity
+      ParameterType.ValidTestedWrapper -> delegate
+      else -> null
     }
   }
 
   private fun getParameterType(
-      targetClass: Class<out Activity>,
-      parameterContext: ParameterContext): ParameterType? {
+      targetClass: KClass<out android.app.Activity>,
+      parameterContext: ParameterContext): ParameterType {
     val parameter = parameterContext.parameter
     val type = parameter.parameterizedType
+    val activityClassJava = targetClass.java
 
     when (type) {
       is Class<*> -> {
-        if (type == targetClass) {
+        if (type == activityClassJava) {
           Log.w("ActivityTestExtension", "Is 'Class': $parameter")
-          return PLAIN
+          return ParameterType.Activity
         }
       }
       is ParameterizedType -> {
-        if (type.rawType == Tested::class.java && type.actualTypeArguments[0] == targetClass) {
-          Log.w("ActivityTestExtension", "Is 'Wrapped': $parameter")
-          return WRAPPED
+        if (type.rawType == Tested::class.java) {
+          val argumentType = type.actualTypeArguments[0] as Class<*>
+          return if (argumentType == activityClassJava) {
+            Log.w("ActivityTestExtension", "Is 'Wrapped': $parameter")
+            ParameterType.ValidTestedWrapper
+
+          } else {
+            ParameterType.InvalidTestedWrapper(argumentType)
+          }
         }
       }
     }
 
     Log.w("ActivityTestExtension", "Is Nothing: ${parameter.parameterizedType}")
-    return null
+    return ParameterType.Unknown
   }
 
   /* AfterTestExecution */
 
   override fun afterTestExecution(context: ExtensionContext) {
-    // TODO Move to Tested<T>
-    delegate.finishActivity()
+    this.delegate.onAfterTestExecution(context)
   }
 
   /* Extension Functions */
 
-  private fun ExtensionContext.testedActivityClass(): Class<out Activity>? =
+  private fun ExtensionContext.findActivityTestConfig(): ActivityTest? =
       sequenceOf(element, parent.flatMap { it.element })
           .filter { it.isPresent }
           .map { AnnotationSupport.findAnnotation(it.get(), ActivityTest::class.java) }
           .filter { it.isPresent }
-          .map { it.get().value.java }
+          .map { it.get() }
           .firstOrNull()
 }
 
@@ -151,4 +297,33 @@ internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterRes
  * Marker values representing the kind of parameter
  * used by an [ActivityTest] method.
  */
-internal enum class ParameterType { PLAIN, WRAPPED }
+internal sealed class ParameterType {
+
+  /* Positive */
+
+  /**
+   * The parameter is equal to the [ActivityTestExtension]'s
+   * "Activity under test".
+   */
+  object Activity : ParameterType()
+
+  /**
+   * The parameter is a [Tested] controller with the correct
+   * "Activity under test" sub-type.
+   */
+  object ValidTestedWrapper : ParameterType()
+
+  /* Negative */
+
+  /**
+   * The parameter is a [Tested] controller, but the sub-type
+   * doesn't match the declared "Activity under test" in the
+   * [ActivityTestExtension].
+   */
+  class InvalidTestedWrapper(val actual: Class<*>) : ParameterType()
+
+  /**
+   * The parameter is of unknown type to the [ActivityTestExtension].
+   */
+  object Unknown : ParameterType()
+}

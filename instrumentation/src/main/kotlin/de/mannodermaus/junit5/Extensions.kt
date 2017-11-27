@@ -8,3 +8,7 @@ fun <T> Optional<T>.or(other: Optional<T>) =
     } else {
       other
     }
+
+/* Collections */
+
+fun <T : Any> T.notIn(values: Collection<T>) = !values.contains(this)
