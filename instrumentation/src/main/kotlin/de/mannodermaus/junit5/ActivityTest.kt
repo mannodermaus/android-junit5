@@ -2,6 +2,7 @@ package de.mannodermaus.junit5
 
 import android.app.Activity
 import android.app.Instrumentation
+import android.app.Instrumentation.ActivityResult
 import android.content.Intent
 import android.os.Bundle
 import android.support.test.InstrumentationRegistry
@@ -68,26 +69,12 @@ annotation class ActivityTest(
  * To obtain an instance, add a parameter of type [Tested] to your test method
  * and assign it the generic type of the Activity described in the scope's [ActivityTest].
  */
-class Tested<T : Activity>
-internal constructor(
-    // Configuration values provided through the test method, or its surrounding class
-    internal val config: ActivityTest,
-    // List of parameter types in the test method's signature
-    private val parameterTypes: List<ParameterType>) {
+interface Tested<out T : Activity> {
 
-  private val instrumentation = InstrumentationRegistry.getInstrumentation()
-
-  // Public getter, private setter
-  private var _activity: T? = null
-  var activity: T? = null
-    get() {
-      if (_activity == null) {
-        Log.w(LOG_TAG, "Activity wasn't created yet")
-      }
-      return _activity
-    }
-
-  /* Public API */
+  /**
+   * Obtains the current Activity under test, if any.
+   */
+  val activity: T?
 
   /**
    * Launches the Activity under test.
@@ -98,8 +85,44 @@ internal constructor(
    *
    * @throws ActivityAlreadyLaunchedException if the Activity was already launched
    */
+  fun launchActivity(intent: Intent? = null): T
+
+  /**
+   * Finishes the currently launched Activity.
+   *
+   * @throws ActivityNotLaunchedException if the Activity is not running
+   */
+  fun finishActivity()
+
+  /**
+   * This method can be used to retrieve the Activity result of an Activity that has called setResult.
+   * Usually, the result is handled in onActivityResult of parent activity, that has called startActivityForResult.
+   * This method must not be called before Activity.finish was called.
+   *
+   * @throws ActivityNotLaunchedException if the Activity is not running
+   */
+  fun getActivityResult(): ActivityResult
+}
+
+/* Internal API */
+
+internal class DefaultTested<out T : Activity>
+constructor(
+    // Configuration values provided through the test method, or its surrounding class
+    val config: ActivityTest,
+    // List of parameter types in the test method's signature
+    private val parameterTypes: List<ParameterType>)
+  : Tested<T> {
+
+  private val instrumentation = InstrumentationRegistry.getInstrumentation()
+
+  /* Overrides */
+
+  private var _activity: T? = null
+  override val activity get() = _activity
+
   @Suppress("UNCHECKED_CAST")
-  fun launchActivity(intent: Intent? = null): T {
+  override fun launchActivity(intent: Intent?): T {
     if (activity != null) {
       throw ActivityAlreadyLaunchedException()
     }
@@ -147,27 +170,15 @@ internal constructor(
     return activity!!
   }
 
-  /**
-   * Finishes the currently launched Activity.
-   *
-   * @throws ActivityNotLaunchedException if the Activity is not running
-   */
-  fun finishActivity() {
+  override fun finishActivity() {
     val activity = this.activity ?: throw ActivityNotLaunchedException()
 
     activity.finish()
-    _activity = null
+    this._activity = null
     instrumentation.waitForIdleSync()
   }
 
-  /**
-   * This method can be used to retrieve the Activity result of an Activity that has called setResult.
-   * Usually, the result is handled in onActivityResult of parent activity, that has called startActivityForResult.
-   * This method must not be called before Activity.finish was called.
-   *
-   * @throws ActivityNotLaunchedException if the Activity is not running
-   */
-  fun getActivityResult(): Instrumentation.ActivityResult {
+  override fun getActivityResult(): Instrumentation.ActivityResult {
     val activity = this.activity ?: throw ActivityNotLaunchedException()
     return activity.result
   }
@@ -205,8 +216,6 @@ internal constructor(
   }
 }
 
-/* Internal API */
-
 /**
  * JUnit Platform Extension revolving around support
  * for Activity-based instrumentation testing on Android.
@@ -216,7 +225,7 @@ internal constructor(
  */
 internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
 
-  private lateinit var delegate: Tested<out Activity>
+  private lateinit var delegate: DefaultTested<Activity>
 
   /* BeforeTestExecution */
 
@@ -226,7 +235,7 @@ internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterRes
     val parameterTypes = context.requiredTestMethod.parameters
         .map { it.describeTypeInRelationToClass(config.value) }
 
-    this.delegate = Tested(config, parameterTypes)
+    this.delegate = DefaultTested(config, parameterTypes)
     this.delegate.onBeforeTestExecution()
   }
 

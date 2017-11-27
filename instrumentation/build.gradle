@@ -20,7 +20,6 @@ android {
     main.java.srcDirs += "src/main/kotlin"
     test.java.srcDirs += "src/test/kotlin"
     androidTest.java.srcDirs += "src/androidTest/kotlin"
-    commonTest.java.srcDirs += "src/commonTest/kotlin"
   }
 
   compileOptions {
@@ -32,12 +31,6 @@ android {
     exclude "META-INF/LICENSE.md"
     exclude "META-INF/LICENSE-notice.md"
   }
-}
-
-configurations {
-  commonTestImplementation
-  androidTestImplementation.extendsFrom(commonTestImplementation)
-  testImplementation.extendsFrom(commonTestImplementation)
 }
 
 dependencies {

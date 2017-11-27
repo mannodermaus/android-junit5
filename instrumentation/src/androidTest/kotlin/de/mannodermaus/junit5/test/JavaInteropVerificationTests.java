@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
   @Test void launchAutomaticallyActivityParameter(FirstActivity activity) {
   }
 
-  @Test void launchAutomaticallyTestedParameter(Tested<FirstActivity> activity) {
+  @Test void launchAutomaticallyTestedParameter(Tested<FirstActivity> tested) {
   }
 
   @Test
   @ActivityTest(value = FirstActivity.class, targetPackage = "some.other.weird.package", launchFlags = Intent.FLAG_ACTIVITY_NO_HISTORY, initialTouchMode = false, launchActivity = false)
-  void bloatedConfigAnnotation(Tested<FirstActivity> activity) {
+  void bloatedConfigAnnotation(Tested<FirstActivity> tested) {
   }
 }
