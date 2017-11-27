@@ -32,7 +32,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
     project.configureExtensions()
     project.configureDependencies()
-    project.afterEvaluate { it.configureTasks() }
+    project.afterEvaluate {
+      it.configureTasks()
+      it.configureAndroid()
+    }
   }
 
   private fun Project.configureExtensions() {
@@ -124,5 +127,13 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     }
 
     return providers
+  }
+
+  private fun Project.configureAndroid() {
+    // Include the JUnit 5-based instrumentation Runner
+    // in the default configuration.
+    // This is the gateway for automatic instrumented tests support
+    val defaultConfig = this.android.safeDefaultConfig
+    defaultConfig.testInstrumentationRunnerArguments[RUNNER_BUILDER_ARG] = JUNIT5_RUNNER_BUILDER_CLASS_NAME
   }
 }
