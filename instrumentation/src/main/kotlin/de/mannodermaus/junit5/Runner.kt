@@ -8,6 +8,9 @@ import org.junit.runners.model.RunnerBuilder
 /* Constants */
 
 private const val LOG_TAG = "AndroidJUnit5"
+private val jupiterTestAnnotations = listOf(
+    org.junit.jupiter.api.Test::class.java,
+    org.junit.jupiter.api.TestFactory::class.java)
 
 /* Types */
 
@@ -19,16 +22,25 @@ private const val LOG_TAG = "AndroidJUnit5"
  * Replacement For:
  * AndroidJUnit4
  */
-class AndroidJUnit5(
+internal class AndroidJUnit5(
     klass: Class<*>
 ) : JUnitPlatform(klass)
 
+/**
+ * Suppressing unused, since this is hooked into the
+ * project configuration via a Test Instrumentation Runner Argument.
+ *
+ * With this, the default JUnit 4-based Runner
+ * for Android instrumented tests is, in a way, tricked
+ * into detecting JUnit Jupiter tests as well.
+ */
+@Suppress("unused")
 class AndroidJUnit5Builder : RunnerBuilder() {
 
   @Throws(Throwable::class)
   override fun runnerForClass(testClass: Class<*>): Runner? {
     try {
-      if (!hasTestMethods(testClass)) {
+      if (!testClass.hasJupiterTestMethods()) {
         return null
       }
 
@@ -40,15 +52,33 @@ class AndroidJUnit5Builder : RunnerBuilder() {
     }
   }
 
-  private fun hasTestMethods(testClass: Class<*>): Boolean {
-    return try {
-      testClass.methods.firstOrNull {
-        it.isAnnotationPresent(org.junit.jupiter.api.Test::class.java)
-      } != null
+  /* Extension Functions */
+
+  private fun Class<*>.hasJupiterTestMethods(): Boolean {
+    try {
+      // Check each method in the Class for the presence
+      // of the well-known list of JUnit Jupiter annotations
+      val testMethod = declaredMethods.firstOrNull { method ->
+        jupiterTestAnnotations.firstOrNull { annotation ->
+          method.isAnnotationPresent(annotation)
+        } != null
+      }
+
+      if (testMethod != null) {
+        return true
+      }
+
+      // Recursively check inner classes as well
+      declaredClasses.forEach { inner ->
+        if (inner.hasJupiterTestMethods()) {
+          return true
+        }
+      }
 
     } catch (t: Throwable) {
-      Log.w(LOG_TAG, "$t in hasTestMethods for ${testClass.name}")
-      false
+      Log.w(LOG_TAG, "$t in hasTestMethods for $name")
     }
+
+    return false
   }
 }

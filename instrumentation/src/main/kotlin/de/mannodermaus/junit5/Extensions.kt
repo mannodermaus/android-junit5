@@ -1,5 +1,6 @@
 package de.mannodermaus.junit5
 
+import java.lang.reflect.Executable
 import java.util.Optional
 
 fun <T> Optional<T>.or(other: Optional<T>) =
@@ -11,4 +12,12 @@ fun <T> Optional<T>.or(other: Optional<T>) =
 
 /* Collections */
 
-fun <T : Any> T.notIn(values: Collection<T>) = !values.contains(this)
+fun <T : Annotation> Executable.isAnyAnnotationPresent(vararg annotationTypes: Class<T>): Boolean {
+  annotationTypes.forEach {
+    if (isAnnotationPresent(it)) {
+      return true
+    }
+  }
+
+  return false
+}

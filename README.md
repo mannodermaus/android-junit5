@@ -121,7 +121,7 @@ junitPlatform {
 `android-junit5` is distributed with multiple Open Source licenses:
 
 - `android-junit5-embedded-runtime` uses [Apache License v2.0](android-junit5-embedded-runtime/LICENSE.md)
-- All other modules use [Eclipse Public License v2.0](android-junit5/LICENSE.md)
+- All other modules use [Eclipse Public License v2.0](android-junit5-gradle-plugin/LICENSE.md)
 
 Please see the `LICENSE.md` files in the subfolders for more details.
 

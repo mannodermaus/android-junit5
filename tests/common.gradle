@@ -39,7 +39,7 @@ test.testLogging {
 
 dependencies {
   // Test Plugin Dependencies
-  testCompile project(":android-junit5")
+  testCompile project(":android-junit5-gradle-plugin")
 
   // Utilities for assertions & tests in general
   testCompile "commons-io:commons-io:$APACHE_COMMONS_VERSION"

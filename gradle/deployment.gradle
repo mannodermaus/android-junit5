@@ -7,6 +7,9 @@
 // * artifactId      : (String, required)
 //    ID of the deployed library
 //
+// * version         : (String, required)
+//    Version of the deployed library
+//
 // * license         : (String, required)
 //    License value of the deployed library
 //
@@ -36,6 +39,7 @@ if (!project.ext.has("deployConfig")) {
 }
 final Map deployConfig = project.ext.deployConfig
 final String artifactId = required(deployConfig, "artifactId")
+final String versionNumber = required(deployConfig, "version")
 final String license = required(deployConfig, "license")
 final String description = required(deployConfig, "description")
 final Closure<MavenPublication> mavenPublication = required(deployConfig, "mavenPublication")
@@ -66,7 +70,7 @@ artifacts {
 // Publication Configuration
 // ------------------------------------------------------------------------------------------------
 
-version = VERSION_NAME
+version = versionNumber
 
 publishing {
   publications {
@@ -125,7 +129,7 @@ project.configure(project) {
         publicDownloadNumbers = true
         vcsUrl = VCS_URL
         version {
-          name = VERSION_NAME
+          name = versionNumber
           desc = description
         }
       }

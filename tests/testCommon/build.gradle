@@ -19,7 +19,7 @@ artifacts {
 
 dependencies {
   // Main Plugin Dependencies
-  compile project(":android-junit5")
+  compile project(':android-junit5-gradle-plugin')
 }
 
 // Resource Writers

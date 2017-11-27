@@ -51,7 +51,7 @@ gradlePlugin {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
-  def tokens = [ANDROID_JUNIT5_VERSION: VERSION_NAME,
+  def tokens = [ANDROID_JUNIT5_VERSION: PLUGIN_VERSION_NAME,
                 JUNIT4_VERSION        : JUNIT4_VERSION,
                 JUNIT_PLATFORM_VERSION: JUNIT_PLATFORM_VERSION,
                 JUNIT_JUPITER_VERSION : JUNIT_JUPITER_VERSION,
@@ -94,6 +94,7 @@ dependencies {
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 project.ext.deployConfig = [artifactId      : PLUGIN_ARTIFACT_ID,
+                            version         : PLUGIN_VERSION_NAME,
                             license         : PLUGIN_LICENSE_NAME,
                             description     : PLUGIN_DESCRIPTION,
                             beforePublishDo : null,
@@ -101,9 +102,9 @@ project.ext.deployConfig = [artifactId      : PLUGIN_ARTIFACT_ID,
                               from components.java
                               artifact sourcesJar
                               artifact javadocJar
-                              groupId GROUP_ID
+                              groupId PLUGIN_GROUP_ID
                               artifactId PLUGIN_ARTIFACT_ID
-                              version VERSION_NAME
+                              version PLUGIN_VERSION_NAME
                               pom.withXml {
                                 def root = asNode()
                                 root.appendNode("description", PLUGIN_DESCRIPTION)

@@ -31,7 +31,7 @@ dependencies {
 shadowJar {
   // Remove '-all' suffix from the generated JAR
   classifier = null
-  version = VERSION_NAME
+  version = PLUGIN_VERSION_NAME
 }
 
 // Replace the default JAR task with the "shadow version",
@@ -47,6 +47,7 @@ jar.dependsOn shadowJar
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 project.ext.deployConfig = [artifactId      : RUNTIME_ARTIFACT_ID,
+                            version         : PLUGIN_VERSION_NAME,
                             license         : RUNTIME_LICENSE_NAME,
                             description     : RUNTIME_DESCRIPTION,
                             beforePublishDo : {
@@ -59,6 +60,7 @@ project.ext.deployConfig = [artifactId      : RUNTIME_ARTIFACT_ID,
                               }
                             },
                             mavenPublication: {
+                              groupId PLUGIN_GROUP_ID
                               project.shadow.component(it)
                             }]
 apply from: "$rootDir/gradle/deployment.gradle"

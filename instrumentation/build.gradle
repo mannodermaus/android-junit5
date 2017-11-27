@@ -1,6 +1,5 @@
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
-apply plugin: "idea"
 
 android {
   compileSdkVersion COMPILE_SDK_VERSION
@@ -13,6 +12,7 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    // TODO Apply automatically through Gradle Plugin eventually
     testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
   }
 
@@ -43,14 +43,14 @@ configurations {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
   implementation "junit:junit:$JUNIT4_VERSION"
-  implementation "com.android.support.test:runner:1.0.1"
-  implementation "com.android.support.test:rules:1.0.1"
+  implementation "com.android.support.test:runner:$SUPPORT_TEST_LIBRARY_VERSION"
   implementation "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
   compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
 
-  androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.1"
+  androidTestImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
+  androidTestImplementation "com.android.support.test.espresso:espresso-core:$ESPRESSO_VERSION"
   androidTestCompileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
 
-  testImplementation "org.mockito:mockito-core:2.12.0"
+  testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
 }
