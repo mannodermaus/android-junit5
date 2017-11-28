@@ -107,23 +107,9 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       project.logger.junit5Info("Root Directories:")
       testRootDirs.forEach { project.logger.junit5Info("|__ $it") }
 
-      if (junit5.enableModulePath) {
-        // Set module-path and clear classpath and main class
-        task.jvmArgs(
-            "--module-path",
-            taskClasspath.asPath,
-            "--add-modules",
-            "ALL-MODULE-PATH"
-        )
-
-        task.classpath = project.files()
-        task.main = ""
-
-      } else {
-        // Use classpath property & configure ConsoleLauncher as the main class
-        task.classpath = taskClasspath
-        task.main = ConsoleLauncher::class.java.name
-      }
+      // Use classpath property & configure ConsoleLauncher as the main class
+      task.classpath = taskClasspath
+      task.main = ConsoleLauncher::class.java.name
 
       // Apply other arguments and properties from the default test task, unless disabled
       // (these are most likely provided by the AGP's testOptions closure)
@@ -157,7 +143,6 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       task.inputs.safeProperty("selectors.classes", junit5.selectors.classes)
       task.inputs.safeProperty("selectors.methods", junit5.selectors.methods)
       task.inputs.safeProperty("selectors.resources", junit5.selectors.resources)
-      task.inputs.safeProperty("selectors.modules", junit5.selectors.modules)
       task.inputs.safeProperty("filters.engines.include", junit5.filters.engines.include)
       task.inputs.safeProperty("filters.engines.exclude", junit5.filters.engines.exclude)
       task.inputs.safeProperty("filters.tags.include", junit5.filters.tags.include)
@@ -216,25 +201,14 @@ open class AndroidJUnit5UnitTest : JavaExec() {
         testRootDirs: List<File>): List<String> {
       val args = mutableListOf<String>()
 
-      // Java 9 Module Path
-      if (junit5.enableModulePath) {
-        args += arrayOf("--module", "org.junit.platform.console")
-      }
-
       // Log Details
       junit5.details?.let { args += arrayOf("--details", it.name) }
 
       // Selectors
       if (junit5.selectors.isEmpty()) {
-        args += if (junit5.enableModulePath) {
-          // Employ module path scanning if that is enabled
-          arrayOf("--scan-modules")
-
-        } else {
-          // Employ classpath scanning if no selectors are given
-          arrayOf("--scan-class-path",
-              testRootDirs.joinToString(separator = File.pathSeparator))
-        }
+        // Employ classpath scanning if no selectors are given
+        args += arrayOf("--scan-class-path",
+            testRootDirs.joinToString(separator = File.pathSeparator))
 
       } else {
         // Otherwise, add each selector individually
@@ -245,7 +219,6 @@ open class AndroidJUnit5UnitTest : JavaExec() {
         junit5.selectors.classes.forEach { args += arrayOf("-c", it) }
         junit5.selectors.methods.forEach { args += arrayOf("-m", it) }
         junit5.selectors.resources.forEach { args += arrayOf("-r", it) }
-        junit5.selectors.modules.forEach { args += arrayOf("-o", it) }
       }
 
       // Filters
