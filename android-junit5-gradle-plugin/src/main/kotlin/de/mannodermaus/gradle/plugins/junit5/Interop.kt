@@ -4,6 +4,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.dsl.CoreProductFlavor
 import com.android.build.gradle.internal.variant.BaseVariantData
+import org.gradle.api.tasks.TaskInputs
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.SelectorsExtension
 
@@ -28,3 +29,6 @@ val BaseVariant.variantData: BaseVariantData
 
 val BaseExtension.safeDefaultConfig: CoreProductFlavor
   get() = GroovyInterop.baseExtension_defaultConfig(this)
+
+fun TaskInputs.safeProperty(key: String, value: Any?) =
+    GroovyInterop.taskInputs_safeProperty(this, key, value)
