@@ -24,9 +24,9 @@ before_install:
   # Install additional Android tools (e.g. avdmanager)
   - sdkmanager tools
   # Install the Emulator system image
-  - sdkmanager "system-images;android-26;default;armeabi-v7a"
+  - sdkmanager "system-images;android-26;google_apis;x86"
   # Create and start Emulator
-  - echo no | avdmanager create avd --force -n test -k "system-images;android-26;default;armeabi-v7a"
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-26;google_apis;x86"
   - $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
 
 install:
