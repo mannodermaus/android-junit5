@@ -1,10 +1,6 @@
 apply plugin: "groovy"
 apply plugin: "kotlin"
 apply plugin: "java-gradle-plugin"
-apply plugin: "idea"
-apply plugin: "maven"
-apply plugin: "maven-publish"
-apply plugin: "com.jfrog.bintray"
 apply plugin: "jacoco"
 
 // ------------------------------------------------------------------------------------------------
@@ -93,7 +89,8 @@ dependencies {
 // Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
-project.ext.deployConfig = [artifactId      : PLUGIN_ARTIFACT_ID,
+project.ext.deployConfig = [platform        : "java",
+                            artifactId      : PLUGIN_ARTIFACT_ID,
                             version         : PLUGIN_VERSION_NAME,
                             license         : PLUGIN_LICENSE_NAME,
                             description     : PLUGIN_DESCRIPTION,
