@@ -62,8 +62,15 @@ class ActivityTestIntegrationTests {
 
   @Test
   @ActivityTest(OtherActivity::class)
-  @DisplayName("Method Parameter overrides class-level declaration")
-  fun methodLevelParameterOverridesClassLevelDeclaration(activity: OtherActivity) {
+  @DisplayName("Method Parameter overrides class-level declaration 1")
+  fun methodLevelParameterOverridesClassLevelDeclaration1(activity: OtherActivity) {
+  }
+
+  @Test
+  @Disabled("No idea how to assert this using an integration test")
+  @ActivityTest(OtherActivity::class)
+  @DisplayName("Method Parameter overrides class-level declaration 2")
+  fun methodLevelParameterOverridesClassLevelDeclaration2(activity: FirstActivity) {
   }
 
   @Test
