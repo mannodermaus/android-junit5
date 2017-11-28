@@ -1,8 +1,10 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.annotations.NonNull
+import com.android.annotations.Nullable
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.variant.BaseVariantData
+import org.gradle.api.tasks.TaskInputs
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.SelectorsExtension
 
@@ -14,6 +16,27 @@ import static java.util.Collections.emptyList
 class GroovyInterop {
   // No instances
   private GroovyInterop() { throw new AssertionError() }
+
+  /**
+   * Add the provided key-value pair to the given TaskInputs object.
+   * Gradle 4.3 included a binary-incompatible change to this method's
+   * return type, which fails for clients running older versions of the
+   * build system.
+   *
+   * Refer to the related issue on GitHub:
+   * https://github.com/mannodermaus/android-junit5/issues/34
+   *
+   * FIXME Once the plugin's minimal Gradle version reaches 4.3, remove this.
+   *
+   * @param inputs TaskInputs to update
+   * @param key Key of the property to set
+   * @param value Value of the property to set
+   * @return Self reference with a backwards-compatible type
+   */
+  @NonNull
+  static TaskInputs taskInputs_safeProperty(TaskInputs inputs, String key, @Nullable Object value) {
+    return inputs.property(key, value) as TaskInputs
+  }
 
   /**
    * Obtains the VariantData of the provided Variant.

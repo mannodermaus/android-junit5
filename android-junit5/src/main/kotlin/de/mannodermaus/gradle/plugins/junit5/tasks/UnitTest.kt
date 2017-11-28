@@ -16,6 +16,7 @@ import de.mannodermaus.gradle.plugins.junit5.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.packages
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
+import de.mannodermaus.gradle.plugins.junit5.safeProperty
 import de.mannodermaus.gradle.plugins.junit5.selectors
 import de.mannodermaus.gradle.plugins.junit5.tags
 import de.mannodermaus.gradle.plugins.junit5.variantData
@@ -147,24 +148,24 @@ open class AndroidJUnit5UnitTest : JavaExec() {
     private fun configureTaskInputs(
         task: AndroidJUnit5UnitTest,
         junit5: AndroidJUnitPlatformExtension) {
-      task.inputs.property("enableStandardTestTask", junit5.enableStandardTestTask)
-      task.inputs.property("configurationParameters", junit5.configurationParameters)
-      task.inputs.property("selectors.uris", junit5.selectors.uris)
-      task.inputs.property("selectors.files", junit5.selectors.files)
-      task.inputs.property("selectors.directories", junit5.selectors.directories)
-      task.inputs.property("selectors.packages", junit5.selectors.packages)
-      task.inputs.property("selectors.classes", junit5.selectors.classes)
-      task.inputs.property("selectors.methods", junit5.selectors.methods)
-      task.inputs.property("selectors.resources", junit5.selectors.resources)
-      task.inputs.property("selectors.modules", junit5.selectors.modules)
-      task.inputs.property("filters.engines.include", junit5.filters.engines.include)
-      task.inputs.property("filters.engines.exclude", junit5.filters.engines.exclude)
-      task.inputs.property("filters.tags.include", junit5.filters.tags.include)
-      task.inputs.property("filters.tags.exclude", junit5.filters.tags.exclude)
-      task.inputs.property("filters.includeClassNamePatterns",
+      task.inputs.safeProperty("enableStandardTestTask", junit5.enableStandardTestTask)
+      task.inputs.safeProperty("configurationParameters", junit5.configurationParameters)
+      task.inputs.safeProperty("selectors.uris", junit5.selectors.uris)
+      task.inputs.safeProperty("selectors.files", junit5.selectors.files)
+      task.inputs.safeProperty("selectors.directories", junit5.selectors.directories)
+      task.inputs.safeProperty("selectors.packages", junit5.selectors.packages)
+      task.inputs.safeProperty("selectors.classes", junit5.selectors.classes)
+      task.inputs.safeProperty("selectors.methods", junit5.selectors.methods)
+      task.inputs.safeProperty("selectors.resources", junit5.selectors.resources)
+      task.inputs.safeProperty("selectors.modules", junit5.selectors.modules)
+      task.inputs.safeProperty("filters.engines.include", junit5.filters.engines.include)
+      task.inputs.safeProperty("filters.engines.exclude", junit5.filters.engines.exclude)
+      task.inputs.safeProperty("filters.tags.include", junit5.filters.tags.include)
+      task.inputs.safeProperty("filters.tags.exclude", junit5.filters.tags.exclude)
+      task.inputs.safeProperty("filters.includeClassNamePatterns",
           junit5.filters.getIncludeClassNamePatterns())
-      task.inputs.property("filters.packages.include", junit5.filters.packages.include)
-      task.inputs.property("filters.packages.exclude", junit5.filters.packages.exclude)
+      task.inputs.safeProperty("filters.packages.include", junit5.filters.packages.include)
+      task.inputs.safeProperty("filters.packages.exclude", junit5.filters.packages.exclude)
 
       junit5.logManager?.let {
         task.systemProperty("java.util.logging.manager", junit5.logManager)
