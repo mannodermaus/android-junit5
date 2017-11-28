@@ -21,7 +21,6 @@ android {
   // to always update the Travis CI .yml config, too
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   compileSdkVersion COMPILE_SDK_VERSION
-  buildToolsVersion BUILD_TOOLS_VERSION
 
   defaultConfig {
     applicationId "de.mannodermaus.junit5.sample"
