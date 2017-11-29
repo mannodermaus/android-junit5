@@ -92,7 +92,7 @@ dependencies {
 project.ext.deployConfig = [platform        : "java",
                             artifactId      : PLUGIN_ARTIFACT_ID,
                             version         : PLUGIN_RUNTIME_VERSION_NAME,
-                            license         : PLUGIN_LICENSE_NAME,
+                            license         : LICENSE_NAME,
                             description     : PLUGIN_DESCRIPTION,
                             beforePublishDo : null,
                             mavenPublication: {

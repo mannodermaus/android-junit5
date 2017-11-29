@@ -47,20 +47,6 @@ class ActivityTestIntegrationTests {
   }
 
   @Test
-  @Disabled("No idea how to assert this using an integration test")
-  @ActivityTest(FirstActivity::class, launchActivity = false)
-  @DisplayName("Manual Launch without Tested Parameter is useless")
-  fun manualLaunchWithoutTestedParameterIsUseless() {
-  }
-
-  @Test
-  @Disabled("No idea how to assert this using an integration test")
-  @ActivityTest(FirstActivity::class, launchActivity = false)
-  @DisplayName("Manual Launch with Activity Parameter is useless")
-  fun manualLaunchWithActivityParameterIsUseless(activity: FirstActivity) {
-  }
-
-  @Test
   @ActivityTest(OtherActivity::class)
   @DisplayName("Method Parameter overrides class-level declaration 1")
   fun methodLevelParameterOverridesClassLevelDeclaration1(activity: OtherActivity) {

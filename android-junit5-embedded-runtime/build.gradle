@@ -46,7 +46,7 @@ jar.dependsOn shadowJar
 project.ext.deployConfig = [platform        : "java",
                             artifactId      : RUNTIME_ARTIFACT_ID,
                             version         : PLUGIN_RUNTIME_VERSION_NAME,
-                            license         : RUNTIME_LICENSE_NAME,
+                            license         : LICENSE_NAME,
                             description     : RUNTIME_DESCRIPTION,
                             beforePublishDo : {
                               // Manually verify that the JAR file isn't "empty"

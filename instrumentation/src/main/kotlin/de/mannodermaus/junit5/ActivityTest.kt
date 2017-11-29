@@ -5,6 +5,7 @@ import android.app.Instrumentation
 import android.app.Instrumentation.ActivityResult
 import android.content.Intent
 import android.os.Bundle
+import android.support.annotation.VisibleForTesting
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.MonitoringInstrumentation
 import android.util.Log
@@ -106,15 +107,21 @@ interface Tested<out T : Activity> {
 
 /* Internal API */
 
-private class DefaultTested<out T : Activity>
+@VisibleForTesting
+internal class DefaultTested<out T : Activity>
 constructor(
-    // Configuration values provided through the test method, or its surrounding class
-    val config: ActivityTest,
-    // List of parameter types in the test method's signature
-    private val parameterTypes: List<ParameterType>)
+    val activityClass: Class<out T>,
+    private val parameterTypes: List<ParameterType>,
+    val targetPackage: String = ABSENT_TARGET_PACKAGE,
+    val launchFlags: Int = NO_FLAGS_SET,
+    val initialTouchMode: Boolean = DEFAULT_INITIAL_TOUCH_MODE,
+    val launchActivity: Boolean = DEFAULT_LAUNCH_ACTIVITY)
   : Tested<T> {
 
-  private val instrumentation = InstrumentationRegistry.getInstrumentation()
+  // Used to override the default Instrumentation, obtained from the registry
+  // (primary application: Unit Testing)
+  private var _instrumentation: Instrumentation? = null
+  private val instrumentation get() = _instrumentation ?: InstrumentationRegistry.getInstrumentation()
 
   /* Overrides */
 
@@ -127,28 +134,28 @@ constructor(
       throw ActivityAlreadyLaunchedException()
     }
 
-    instrumentation.setInTouchMode(config.initialTouchMode)
+    instrumentation.setInTouchMode(this.initialTouchMode)
 
     // Construct launcher Intent, injecting configuration along the way
     val startIntent = intent ?: Intent(Intent.ACTION_MAIN)
 
     if (startIntent.component == null) {
       // Fall back to the default Target Context's package name if none is set
-      val targetPackage = if (config.targetPackage == ABSENT_TARGET_PACKAGE) {
+      val targetPackage = if (this.targetPackage == ABSENT_TARGET_PACKAGE) {
         InstrumentationRegistry.getTargetContext().packageName
       } else {
-        config.targetPackage
+        this.targetPackage
       }
-      startIntent.setClassName(targetPackage, config.value.java.name)
+      startIntent.setClassName(targetPackage, activityClass.name)
     }
 
     if (startIntent.flags == NO_FLAGS_SET) {
-      startIntent.addFlags(config.launchFlags)
+      startIntent.addFlags(this.launchFlags)
     }
 
     Log.i(LOG_TAG, "Launching activity: ${startIntent.component} with Intent: $startIntent")
 
-    this._activity = config.value.java.cast(instrumentation.startActivitySync(startIntent)) as T
+    this._activity = this.activityClass.cast(instrumentation.startActivitySync(startIntent)) as T
 
     instrumentation.waitForIdleSync()
 
@@ -180,13 +187,17 @@ constructor(
 
   /* Internal API */
 
+  internal fun setInstrumentation(instrumentation: Instrumentation) {
+    this._instrumentation = instrumentation
+  }
+
   internal fun parameterTypeAt(index: Int): ParameterType = parameterTypes[index]
 
   internal fun onBeforeTestExecution() {
     // Check for undesirable states:
     // * Lacking a Tested<T> parameter with manual Activity launching is useless
-    if (!config.launchActivity && !parameterTypes.contains(ParameterType.ValidTestedWrapper)) {
-      throw MissingTestedParameterException(config.value.java)
+    if (!this.launchActivity && !parameterTypes.contains(ParameterType.ValidTestedWrapper)) {
+      throw MissingTestedParameterException(this.activityClass)
     }
 
     // From here on, this method is mirroring the first half of
@@ -194,7 +205,7 @@ constructor(
     // TODO Include ActivityFactory checks eventually
 //    val monitoringInstrumentation = this.instrumentation as? MonitoringInstrumentation
 
-    if (config.launchActivity) {
+    if (this.launchActivity) {
       launchActivity(null)
     }
   }
@@ -209,6 +220,17 @@ constructor(
       finishActivity()
     }
   }
+
+  fun validateParameterOrThrow(parameterType: ParameterType): Boolean =
+      when (parameterType) {
+      // Possibly a developer error; throw a descriptive exception
+        is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(
+            expected = this.activityClass,
+            actual = parameterType.actual)
+
+      // Otherwise, communicate only valid parameter types
+        else -> parameterType.valid
+      }
 }
 
 /**
@@ -218,7 +240,8 @@ constructor(
  * This Extension takes the place of the ActivityTestRule
  * from the JUnit4-centered Test Support Library.
  */
-private class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
+@VisibleForTesting
+internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
 
   private lateinit var delegate: DefaultTested<Activity>
 
@@ -230,7 +253,13 @@ private class ActivityTestExtension : BeforeTestExecutionCallback, ParameterReso
     val parameterTypes = context.requiredTestMethod.parameters
         .map { it.describeTypeInRelationToClass(config.value) }
 
-    this.delegate = DefaultTested(config, parameterTypes)
+    this.delegate = DefaultTested(
+        activityClass = config.value.java,
+        targetPackage = config.targetPackage,
+        launchFlags = config.launchFlags,
+        initialTouchMode = config.initialTouchMode,
+        launchActivity = config.launchActivity,
+        parameterTypes = parameterTypes)
     this.delegate.onBeforeTestExecution()
   }
 
@@ -273,16 +302,7 @@ private class ActivityTestExtension : BeforeTestExecutionCallback, ParameterReso
   override fun supportsParameter(parameterContext: ParameterContext,
       extensionContext: ExtensionContext): Boolean {
     val parameterType = delegate.parameterTypeAt(parameterContext.index)
-
-    return when (parameterType) {
-    // Possibly a developer error; throw a descriptive exception early
-      is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(
-          expected = delegate.config.value.java,
-          actual = parameterType.actual)
-
-    // Otherwise, allow only valid types to pass
-      else -> parameterType.valid
-    }
+    return delegate.validateParameterOrThrow(parameterType)
   }
 
   override fun resolveParameter(parameterContext: ParameterContext,
@@ -313,7 +333,8 @@ private class ActivityTestExtension : BeforeTestExecutionCallback, ParameterReso
  * Marker values representing the kind of parameter
  * used by an [ActivityTest] method.
  */
-private sealed class ParameterType(val valid: Boolean) {
+@VisibleForTesting
+internal sealed class ParameterType(val valid: Boolean) {
 
   /* Positive */
 

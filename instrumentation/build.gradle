@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
@@ -26,6 +28,10 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
   }
 
+  tasks.withType(KotlinCompile).all {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
+  }
+
   lintOptions {
     // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
     warning "InvalidPackage"
@@ -34,6 +40,10 @@ android {
   packagingOptions {
     exclude "META-INF/LICENSE.md"
     exclude "META-INF/LICENSE-notice.md"
+  }
+
+  testOptions {
+    unitTests.returnDefaultValues = true
   }
 }
 
@@ -50,6 +60,10 @@ dependencies {
   androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
 
   testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
+  testCompileOnly project(":android-junit5-embedded-runtime")
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -61,7 +75,7 @@ dependencies {
 project.ext.deployConfig = [platform        : "android",
                             artifactId      : INSTRUMENTATION_ARTIFACT_ID,
                             version         : INSTRUMENTATION_VERSION_NAME,
-                            license         : INSTRUMENTATION_LICENSE_NAME,
+                            license         : LICENSE_NAME,
                             description     : INSTRUMENTATION_DESCRIPTION,
                             beforePublishDo : null,
                             mavenPublication: {
