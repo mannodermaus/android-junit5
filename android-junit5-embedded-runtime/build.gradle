@@ -28,7 +28,7 @@ dependencies {
 shadowJar {
   // Remove '-all' suffix from the generated JAR
   classifier = null
-  version = PLUGIN_VERSION_NAME
+  version = PLUGIN_RUNTIME_VERSION_NAME
 }
 
 // Replace the default JAR task with the "shadow version",
@@ -45,7 +45,7 @@ jar.dependsOn shadowJar
 // ------------------------------------------------------------------------------------------------
 project.ext.deployConfig = [platform        : "java",
                             artifactId      : RUNTIME_ARTIFACT_ID,
-                            version         : PLUGIN_VERSION_NAME,
+                            version         : PLUGIN_RUNTIME_VERSION_NAME,
                             license         : RUNTIME_LICENSE_NAME,
                             description     : RUNTIME_DESCRIPTION,
                             beforePublishDo : {
@@ -58,7 +58,7 @@ project.ext.deployConfig = [platform        : "java",
                               }
                             },
                             mavenPublication: {
-                              groupId PLUGIN_GROUP_ID
+                              groupId RUNTIME_GROUP_ID
                               project.shadow.component(it)
                             }]
 apply from: "$rootDir/gradle/deployment.gradle"
