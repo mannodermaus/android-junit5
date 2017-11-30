@@ -4,8 +4,14 @@
 // This script expects a Map extension property
 // named "deployConfig" to exist on the Project instance:
 //
+// * platform        : (String, required)
+//    One of "java" or "android", depending on what type of library is being deployed
+//
 // * artifactId      : (String, required)
 //    ID of the deployed library
+//
+// * version         : (String, required)
+//    Version of the deployed library
 //
 // * license         : (String, required)
 //    License value of the deployed library
@@ -36,22 +42,54 @@ if (!project.ext.has("deployConfig")) {
 }
 final Map deployConfig = project.ext.deployConfig
 final String artifactId = required(deployConfig, "artifactId")
+final String versionNumber = required(deployConfig, "version")
 final String license = required(deployConfig, "license")
 final String description = required(deployConfig, "description")
 final Closure<MavenPublication> mavenPublication = required(deployConfig, "mavenPublication")
 final def beforePublishDo = deployConfig.get("beforePublishDo", null)
+final String targetPlatform = required(deployConfig, "platform")
+
+if (!["java", "android"].contains(targetPlatform)) {
+  throw new IllegalStateException("Deployed module '$name' declared unknown platform '$targetPlatform'")
+}
+
+// Apply required plugins
+apply plugin: "com.jfrog.bintray"
+
+if (targetPlatform == "java") {
+  apply plugin: "maven"
+  apply plugin: "maven-publish"
+} else if (targetPlatform == "android") {
+  apply plugin: "com.github.dcendents.android-maven"
+  apply plugin: "digital.wup.android-maven-publish"
+}
 
 // ------------------------------------------------------------------------------------------------
 // Artifacts Configuration
 // ------------------------------------------------------------------------------------------------
 
 // Include sources.jar archive in each release
-task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier = "sources"
-  from sourceSets.main.allSource
+if (targetPlatform == "java") {
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+  }
+} else {
+  task sourcesJar(type: Jar) {
+    classifier = "sources"
+    from android.sourceSets.main.java.srcDirs
+  }
 }
 
 // Include javadoc.jar archive in each release
+if (targetPlatform == "android") {
+  task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    excludes = ["**/*.kt"]
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+  }
+}
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
   classifier = "javadoc"
   from javadoc.destinationDir
@@ -66,7 +104,7 @@ artifacts {
 // Publication Configuration
 // ------------------------------------------------------------------------------------------------
 
-version = VERSION_NAME
+version = versionNumber
 
 publishing {
   publications {
@@ -125,7 +163,7 @@ project.configure(project) {
         publicDownloadNumbers = true
         vcsUrl = VCS_URL
         version {
-          name = VERSION_NAME
+          name = versionNumber
           desc = description
         }
       }

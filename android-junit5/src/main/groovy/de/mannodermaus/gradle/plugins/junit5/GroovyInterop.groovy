@@ -2,7 +2,9 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
+import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.dsl.CoreProductFlavor
 import com.android.build.gradle.internal.variant.BaseVariantData
 import org.gradle.api.tasks.TaskInputs
 import org.junit.platform.gradle.plugin.FiltersExtension
@@ -16,6 +18,24 @@ import static java.util.Collections.emptyList
 class GroovyInterop {
   // No instances
   private GroovyInterop() { throw new AssertionError() }
+
+  /**
+   * Obtains the defaultConfig property of the Android extension.
+   * This requires a Groovy interop method because of a breaking change
+   * in AGP 3, which introduced a dedicated type for the DefaultConfig
+   * that wasn't present before then. Since Kotlin always favors the
+   * newer method signature, therefore triggering a NoSuchMethodError on AGP 2.x,
+   * we fall back to using a dynamic Groovy invocation
+   * and cast to the most common base type between both
+   * branches of the Plugin's codebase.
+   *
+   * @param android Android BaseExtension
+   * @return The "defaultConfig" of that extension
+   */
+  @NonNull
+  static CoreProductFlavor baseExtension_defaultConfig(BaseExtension android) {
+    return android.defaultConfig as CoreProductFlavor
+  }
 
   /**
    * Add the provided key-value pair to the given TaskInputs object.

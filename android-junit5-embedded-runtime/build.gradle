@@ -10,10 +10,7 @@ buildscript {
 }
 
 apply plugin: "java-library"
-apply plugin: "maven"
-apply plugin: "maven-publish"
 apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "com.jfrog.bintray"
 
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
@@ -31,7 +28,7 @@ dependencies {
 shadowJar {
   // Remove '-all' suffix from the generated JAR
   classifier = null
-  version = VERSION_NAME
+  version = PLUGIN_RUNTIME_VERSION_NAME
 }
 
 // Replace the default JAR task with the "shadow version",
@@ -46,8 +43,10 @@ jar.dependsOn shadowJar
 // Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
-project.ext.deployConfig = [artifactId      : RUNTIME_ARTIFACT_ID,
-                            license         : RUNTIME_LICENSE_NAME,
+project.ext.deployConfig = [platform        : "java",
+                            artifactId      : RUNTIME_ARTIFACT_ID,
+                            version         : PLUGIN_RUNTIME_VERSION_NAME,
+                            license         : LICENSE_NAME,
                             description     : RUNTIME_DESCRIPTION,
                             beforePublishDo : {
                               // Manually verify that the JAR file isn't "empty"
@@ -59,6 +58,7 @@ project.ext.deployConfig = [artifactId      : RUNTIME_ARTIFACT_ID,
                               }
                             },
                             mavenPublication: {
+                              groupId RUNTIME_GROUP_ID
                               project.shadow.component(it)
                             }]
 apply from: "$rootDir/gradle/deployment.gradle"

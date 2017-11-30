@@ -1,10 +1,11 @@
-rootProject.name = GROUP_ID
+rootProject.name = "android-junit5-root"
 
 include ":android-junit5"
 include ":android-junit5-embedded-runtime"
 include ":sample"
+include ":instrumentation"
 
 ["testCommon", "testAgp2x", "testAgp3x"].each { name ->
   include ":$name"
-  project(":$name").projectDir = file("tests/$name")
+  project(":$name").projectDir = file("android-junit5-tests/$name")
 }

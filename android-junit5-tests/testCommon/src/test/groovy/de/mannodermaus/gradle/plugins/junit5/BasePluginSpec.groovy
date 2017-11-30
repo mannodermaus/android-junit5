@@ -415,4 +415,17 @@ abstract class BasePluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReportDebug") == null
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
+
+  def "Attaches the JUnit 5 Runner Builder to the Android Default Config"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .buildAndEvaluate()
+
+    then:
+    def args = project.android.defaultConfig.testInstrumentationRunnerArguments
+    assert args.containsKey("runnerBuilder")
+    assert args["runnerBuilder"] == "de.mannodermaus.junit5.AndroidJUnit5Builder"
+  }
 }

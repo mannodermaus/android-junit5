@@ -4,7 +4,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.20"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.21"
   }
 }
 
@@ -21,23 +21,32 @@ android {
   // to always update the Travis CI .yml config, too
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   compileSdkVersion COMPILE_SDK_VERSION
-  buildToolsVersion BUILD_TOOLS_VERSION
 
   defaultConfig {
-    applicationId "de.mannodermaus.gradle.plugins.junit5.sample"
+    applicationId "de.mannodermaus.junit5.sample"
     minSdkVersion MIN_SDK_VERSION
     targetSdkVersion TARGET_SDK_VERSION
     versionCode 1
     versionName "1.0"
+
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
   }
 
   sourceSets {
+    androidTest.java.srcDirs += "src/androidTest/kotlin"
+    main.java.srcDirs += "src/main/kotlin"
     test.java.srcDirs += "src/test/kotlin"
   }
 
   compileOptions {
     targetCompatibility JavaVersion.VERSION_1_8
     sourceCompatibility JavaVersion.VERSION_1_8
+  }
+
+  packagingOptions {
+    exclude "META-INF/LICENSE.md"
+    exclude "META-INF/LICENSE-notice.md"
   }
 }
 

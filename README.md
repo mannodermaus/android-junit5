@@ -116,14 +116,49 @@ junitPlatform {
 }
 ```
 
-## License
+## Licenses
 
-`android-junit5` is distributed with multiple Open Source licenses:
+#### `android-junit5-embedded-runtime`
 
-- `android-junit5-embedded-runtime` uses [Apache License v2.0](android-junit5-embedded-runtime/LICENSE.md)
-- All other modules use [Eclipse Public License v2.0](android-junit5/LICENSE.md)
+```
+Copyright 2000-2016 JetBrains s.r.o.
 
-Please see the `LICENSE.md` files in the subfolders for more details.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+See also the [full License text](android-junit5-embedded-runtime/LICENSE).
+
+#### Others:
+
+```
+Copyright 2017 Marcel Schnelle
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+See also the [full License text](LICENSE).
+
+
 
  [junit5gh]: https://github.com/junit-team/junit5
  [junit5ug]: http://junit.org/junit5/docs/current/user-guide
@@ -132,4 +167,3 @@ Please see the `LICENSE.md` files in the subfolders for more details.
  [jacoco]: http://www.eclemma.org/jacoco
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots/de/mannodermaus/gradle/plugins
  [sampletests]: sample/src/test
- [licensefile]: LICENSE.md
