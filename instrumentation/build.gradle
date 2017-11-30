@@ -12,9 +12,9 @@ android {
     versionCode 1
     versionName "1.0"
 
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    // TODO Apply automatically through Gradle Plugin eventually
+    // Usually, this is automatically applied through the Gradle Plugin
     testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
   sourceSets {

@@ -27,12 +27,20 @@ internal class AndroidJUnit5(
 ) : JUnitPlatform(klass)
 
 /**
- * Suppressing unused, since this is hooked into the
- * project configuration via a Test Instrumentation Runner Argument.
+ * Custom RunnerBuilder hooked into the main Test Instrumentation Runner
+ * provided by the Android Test Support Library, which allows to run
+ * the JUnit Platform for instrumented tests. With this,
+ * the default JUnit 4-based Runner for Android instrumented tests is,
+ * in a way, tricked into detecting JUnit Jupiter tests as well.
  *
- * With this, the default JUnit 4-based Runner
- * for Android instrumented tests is, in a way, tricked
- * into detecting JUnit Jupiter tests as well.
+ * Applying the android-junit5 Gradle Plugin will hook this RunnerBuilder
+ * into the instrumentation runner's lifecycle through a custom
+ * "testInstrumentationRunnerArgument".
+ *
+ * (Suppressing unused, since this is hooked into the
+ * project configuration via a Test Instrumentation Runner Argument.)
+ *
+ * TODO Is this exhaustive enough? We need more Jupiter test scenarios to be sure.
  */
 @Suppress("unused")
 class AndroidJUnit5Builder : RunnerBuilder() {
