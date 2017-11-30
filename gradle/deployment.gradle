@@ -7,6 +7,9 @@
 // * platform        : (String, required)
 //    One of "java" or "android", depending on what type of library is being deployed
 //
+// * groupId      : (String, required)
+//    Group of the deployed library
+//
 // * artifactId      : (String, required)
 //    ID of the deployed library
 //
@@ -19,10 +22,11 @@
 // * description     : (String, required)
 //    Description of the deployed library
 //
-// * mavenPublication: (Closure<MavenPublication>, required)
-//    Function to configure the publication to deploy
+// * doConfigure: (Closure<MavenPublication>, optional)
+//    Function to configure the publication to deploy.
+//    Receives a MavenPublication as its only argument.
 //
-// * beforePublishDo : (Closure, optional)
+// * doBeforePublish: (Closure, optional)
 //    Function without parameters, called before deployment.
 //    To stop deployment, throw an AssertionError here
 
@@ -41,16 +45,20 @@ if (!project.ext.has("deployConfig")) {
   throw new IllegalStateException("Deployed module '$name' requires a 'deployConfig'")
 }
 final Map deployConfig = project.ext.deployConfig
+final String targetPlatform = required(deployConfig, "platform")
+
+final String groupId = required(deployConfig, "groupId")
 final String artifactId = required(deployConfig, "artifactId")
 final String versionNumber = required(deployConfig, "version")
 final String license = required(deployConfig, "license")
 final String description = required(deployConfig, "description")
-final Closure<MavenPublication> mavenPublication = required(deployConfig, "mavenPublication")
-final def beforePublishDo = deployConfig.get("beforePublishDo", null)
-final String targetPlatform = required(deployConfig, "platform")
+
+final def doConfigure = deployConfig.get("doConfigure", null)
+final def doBeforePublish = deployConfig.get("doBeforePublish", null)
 
 if (!["java", "android"].contains(targetPlatform)) {
-  throw new IllegalStateException("Deployed module '$name' declared unknown platform '$targetPlatform'")
+  throw new IllegalStateException(
+      "Deployed module '$name' declared unknown platform '$targetPlatform'")
 }
 
 // Apply required plugins
@@ -71,11 +79,13 @@ if (targetPlatform == "java") {
 // Include sources.jar archive in each release
 if (targetPlatform == "java") {
   task sourcesJar(type: Jar, dependsOn: classes) {
+    baseName = artifactId
     classifier = "sources"
     from sourceSets.main.allSource
   }
 } else {
   task sourcesJar(type: Jar) {
+    baseName = artifactId
     classifier = "sources"
     from android.sourceSets.main.java.srcDirs
   }
@@ -91,6 +101,7 @@ if (targetPlatform == "android") {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
+  baseName = artifactId
   classifier = "javadoc"
   from javadoc.destinationDir
 }
@@ -104,13 +115,32 @@ artifacts {
 // Publication Configuration
 // ------------------------------------------------------------------------------------------------
 
+group = groupId
+archivesBaseName = artifactId
 version = versionNumber
 
 publishing {
   publications {
-    library(MavenPublication) {
-      mavenPublication.delegate = it
-      mavenPublication(it)
+    library(MavenPublication) { p ->
+      if (doConfigure) {
+        // Perform 100% manual publication config
+        ConfigureUtil.configure(doConfigure, p)
+      } else {
+        // Apply default configuration
+        p.from components.getByName(targetPlatform)
+        p.artifact sourcesJar
+        p.artifact javadocJar
+        p.groupId groupId
+        p.artifactId artifactId
+        p.version version
+        p.pom.withXml {
+          def root = asNode()
+          root.appendNode("description", description)
+          root.appendNode("name", artifactId)
+          root.appendNode("url", VCS_URL)
+          root.children().last + pomConfig
+        }
+      }
     }
   }
 }
@@ -144,8 +174,8 @@ project.configure(project) {
       }
     }
 
-    if (beforePublishDo != null) {
-      publish.doFirst beforePublishDo
+    if (doBeforePublish != null) {
+      publish.doFirst doBeforePublish
     }
   } else {
     // Configure deployment of release versions to Bintray
@@ -154,14 +184,17 @@ project.configure(project) {
       key = project.ext.bintrayKey
       configurations = ["archives"]
       dryRun = false
+      publish = true
       pkg {
         repo = "maven"
         name = artifactId
-        userOrg = project.ext.bintrayUser
+        desc = description
         licenses = [license]
-        publish = true
+        githubRepo = GITHUB_REPO
+        websiteUrl = GITHUB_URL
+        vcsUrl = "${GITHUB_URL}.git"
+        issueTrackerUrl = "${GITHUB_URL}/issues"
         publicDownloadNumbers = true
-        vcsUrl = VCS_URL
         version {
           name = versionNumber
           desc = description
@@ -169,8 +202,8 @@ project.configure(project) {
       }
     }
 
-    if (beforePublishDo != null) {
-      publish.doFirst beforePublishDo
+    if (doBeforePublish != null) {
+      publish.doFirst doBeforePublish
     }
   }
 }
