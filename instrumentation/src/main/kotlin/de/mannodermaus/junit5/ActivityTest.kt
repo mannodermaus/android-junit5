@@ -221,7 +221,15 @@ constructor(
     }
   }
 
-  fun validateParameterOrThrow(parameterType: ParameterType): Boolean =
+  fun validateParameters(): Boolean {
+    parameterTypes.forEach {
+      if (!validateParameterOrThrow(it)) return false
+    }
+
+    return true
+  }
+
+  internal fun validateParameterOrThrow(parameterType: ParameterType): Boolean =
       when (parameterType) {
       // Possibly a developer error; throw a descriptive exception
         is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(

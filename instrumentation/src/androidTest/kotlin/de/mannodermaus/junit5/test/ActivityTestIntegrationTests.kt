@@ -15,7 +15,6 @@ import org.assertj.android.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -41,22 +40,9 @@ class ActivityTestIntegrationTests {
   }
 
   @Test
-  @Disabled("No idea how to assert this using an integration test")
-  @DisplayName("Tested Parameter with invalid Activity type throws")
-  fun testedParameterWithInvalidActivityTypeThrows(tested: Tested<OtherActivity>) {
-  }
-
-  @Test
   @ActivityTest(OtherActivity::class)
   @DisplayName("Method Parameter overrides class-level declaration 1")
   fun methodLevelParameterOverridesClassLevelDeclaration1(activity: OtherActivity) {
-  }
-
-  @Test
-  @Disabled("No idea how to assert this using an integration test")
-  @ActivityTest(OtherActivity::class)
-  @DisplayName("Method Parameter overrides class-level declaration 2")
-  fun methodLevelParameterOverridesClassLevelDeclaration2(activity: FirstActivity) {
   }
 
   @Test

@@ -60,6 +60,7 @@ dependencies {
   androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
 
   testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
+  testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
   testCompileOnly project(":android-junit5-embedded-runtime")
   testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
