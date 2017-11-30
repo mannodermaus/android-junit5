@@ -2,9 +2,10 @@ package de.mannodermaus.junit5.test
 
 import android.app.Activity
 import android.app.Instrumentation
-import de.mannodermaus.junit5.DefaultTested
+import de.mannodermaus.junit5.ActivityTestExtension
 import de.mannodermaus.junit5.MissingTestedParameterException
 import de.mannodermaus.junit5.ParameterType
+import de.mannodermaus.junit5.TestedInternal
 import de.mannodermaus.junit5.UnexpectedActivityException
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -13,31 +14,29 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 
-class DefaultTestedTests {
+class TestedInternalTests {
 
   private lateinit var mockInstrumentation: Instrumentation
+  private lateinit var extension: ActivityTestExtension
 
   @BeforeEach
   fun beforeEach() {
     this.mockInstrumentation = Mockito.mock(Instrumentation::class.java)
+    this.extension = ActivityTestExtension()
   }
 
   @Test
   @DisplayName("Execution: Works on Activity Parameter")
   fun worksWhenUsingActivityParameterType() {
-    val tested = create(SomeActivity::class.java, listOf(ParameterType.Activity))
-
-    tested.onBeforeTestExecution()
-    tested.onAfterTestExecution()
+    val tested = create(SomeActivity::class.java, ParameterType.Activity)
+    tested.execute()
   }
 
   @Test
   @DisplayName("Execution: Works on Valid Tested Parameter")
   fun worksWhenUsingValidTestedParameterType() {
-    val tested = create(SomeActivity::class.java, listOf(ParameterType.ValidTestedWrapper))
-
-    tested.onBeforeTestExecution()
-    tested.onAfterTestExecution()
+    val tested = create(SomeActivity::class.java, ParameterType.ValidTestedWrapper)
+    tested.execute()
   }
 
   @Test
@@ -45,12 +44,10 @@ class DefaultTestedTests {
   fun throwsWhenMissingTestedParameterTypeOnManualLaunch() {
     val tested = create(
         activityClass = SomeActivity::class.java,
-        parameterTypes = emptyList(),
         launchActivity = false)
 
     assertThrows(MissingTestedParameterException::class.java) {
-      tested.onBeforeTestExecution()
-      tested.onAfterTestExecution()
+      tested.execute()
     }
   }
 
@@ -59,12 +56,11 @@ class DefaultTestedTests {
   fun throwsWhenUsingActivityParameterTypeOnManualLaunch() {
     val tested = create(
         activityClass = SomeActivity::class.java,
-        parameterTypes = listOf(ParameterType.Activity),
+        parameterType = ParameterType.Activity,
         launchActivity = false)
 
     assertThrows(MissingTestedParameterException::class.java) {
-      tested.onBeforeTestExecution()
-      tested.onAfterTestExecution()
+      tested.execute()
     }
   }
 
@@ -73,7 +69,7 @@ class DefaultTestedTests {
   internal fun parameterTypeValidationActivity() {
     val tested = create(
         activityClass = SomeActivity::class.java,
-        parameterTypes = listOf(ParameterType.Activity))
+        parameterType = ParameterType.Activity)
 
     expectThat { tested.validateParameters() }
         .willReturn(true)
@@ -85,7 +81,7 @@ class DefaultTestedTests {
   internal fun parameterTypeValidationValidTestedT() {
     val tested = create(
         activityClass = SomeActivity::class.java,
-        parameterTypes = listOf(ParameterType.ValidTestedWrapper))
+        parameterType = ParameterType.ValidTestedWrapper)
 
     expectThat { tested.validateParameters() }
         .willReturn(true)
@@ -97,7 +93,7 @@ class DefaultTestedTests {
   internal fun parameterTypeValidationInvalidTestedT() {
     val tested = create(
         activityClass = SomeActivity::class.java,
-        parameterTypes = listOf(ParameterType.InvalidTestedWrapper(OtherActivity::class.java)))
+        parameterType = ParameterType.InvalidTestedWrapper(OtherActivity::class.java))
 
     expectThat { tested.validateParameters() }
         .willThrow(UnexpectedActivityException::class.java)
@@ -112,7 +108,7 @@ class DefaultTestedTests {
   internal fun parameterTypeValidationUnknown() {
     val tested = create(
         activityClass = SomeActivity::class.java,
-        parameterTypes = listOf(ParameterType.Unknown))
+        parameterType = ParameterType.Unknown)
 
     expectThat { tested.validateParameters() }
         .willReturn(false)
@@ -126,13 +122,17 @@ class DefaultTestedTests {
    */
   private fun <T : Activity> create(
       activityClass: Class<T>,
-      parameterTypes: List<ParameterType>,
-      launchActivity: Boolean = true): DefaultTested<T> {
-    val tested = DefaultTested(
+      parameterType: ParameterType? = null,
+      launchActivity: Boolean = true): TestedInternal<T> {
+    val types = if (parameterType != null) listOf(parameterType) else emptyList()
+
+    val tested = extension.delegateFactory.create(
         activityClass = activityClass,
         targetPackage = "de.mannodermaus.junit5",
         launchActivity = launchActivity,
-        parameterTypes = parameterTypes)
+        parameterTypes = types,
+        launchFlags = 0,
+        initialTouchMode = true)
 
     // Configure the Instrumentation mock
     val mockActivity = Mockito.mock(activityClass)
@@ -140,11 +140,13 @@ class DefaultTestedTests {
     tested.setInstrumentation(mockInstrumentation)
     return tested
   }
+
+  private fun <T : Activity> TestedInternal<T>.execute() {
+    onBeforeTestExecution()
+    onAfterTestExecution()
+  }
 }
 
-/* Helper Types */
-
-// "Shell Activity" classes
+// "Shell Activity" classes, used purely as markers for validation
 private open class SomeActivity : Activity()
-
 private open class OtherActivity : Activity()

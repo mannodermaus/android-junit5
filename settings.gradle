@@ -7,5 +7,5 @@ include ":instrumentation"
 
 ["testCommon", "testAgp2x", "testAgp3x"].each { name ->
   include ":$name"
-  project(":$name").projectDir = file("tests/$name")
+  project(":$name").projectDir = file("android-junit5-tests/$name")
 }

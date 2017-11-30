@@ -33,7 +33,11 @@ private const val DEFAULT_INITIAL_TOUCH_MODE = true
 
 private const val LOG_TAG = "ActivityTest"
 
-/* Public API */
+/*
+ * ================================================================================================
+ * Public API
+ * ================================================================================================
+ */
 
 /**
  * Marker annotation providing functional testing of an [Activity], applied
@@ -105,25 +109,80 @@ interface Tested<out T : Activity> {
   fun getActivityResult(): ActivityResult
 }
 
-/* Internal API */
+/*
+ * ================================================================================================
+ * Internal API
+ * ================================================================================================
+ */
 
+/**
+ * Internal members of the [Tested] interface, exposed only to the [ActivityTestExtension],
+ * not to consumers of the library. It allows access to validate the parameters assigned
+ * to a certain test environment, as well as some replacement of production resources
+ * with mocks during unit testing.
+ *
+ * Instances of actual implementing extensions to this abstract class are obtained
+ * via the accompanying [TestedInternal.Factory] class.
+ */
 @VisibleForTesting
-internal class DefaultTested<out T : Activity>
-constructor(
-    val activityClass: Class<out T>,
-    private val parameterTypes: List<ParameterType>,
-    val targetPackage: String = ABSENT_TARGET_PACKAGE,
-    val launchFlags: Int = NO_FLAGS_SET,
-    val initialTouchMode: Boolean = DEFAULT_INITIAL_TOUCH_MODE,
-    val launchActivity: Boolean = DEFAULT_LAUNCH_ACTIVITY)
-  : Tested<T> {
+internal abstract class TestedInternal<out T : Activity>(
+    protected val parameterTypes: List<ParameterType>
+) : Tested<T> {
+
+  abstract fun parameterTypeAt(index: Int): ParameterType
+  abstract fun validateParameterAt(index: Int): Boolean
+  abstract fun setInstrumentation(instrumentation: Instrumentation)
+
+  fun validateParameters() = (0 until parameterTypes.size).all { validateParameterAt(it) }
+
+  open fun onBeforeTestExecution() {}
+  open fun onAfterTestExecution() {}
+
+  /**
+   * Creates concrete implementations of [TestedInternal] objects,
+   * given a set of configuration parameters.
+   */
+  class Factory {
+    fun <T : Activity> create(
+        activityClass: Class<out T>,
+        parameterTypes: List<ParameterType>,
+        targetPackage: String,
+        launchFlags: Int,
+        initialTouchMode: Boolean,
+        launchActivity: Boolean): TestedInternal<T> {
+      return TestedImpl(
+          activityClass = activityClass,
+          targetPackage = targetPackage,
+          launchFlags = launchFlags,
+          initialTouchMode = initialTouchMode,
+          launchActivity = launchActivity,
+          parameterTypes = parameterTypes)
+    }
+  }
+}
+
+/**
+ * Concrete realization of the [TestedInternal] contract
+ * used by the [ActivityTestExtension].
+ *
+ * It takes the place of JUnit 4's "ActivityTestRule",
+ * delegating to a surrounding [Instrumentation] and
+ * keeping track of the state of a launched [Activity].
+ */
+@VisibleForTesting
+internal class TestedImpl<out T : Activity>(
+    private val activityClass: Class<out T>,
+    private val targetPackage: String = ABSENT_TARGET_PACKAGE,
+    private val launchFlags: Int = NO_FLAGS_SET,
+    private val initialTouchMode: Boolean = DEFAULT_INITIAL_TOUCH_MODE,
+    private val launchActivity: Boolean = DEFAULT_LAUNCH_ACTIVITY,
+    parameterTypes: List<ParameterType>)
+  : TestedInternal<T>(parameterTypes) {
 
   // Used to override the default Instrumentation, obtained from the registry
   // (primary application: Unit Testing)
   private var _instrumentation: Instrumentation? = null
   private val instrumentation get() = _instrumentation ?: InstrumentationRegistry.getInstrumentation()
-
-  /* Overrides */
 
   private var _activity: T? = null
   override val activity get() = _activity
@@ -185,15 +244,15 @@ constructor(
     return activity.result
   }
 
-  /* Internal API */
-
-  internal fun setInstrumentation(instrumentation: Instrumentation) {
+  override fun setInstrumentation(instrumentation: Instrumentation) {
     this._instrumentation = instrumentation
   }
 
-  internal fun parameterTypeAt(index: Int): ParameterType = parameterTypes[index]
+  override fun parameterTypeAt(index: Int): ParameterType = parameterTypes[index]
 
-  internal fun onBeforeTestExecution() {
+  override fun onBeforeTestExecution() {
+    super.onBeforeTestExecution()
+
     // Check for undesirable states:
     // * Lacking a Tested<T> parameter with manual Activity launching is useless
     if (!this.launchActivity && !parameterTypes.contains(ParameterType.ValidTestedWrapper)) {
@@ -210,7 +269,9 @@ constructor(
     }
   }
 
-  internal fun onAfterTestExecution() {
+  override fun onAfterTestExecution() {
+    super.onAfterTestExecution()
+
     // This method is mirroring the second half of
     // ActivityTestRule.ActivityStatement#evaluate().
     val monitoringInstrumentation = this.instrumentation as? MonitoringInstrumentation
@@ -221,24 +282,19 @@ constructor(
     }
   }
 
-  fun validateParameters(): Boolean {
-    parameterTypes.forEach {
-      if (!validateParameterOrThrow(it)) return false
+  override fun validateParameterAt(index: Int): Boolean {
+    val type = parameterTypes[index]
+
+    return when (type) {
+    // Possibly a developer error; throw a descriptive exception
+      is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(
+          expected = this.activityClass,
+          actual = type.actual)
+
+    // Otherwise, communicate only valid parameter types
+      else -> type.valid
     }
-
-    return true
   }
-
-  internal fun validateParameterOrThrow(parameterType: ParameterType): Boolean =
-      when (parameterType) {
-      // Possibly a developer error; throw a descriptive exception
-        is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(
-            expected = this.activityClass,
-            actual = parameterType.actual)
-
-      // Otherwise, communicate only valid parameter types
-        else -> parameterType.valid
-      }
 }
 
 /**
@@ -251,7 +307,10 @@ constructor(
 @VisibleForTesting
 internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterResolver, AfterTestExecutionCallback {
 
-  private lateinit var delegate: DefaultTested<Activity>
+  private lateinit var delegate: TestedInternal<Activity>
+
+  @VisibleForTesting
+  val delegateFactory = TestedInternal.Factory()
 
   /* BeforeTestExecution */
 
@@ -261,7 +320,7 @@ internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterRes
     val parameterTypes = context.requiredTestMethod.parameters
         .map { it.describeTypeInRelationToClass(config.value) }
 
-    this.delegate = DefaultTested(
+    this.delegate = delegateFactory.create(
         activityClass = config.value.java,
         targetPackage = config.targetPackage,
         launchFlags = config.launchFlags,
@@ -309,8 +368,7 @@ internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterRes
 
   override fun supportsParameter(parameterContext: ParameterContext,
       extensionContext: ExtensionContext): Boolean {
-    val parameterType = delegate.parameterTypeAt(parameterContext.index)
-    return delegate.validateParameterOrThrow(parameterType)
+    return delegate.validateParameterAt(parameterContext.index)
   }
 
   override fun resolveParameter(parameterContext: ParameterContext,
