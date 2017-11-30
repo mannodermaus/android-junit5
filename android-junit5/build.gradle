@@ -32,6 +32,7 @@ final def pluginClassName =
     "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
 
 gradlePlugin {
+  automatedPublishing false
   plugins {
     shortIdentifier {
       id = "android-junit5"
