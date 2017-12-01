@@ -124,7 +124,10 @@ publishing {
     library(MavenPublication) { p ->
       if (doConfigure) {
         // Perform 100% manual publication config
-        ConfigureUtil.configure(doConfigure, p)
+        // (using fully qualified reference to ConfigureUtil to combat
+        // deprecation warning related to implicit imports in Gradle 4+)
+        // noinspection UnnecessaryQualifiedReference
+        org.gradle.util.ConfigureUtil.configure(doConfigure, p)
       } else {
         // Apply default configuration
         p.from components.getByName(targetPlatform)
@@ -137,8 +140,7 @@ publishing {
           def root = asNode()
           root.appendNode("description", description)
           root.appendNode("name", artifactId)
-          root.appendNode("url", VCS_URL)
-          root.children().last + pomConfig
+          root.appendNode("url", GITHUB_URL)
         }
       }
     }
@@ -207,4 +209,3 @@ project.configure(project) {
     }
   }
 }
-
