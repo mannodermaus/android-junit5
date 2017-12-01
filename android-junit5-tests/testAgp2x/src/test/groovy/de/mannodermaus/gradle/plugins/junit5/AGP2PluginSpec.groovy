@@ -1,5 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
+import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils
 import org.gradle.api.Project
 
 /*
@@ -28,17 +31,21 @@ class AGP2PluginSpec extends BasePluginSpec {
     then:
     // These statements automatically assert the existence of the tasks,
     // and raise an Exception if absent
-    def runDebugFree = project.tasks.getByName("junitPlatformTestFreeDebug")
-    def runDebugPaid = project.tasks.getByName("junitPlatformTestPaidDebug")
-    def runReleaseFree = project.tasks.getByName("junitPlatformTestFreeRelease")
-    def runReleasePaid = project.tasks.getByName("junitPlatformTestPaidRelease")
-    def runAll = project.tasks.getByName("junitPlatformTest")
+    def expectedVariants = ["freeDebug", "paidDebug", "freeRelease", "paidRelease"]
 
     // Assert that dependency chain is valid
-    assert runAll.getDependsOn().contains(runDebugFree)
-    assert runAll.getDependsOn().contains(runDebugPaid)
-    assert runAll.getDependsOn().contains(runReleaseFree)
-    assert runAll.getDependsOn().contains(runReleasePaid)
+    def expectedVariantTasks = expectedVariants
+        .collect { project.tasks.getByName("junitPlatformTest${it.capitalize()}") }
+        .collect { it as AndroidJUnit5UnitTest }
+    def runAllTask = project.tasks.getByName("junitPlatformTest")
+    expectedVariantTasks.each { assert runAllTask.getDependsOn().contains(it) }
+
+    // Assert that report directories are correctly to individual folders
+    def uniqueReportDirs = expectedVariantTasks
+        .collect { TaskUtils.argument(it, "--reports-dir") }
+        .unique()
+
+    assert expectedVariantTasks.size() == uniqueReportDirs.size()
   }
 
   def "Application: Jacoco Integration with Product Flavors"() {
@@ -61,16 +68,13 @@ class AGP2PluginSpec extends BasePluginSpec {
     then:
     // These statements automatically assert the existence of the tasks,
     // and raise an Exception if absent
-    def runDebugFree = project.tasks.getByName("jacocoTestReportFreeDebug")
-    def runDebugPaid = project.tasks.getByName("jacocoTestReportPaidDebug")
-    def runReleaseFree = project.tasks.getByName("jacocoTestReportFreeRelease")
-    def runReleasePaid = project.tasks.getByName("jacocoTestReportPaidRelease")
-    def runAll = project.tasks.getByName("jacocoTestReport")
+    def expectedVariants = ["freeDebug", "paidDebug", "freeRelease", "paidRelease"]
 
     // Assert that dependency chain is valid
-    assert runAll.getDependsOn().contains(runDebugFree)
-    assert runAll.getDependsOn().contains(runDebugPaid)
-    assert runAll.getDependsOn().contains(runReleaseFree)
-    assert runAll.getDependsOn().contains(runReleasePaid)
+    def expectedVariantTasks = expectedVariants
+        .collect { project.tasks.getByName("jacocoTestReport${it.capitalize()}") }
+        .collect { it as AndroidJUnit5JacocoReport }
+    def runAllTask = project.tasks.getByName("jacocoTestReport")
+    expectedVariantTasks.each { assert runAllTask.getDependsOn().contains(it) }
   }
 }

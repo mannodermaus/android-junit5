@@ -2,6 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
+import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import org.apache.commons.io.FileUtils
@@ -250,6 +251,30 @@ abstract class BasePluginSpec extends Specification {
     assert !runRelease.jvmArgs.contains("-noverify")
     assert !runRelease.systemProperties.containsKey("some.prop")
     assert !runRelease.environment.containsKey("MY_ENV_VAR")
+  }
+
+  def "Custom reportsDir still creates unique path per variant"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .build()
+
+    project.junitPlatform {
+      reportsDir project.file("${project.buildDir.absolutePath}/other-path/test-reports")
+    }
+
+    project.evaluate()
+
+    then:
+    def expectedVariants = ["debug", "release"]
+    def expectedReportDirs = expectedVariants
+        .collect { project.tasks.getByName("junitPlatformTest${it.capitalize()}") }
+        .collect { it as AndroidJUnit5UnitTest }
+        .collect { TaskUtils.argument(it, "--reports-dir") }
+        .unique()
+
+    assert expectedReportDirs.size() == expectedVariants.size()
   }
 
   def "Application: Basic Integration"() {

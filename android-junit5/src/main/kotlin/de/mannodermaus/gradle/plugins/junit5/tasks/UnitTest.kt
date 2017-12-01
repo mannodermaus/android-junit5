@@ -189,8 +189,14 @@ open class AndroidJUnit5UnitTest : JavaExec() {
     private fun configureTaskOutputs(
         task: AndroidJUnit5UnitTest,
         junit5: AndroidJUnitPlatformExtension): File {
-      val reportsDir = junit5.reportsDir ?:
-          project.file("${project.buildDir}/test-results/junit-platform")
+      val reportsDir = if (junit5.reportsDir != null) {
+        // Ensure per-variant directory even with a custom "reportsDir"
+        project.file("${junit5.reportsDir.absolutePath}/${variant.name}")
+      } else {
+        // Default path
+        project.file("${project.buildDir}/test-results/${variant.name}/junit-platform")
+      }
+
       task.outputs.dir(reportsDir)
       return reportsDir
     }
