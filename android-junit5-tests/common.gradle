@@ -18,7 +18,7 @@ configurations {
 processTestResources {
   def tokens = [COMPILE_SDK_VERSION: COMPILE_SDK_VERSION,
                 BUILD_TOOLS_VERSION: BUILD_TOOLS_VERSION,
-                MIN_SDK_VERSION    : MIN_SDK_VERSION,
+                MIN_SDK_VERSION    : SAMPLE_MIN_SDK_VERSION,
                 TARGET_SDK_VERSION : TARGET_SDK_VERSION]
 
   inputs.properties(tokens)

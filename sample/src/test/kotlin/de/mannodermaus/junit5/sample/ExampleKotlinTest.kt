@@ -1,3 +1,5 @@
+package de.mannodermaus.junit5.sample
+
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
