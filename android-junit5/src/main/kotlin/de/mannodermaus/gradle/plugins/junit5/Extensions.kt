@@ -5,7 +5,8 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.android.build.gradle.internal.dsl.TestOptions
-import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
+import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level.INFO
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -78,10 +79,6 @@ val FiltersExtension.packages
 val FiltersExtension.engines
   get() = extensionByName<EnginesExtension>(ENGINES_EXTENSION_NAME)
 
-@Deprecated(message = "will be removed")
-val AndroidJUnitPlatformExtension.jacoco
-  get() = extensionByName<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
-
 val TestOptions.junitPlatform
   get() = extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
 
@@ -90,6 +87,12 @@ val Project.jacoco
 
 val AndroidJUnit5UnitTest.jacoco
   get() = extensionByName<JacocoTaskExtension>("jacoco")
+
+/* Extensions for Gradle */
+
+fun Logger.agpStyleLog(message: String, level: Level = INFO) {
+  LogUtils.agpStyleLog(this, level, message)
+}
 
 /* Interoperability layer for Gradle */
 
@@ -206,7 +209,7 @@ fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): A
  * Multi-language functional construct,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
  *
- * A [Callable] can be invoked with the short-hand
+ * A [Callable0] can be invoked with the short-hand
  * function syntax from both Kotlin & Groovy:
  *
  * <code><pre>
@@ -232,7 +235,7 @@ class Callable0<R>(private val body: () -> R) : Closure<R>(null) {
  * Multi-language functional construct,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
  *
- * A [Callable] can be invoked with the short-hand
+ * A [Callable1] can be invoked with the short-hand
  * function syntax from both Kotlin & Groovy:
  *
  * <code><pre>

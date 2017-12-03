@@ -1,9 +1,11 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
 import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.logging.Logger
 import java.util.Properties
 
 /*
@@ -13,9 +15,11 @@ import java.util.Properties
 
 /* Extensions */
 
-private fun Project.logDeprecationWarning(oldName: String, newName: String) {
-  LogUtils.warning(this, "The JUnit 5 dependency on '$oldName' " +
-      "is deprecated and will be removed in a future version. Please use '$newName' instead!")
+private fun Logger.replacementWarning(oldName: String, newName: String) {
+  this.agpStyleLog(
+      message = "The JUnit 5 dependency on '$oldName' " +
+          "is deprecated and will be removed in a future version. Please use '$newName' instead!",
+      level = Level.WARNING)
 }
 
 /* Types */
@@ -103,13 +107,14 @@ class JUnit5DependencyHandler(
 
     // "dependencies.junit5Params()" is the old way to specify parameterized tests
     project.dependencies.ext["junit5Params"] = Callable0 {
-      project.logDeprecationWarning(oldName = "junit5Params()", newName = "junit5.parameterized()")
+      project.logger.replacementWarning(oldName = "junit5Params()",
+          newName = "junit5.parameterized()")
       this.parameterized()
     }
 
     // "dependencies.junit5EmbeddedRuntime()" is the old way to specify the embedded runtime
     project.dependencies.ext["junit5EmbeddedRuntime"] = Callable0 {
-      project.logDeprecationWarning(
+      project.logger.replacementWarning(
           oldName = "junit5EmbeddedRuntime()",
           newName = "junit5.unitTestsRuntime()")
       this.unitTestsRuntime()
@@ -119,7 +124,7 @@ class JUnit5DependencyHandler(
   // "dependencies.junit5()" is the old way to specify unit tests
   @Suppress("MemberVisibilityCanPrivate")
   operator fun invoke(): List<Dependency> {
-    project.logDeprecationWarning(oldName = "junit5()", newName = "junit5.unitTests()")
+    project.logger.replacementWarning(oldName = "junit5()", newName = "junit5.unitTests()")
     return this.unitTests()
   }
 

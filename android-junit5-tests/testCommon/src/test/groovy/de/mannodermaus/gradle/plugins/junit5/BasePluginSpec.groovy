@@ -379,6 +379,61 @@ abstract class BasePluginSpec extends Specification {
 
     project.junitPlatform {
       jacoco {
+        xml {
+          enabled false
+          destination project.file("build/other-jacoco-folder/xml")
+        }
+        html {
+          enabled false
+          destination project.file("build/html-reports/jacoco")
+        }
+        csv {
+          enabled true
+          destination project.file("build/CSVISDABEST")
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    // These statements automatically assert the existence of the tasks,
+    // and raise an Exception if absent
+    def runDebug = project.tasks.getByName("jacocoTestReportDebug") as AndroidJUnit5JacocoReport
+    def runRelease = project.tasks.getByName("jacocoTestReportRelease")
+    def runStaging = project.tasks.getByName("jacocoTestReportStaging")
+    def runAll = project.tasks.getByName("jacocoTestReport")
+
+    // Assert that dependency chain is valid
+    assert runAll.getDependsOn().containsAll([runDebug, runRelease, runStaging])
+
+    // Assert report configuration parameters
+    assert runDebug.reports.xml.enabled == false
+    assert runDebug.reports.xml.destination.path.endsWith("build/other-jacoco-folder/xml")
+    assert runDebug.reports.html.enabled == false
+    assert runDebug.reports.html.destination.path.endsWith("build/html-reports/jacoco")
+    assert runDebug.reports.csv.enabled == true
+    assert runDebug.reports.csv.destination.path.endsWith("build/CSVISDABEST")
+  }
+
+  // FIXME Deprecated. Remove test once APIs are deleted
+  @SuppressWarnings("GroovyPointlessBoolean")
+  def "Application: Jacoco Integration Using Old Configuration Parameters"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .applyJacocoPlugin()
+        .build()
+
+    project.android {
+      buildTypes {
+        staging {}
+      }
+    }
+
+    project.junitPlatform {
+      jacoco {
         xmlReport false
         htmlReport false
         csvReport true

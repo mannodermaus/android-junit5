@@ -17,6 +17,7 @@ private const val GROUP_REPORTING = "reporting"
  * Jacoco Test Reporting Task connected to a variant-aware JUnit 5 task.
  * Required to be "open" in order for Groovy's proxy magic to do its thing.
  */
+@Suppress("MemberVisibilityCanPrivate")
 open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
@@ -26,18 +27,6 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       val configAction = ConfigAction(project, testTask, directoryProviders)
       return project.tasks.create(configAction.name, configAction.type, configAction)
     }
-  }
-
-  /**
-   * Configuration exposed to consumers
-   */
-  open class Extension {
-    /** Generate a test coverage report in CSV */
-    var csvReport = true
-    /** Generate a test coverage report in XML */
-    var xmlReport = true
-    /** Generate a test coverage report in HTML */
-    var htmlReport = true
   }
 
   /**
@@ -70,10 +59,14 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
       // Apply JUnit 5 configuration parameters
       val junit5Jacoco = project.junit5.jacoco
-      reportTask.reports.apply {
-        csv.isEnabled = junit5Jacoco.csvReport
-        html.isEnabled = junit5Jacoco.htmlReport
-        xml.isEnabled = junit5Jacoco.xmlReport
+      val allReports = listOf(
+          junit5Jacoco.csv to reportTask.reports.csv,
+          junit5Jacoco.xml to reportTask.reports.xml,
+          junit5Jacoco.html to reportTask.reports.html)
+
+      allReports.forEach { (from, to) ->
+        to.isEnabled = from.isEnabled
+        from.destination?.let { to.destination = it }
       }
 
       project.logger.junit5Info(

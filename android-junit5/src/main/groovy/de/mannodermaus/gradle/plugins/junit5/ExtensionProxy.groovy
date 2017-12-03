@@ -36,6 +36,6 @@ class ExtensionProxy {
   }
 
   private def logWarning() {
-    LogUtils.warning(project, warning)
+    LogUtils.agpStyleLog(project.logger, LogUtils.Level.WARNING, warning)
   }
 }

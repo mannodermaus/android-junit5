@@ -48,9 +48,6 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
             filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
             filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
           }
-
-          // TODO Deprecate & use actual Jacoco properties
-          ju5.extend<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
         }
 
     // FIXME Deprecated --------------------------------------------------------------------------------

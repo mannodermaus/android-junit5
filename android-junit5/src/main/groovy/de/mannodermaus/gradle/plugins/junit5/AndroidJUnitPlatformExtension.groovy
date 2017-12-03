@@ -17,8 +17,11 @@ import javax.annotation.Nullable
 
 class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
+  private final Project project
+
   AndroidJUnitPlatformExtension(Project project) {
     super(project)
+    this.project = project
   }
 
   /** The version of JUnit Jupiter to use.*/
@@ -38,6 +41,8 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
    * - jvmArgs
    * - systemProperties */
   boolean applyDefaultTestOptions = true
+
+  /* Integration of Instrumentation Tests */
 
   /**
    * Options for controlling instrumentation test execution with JUnit 5.
@@ -72,5 +77,111 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
     /** The version of the instrumentation companion library to use. */
     @Nullable String version
+  }
+
+  /* Integration of Jacoco Reporting */
+
+  /**
+   * Options for controlling Jacoco reporting.*/
+  private final JacocoOptions jacoco = new JacocoOptions(project)
+
+  /**
+   * Configures Jacoco reporting options.*/
+  void jacoco(Closure closure) {
+    ConfigureUtil.configure(closure, jacoco)
+  }
+
+  /**
+   * Configures Jacoco reporting options.*/
+  JacocoOptions getJacoco() { return jacoco }
+
+  /**
+   * Options for controlling Jacoco reporting.*/
+  static class JacocoOptions {
+
+    private final Project project
+    private final Report html
+    private final Report csv
+    private final Report xml
+
+    JacocoOptions(Project project) {
+      this.project = project
+      this.html = new Report()
+      this.csv = new Report()
+      this.xml = new Report()
+    }
+
+    void html(Closure closure) {
+      ConfigureUtil.configure(closure, html)
+    }
+
+    Report getHtml() {
+      return html
+    }
+
+    void csv(Closure closure) {
+      ConfigureUtil.configure(closure, csv)
+    }
+
+    Report getCsv() {
+      return csv
+    }
+
+    void xml(Closure closure) {
+      ConfigureUtil.configure(closure, xml)
+    }
+
+    Report getXml() {
+      return xml
+    }
+
+    // FIXME DEPRECATED ---------------------------------------------------------------
+    def htmlReport(boolean state) {
+      logDeprecationWarning("htmlReport", "html.enabled")
+      html.enabled = state
+    }
+
+    def csvReport(boolean state) {
+      logDeprecationWarning("csvReport", "csv.enabled")
+      csv.enabled = state
+    }
+
+    def xmlReport(boolean state) {
+      logDeprecationWarning("xmlReport", "xml.enabled")
+      xml.enabled = state
+    }
+
+    private def logDeprecationWarning(String dontUse, String useInstead) {
+      LogUtils.agpStyleLog(project.logger,
+          LogUtils.Level.WARNING,
+          "Accessing the Jacoco property '$dontUse' for JUnit 5 configuration " + "is deprecated and will be removed in a future version. Please use '$useInstead' instead")
+    }
+
+    // END DEPRECATED -----------------------------------------------------------------
+
+    class Report {
+
+      private boolean enabled = true
+
+      @Nullable
+      private File destination
+
+      void enabled(boolean state) {
+        this.enabled = state
+      }
+
+      boolean isEnabled() {
+        return enabled
+      }
+
+      void destination(File destination) {
+        this.destination = destination
+      }
+
+      @Nullable
+      File getDestination() {
+        return destination
+      }
+    }
   }
 }
