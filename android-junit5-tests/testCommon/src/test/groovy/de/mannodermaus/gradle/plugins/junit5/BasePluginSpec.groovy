@@ -137,7 +137,7 @@ abstract class BasePluginSpec extends Specification {
         vintageVersion = "1.2.3"
 
         instrumentationTests {
-          enabled = true
+          enabled true
           version = "4.8.15"
         }
       }
@@ -563,7 +563,7 @@ abstract class BasePluginSpec extends Specification {
 
     project.android {
       testOptions.junitPlatform.instrumentationTests {
-        enabled = false
+        enabled false
       }
     }
 
@@ -583,7 +583,7 @@ abstract class BasePluginSpec extends Specification {
 
     project.android {
       testOptions.junitPlatform.instrumentationTests {
-        enabled = true
+        enabled true
       }
     }
 
@@ -608,7 +608,7 @@ abstract class BasePluginSpec extends Specification {
       }
 
       testOptions.junitPlatform.instrumentationTests {
-        enabled = true
+        enabled true
       }
     }
 

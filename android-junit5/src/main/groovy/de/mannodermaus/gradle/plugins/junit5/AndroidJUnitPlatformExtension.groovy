@@ -39,8 +39,17 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
    * by a "testOptions.unitTests.all" closure:
    *
    * - jvmArgs
-   * - systemProperties */
-  boolean applyDefaultTestOptions = true
+   * - systemProperties
+   * - environment variables */
+  private boolean applyDefaultTestOptions = true
+
+  void applyDefaultTestOptions(boolean enabled) {
+    this.applyDefaultTestOptions = enabled
+  }
+
+  boolean getApplyDefaultTestOptions() {
+    return applyDefaultTestOptions
+  }
 
   /* Integration of Instrumentation Tests */
 
@@ -73,10 +82,18 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   static class InstrumentationTestOptions {
 
     /** Whether or not to enable support for JUnit 5 instrumentation tests. */
-    boolean enabled = false
+    private boolean enabled = false
 
     /** The version of the instrumentation companion library to use. */
     @Nullable String version
+
+    void enabled(boolean state) {
+      this.enabled = state
+    }
+
+    boolean getEnabled() {
+      return enabled
+    }
   }
 
   /* Integration of Jacoco Reporting */
