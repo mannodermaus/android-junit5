@@ -4,7 +4,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.21"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.22"
   }
 }
 
@@ -24,7 +24,6 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
   }
 
   sourceSets {
@@ -38,20 +37,22 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
   }
 
+  testOptions {
+    junitPlatform {
+      details "tree"
+    }
+  }
+
   packagingOptions {
     exclude "META-INF/LICENSE.md"
     exclude "META-INF/LICENSE-notice.md"
   }
 }
 
-junitPlatform {
-  details "tree"
-}
-
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 
-  testImplementation junit5()
-  testImplementation junit5Params()
-  testCompileOnly junit5EmbeddedRuntime()
+  testImplementation junit5.unitTests()
+  testImplementation junit5.parameterized()
+  testCompileOnly junit5.unitTestsRuntime()
 }
