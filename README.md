@@ -50,7 +50,7 @@ dependencies {
   // (Optional) Writing and executing Instrumented Tests with the JUnit Platform Runner.
   //
   // IMPORTANT:
-  // By declaring this dependency, you are required to use a minSdkVersion
+  // By declaring this dependency, you have to use a minSdkVersion
   // of at least 26, since the nature of JUnit 5 relies on APIs that aren't
   // available on Android devices before then.
   // Additionally, you are required to explicitly enable support for instrumented tests in the
@@ -62,7 +62,7 @@ dependencies {
 ## Configuration
 
 The plugin applies a configuration closure to your module's `android.testOptions`.
-Inside it, you can use [all properties available through the default JUnit 5 Gradle plugin](junit5config).
+Inside it, you can use [all properties available through the default JUnit 5 Gradle plugin][junit5config].
 However, there are a few more parameters that allow for more customization of the JUnit Platform
 in your Android project. These are detailed below, alongside their default values:
 
