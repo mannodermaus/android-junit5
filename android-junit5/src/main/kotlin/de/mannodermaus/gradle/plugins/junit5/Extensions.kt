@@ -4,6 +4,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
+import com.android.builder.model.ProductFlavor
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import groovy.lang.Closure
@@ -135,6 +136,17 @@ val DependencyHandler.ext: ExtraPropertiesExtension
         ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
   }
 
+/**
+ * Access the extra properties of a ProductFlavor.
+ * Equivalent to "ProductFlavor#ext" in Groovy.
+ */
+val ProductFlavor.ext: ExtraPropertiesExtension
+  get() {
+    val aware = this as ExtensionAware
+    return aware.extensions.getByName(
+        ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
+  }
+
 val BaseVariant.unitTestVariant: UnitTestVariant
   get() {
     if (this !is TestedVariant) {
@@ -204,4 +216,30 @@ class Callable(private val body: () -> Any) : Closure<Any>(null) {
 
   /** Groovy's call syntax */
   fun doCall(): Any = body()
+}
+
+/**
+ * Multi-language functional construct,
+ * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
+ *
+ * A [Callable] can be invoked with the short-hand
+ * function syntax from both Kotlin & Groovy:
+ *
+ * <code><pre>
+ *   val callable = Callable { 2 + 2 }
+ *   val result = callable()  // result == 4
+ * </pre></code>
+ *
+ * <code><pre>
+ *   def callable = new Callable({ 2 + 2 })
+ *   def result = callable()  // result == 4
+ * </pre></code>
+ */
+@Suppress("unused")
+class Callable1<in T : Any, R>(private val body: (T) -> R) : Closure<R>(null) {
+  /** Kotlin's call syntax */
+  operator fun invoke(arg: T): R = body(arg)
+
+  /** Groovy's call syntax */
+  fun doCall(arg: T): R = body(arg)
 }

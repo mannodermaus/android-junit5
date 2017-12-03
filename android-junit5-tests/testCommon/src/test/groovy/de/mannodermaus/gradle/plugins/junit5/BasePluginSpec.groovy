@@ -440,4 +440,24 @@ abstract class BasePluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReportDebug") == null
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
+
+  def "Instrumentation Test Integration: Enabled"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .build()
+
+    project.android {
+      defaultConfig {
+        junit5InstrumentedTestsEnabled true
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
+    assert args.containsKey("runnerBuilder")
+  }
 }

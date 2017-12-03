@@ -143,4 +143,39 @@ class AGP3PluginSpec extends BasePluginSpec {
     project.tasks.findByName("jacocoTestReportDebug") == null
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
+
+  def "Instrumentation Test Integration: Works with Product Flavors"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .build()
+
+    project.android {
+      // "All flavors must now belong to a named flavor dimension"
+      flavorDimensions "price"
+
+      productFlavors {
+        paid {
+          dimension "price"
+          junit5InstrumentedTestsEnabled false
+        }
+        free {
+          dimension "price"
+          junit5InstrumentedTestsEnabled true
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def enabledFlavor = project.android.productFlavors.getByName("free")
+    def enabledArgs = enabledFlavor.getTestInstrumentationRunnerArguments()
+    assert enabledArgs.containsKey("runnerBuilder")
+
+    def disabledFlavor = project.android.productFlavors.getByName("paid")
+    def disabledArgs = disabledFlavor.getTestInstrumentationRunnerArguments()
+    assert !disabledArgs.containsKey("runnerBuilder")
+  }
 }

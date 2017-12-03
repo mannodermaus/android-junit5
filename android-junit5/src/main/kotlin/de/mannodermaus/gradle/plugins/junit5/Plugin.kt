@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
+import de.mannodermaus.gradle.plugins.junit5.integrations.attachInstrumentationTestSupport
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -47,6 +48,9 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       }
       createExtension<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
     }
+
+    // Connect with integration libraries
+    attachInstrumentationTestSupport()
   }
 
   private fun Project.configureDependencies() {
@@ -68,7 +72,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     }
 
     // Create the dependency handlers for JUnit 5
-    project.dependencies.ext["junit5"] = Callable {
+    project.dependencies.ext[DEP_HANDLER_NAME_JUNIT5] = Callable {
       withDependencies(defaults) {
         listOf(
             it.others.junit4,
@@ -85,11 +89,11 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       }
     }
 
-    project.dependencies.ext["junit5Params"] = Callable {
+    project.dependencies.ext[DEP_HANDLER_NAME_PARAMETERIZED] = Callable {
       withDependencies(defaults) { it.jupiter.params }
     }
 
-    project.dependencies.ext["junit5EmbeddedRuntime"] = Callable {
+    project.dependencies.ext[DEP_HANDLER_NAME_RUNTIME] = Callable {
       withDependencies(defaults) { it.others.embeddedRuntime }
     }
   }

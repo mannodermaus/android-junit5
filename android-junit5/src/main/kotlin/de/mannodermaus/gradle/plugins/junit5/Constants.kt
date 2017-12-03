@@ -18,3 +18,15 @@ const val JUNIT_PLATFORM_VERSION_PROP = "junitPlatformVersion"
 const val JUNIT_JUPITER_VERSION_PROP = "junitJupiterVersion"
 const val JUNIT_VINTAGE_VERSION_PROP = "junitVintageVersion"
 const val JUNIT4_VERSION_PROP = "junit4Version"
+
+// Instrumentation Test integration
+const val RUNNER_BUILDER_ARG = "runnerBuilder"
+const val JUNIT5_RUNNER_BUILDER_CLASS_NAME = "de.mannodermaus.junit5.AndroidJUnit5Builder"
+
+// Dependency Handler Names
+const val DEP_HANDLER_NAME_JUNIT5 = "junit5"
+const val DEP_HANDLER_NAME_PARAMETERIZED = "junit5Params"
+const val DEP_HANDLER_NAME_RUNTIME = "junit5EmbeddedRuntime"
+
+// Configuration Names
+const val PARAM_NAME_ENABLE_INSTRUMENTED_TESTS = "junit5InstrumentedTestsEnabled"

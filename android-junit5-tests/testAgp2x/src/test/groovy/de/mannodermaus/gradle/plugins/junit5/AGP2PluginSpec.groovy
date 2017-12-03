@@ -77,4 +77,34 @@ class AGP2PluginSpec extends BasePluginSpec {
     def runAllTask = project.tasks.getByName("jacocoTestReport")
     expectedVariantTasks.each { assert runAllTask.getDependsOn().contains(it) }
   }
+
+  def "Instrumentation Test Integration: Works with Product Flavors"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .build()
+
+    project.android {
+      productFlavors {
+        paid {
+          junit5InstrumentedTestsEnabled false
+        }
+        free {
+          junit5InstrumentedTestsEnabled true
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def enabledFlavor = project.android.productFlavors.getByName("free")
+    def enabledArgs = enabledFlavor.getTestInstrumentationRunnerArguments()
+    assert enabledArgs.containsKey("runnerBuilder")
+
+    def disabledFlavor = project.android.productFlavors.getByName("paid")
+    def disabledArgs = disabledFlavor.getTestInstrumentationRunnerArguments()
+    assert !disabledArgs.containsKey("runnerBuilder")
+  }
 }
