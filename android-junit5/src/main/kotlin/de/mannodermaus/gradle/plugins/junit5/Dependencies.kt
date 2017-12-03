@@ -1,16 +1,139 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import groovy.lang.Closure
 import org.gradle.api.Project
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Dependency
 import java.util.Properties
 
 /*
  * Model classes holding information about the transitive dependencies of the plugin,
- * exposed to consumers through its custom dependency handlers.
+ * exposed to consumers through the custom dependency handler.
  */
 
+/* Extensions */
+
+private fun Project.logDeprecationWarning(oldName: String, newName: String) {
+  LogUtils.warning(this, "The JUnit 5 dependency on '$oldName' " +
+      "is deprecated and will be removed in a future version. Please use '$newName' instead!")
+}
+
+/* Types */
+
 /**
- * Data holder, serving as a gateway to the actual dependencies via its properties.
+ * Public-facing handler object, injected into the default DependencyHandler,
+ * exposing the different available methods to consumers.
+ */
+@Suppress("MemberVisibilityCanPrivate")
+class JUnit5DependencyHandler(
+    private val project: Project,
+    defaults: Properties) : Closure<Any>(null) /* FIXME Part of junit5 deprecation */ {
+
+  private val versions: Versions by lazy {
+    Versions(
+        project = project,
+        extension = project.junit5,
+        defaults = defaults)
+  }
+
+  /* Public */
+
+  /**
+   * Retrieves the list of dependencies related to
+   * running Unit Tests on the JUnit Platform with Android.
+   */
+  fun unitTests() = listOf(
+      versions.others.junit4,
+      versions.jupiter.api,
+      versions.platform.engine,
+      versions.jupiter.engine,
+      versions.vintage.engine,
+
+      // Only needed to run tests in an Android Studio that bundles an older version
+      // (see also http://junit.org/junit5/docs/current/user-guide/#running-tests-ide-intellij-idea)
+      versions.platform.launcher,
+      versions.platform.console
+  )
+
+  /**
+   * Retrieves the list of dependencies related to
+   * writing Parameterized Tests.
+   */
+  fun parameterized() = listOf(
+      versions.jupiter.params
+  )
+
+  /**
+   * Retrieves the list of dependencies related to
+   * executing Unit Tests in Android Studio 3 properly.
+   */
+  fun unitTestsRuntime() = listOf(
+      versions.others.embeddedRuntime
+  )
+
+  /**
+   * Retrieves the list of dependencies related to
+   * running Instrumentation Tests on the JUnit Platform with Android.
+   */
+  fun instrumentationTests(): List<Dependency> {
+    // Abort if JUnit 5 Instrumentation Tests aren't enabled,
+    // since that would cause confusion otherwise.
+    if (!project.junit5.instrumentationTests.enabled) {
+      @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+      throw ProjectConfigurationException(
+          "The JUnit 5 Instrumentation Test library can only be used " +
+              "if support for them is explicitly enabled as well.\n" +
+              "Please add the following to your build.gradle\n:" +
+              "android.defaultConfig.testOptions.instrumentationTests.enabled = true", null)
+    }
+
+    return listOf(versions.others.instrumentationTest)
+  }
+
+  /* Internal */
+
+  internal fun configure() {
+    // "dependencies.junit5" is the gateway to the sharded dependency groups
+    project.dependencies.ext[DEP_HANDLER_NAME] = this
+
+    // FIXME Deprecation ----------------------------------------------------------------------------------------------------
+    // "dependencies.junit5()" is the old way to specify unit tests
+    // this backwards compatibility is realized through the invoke() operator
+    // (see class declaration!)
+
+    // "dependencies.junit5Params()" is the old way to specify parameterized tests
+    project.dependencies.ext["junit5Params"] = Callable0 {
+      project.logDeprecationWarning(oldName = "junit5Params()", newName = "junit5.parameterized()")
+      this.parameterized()
+    }
+
+    // "dependencies.junit5EmbeddedRuntime()" is the old way to specify the embedded runtime
+    project.dependencies.ext["junit5EmbeddedRuntime"] = Callable0 {
+      project.logDeprecationWarning(
+          oldName = "junit5EmbeddedRuntime()",
+          newName = "junit5.unitTestsRuntime()")
+      this.unitTestsRuntime()
+    }
+  }
+
+  // "dependencies.junit5()" is the old way to specify unit tests
+  @Suppress("MemberVisibilityCanPrivate")
+  operator fun invoke(): List<Dependency> {
+    project.logDeprecationWarning(oldName = "junit5()", newName = "junit5.unitTests()")
+    return this.unitTests()
+  }
+
+  @Suppress("unused")
+  fun doCall(): List<Dependency> {
+    return this()
+  }
+  // END Deprecation ----------------------------------------------------------------------------------------------------
+}
+
+/* Internal API */
+
+/**
+ * Internal data holder, serving as a gateway to the actual dependencies via its properties.
  */
 class Versions(
     project: Project,
@@ -20,7 +143,7 @@ class Versions(
   val jupiter = Jupiter(project, extension, defaults)
   val platform = Platform(project, extension, defaults)
   val vintage = Vintage(project, extension, defaults)
-  val others = Other(project, defaults)
+  val others = Other(project, extension, defaults)
 }
 
 abstract class BaseDependency(private val project: Project) {
@@ -96,6 +219,7 @@ class Vintage(
  */
 class Other(
     project: Project,
+    private val extension: AndroidJUnitPlatformExtension,
     properties: Properties
 ) : BaseDependency(project) {
 
@@ -108,4 +232,12 @@ class Other(
       groupId = "junit",
       artifactId = "junit",
       version = properties.getProperty(JUNIT4_VERSION_PROP))
+
+  val instrumentationTest by lazy {
+    dependency(
+        groupId = "de.mannodermaus.junit5",
+        artifactId = "android-instrumentation-test",
+        version = extension.instrumentationTests.version ?:
+            properties.getProperty(INSTRUMENTATION_TEST_VERSION_PROP))
+  }
 }

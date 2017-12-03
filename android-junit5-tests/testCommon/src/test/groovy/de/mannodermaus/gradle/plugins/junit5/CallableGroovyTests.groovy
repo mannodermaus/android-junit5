@@ -4,8 +4,8 @@ import org.junit.Test
 
 class CallableGroovyTests {
   @Test
-  void callable() {
-    def obj = new Callable({ 2 + 2 })
+  void callable0() {
+    def obj = new Callable0<Integer>({ 2 + 2 })
     assert obj() == 4
   }
 

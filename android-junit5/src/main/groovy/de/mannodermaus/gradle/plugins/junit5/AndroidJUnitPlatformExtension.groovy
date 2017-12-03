@@ -1,6 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import com.android.annotations.NonNull
 import org.gradle.api.Project
+import org.gradle.util.ConfigureUtil
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
 import javax.annotation.Nullable
@@ -19,12 +21,10 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     super(project)
   }
 
-  /**
-   * The version of JUnit Jupiter to use.*/
+  /** The version of JUnit Jupiter to use.*/
   @Nullable String jupiterVersion
 
-  /**
-   * The version of JUnit Vintage Engine to use. */
+  /** The version of JUnit Vintage Engine to use. */
   @Nullable
   String vintageVersion
 
@@ -38,4 +38,39 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
    * - jvmArgs
    * - systemProperties */
   boolean applyDefaultTestOptions = true
+
+  /**
+   * Options for controlling instrumentation test execution with JUnit 5.
+   *
+   * @since 1.0.22
+   */
+  private final InstrumentationTestOptions instrumentationTests = new InstrumentationTestOptions()
+
+  /**
+   * Configures instrumentation test options.
+   *
+   * @since 1.0.22
+   */
+  void instrumentationTests(Closure closure) {
+    ConfigureUtil.configure(closure, instrumentationTests)
+  }
+
+  /**
+   * Configures instrumentation test options.
+   *
+   * @since 1.0.22
+   */
+  @NonNull
+  InstrumentationTestOptions getInstrumentationTests() { return instrumentationTests }
+
+  /**
+   * Options for controlling instrumentation test execution.*/
+  static class InstrumentationTestOptions {
+
+    /** Whether or not to enable support for JUnit 5 instrumentation tests. */
+    boolean enabled = false
+
+    /** The version of the instrumentation companion library to use. */
+    @Nullable String version
+  }
 }

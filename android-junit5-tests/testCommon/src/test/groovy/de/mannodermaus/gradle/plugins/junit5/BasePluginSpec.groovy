@@ -82,14 +82,14 @@ abstract class BasePluginSpec extends Specification {
 
     project.file("build.gradle").withWriter {
       it.write("""
-          buildscript {
-              dependencies {
-                  classpath files($environment.pluginClasspathString)
-              }
-          }
+            buildscript {
+                dependencies {
+                    classpath files($environment.pluginClasspathString)
+                }
+            }
 
-          apply plugin: "de.mannodermaus.android-junit5"
-  """)
+            apply plugin: "de.mannodermaus.android-junit5"
+    """)
     }
 
     def result = GradleRunner.create()
@@ -108,16 +108,60 @@ abstract class BasePluginSpec extends Specification {
         .buildAndEvaluate()
 
     then:
-    def junit5 = project.dependencies.junit5
-    def junit5Params = project.dependencies.junit5Params
-    def junit5EmbeddedRuntime = project.dependencies.junit5EmbeddedRuntime
+    assert project.dependencies.junit5 != null
+  }
 
-    assert junit5 != null
-    assert junit5Params != null
-    assert junit5EmbeddedRuntime != null
+  // FIXME When the deprecation is removed in a future major update, delete this test as well
+  def "Deprecated Dependency Handlers still work"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .buildAndEvaluate()
+
+    then:
+    assert project.dependencies.junit5.unitTests() == project.dependencies.junit5()
+    assert project.dependencies.junit5.parameterized() == project.dependencies.junit5Params()
+    assert project.dependencies.junit5.unitTestsRuntime() == project.dependencies.junit5EmbeddedRuntime()
   }
 
   def "Overwrite Dependency Versions"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions.junitPlatform {
+        platformVersion = "1.3.3.7"
+        jupiterVersion = "0.8.15"
+        vintageVersion = "1.2.3"
+
+        instrumentationTests {
+          enabled = true
+          version = "4.8.15"
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def ju5Deps = project.dependencies.junit5.unitTests() as List<Dependency>
+    assert ju5Deps.find { it.group == "org.junit.platform" && it.version == "1.3.3.7" } != null
+    assert ju5Deps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null
+    assert ju5Deps.find { it.group == "org.junit.vintage" && it.version == "1.2.3" } != null
+
+    def ju5ParamsDeps = project.dependencies.junit5.parameterized() as List<Dependency>
+    assert ju5ParamsDeps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null
+
+    def ju5InstrumentationDeps = project.dependencies.junit5.instrumentationTests() as List<Dependency>
+    assert ju5InstrumentationDeps.find {
+      it.group == "de.mannodermaus.junit5" && it.version == "4.8.15"
+    } != null
+  }
+
+  // FIXME When the deprecation is removed in a future major update, delete this test as well
+  def "Using the old DSL to configure JUnit 5 properly delegates"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -127,18 +171,28 @@ abstract class BasePluginSpec extends Specification {
       platformVersion = "1.3.3.7"
       jupiterVersion = "0.8.15"
       vintageVersion = "1.2.3"
+
+      instrumentationTests {
+        enabled = true
+        version = "4.8.15"
+      }
     }
 
     project.evaluate()
 
     then:
-    def ju5Deps = project.dependencies.junit5() as List<Dependency>
+    def ju5Deps = project.dependencies.junit5.unitTests() as List<Dependency>
     assert ju5Deps.find { it.group == "org.junit.platform" && it.version == "1.3.3.7" } != null
     assert ju5Deps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null
     assert ju5Deps.find { it.group == "org.junit.vintage" && it.version == "1.2.3" } != null
 
-    def ju5ParamsDeps = project.dependencies.junit5Params() as List<Dependency>
+    def ju5ParamsDeps = project.dependencies.junit5.parameterized() as List<Dependency>
     assert ju5ParamsDeps.find { it.group == "org.junit.jupiter" && it.version == "0.8.15" } != null
+
+    def ju5InstrumentationDeps = project.dependencies.junit5.instrumentationTests() as List<Dependency>
+    assert ju5InstrumentationDeps.find {
+      it.group == "de.mannodermaus.junit5" && it.version == "4.8.15"
+    } != null
   }
 
   def "android.testOptions: jvmArgs are properly applied"() {
@@ -235,8 +289,10 @@ abstract class BasePluginSpec extends Specification {
       }
     }
 
-    project.junitPlatform {
-      applyDefaultTestOptions = false
+    project.android {
+      testOptions.junitPlatform {
+        applyDefaultTestOptions false
+      }
     }
 
     project.evaluate()
@@ -260,8 +316,10 @@ abstract class BasePluginSpec extends Specification {
         .applyJunit5Plugin()
         .build()
 
-    project.junitPlatform {
-      reportsDir project.file("${project.buildDir.absolutePath}/other-path/test-reports")
+    project.android {
+      testOptions.junitPlatform {
+        reportsDir project.file("${project.buildDir.absolutePath}/other-path/test-reports")
+      }
     }
 
     project.evaluate()
@@ -441,7 +499,7 @@ abstract class BasePluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
 
-  def "Instrumentation Test Integration: Enabled"() {
+  def "Instrumentation Test Integration: Doesn't attach RunnerBuilder if disabled"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -449,8 +507,28 @@ abstract class BasePluginSpec extends Specification {
         .build()
 
     project.android {
-      defaultConfig {
-        junit5InstrumentedTestsEnabled true
+      testOptions.junitPlatform.instrumentationTests {
+        enabled = false
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
+    assert !args.containsKey("runnerBuilder")
+  }
+
+  def "Instrumentation Test Integration: Attaches RunnerBuilder"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .build()
+
+    project.android {
+      testOptions.junitPlatform.instrumentationTests {
+        enabled = true
       }
     }
 
@@ -459,5 +537,34 @@ abstract class BasePluginSpec extends Specification {
     then:
     def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
     assert args.containsKey("runnerBuilder")
+    assert args["runnerBuilder"].contains("AndroidJUnit5Builder")
+  }
+
+  def "Instrumentation Test Integration: Appends RunnerBuilder if another is already present"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .build()
+
+    project.android {
+      defaultConfig {
+        testInstrumentationRunnerArgument "runnerBuilder", "com.something.else.OtherRunnerBuilder"
+      }
+
+      testOptions.junitPlatform.instrumentationTests {
+        enabled = true
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
+    assert args.containsKey("runnerBuilder")
+
+    // Intentional comma
+    assert args["runnerBuilder"].contains("com.something.else.OtherRunnerBuilder,")
+    assert args["runnerBuilder"].contains("AndroidJUnit5Builder")
   }
 }

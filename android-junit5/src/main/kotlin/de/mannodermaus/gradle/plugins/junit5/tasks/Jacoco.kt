@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import de.mannodermaus.gradle.plugins.junit5.jacoco
+import de.mannodermaus.gradle.plugins.junit5.junit5
 import de.mannodermaus.gradle.plugins.junit5.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.maybeCreate
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
@@ -68,7 +69,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       reportTask.sourceDirectories = project.files(directoryProviders.mainSourceDirectories())
 
       // Apply JUnit 5 configuration parameters
-      val junit5Jacoco = junit5.jacoco
+      val junit5Jacoco = project.junit5.jacoco
       reportTask.reports.apply {
         csv.isEnabled = junit5Jacoco.csvReport
         html.isEnabled = junit5Jacoco.htmlReport
