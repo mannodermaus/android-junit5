@@ -44,9 +44,9 @@ after_success:
   - ./scripts/deploy_snapshot.sh
 
 after_failure:
-- cat $TRAVIS_BUILD_DIR/tests/testCommon/build/reports/tests/test/index.html
-- cat $TRAVIS_BUILD_DIR/tests/testAgp2x/build/reports/tests/test/index.html
-- cat $TRAVIS_BUILD_DIR/tests/testAgp3x/build/reports/tests/test/index.html
+- cat $TRAVIS_BUILD_DIR/android-junit5-tests/testCommon/build/reports/tests/test/index.html
+- cat $TRAVIS_BUILD_DIR/android-junit5-tests/testAgp2x/build/reports/tests/test/index.html
+- cat $TRAVIS_BUILD_DIR/android-junit5-tests/testAgp3x/build/reports/tests/test/index.html
 
 deploy:
   provider: script
