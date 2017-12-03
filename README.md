@@ -94,7 +94,7 @@ android {
         enabled false
 
         // The Android-Instrumentation-Test dependency version to use
-        version "0.1.0"
+        version "0.1.1"
       }
 
       // Configuration of companion tasks for JaCoCo Reports,
