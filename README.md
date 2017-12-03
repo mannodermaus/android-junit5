@@ -30,7 +30,7 @@ buildscript {
 
 Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
 
-## Basic Setup
+## Setup
 
 ```groovy
 apply plugin: "com.android.application"
@@ -85,10 +85,10 @@ android {
 
       // Options related to running instrumented tests with JUnit 5.
       // This is an incubating feature which utilizes the backwards-compatibility
-      // of the JUnit Platform in order to extend the default Test Instrumentation Runner
-      // with new power. Because of their experimental nature and minSdkVersion requirement,
-      // they are turned off by default. If you enable them, you also have to specify
-      // the library dependency in your androidTest scope. Please refer to the "Instrumented Tests"
+      // of the JUnit Platform in order to enhance the default Test Instrumentation Runner
+      // with new power. However, because of their experimental nature and steep minSdkVersion requirement,
+      // they are turned off by default. If you choose to enable them, you also have to declare
+      // the library dependency in your androidTest scope. Please refer to the "Setup"
       // section for more details.
       instrumentationTests {
         enabled false
