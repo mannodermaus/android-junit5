@@ -84,11 +84,16 @@ class JUnit5DependencyHandler(
     // since that would cause confusion otherwise.
     if (!project.junit5.instrumentationTests.enabled) {
       @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-      throw ProjectConfigurationException(
-          "The JUnit 5 Instrumentation Test library can only be used " +
-              "if support for them is explicitly enabled as well.\n" +
-              "Please add the following to your build.gradle\n:" +
-              "android.defaultConfig.testOptions.instrumentationTests.enabled = true", null)
+      throw ProjectConfigurationException("""
+        The JUnit 5 Instrumentation Test library can only be used
+        if support for them is explicitly enabled as well.
+        Please add the following to your build.gradle:
+        android.testOptions {
+          junitPlatform {
+            instrumentationTests.enabled true
+          }
+        }
+        """.trimIndent(), null)
     }
 
     return listOf(versions.others.instrumentationTest)
