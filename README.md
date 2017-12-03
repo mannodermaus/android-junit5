@@ -55,7 +55,7 @@ dependencies {
   // available on Android devices before then.
   // Additionally, you are required to explicitly enable support for instrumented tests in the
   // "junitPlatform" configuration closure (see the section below for details).
-  androidTestImplementation junit5.instrumentedTests()
+  androidTestImplementation junit5.instrumentationTests()
 }
 ```
 
