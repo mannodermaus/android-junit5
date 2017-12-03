@@ -35,6 +35,7 @@ tasks.withType(WriteClasspathResource).all {
 
 test.testLogging {
   events "passed", "skipped", "failed"
+  exceptionFormat = "full"
 }
 
 dependencies {

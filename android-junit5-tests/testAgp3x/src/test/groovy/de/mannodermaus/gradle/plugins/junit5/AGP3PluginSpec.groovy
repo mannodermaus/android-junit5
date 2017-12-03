@@ -4,6 +4,7 @@ import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils
 import org.gradle.api.Project
+import org.gradle.api.ProjectConfigurationException
 
 /*
  * Unit testing the integration of JUnit 5
@@ -144,7 +145,7 @@ class AGP3PluginSpec extends BasePluginSpec {
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
 
-  def "Instrumentation Test Integration: Works with Product Flavors"() {
+  def "Instrumentation Test Integration: Attempting to use library without enabling throws Exception"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -152,30 +153,20 @@ class AGP3PluginSpec extends BasePluginSpec {
         .build()
 
     project.android {
-      // "All flavors must now belong to a named flavor dimension"
-      flavorDimensions "price"
-
-      productFlavors {
-        paid {
-          dimension "price"
-          junit5InstrumentedTestsEnabled false
-        }
-        free {
-          dimension "price"
-          junit5InstrumentedTestsEnabled true
-        }
+      testOptions.junitPlatform.instrumentationTests {
+        enabled = false
       }
+    }
+
+    project.dependencies {
+      androidTestImplementation junit5.instrumentationTests()
     }
 
     project.evaluate()
 
     then:
-    def enabledFlavor = project.android.productFlavors.getByName("free")
-    def enabledArgs = enabledFlavor.getTestInstrumentationRunnerArguments()
-    assert enabledArgs.containsKey("runnerBuilder")
-
-    def disabledFlavor = project.android.productFlavors.getByName("paid")
-    def disabledArgs = disabledFlavor.getTestInstrumentationRunnerArguments()
-    assert !disabledArgs.containsKey("runnerBuilder")
+    def expect = thrown(ProjectConfigurationException)
+    expect.message.contains("The JUnit 5 Instrumentation Test library can only be used " +
+        "if support for them is explicitly enabled as well.")
   }
 }

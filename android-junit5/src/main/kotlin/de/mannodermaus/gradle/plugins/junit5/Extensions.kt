@@ -4,8 +4,9 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
-import com.android.builder.model.ProductFlavor
-import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import com.android.build.gradle.internal.dsl.TestOptions
+import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
+import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level.INFO
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -41,6 +42,23 @@ fun loadProperties(resource: String): Properties {
   return properties
 }
 
+/**
+ * Adds the provided key-value pair to the Map.
+ * If there already is a value associated with the key,
+ * the value is appended to the end of the current value
+ * using the given delimiter.
+ */
+fun MutableMap<String, String>.append(
+    key: String, value: String, delimiter: String = ","): String? {
+  val insertedValue = if (containsKey(key)) {
+    "${this[key]}$delimiter$value"
+  } else {
+    value
+  }
+
+  return this.put(key, insertedValue)
+}
+
 /*
  * "Extension" Extension Functions:
  * Shorthand properties to access different plugins' extension models.
@@ -61,10 +79,7 @@ val FiltersExtension.packages
 val FiltersExtension.engines
   get() = extensionByName<EnginesExtension>(ENGINES_EXTENSION_NAME)
 
-val AndroidJUnitPlatformExtension.jacoco
-  get() = extensionByName<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
-
-val Project.junit5
+val TestOptions.junitPlatform
   get() = extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
 
 val Project.jacoco
@@ -73,15 +88,21 @@ val Project.jacoco
 val AndroidJUnit5UnitTest.jacoco
   get() = extensionByName<JacocoTaskExtension>("jacoco")
 
+/* Extensions for Gradle */
+
+fun Logger.agpStyleLog(message: String, level: Level = INFO) {
+  LogUtils.agpStyleLog(this, level, message)
+}
+
 /* Interoperability layer for Gradle */
 
 /**
  * Create & add an Extension to the given container by name.
  */
-inline fun <reified T> Any.createExtension(
+inline fun <reified T> Any.extend(
     name: String,
     args: Array<Any> = emptyArray(),
-    noinline init: (T.() -> Unit)? = null): T {
+    noinline init: ((T) -> Unit)? = null): T {
   // Access the Extension container of an object,
   // or raise an Exception if none are available
   if (this !is ExtensionAware) {
@@ -89,7 +110,7 @@ inline fun <reified T> Any.createExtension(
   }
 
   // Create & Configure the new extension
-  val created = this.extensions.create(name, T::class.java, *args)
+  val created: T = this.extensions.create(name, T::class.java, *args)
   init?.let { init(created) }
   return created
 }
@@ -125,22 +146,14 @@ fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null
 val Project.android: BaseExtension
   get() = this.extensions.getByName("android") as BaseExtension
 
+val Project.junit5: AndroidJUnitPlatformExtension
+  get() = this.android.testOptions.junitPlatform
+
 /**
  * Access the extra properties of a DependencyHandler.
  * Equivalent to "DependencyHandler#ext" in Groovy.
  */
 val DependencyHandler.ext: ExtraPropertiesExtension
-  get() {
-    val aware = this as ExtensionAware
-    return aware.extensions.getByName(
-        ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
-  }
-
-/**
- * Access the extra properties of a ProductFlavor.
- * Equivalent to "ProductFlavor#ext" in Groovy.
- */
-val ProductFlavor.ext: ExtraPropertiesExtension
   get() {
     val aware = this as ExtensionAware
     return aware.extensions.getByName(
@@ -196,7 +209,7 @@ fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): A
  * Multi-language functional construct,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
  *
- * A [Callable] can be invoked with the short-hand
+ * A [Callable0] can be invoked with the short-hand
  * function syntax from both Kotlin & Groovy:
  *
  * <code><pre>
@@ -210,19 +223,19 @@ fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): A
  * </pre></code>
  */
 @Suppress("unused")
-class Callable(private val body: () -> Any) : Closure<Any>(null) {
+class Callable0<R>(private val body: () -> R) : Closure<R>(null) {
   /** Kotlin's call syntax */
-  operator fun invoke(): Any = body()
+  operator fun invoke(): R = body()
 
   /** Groovy's call syntax */
-  fun doCall(): Any = body()
+  fun doCall(): R = body()
 }
 
 /**
  * Multi-language functional construct,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
  *
- * A [Callable] can be invoked with the short-hand
+ * A [Callable1] can be invoked with the short-hand
  * function syntax from both Kotlin & Groovy:
  *
  * <code><pre>

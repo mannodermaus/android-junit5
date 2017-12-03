@@ -1,7 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
-import de.mannodermaus.gradle.plugins.junit5.integrations.attachInstrumentationTestSupport
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -35,22 +34,27 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     project.configureDependencies()
     project.afterEvaluate {
       it.configureTasks()
+      it.applyConfigurationParameters()
     }
   }
 
   private fun Project.configureExtensions() {
-    createExtension<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(this)) {
-      createExtension<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
-      createExtension<FiltersExtension>(FILTERS_EXTENSION_NAME) {
-        createExtension<PackagesExtension>(PACKAGES_EXTENSION_NAME)
-        createExtension<TagsExtension>(TAGS_EXTENSION_NAME)
-        createExtension<EnginesExtension>(ENGINES_EXTENSION_NAME)
-      }
-      createExtension<AndroidJUnit5JacocoReport.Extension>(JACOCO_EXTENSION_NAME)
-    }
+    // Hook the JUnit Platform configuration into the Android testOptions
+    android.testOptions
+        .extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(this)) { ju5 ->
+          ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
+          ju5.extend<FiltersExtension>(FILTERS_EXTENSION_NAME) { filters ->
+            filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
+            filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
+            filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
+          }
+        }
 
-    // Connect with integration libraries
-    attachInstrumentationTestSupport()
+    // FIXME Deprecated --------------------------------------------------------------------------------
+    // For backwards compatibility, still offer the "old" entry point "project.junitPlatform",
+    // which should redirect to the testOptions-based DSL dynamically
+    this.extend<ExtensionProxy>(EXTENSION_NAME, arrayOf(this, this.junit5))
+    // END Deprecation  --------------------------------------------------------------------------------
   }
 
   private fun Project.configureDependencies() {
@@ -71,31 +75,9 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       }
     }
 
-    // Create the dependency handlers for JUnit 5
-    project.dependencies.ext[DEP_HANDLER_NAME_JUNIT5] = Callable {
-      withDependencies(defaults) {
-        listOf(
-            it.others.junit4,
-            it.jupiter.api,
-            it.platform.engine,
-            it.jupiter.engine,
-            it.vintage.engine,
-
-            // Only needed to run tests in an Android Studio that bundles an older version
-            // (see also http://junit.org/junit5/docs/current/user-guide/#running-tests-ide-intellij-idea)
-            it.platform.launcher,
-            it.platform.console
-        )
-      }
-    }
-
-    project.dependencies.ext[DEP_HANDLER_NAME_PARAMETERIZED] = Callable {
-      withDependencies(defaults) { it.jupiter.params }
-    }
-
-    project.dependencies.ext[DEP_HANDLER_NAME_RUNTIME] = Callable {
-      withDependencies(defaults) { it.others.embeddedRuntime }
-    }
+    // Create the custom dependency endpoints for JUnit 5
+    val dependencyHandler = JUnit5DependencyHandler(this, defaults)
+    dependencyHandler.configure()
   }
 
   private fun Project.configureTasks() {
@@ -130,5 +112,16 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     }
 
     return providers
+  }
+
+  private fun Project.applyConfigurationParameters() {
+    // Consume Instrumentation Test options &
+    // apply configuration if enabled
+    if (junit5.instrumentationTests.enabled) {
+      // Attach the JUnit 5 RunnerBuilder automatically
+      // to the test instrumentation runner's parameters.
+      val runnerArgs = android.safeDefaultConfig.testInstrumentationRunnerArguments
+      runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
+    }
   }
 }

@@ -4,8 +4,8 @@ import org.junit.Test
 
 class CallableKotlinTests {
   @Test
-  fun callable() {
-    val obj = Callable { 2 + 2 }
+  fun callable0() {
+    val obj = Callable0 { 2 + 2 }
     assert(obj() == 4)
   }
 

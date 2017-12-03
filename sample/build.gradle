@@ -14,17 +14,11 @@ apply plugin: "de.mannodermaus.android-junit5"
 apply plugin: "jacoco"
 
 android {
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // A Note to my forgetful self:
-  //
-  // When updating these values, make sure
-  // to always update the Travis CI .yml config, too
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   compileSdkVersion COMPILE_SDK_VERSION
 
   defaultConfig {
     applicationId "de.mannodermaus.junit5.sample"
-    minSdkVersion MIN_SDK_VERSION
+    minSdkVersion SAMPLE_MIN_SDK_VERSION
     targetSdkVersion TARGET_SDK_VERSION
     versionCode 1
     versionName "1.0"
