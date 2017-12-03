@@ -166,7 +166,6 @@ class AGP3PluginSpec extends BasePluginSpec {
 
     then:
     def expect = thrown(ProjectConfigurationException)
-    expect.message.contains("The JUnit 5 Instrumentation Test library can only be used " +
-        "if support for them is explicitly enabled as well.")
+    expect.message.contains("instrumentationTests.enabled true")
   }
 }
