@@ -44,12 +44,21 @@ after_success:
   - ./scripts/deploy_snapshot.sh
 
 deploy:
-  provider: script
-  script: ./scripts/deploy_release.sh
   skip_cleanup: true
-  on:
-    tags: true
-    repo: mannodermaus/android-junit5
+    # Deploy Gradle plugin on tagged commits
+    # starting with the marker "plugin-<version>"
+  - provider: script
+    script: ./scripts/deploy_plugin_release.sh
+    on:
+      tags: true
+      condition: "${TRAVIS_TAG/plugin-}" != "$TRAVIS_TAG"
+    # Deploy Instrumentation library on tagged commits
+    # starting with the marker "instrumentation-<version>"
+  - provider: script
+    script: ./scripts/deploy_instrumentation_release.sh
+    on:
+      tags: true
+      condition: "${TRAVIS_TAG/instrumentation-}" != "$TRAVIS_TAG"
 
 notifications:
   email: false
