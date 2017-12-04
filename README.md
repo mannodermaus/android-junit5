@@ -7,7 +7,7 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in An
 ## Why a separate plugin?
 
 The JUnit Platform team provides a Gradle plugin for running JUnit 5 on the JVM. However,
-this plugin is tailored to the needs of a "purely Java" application, and doesn't work in
+that plugin is tailored to the needs of a "purely Java" application, and doesn't work in
 the context of the multi-variant world that we live in on Android. Therefore, this plugin was born.
 
 It configures a `junitPlatformTest` task for each registered build variant of a project.
@@ -150,7 +150,7 @@ To work around this, there is a separate dependency you can add to the *test* sc
 of your project in Android Studio 3. It provides its own copy of the JUnit 5 Runtime
 provided by a more recent build of IntelliJ, overriding the one embedded in Android Studio.
 
-To use this, add the following line alongside the other `junit5()` dependencies:
+To use this, add the following line alongside the other `junit5` dependencies:
 
 ```groovy
 dependencies {
