@@ -83,15 +83,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   UnitTestOptions getUnitTests() { return unitTests }
 
   /**
-   * Options for controlling instrumentation test execution with JUnit 5.
-   *
-   * @since 1.0.22
-   */
-  private final InstrumentationTestOptions instrumentationTests = new InstrumentationTestOptions()
-
-  /* Integration of Instrumentation Tests */
-
-  /**
    * Options for controlling unit test execution.*/
   static class UnitTestOptions {
     private final DomainObjectSet<JUnit5UnitTest> testTasks =
@@ -144,6 +135,15 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
       this.testTasks.add(task)
     }
   }
+
+  /* Integration of Instrumentation Tests */
+
+  /**
+   * Options for controlling instrumentation test execution with JUnit 5.
+   *
+   * @since 1.0.22
+   */
+  private final InstrumentationTestOptions instrumentationTests = new InstrumentationTestOptions()
 
   /**
    * Configures instrumentation test options.
