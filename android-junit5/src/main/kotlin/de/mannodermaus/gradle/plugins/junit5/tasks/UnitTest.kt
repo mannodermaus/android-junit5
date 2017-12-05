@@ -21,12 +21,19 @@ import de.mannodermaus.gradle.plugins.junit5.safeProperty
 import de.mannodermaus.gradle.plugins.junit5.selectors
 import de.mannodermaus.gradle.plugins.junit5.tags
 import de.mannodermaus.gradle.plugins.junit5.variantData
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.file.IdentityFileResolver
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
+import org.gradle.process.JavaForkOptions
+import org.gradle.process.ProcessForkOptions
+import org.gradle.process.internal.DefaultJavaForkOptions
+import org.gradle.process.internal.DefaultProcessForkOptions
 import org.junit.platform.console.ConsoleLauncher
 import java.io.File
 
@@ -98,8 +105,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       // instrumented by Clover in JUnit's build will be shadowed by JARs pulled in
       // via the junitPlatform configuration... leading to zero code coverage for
       // the respective modules.
-      val defaultTestTask = getDefaultUnitTestTask()
-      val taskClasspath = defaultTestTask.classpath +
+      val defaultJUnit4Task = getDefaultJUnit4Task()
+      val taskClasspath = defaultJUnit4Task.classpath +
           project.configurations.getByName("junitPlatform")
 
       // Aggregate test root directories from the given providers
@@ -115,9 +122,9 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       // Apply other arguments and properties from the default test task, unless disabled
       // (these are most likely provided by the AGP's testOptions closure)
       if (junit5.unitTests.applyDefaultTestOptions) {
-        task.jvmArgs(defaultTestTask.jvmArgs)
-        task.systemProperties(defaultTestTask.systemProperties)
-        task.environment(defaultTestTask.environment)
+        task.jvmArgs(defaultJUnit4Task.jvmArgs)
+        task.systemProperties(defaultJUnit4Task.systemProperties)
+        task.environment(defaultJUnit4Task.environment)
       }
 
       // Build the task arguments
@@ -126,7 +133,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       project.logger.junit5Info("JVM Arguments: ${task.jvmArgs.joinToString()}")
 
       // Hook into the main JUnit 5 task
-      val defaultJUnit5Task = project.tasks.maybeCreate(TASK_NAME_DEFAULT)
+      val defaultJUnit5Task = getDefaultJUnit5Task()
       defaultJUnit5Task.dependsOn(task)
 
       // Apply additional user configuration
@@ -134,6 +141,20 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
     }
 
     /* Private */
+
+    private fun getDefaultJUnit4Task(): AndroidUnitTest {
+      val name = scope.getTaskName(VariantType.UNIT_TEST.prefix, VariantType.UNIT_TEST.suffix)
+      return project.tasks.getByName(name) as AndroidUnitTest
+    }
+
+    private fun getDefaultJUnit5Task(): Task {
+      var defaultTask = project.tasks.findByName(TASK_NAME_DEFAULT)
+      if (defaultTask == null) {
+        defaultTask = project.tasks.create(TASK_NAME_DEFAULT, JUnit5UnitTestRunAll::class.java)
+        project.junit5.unitTests.applyConfiguration(defaultTask)
+      }
+      return defaultTask!!
+    }
 
     private fun configureTaskInputs(
         task: AndroidJUnit5UnitTest,
@@ -165,7 +186,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
         task: AndroidJUnit5UnitTest,
         junit5: AndroidJUnitPlatformExtension) {
       // Connect to the default unit test task
-      val variantUnitTestTask = this.getDefaultUnitTestTask()
+      val variantUnitTestTask = this.getDefaultJUnit4Task()
       try {
         // Android Gradle Plugin 3.x provides additional input parameters
         task.resCollection = variantUnitTestTask.resCollection
@@ -183,11 +204,6 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       // Hook into the main test task
       val mainTestTask = project.tasks.getByName("test")
       mainTestTask.dependsOn(task)
-    }
-
-    private fun getDefaultUnitTestTask(): AndroidUnitTest {
-      val name = scope.getTaskName(VariantType.UNIT_TEST.prefix, VariantType.UNIT_TEST.suffix)
-      return project.tasks.getByName(name) as AndroidUnitTest
     }
 
     private fun configureTaskOutputs(
@@ -253,4 +269,117 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       return args
     }
   }
+}
+
+/**
+ * Facade for the main JUnit 5 Unit Test task.
+ * Allows the default task to also be configured by unitTests.all.
+ */
+open class JUnit5UnitTestRunAll : DefaultTask(), JUnit5UnitTest {
+
+  private val emptyJavaForkOptions = DefaultJavaForkOptions(IdentityFileResolver())
+  private val emptyProcessForkOptions = DefaultProcessForkOptions(IdentityFileResolver())
+  private val emptyFileCollection = project.files()
+
+  override fun setSystemProperties(p0: MutableMap<String, *>?) {
+  }
+
+  override fun getExecutable() = ""
+
+  override fun setDefaultCharacterEncoding(p0: String?) {
+  }
+
+  override fun jvmArgs(p0: MutableIterable<*>?) = emptyJavaForkOptions
+
+  override fun jvmArgs(vararg p0: Any?) = emptyJavaForkOptions
+
+  override fun environment(p0: MutableMap<String, *>?) = emptyProcessForkOptions
+
+  override fun environment(p0: String?, p1: Any?) = emptyProcessForkOptions
+
+  override fun setMinHeapSize(p0: String?) {
+  }
+
+  override fun systemProperties(p0: MutableMap<String, *>?) = emptyJavaForkOptions
+
+  override fun setExecutable(p0: String?) {
+  }
+
+  override fun setExecutable(p0: Any?) {
+  }
+
+  override fun executable(p0: Any?) = emptyProcessForkOptions
+
+  override fun setJvmArgs(p0: MutableList<String>?) {
+  }
+
+  override fun setJvmArgs(p0: MutableIterable<*>?) {
+  }
+
+  override fun setAllJvmArgs(p0: MutableList<String>?) {
+  }
+
+  override fun setAllJvmArgs(p0: MutableIterable<*>?) {
+  }
+
+  override fun setDebug(p0: Boolean) {
+  }
+
+  override fun getWorkingDir() = project.file("")
+
+  override fun setBootstrapClasspath(p0: FileCollection?) {
+  }
+
+  override fun getDefaultCharacterEncoding() = ""
+
+  override fun setMaxHeapSize(p0: String?) {
+  }
+
+  override fun systemProperty(p0: String?, p1: Any?) = emptyJavaForkOptions
+
+  override fun getBootstrapClasspath() = emptyFileCollection
+
+  override fun workingDir(p0: Any?) = emptyProcessForkOptions
+
+  override fun setWorkingDir(p0: File?) {
+  }
+
+  override fun setWorkingDir(p0: Any?) {
+  }
+
+  override fun setEnvironment(p0: MutableMap<String, *>?) {
+  }
+
+  override fun getEnableAssertions() = false
+
+  override fun setEnableAssertions(p0: Boolean) {
+  }
+
+  override fun getMaxHeapSize() = ""
+
+  override fun copyTo(p0: JavaForkOptions?) = emptyJavaForkOptions
+
+  override fun copyTo(p0: ProcessForkOptions?) = emptyProcessForkOptions
+
+  override fun getJvmArgs(): MutableList<String> {
+    return mutableListOf()
+  }
+
+  override fun getSystemProperties(): MutableMap<String, Any> {
+    return mutableMapOf()
+  }
+
+  override fun getMinHeapSize() = ""
+
+  override fun getEnvironment(): MutableMap<String, Any> {
+    return mutableMapOf()
+  }
+
+  override fun getAllJvmArgs(): MutableList<String> {
+    return mutableListOf()
+  }
+
+  override fun getDebug() = false
+
+  override fun bootstrapClasspath(vararg p0: Any?) = emptyJavaForkOptions
 }

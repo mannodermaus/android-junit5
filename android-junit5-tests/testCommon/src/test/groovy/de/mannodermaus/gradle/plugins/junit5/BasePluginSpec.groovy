@@ -279,6 +279,7 @@ abstract class BasePluginSpec extends Specification {
         .asAndroidApplication()
         .build()
 
+    def onlyDefaultTask = project.task("onlyDefaultTask")
     def otherTask = project.task("someOtherTask")
 
     project.android {
@@ -288,6 +289,10 @@ abstract class BasePluginSpec extends Specification {
           systemProperty "some.prop", "0815"
           environment "MY_ENV_VAR", "MegaShark.bin"
           dependsOn otherTask
+
+          if (it.name == "junitPlatformTest") {
+            it.dependsOn onlyDefaultTask
+          }
         }
       }
     }
@@ -295,17 +300,22 @@ abstract class BasePluginSpec extends Specification {
     project.evaluate()
 
     then:
+    def runAll = project.tasks.getByName("junitPlatformTest")
     def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
     def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
 
+    assert runAll.getDependsOn().contains(otherTask)
+    assert runAll.getDependsOn().contains(onlyDefaultTask)
     assert runDebug.jvmArgs.contains("-noverify")
     assert runDebug.systemProperties.containsKey("some.prop")
     assert runDebug.environment.containsKey("MY_ENV_VAR")
     assert runDebug.getDependsOn().contains(otherTask)
+    assert !runDebug.getDependsOn().contains(onlyDefaultTask)
     assert runRelease.jvmArgs.contains("-noverify")
     assert runRelease.systemProperties.containsKey("some.prop")
     assert runRelease.environment.containsKey("MY_ENV_VAR")
     assert runRelease.getDependsOn().contains(otherTask)
+    assert !runRelease.getDependsOn().contains(onlyDefaultTask)
   }
 
   def "android.testOptions: Can be disabled for JUnit 5 tasks via the extension"() {
