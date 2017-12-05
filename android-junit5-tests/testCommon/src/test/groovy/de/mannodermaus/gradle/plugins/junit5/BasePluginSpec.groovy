@@ -195,7 +195,7 @@ abstract class BasePluginSpec extends Specification {
     } != null
   }
 
-  def "android.testOptions: jvmArgs are properly applied"() {
+  def "jvmArgs are properly applied"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -203,7 +203,7 @@ abstract class BasePluginSpec extends Specification {
 
     project.android {
       testOptions {
-        unitTests.all {
+        junitPlatform.unitTests.all {
           if (it.name.contains("Debug")) {
             jvmArgs "-noverify"
           }
@@ -221,7 +221,7 @@ abstract class BasePluginSpec extends Specification {
     assert !runRelease.jvmArgs.contains("-noverify")
   }
 
-  def "android.testOptions: System properties are properly applied"() {
+  def "System properties are properly applied"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -229,7 +229,7 @@ abstract class BasePluginSpec extends Specification {
 
     project.android {
       testOptions {
-        unitTests.all {
+        junitPlatform.unitTests.all {
           if (it.name.contains("Debug")) {
             systemProperty "some.prop", "0815"
           }
@@ -247,7 +247,7 @@ abstract class BasePluginSpec extends Specification {
     assert !runRelease.systemProperties.containsKey("some.prop")
   }
 
-  def "android.testOptions: Environment variables are properly applied"() {
+  def "Environment variables are properly applied"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -255,7 +255,7 @@ abstract class BasePluginSpec extends Specification {
 
     project.android {
       testOptions {
-        unitTests.all {
+        junitPlatform.unitTests.all {
           if (it.name.contains("Debug")) {
             environment "MY_ENV_VAR", "MegaShark.bin"
           }
@@ -273,7 +273,79 @@ abstract class BasePluginSpec extends Specification {
     assert !runRelease.environment.containsKey("MY_ENV_VAR")
   }
 
+  def "Configuration Closure works properly"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    def otherTask = project.task("someOtherTask")
+
+    project.android {
+      testOptions {
+        junitPlatform.unitTests.all {
+          jvmArgs "-noverify"
+          systemProperty "some.prop", "0815"
+          environment "MY_ENV_VAR", "MegaShark.bin"
+          dependsOn otherTask
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
+
+    assert runDebug.jvmArgs.contains("-noverify")
+    assert runDebug.systemProperties.containsKey("some.prop")
+    assert runDebug.environment.containsKey("MY_ENV_VAR")
+    assert runDebug.getDependsOn().contains(otherTask)
+    assert runRelease.jvmArgs.contains("-noverify")
+    assert runRelease.systemProperties.containsKey("some.prop")
+    assert runRelease.environment.containsKey("MY_ENV_VAR")
+    assert runRelease.getDependsOn().contains(otherTask)
+  }
+
   def "android.testOptions: Can be disabled for JUnit 5 tasks via the extension"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions {
+        unitTests.all {
+          jvmArgs "-noverify"
+          systemProperty "some.prop", "0815"
+          environment "MY_ENV_VAR", "MegaShark.bin"
+        }
+      }
+    }
+
+    project.android {
+      testOptions.junitPlatform {
+        applyDefaultTestOptions false
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def runDebug = project.tasks.getByName("junitPlatformTestDebug") as AndroidJUnit5UnitTest
+    def runRelease = project.tasks.getByName("junitPlatformTestRelease") as AndroidJUnit5UnitTest
+
+    assert !runDebug.jvmArgs.contains("-noverify")
+    assert !runDebug.systemProperties.containsKey("some.prop")
+    assert !runDebug.environment.containsKey("MY_ENV_VAR")
+    assert !runRelease.jvmArgs.contains("-noverify")
+    assert !runRelease.systemProperties.containsKey("some.prop")
+    assert !runRelease.environment.containsKey("MY_ENV_VAR")
+  }
+
+  // FIXME When the deprecated property is removed, delete this test as well
+  def "android.testOptions: Can be disabled for JUnit 5 tasks via the extension (Old DSL)"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()

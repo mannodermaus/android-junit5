@@ -1,7 +1,10 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.annotations.NonNull
+import org.gradle.api.Action
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
+import org.gradle.api.internal.DefaultDomainObjectSet
 import org.gradle.util.ConfigureUtil
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
@@ -31,27 +34,53 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   @Nullable
   String vintageVersion
 
-  /**
-   * Whether or not to apply the Android Gradle Plugin's "testOptions"
-   * to JUnit 5 tasks - true by default.
-   *
-   * Note that this will only affect the following properties assigned
-   * by a "testOptions.unitTests.all" closure:
-   *
-   * - jvmArgs
-   * - systemProperties
-   * - environment variables */
-  private boolean applyDefaultTestOptions = true
+  /* Integration of Unit Tests */
 
+  // FIXME DEPRECATED ---------------------------------------------------------------
+
+  private def logDeprecationWarning(String dontUse, String useInstead) {
+    LogUtils.agpStyleLog(project.logger,
+        LogUtils.Level.WARNING,
+        "Accessing '$dontUse' for JUnit 5 unit tests is deprecated and will be removed in a future version. Please use '$useInstead' instead")
+  }
+
+  @Deprecated
   void applyDefaultTestOptions(boolean enabled) {
-    this.applyDefaultTestOptions = enabled
+    logDeprecationWarning("applyDefaultTestOptions", "unitTests.all")
+    unitTests.applyDefaultTestOptions(enabled)
   }
 
+  @Deprecated
   boolean getApplyDefaultTestOptions() {
-    return applyDefaultTestOptions
+    logDeprecationWarning("applyDefaultTestOptions", "unitTests.all")
+    return unitTests.getApplyDefaultTestOptions()
   }
 
-  /* Integration of Instrumentation Tests */
+  // END DEPRECATED ---------------------------------------------------------------
+
+  /**
+   * Options for controlling unit test execution with JUnit 5.
+   *
+   * @since 1.0.23
+   */
+  private final UnitTestOptions unitTests = new UnitTestOptions()
+
+  /**
+   * Configures unit test options.
+   *
+   * @since 1.0.23
+   */
+  void unitTests(Closure closure) {
+    ConfigureUtil.configure(closure, unitTests)
+  }
+
+  /**
+   * Configures unit test options.
+   *
+   * @since 1.0.23
+   */
+  @NonNull
+  UnitTestOptions getUnitTests() { return unitTests }
 
   /**
    * Options for controlling instrumentation test execution with JUnit 5.
@@ -59,6 +88,62 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
    * @since 1.0.22
    */
   private final InstrumentationTestOptions instrumentationTests = new InstrumentationTestOptions()
+
+  /* Integration of Instrumentation Tests */
+
+  /**
+   * Options for controlling unit test execution.*/
+  static class UnitTestOptions {
+    private final DomainObjectSet<JUnit5UnitTest> testTasks =
+        new DefaultDomainObjectSet<>(JUnit5UnitTest.class)
+
+    private boolean applyDefaultTestOptions = true
+
+    /**
+     * Whether or not to apply the Android Gradle Plugin's "testOptions"
+     * to JUnit 5 tasks - true by default.
+     *
+     * Note that this will only affect the following properties assigned
+     * by a "testOptions.unitTests.all" closure:
+     *
+     * - jvmArgs
+     * - systemProperties
+     * - environment variables
+     * */
+    void applyDefaultTestOptions(boolean enabled) {
+      this.applyDefaultTestOptions = enabled
+    }
+
+    /**
+     * Returns whether or not to apply the Android Gradle Plugin's "testOptions"
+     * to JUnit 5 tasks.
+     * */
+    boolean getApplyDefaultTestOptions() {
+      return applyDefaultTestOptions
+    }
+
+    /**
+     * Applies the provided config closure to all JUnit 5 test tasks,
+     * and any task that'll be added in the future
+     * @param configClosure Closure to apply
+     */
+    void all(Closure<JUnit5UnitTest> configClosure) {
+      this.testTasks.all(new Action<JUnit5UnitTest>() {
+        @Override
+        void execute(JUnit5UnitTest task) {
+          ConfigureUtil.configure(configClosure, task)
+        }
+      })
+    }
+
+    /**
+     * Registers a JUnit 5 test task
+     * @param task The task
+     */
+    void applyConfiguration(JUnit5UnitTest task) {
+      this.testTasks.add(task)
+    }
+  }
 
   /**
    * Configures instrumentation test options.

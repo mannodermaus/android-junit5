@@ -6,6 +6,7 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.android.builder.core.VariantType
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
+import de.mannodermaus.gradle.plugins.junit5.JUnit5UnitTest
 import de.mannodermaus.gradle.plugins.junit5.engines
 import de.mannodermaus.gradle.plugins.junit5.filters
 import de.mannodermaus.gradle.plugins.junit5.getExcludeClassNamePatterns
@@ -38,7 +39,7 @@ private const val VERIFICATION_GROUP = JavaBasePlugin.VERIFICATION_GROUP
  * pretty closely, and it takes advantage of the efforts related to
  * classpath construction prevalent in the platform's default implementation.
  */
-open class AndroidJUnit5UnitTest : JavaExec() {
+open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
 
   companion object {
     fun create(
@@ -113,7 +114,7 @@ open class AndroidJUnit5UnitTest : JavaExec() {
 
       // Apply other arguments and properties from the default test task, unless disabled
       // (these are most likely provided by the AGP's testOptions closure)
-      if (junit5.applyDefaultTestOptions) {
+      if (junit5.unitTests.applyDefaultTestOptions) {
         task.jvmArgs(defaultTestTask.jvmArgs)
         task.systemProperties(defaultTestTask.systemProperties)
         task.environment(defaultTestTask.environment)
@@ -127,6 +128,9 @@ open class AndroidJUnit5UnitTest : JavaExec() {
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = project.tasks.maybeCreate(TASK_NAME_DEFAULT)
       defaultJUnit5Task.dependsOn(task)
+
+      // Apply additional user configuration
+      project.junit5.unitTests.applyConfiguration(task)
     }
 
     /* Private */
