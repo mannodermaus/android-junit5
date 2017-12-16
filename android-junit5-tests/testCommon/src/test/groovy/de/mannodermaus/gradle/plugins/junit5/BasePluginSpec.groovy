@@ -576,6 +576,88 @@ abstract class BasePluginSpec extends Specification {
     assert !runRelease.classDirectories.asPath.contains("classes/test/")
   }
 
+  def "Jacoco Exclude Rules: Addition"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .applyJacocoPlugin()
+        .build()
+
+    // Create some fake class files to verify the Jacoco task's tree
+    project.file("build/intermediates/classes/debug").mkdirs()
+    project.file("build/intermediates/classes/debug/R.class").createNewFile()
+    project.file("build/intermediates/classes/debug/FirstFile.class").createNewFile()
+    project.file("build/intermediates/classes/debug/SecondFile.class").createNewFile()
+    project.file("src/main/java").mkdirs()
+    project.file("src/main/java/OkFile.java").createNewFile()
+    project.file("src/main/java/AnnoyingFile.java").createNewFile()
+
+    project.junitPlatform {
+      jacoco {
+        // In addition to the default exclusion rules for R.class,
+        // also exclude any class prefixed with "Second"
+        excludedClasses += "Second*.class"
+        excludedSources += "AnnoyingFile.java"
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def jacocoTask = project.tasks.getByName("jacocoTestReportDebug") as AndroidJUnit5JacocoReport
+
+    def classFiles = jacocoTask.classDirectories.asFileTree.files
+    classFiles.find { it.name == "R.class" } == null
+    classFiles.find { it.name == "FirstFile.class" } != null
+    classFiles.find { it.name == "SecondFile.class" } == null
+
+    def sourceFiles = jacocoTask.sourceDirectories.asFileTree.files
+    sourceFiles.find { it.name == "OkFile.java" } != null
+    sourceFiles.find { it.name == "AnnoyingFile.java" } == null
+  }
+
+  def "Jacoco Exclude Rules: Replacement"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .applyJunit5Plugin()
+        .applyJacocoPlugin()
+        .build()
+
+    // Create some fake class files to verify the Jacoco task's tree
+    project.file("build/intermediates/classes/debug").mkdirs()
+    project.file("build/intermediates/classes/debug/R.class").createNewFile()
+    project.file("build/intermediates/classes/debug/FirstFile.class").createNewFile()
+    project.file("build/intermediates/classes/debug/SecondFile.class").createNewFile()
+    project.file("src/main/java").mkdirs()
+    project.file("src/main/java/OkFile.java").createNewFile()
+    project.file("src/main/java/AnnoyingFile.java").createNewFile()
+
+    project.junitPlatform {
+      jacoco {
+        // Replace the default exclusion rules
+        // and only exclude any class prefixed with "Second"
+        excludedClasses = ["Second*.class"]
+        excludedSources = ["AnnoyingFile.java"]
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def jacocoTask = project.tasks.getByName("jacocoTestReportDebug") as AndroidJUnit5JacocoReport
+
+    def files = jacocoTask.classDirectories.asFileTree.files
+    files.find { it.name == "R.class" } != null
+    files.find { it.name == "FirstFile.class" } != null
+    files.find { it.name == "SecondFile.class" } == null
+
+    def sourceFiles = jacocoTask.sourceDirectories.asFileTree.files
+    sourceFiles.find { it.name == "OkFile.java" } != null
+    sourceFiles.find { it.name == "AnnoyingFile.java" } == null
+  }
+
   def "Library: Basic Integration"() {
     when:
     Project project = factory.newProject(rootProject())

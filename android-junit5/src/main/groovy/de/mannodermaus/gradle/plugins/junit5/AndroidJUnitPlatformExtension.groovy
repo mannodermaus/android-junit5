@@ -206,6 +206,12 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     private final Report csv
     private final Report xml
 
+    @NonNull
+    public List<String> excludedClasses = ["**/R.class", '**/R$*.class']
+
+    @NonNull
+    public List<String> excludedSources = []
+
     JacocoOptions(Project project) {
       this.project = project
       this.html = new Report()

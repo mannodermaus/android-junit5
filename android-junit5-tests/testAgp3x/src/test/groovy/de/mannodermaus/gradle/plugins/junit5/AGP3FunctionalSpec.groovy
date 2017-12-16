@@ -21,10 +21,10 @@ class AGP3FunctionalSpec extends BaseFunctionalSpec {
     def flavors = flavorNames.collect { """$it { dimension "tier" }""" }.join("\n")
 
     return """
-flavorDimensions "tier"
-productFlavors {
-  $flavors
-}
-"""
+      flavorDimensions "tier"
+      productFlavors {
+        $flavors
+      }
+    """
   }
 }

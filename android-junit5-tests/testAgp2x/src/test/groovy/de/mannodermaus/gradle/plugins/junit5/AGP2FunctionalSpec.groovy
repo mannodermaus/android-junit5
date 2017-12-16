@@ -21,9 +21,9 @@ class AGP2FunctionalSpec extends BaseFunctionalSpec {
     def flavors = flavorNames.collect { "$it {}" }.join("\n")
 
     return """
-productFlavors {
-  $flavors
-}
-"""
+      productFlavors {
+        $flavors
+      }
+    """
   }
 }
