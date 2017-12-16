@@ -206,19 +206,19 @@ fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): A
 /* Types */
 
 /**
- * Multi-language functional construct,
+ * Multi-language functional construct with no parameters,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
  *
  * A [Callable0] can be invoked with the short-hand
  * function syntax from both Kotlin & Groovy:
  *
  * <code><pre>
- *   val callable = Callable { 2 + 2 }
+ *   val callable = Callable0 { 2 + 2 }
  *   val result = callable()  // result == 4
  * </pre></code>
  *
  * <code><pre>
- *   def callable = new Callable({ 2 + 2 })
+ *   def callable = new Callable0({ 2 + 2 })
  *   def result = callable()  // result == 4
  * </pre></code>
  */
@@ -232,20 +232,20 @@ class Callable0<R>(private val body: () -> R) : Closure<R>(null) {
 }
 
 /**
- * Multi-language functional construct,
+ * Multi-language functional construct with 1 parameter,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
  *
  * A [Callable1] can be invoked with the short-hand
  * function syntax from both Kotlin & Groovy:
  *
  * <code><pre>
- *   val callable = Callable { 2 + 2 }
- *   val result = callable()  // result == 4
+ *   val callable = Callable1 { 2 + it }
+ *   val result = callable(2)  // result == 4
  * </pre></code>
  *
  * <code><pre>
- *   def callable = new Callable({ 2 + 2 })
- *   def result = callable()  // result == 4
+ *   def callable = new Callable1({ input ->  2 + input })
+ *   def result = callable(2)  // result == 4
  * </pre></code>
  */
 @Suppress("unused")
