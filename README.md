@@ -1,6 +1,6 @@
-# android-junit5
+# android-junit5 [![Travis Build Status](https://travis-ci.org/mannodermaus/android-junit5.svg?branch=master)][travisci]
 
-[![Travis Build Status](https://travis-ci.org/mannodermaus/android-junit5.svg?branch=master)][travisci]
+![Logo](.images/android-junit5.png)
 
 A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments.
 
