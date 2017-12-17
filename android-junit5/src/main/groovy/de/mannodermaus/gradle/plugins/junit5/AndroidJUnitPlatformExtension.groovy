@@ -41,7 +41,7 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   private def logDeprecationWarning(String dontUse, String useInstead) {
     LogUtils.agpStyleLog(project.logger,
         LogUtils.Level.WARNING,
-        "Accessing '$dontUse' for JUnit 5 unit tests is deprecated and will be removed in a future version. Please use '$useInstead' instead")
+        "Accessing '$dontUse' is deprecated and will be removed in a future version. Please use '$useInstead' instead")
   }
 
   @Deprecated
@@ -189,13 +189,27 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
 
   /**
    * Configures Jacoco reporting options.*/
-  void jacoco(Closure closure) {
+  void jacocoOptions(Closure closure) {
     ConfigureUtil.configure(closure, jacoco)
   }
 
   /**
    * Configures Jacoco reporting options.*/
-  JacocoOptions getJacoco() { return jacoco }
+  JacocoOptions getJacocoOptions() { return jacoco }
+
+  // FIXME DEPRECATED ---------------------------------------------------------------
+
+  void jacoco(Closure closure) {
+    logDeprecationWarning("jacoco", "jacocoOptions")
+    jacocoOptions(closure)
+  }
+
+  JacocoOptions getJacoco() {
+    logDeprecationWarning("jacoco", "jacocoOptions")
+    return getJacocoOptions()
+  }
+
+  // END DEPRECATED ---------------------------------------------------------------
 
   /**
    * Options for controlling Jacoco reporting.*/
