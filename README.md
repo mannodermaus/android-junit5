@@ -8,9 +8,9 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in An
 
 The JUnit Platform team provides a Gradle plugin for running JUnit 5 on the JVM. However,
 that plugin is tailored to the needs of a "purely Java" application, and doesn't work in
-the context of the multi-variant world that we live in on Android. Therefore, this plugin was born.
+the context of the multi-variant world that we live in on Android. As a result, `android-junit5` was born.
 
-It configures a `junitPlatformTest` task for each registered build variant of a project.
+This plugin configures a `junitPlatformTest` task for each registered build variant of a project.
 Furthermore, it automatically attaches both the Jupiter & Vintage Engines
 during the execution phase of your tests as well, so there's very little configuration
 necessary to get your project up-and-running on the JUnit Platform.
@@ -61,9 +61,9 @@ dependencies {
 
 ## Configuration
 
-The plugin applies a configuration closure to your module's `android.testOptions`.
+The plugin extends your module's `android.testOptions` with more options, wrapped in a container called `junitPlatform`.
 Inside it, you can use [all properties available through the default JUnit 5 Gradle plugin][junit5config].
-However, there are a few more parameters that allow for more customization of the JUnit Platform
+Additionally, there are a few more parameters that allow for more customization of the JUnit Platform
 in your Android project. These are detailed below, alongside their default values:
 
 ```groovy
