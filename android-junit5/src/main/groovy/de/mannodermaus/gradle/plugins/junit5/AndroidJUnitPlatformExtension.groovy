@@ -207,7 +207,7 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     private final Report xml
 
     @NonNull
-    public List<String> excludedClasses = ["**/R.class", '**/R$*.class']
+    public List<String> excludedClasses = ["**/R.class", '**/R$*.class', "**/BuildConfig.*"]
 
     @NonNull
     public List<String> excludedSources = []
