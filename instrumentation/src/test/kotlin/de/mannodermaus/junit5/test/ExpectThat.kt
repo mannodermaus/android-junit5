@@ -79,7 +79,7 @@ sealed class ExpectedMessage {
 
   class Containing(private val fragment: String) : ExpectedMessage() {
     override fun assertAgainst(actual: String) {
-      assertThat(actual).contains(fragment)
+      assertThat(actual).containsOnlyOnce(fragment)
     }
   }
 }

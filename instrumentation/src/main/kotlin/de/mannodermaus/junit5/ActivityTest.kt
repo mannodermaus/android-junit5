@@ -85,8 +85,7 @@ interface Tested<out T : Activity> {
    * Launches the Activity under test.
    *
    * Don't call this method directly, unless you explicitly requested
-   * not to lazily launch the Activity manually using the launchActivity flag
-   * in the [ActivityTest] configuration annotation.
+   * to launch the Activity manually through the [ActivityTest]'s launchActivity flag.
    *
    * @throws ActivityAlreadyLaunchedException if the Activity was already launched
    */
@@ -100,8 +99,8 @@ interface Tested<out T : Activity> {
   fun finishActivity()
 
   /**
-   * This method can be used to retrieve the Activity result of an Activity that has called setResult.
-   * Usually, the result is handled in onActivityResult of parent activity, that has called startActivityForResult.
+   * This method can be used to retrieve the result of an Activity that has called [Activity.setResult].
+   * Usually, the result is handled in onActivityResult of the parent activity, which has called startActivityForResult.
    * This method must not be called before Activity.finish was called.
    *
    * @throws ActivityNotLaunchedException if the Activity is not running
