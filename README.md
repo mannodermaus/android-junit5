@@ -129,13 +129,9 @@ android {
 > The following section deals with fixing Test Execution within **Android Studio 3**.
 > Running your JUnit 5 tests directly from Android Studio 2.3.3 and earlier **will not work**:
 > You will encounter an `AbstractMethodError` when trying to do so ([more information here][as2issue]).
->
-> The cause of this error is similar in nature to the one described below, and related to outdated APIs.
-> Unlike that issue though, we can't fix the `AbstractMethodError` inside IntelliJ's internal runtime
-> in the same way. Therefore, please resort to using Gradle for unit testing in Android Studio 2.
+> Therefore, please use Gradle for unit testing in Android Studio 2.
 
-
-All versions up to and including **Android Studio 3.1 Canary** are built
+All versions up to **Android Studio 3.1 Canary 6** are built
 on a version of IntelliJ IDEA that depends on outdated JUnit 5 APIs.
 Therefore, your tests will fail with an Exception similar to the following when you try to
 launch your tests from inside the IDE (using an *Android JUnit* Run Configuration):
