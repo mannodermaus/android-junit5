@@ -10,7 +10,8 @@ import org.junit.runners.model.RunnerBuilder
 private const val LOG_TAG = "AndroidJUnit5"
 private val jupiterTestAnnotations = listOf(
     org.junit.jupiter.api.Test::class.java,
-    org.junit.jupiter.api.TestFactory::class.java)
+    org.junit.jupiter.api.TestFactory::class.java,
+    org.junit.jupiter.params.ParameterizedTest::class.java)
 
 /* Types */
 
