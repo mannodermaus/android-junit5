@@ -45,9 +45,16 @@ android {
 
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
-  implementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
-  implementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
-  implementation "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
+  implementation "junit:junit:$JUNIT4_VERSION"
+
+  // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
+  // since that would prematurely raise the minSdkVersion requirement for target applications,
+  // even though not all product flavors might want to use JUnit 5.
+  // Therefore, only compile against those APIs, and have them provided at runtime
+  // by the "instrumentation" companion library instead.
+  compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  compileOnly "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
+  compileOnly "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
 
   testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
   testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"

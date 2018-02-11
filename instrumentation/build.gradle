@@ -56,7 +56,12 @@ configurations {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
   implementation "com.android.support.test:runner:$SUPPORT_TEST_LIBRARY_VERSION"
-  compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  implementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+
+  // This is required by the "instrumentation-runner" companion library,
+  // since it can't provide any JUnit 5 runtime libraries itself
+  // due to fear of prematurely incrementing the minSdkVersion requirement.
+  runtimeOnly "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
 
   commonTestImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
   commonTestImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
