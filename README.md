@@ -2,8 +2,7 @@
 
 ![Logo](.images/logo.png)
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments.
-**It requires Android Gradle Plugin 3.0.0 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.0.0 or later.**
 
 ## Why a separate plugin?
 
