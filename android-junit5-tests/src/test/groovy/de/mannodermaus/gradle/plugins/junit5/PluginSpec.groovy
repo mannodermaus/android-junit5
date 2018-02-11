@@ -10,6 +10,7 @@ import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.internal.plugins.PluginApplicationException
+import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 
 /*
