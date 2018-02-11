@@ -30,6 +30,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       "android-junit5 plugin requires Gradle $MIN_REQUIRED_GRADLE_VERSION or later"
     }
 
+    requireAgp3 {
+      "android-junit5 plugin requires Android Gradle Plugin 3.0.0 or later"
+    }
+
     // Validates that the project's plugins are configured correctly
     this.projectConfig = ProjectConfig(project)
 
@@ -124,7 +128,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       // Attach the JUnit 5 RunnerBuilder automatically
       // to the test instrumentation runner's parameters,
       // and attach the runner's artifact automatically to the runtime configuration
-      val runnerArgs = android.safeDefaultConfig.testInstrumentationRunnerArguments
+      val runnerArgs = android.defaultConfig.testInstrumentationRunnerArguments
       runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
 
       val defaults = loadProperties(VERSIONS_RESOURCE_NAME)

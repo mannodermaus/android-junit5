@@ -5,6 +5,7 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.android.build.gradle.internal.dsl.TestOptions
+import com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
 import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.APP
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level.INFO
@@ -33,6 +34,14 @@ import java.util.Properties
 
 fun requireGradle(version: String, message: () -> String) {
   require(GradleVersion.current() >= GradleVersion.version(version)) {
+    throw GradleException(message())
+  }
+}
+
+fun requireAgp3(message: () -> String) {
+  val majorVersion = ANDROID_GRADLE_PLUGIN_VERSION.substringBefore('.').toInt()
+
+  require(majorVersion >= 3) {
     throw GradleException(message())
   }
 }

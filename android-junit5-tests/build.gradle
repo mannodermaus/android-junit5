@@ -1,0 +1,79 @@
+import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
+import org.apache.tools.ant.filters.ReplaceTokens
+
+apply plugin: "groovy"
+apply plugin: "java-gradle-plugin"
+apply plugin: "java-library"
+apply plugin: "idea"
+apply plugin: "jacoco"
+apply plugin: "kotlin"
+
+// Add custom dependency configurations
+configurations {
+  functionalTest {
+    description = "Local dependencies used for compiling & running " +
+        "tests source code in Gradle functional tests"
+  }
+}
+
+processTestResources {
+  def tokens = [COMPILE_SDK_VERSION: COMPILE_SDK_VERSION,
+                BUILD_TOOLS_VERSION: BUILD_TOOLS_VERSION,
+                MIN_SDK_VERSION    : SAMPLE_MIN_SDK_VERSION,
+                TARGET_SDK_VERSION : TARGET_SDK_VERSION]
+
+  inputs.properties(tokens)
+
+  from(sourceSets.test.resources.srcDirs) {
+    include '**/testenv.properties'
+    filter(ReplaceTokens, tokens: tokens)
+  }
+}
+
+tasks.withType(WriteClasspathResource).all {
+  processTestResources.finalizedBy it
+}
+
+test.testLogging {
+  events "passed", "skipped", "failed"
+  exceptionFormat = "full"
+}
+
+dependencies {
+  // Test Plugin Dependencies
+  testCompile project(":android-junit5")
+
+  // Utilities for assertions & tests in general
+  testCompile "commons-io:commons-io:$APACHE_COMMONS_VERSION"
+  testCompile "commons-lang:commons-lang:$APACHE_COMMONS_VERSION"
+
+  // Dependent Plugins
+  testCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
+  testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+
+  // Test Execution
+  testCompile "junit:junit:$JUNIT4_VERSION"
+  testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
+    exclude group: "org.codehaus.groovy"
+  }
+
+  // Compilation of local classpath for functional tests
+  functionalTest "junit:junit:$JUNIT4_VERSION"
+  functionalTest "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
+  functionalTest "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  functionalTest "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
+  functionalTest "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
+}
+
+// Resource Writers
+task writePluginClasspath(type: WriteClasspathResource) {
+  inputFiles = sourceSets.test.runtimeClasspath
+  outputDir = file("$buildDir/resources/test")
+  resourceFileName = "plugin-classpath.txt"
+}
+
+task writeFunctionalTestCompileClasspath(type: WriteClasspathResource) {
+  inputFiles = configurations.functionalTest
+  outputDir = file("$buildDir/resources/test")
+  resourceFileName = "functional-test-compile-classpath.txt"
+}

@@ -40,8 +40,6 @@ internal class AndroidJUnit5(
  *
  * (Suppressing unused, since this is hooked into the
  * project configuration via a Test Instrumentation Runner Argument.)
- *
- * TODO Is this exhaustive enough? We need more Jupiter test scenarios to be sure.
  */
 @Suppress("unused")
 class AndroidJUnit5Builder : RunnerBuilder() {

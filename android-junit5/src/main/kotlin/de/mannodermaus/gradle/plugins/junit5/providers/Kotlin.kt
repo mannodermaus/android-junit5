@@ -16,10 +16,6 @@ import java.io.File
 /**
  * Provides test root directories for Kotlin sources,
  * with which a JUnit 5 Task can be enhanced.
- *
- * Note: The resulting Sets might be empty for modules powered by AGP2:
- * The legacy Kotlin integration automatically copies over Kotlin classes
- * into the Java directories, which renders dedicated Gradle tasks useless.
  */
 class KotlinDirectoryProvider(
     private val project: Project,
