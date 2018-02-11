@@ -69,9 +69,9 @@ dependencies {
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 project.ext.deployConfig = [platform   : "android",
-                            groupId    : INSTRUMENTATION_RUNNER_GROUP_ID,
+                            groupId    : INSTRUMENTATION_GROUP_ID,
                             artifactId : INSTRUMENTATION_RUNNER_ARTIFACT_ID,
-                            version    : INSTRUMENTATION_RUNNER_VERSION_NAME,
+                            version    : INSTRUMENTATION_VERSION_NAME,
                             description: INSTRUMENTATION_RUNNER_DESCRIPTION,
                             license    : LICENSE_NAME]
 apply from: "$rootDir/gradle/deployment.gradle"

@@ -1,6 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
+import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.ANDROID_TEST
+import de.mannodermaus.gradle.plugins.junit5.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -13,6 +15,7 @@ import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.PackagesExtension
 import org.junit.platform.gradle.plugin.SelectorsExtension
 import org.junit.platform.gradle.plugin.TagsExtension
+import java.util.Properties
 
 /**
  * Android JUnit Platform plugin for Gradle.
@@ -67,7 +70,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     configuration.defaultDependencies { config ->
       // By default, include both the Jupiter & Vintage TestEngines
       // as well as the Launcher-related dependencies on the runtime classpath
-      withDependencies(defaults) {
+      withLoadedVersions(defaults) {
         config.addAll(listOf(
             it.platform.launcher,
             it.platform.console
@@ -119,9 +122,34 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     // apply configuration if enabled
     if (junit5.instrumentationTests.enabled) {
       // Attach the JUnit 5 RunnerBuilder automatically
-      // to the test instrumentation runner's parameters.
+      // to the test instrumentation runner's parameters,
+      // and attach the runner's artifact automatically to the runtime configuration
       val runnerArgs = android.safeDefaultConfig.testInstrumentationRunnerArguments
       runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
+
+      val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
+      val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
+      withLoadedVersions(defaults) {
+        rtOnly.dependencies.add(it.others.instrumentationRunner)
+      }
     }
   }
+
+  /**
+   * Executes the given block within the context of
+   * the plugin's transitive dependencies.
+   * This is used in our custom dependency handlers, and is required
+   * to be used lazily instead of eagerly. This is motivated by the
+   * user's capability to override the versions utilized by the plugin to work.
+   * We need to wait until the configuration is evaluated by Gradle before
+   * accessing our plugin Extension's parameters.
+   */
+  private fun Project.withLoadedVersions(defaults: Properties, config: (Versions) -> Any): Any {
+    val versions = Versions(
+        project = this,
+        extension = project.junit5,
+        defaults = defaults)
+    return config(versions)
+  }
+
 }

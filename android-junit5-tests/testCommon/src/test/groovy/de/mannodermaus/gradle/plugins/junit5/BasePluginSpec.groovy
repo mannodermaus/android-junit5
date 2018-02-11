@@ -786,4 +786,55 @@ abstract class BasePluginSpec extends Specification {
     assert args["runnerBuilder"].contains("com.something.else.OtherRunnerBuilder,")
     assert args["runnerBuilder"].contains("AndroidJUnit5Builder")
   }
+
+  def "Instrumentation Test Integration: Runner Library is not added automatically if disabled"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions.junitPlatform {
+        instrumentationTests {
+          enabled false
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def config = ExtensionsKt.findConfiguration(project.configurations, null,
+        ConfigurationKind.ANDROID_TEST, ConfigurationScope.RUNTIME_ONLY)
+    assert config.dependencies.find { it.name == "android-instrumentation-test-runner" } == null
+  }
+
+  def "Instrumentation Test Integration: Runner Library is added automatically if enabled"() {
+    when:
+    Project project = factory.newProject(rootProject())
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      testOptions.junitPlatform {
+        instrumentationTests {
+          enabled true
+          version = "2.88.9"
+        }
+      }
+    }
+
+    project.evaluate()
+
+    then:
+    def config = ExtensionsKt.findConfiguration(project.configurations, null,
+        ConfigurationKind.ANDROID_TEST, ConfigurationScope.RUNTIME_ONLY)
+    assert config.dependencies.find {
+      it.group == "de.mannodermaus.junit5" &&
+          it.name ==
+          "android-instrumentation-test-runner" &&
+          it.version ==
+          "2.88.9"
+    } != null
+  }
 }
