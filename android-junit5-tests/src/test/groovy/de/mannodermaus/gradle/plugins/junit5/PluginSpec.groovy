@@ -61,17 +61,10 @@ class PluginSpec extends Specification {
     expect.cause.message == "An Android plugin must be applied to this project"
   }
 
-  def "Requires Gradle 2.5 or later"() {
-    // Below Gradle 2.8, TestKit's pluginClasspath() API
-    // doesn't work with GradleRunner. Therefore, we have
-    // to inject it ourselves inside the build.gradle script.
-    //
-    // Because of that, this test doesn't apply the default plugins
-    // directly, and instead writes out the build file manually.
-    //
-    // More info:
-    // https://docs.gradle.org/current/userguide/test_kit.html#sec:working_with_gradle_versions_prior_to_28
+  def "Requires Gradle 4.3 or later"() {
     when:
+    // Write out the build file manually, so we can properly test
+    // if the plugin rejects outdated versions of Gradle.
     def project = factory.newProject(rootProject())
         .asAndroidLibrary()
         .applyJunit5Plugin(false)
@@ -90,12 +83,12 @@ class PluginSpec extends Specification {
     }
 
     def result = GradleRunner.create()
-        .withGradleVersion("2.4")
+        .withGradleVersion("4.2")
         .withProjectDir(project.projectDir)
         .buildAndFail()
 
     then:
-    result.output.contains("android-junit5 plugin requires Gradle 2.5 or later")
+    result.output.contains("android-junit5 plugin requires Gradle 4.3 or later")
   }
 
   def "Dependency Handler Creation"() {
