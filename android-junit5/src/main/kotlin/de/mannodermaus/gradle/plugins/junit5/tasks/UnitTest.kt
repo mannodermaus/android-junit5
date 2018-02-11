@@ -17,7 +17,6 @@ import de.mannodermaus.gradle.plugins.junit5.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.packages
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
-import de.mannodermaus.gradle.plugins.junit5.safeProperty
 import de.mannodermaus.gradle.plugins.junit5.selectors
 import de.mannodermaus.gradle.plugins.junit5.tags
 import de.mannodermaus.gradle.plugins.junit5.variantData
@@ -159,23 +158,23 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
     private fun configureTaskInputs(
         task: AndroidJUnit5UnitTest,
         junit5: AndroidJUnitPlatformExtension) {
-      task.inputs.safeProperty("enableStandardTestTask", junit5.enableStandardTestTask)
-      task.inputs.safeProperty("configurationParameters", junit5.configurationParameters)
-      task.inputs.safeProperty("selectors.uris", junit5.selectors.uris)
-      task.inputs.safeProperty("selectors.files", junit5.selectors.files)
-      task.inputs.safeProperty("selectors.directories", junit5.selectors.directories)
-      task.inputs.safeProperty("selectors.packages", junit5.selectors.packages)
-      task.inputs.safeProperty("selectors.classes", junit5.selectors.classes)
-      task.inputs.safeProperty("selectors.methods", junit5.selectors.methods)
-      task.inputs.safeProperty("selectors.resources", junit5.selectors.resources)
-      task.inputs.safeProperty("filters.engines.include", junit5.filters.engines.include)
-      task.inputs.safeProperty("filters.engines.exclude", junit5.filters.engines.exclude)
-      task.inputs.safeProperty("filters.tags.include", junit5.filters.tags.include)
-      task.inputs.safeProperty("filters.tags.exclude", junit5.filters.tags.exclude)
-      task.inputs.safeProperty("filters.includeClassNamePatterns",
+      task.inputs.property("enableStandardTestTask", junit5.enableStandardTestTask)
+      task.inputs.property("configurationParameters", junit5.configurationParameters)
+      task.inputs.property("selectors.uris", junit5.selectors.uris)
+      task.inputs.property("selectors.files", junit5.selectors.files)
+      task.inputs.property("selectors.directories", junit5.selectors.directories)
+      task.inputs.property("selectors.packages", junit5.selectors.packages)
+      task.inputs.property("selectors.classes", junit5.selectors.classes)
+      task.inputs.property("selectors.methods", junit5.selectors.methods)
+      task.inputs.property("selectors.resources", junit5.selectors.resources)
+      task.inputs.property("filters.engines.include", junit5.filters.engines.include)
+      task.inputs.property("filters.engines.exclude", junit5.filters.engines.exclude)
+      task.inputs.property("filters.tags.include", junit5.filters.tags.include)
+      task.inputs.property("filters.tags.exclude", junit5.filters.tags.exclude)
+      task.inputs.property("filters.includeClassNamePatterns",
           junit5.filters.getIncludeClassNamePatterns())
-      task.inputs.safeProperty("filters.packages.include", junit5.filters.packages.include)
-      task.inputs.safeProperty("filters.packages.exclude", junit5.filters.packages.exclude)
+      task.inputs.property("filters.packages.include", junit5.filters.packages.include)
+      task.inputs.property("filters.packages.exclude", junit5.filters.packages.exclude)
 
       junit5.logManager?.let {
         task.systemProperty("java.util.logging.manager", junit5.logManager)
@@ -187,12 +186,9 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
         junit5: AndroidJUnitPlatformExtension) {
       // Connect to the default unit test task
       val variantUnitTestTask = this.getDefaultJUnit4Task()
-      try {
-        // Android Gradle Plugin 3.x provides additional input parameters
-        task.resCollection = variantUnitTestTask.resCollection
-        task.assetsCollection = variantUnitTestTask.assetsCollection
-      } catch (ignored: Throwable) {
-      }
+      task.resCollection = variantUnitTestTask.resCollection
+      task.assetsCollection = variantUnitTestTask.assetsCollection
+
       variantUnitTestTask.enabled = junit5.enableStandardTestTask
       variantUnitTestTask.dependsOn(task)
 

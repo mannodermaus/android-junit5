@@ -1,0 +1,85 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+  compileSdkVersion COMPILE_SDK_VERSION
+
+  defaultConfig {
+    minSdkVersion INSTRUMENTATION_RUNNER_MIN_SDK_VERSION
+    targetSdkVersion TARGET_SDK_VERSION
+    versionCode 1
+    versionName "1.0"
+  }
+
+  sourceSets {
+    main.java.srcDirs += "src/main/kotlin"
+    test.java.srcDirs += "src/test/kotlin"
+    androidTest.java.srcDirs += "src/androidTest/kotlin"
+  }
+
+  compileOptions {
+    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_8
+  }
+
+  tasks.withType(KotlinCompile).all {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
+  }
+
+  lintOptions {
+    // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
+    warning "InvalidPackage"
+  }
+
+  packagingOptions {
+    exclude "META-INF/LICENSE.md"
+    exclude "META-INF/LICENSE-notice.md"
+  }
+
+  testOptions {
+    unitTests.returnDefaultValues = true
+  }
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+  implementation "junit:junit:$JUNIT4_VERSION"
+
+  // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
+  // since that would prematurely raise the minSdkVersion requirement for target applications,
+  // even though not all product flavors might want to use JUnit 5.
+  // Therefore, only compile against those APIs, and have them provided at runtime
+  // by the "instrumentation" companion library instead.
+  compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  compileOnly "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
+  compileOnly "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
+
+  testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
+  testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
+
+  // Obviously, these dependencies should be mostly "runtimeOnly",
+  // but we have to override bundled APIs from the IDE as much as possible for Android Studio.
+  testCompileOnly project(":android-junit5-embedded-runtime")
+  testImplementation "org.junit.platform:junit-platform-launcher:$JUNIT_PLATFORM_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.platform:junit-platform-engine:$JUNIT_PLATFORM_VERSION"
+  testImplementation "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+}
+
+// ------------------------------------------------------------------------------------------------
+// Deployment Setup
+//
+// Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
+// This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
+// ------------------------------------------------------------------------------------------------
+project.ext.deployConfig = [platform   : "android",
+                            groupId    : INSTRUMENTATION_GROUP_ID,
+                            artifactId : INSTRUMENTATION_RUNNER_ARTIFACT_ID,
+                            version    : INSTRUMENTATION_VERSION_NAME,
+                            description: INSTRUMENTATION_RUNNER_DESCRIPTION,
+                            license    : LICENSE_NAME]
+apply from: "$rootDir/gradle/deployment.gradle"

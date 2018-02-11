@@ -1,12 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.annotations.NonNull
-import com.android.annotations.Nullable
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.dsl.CoreProductFlavor
+import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
-import org.gradle.api.tasks.TaskInputs
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.SelectorsExtension
 
@@ -18,45 +15,6 @@ import static java.util.Collections.emptyList
 class GroovyInterop {
   // No instances
   private GroovyInterop() { throw new AssertionError() }
-
-  /**
-   * Obtains the defaultConfig property of the Android extension.
-   * This requires a Groovy interop method because of a breaking change
-   * in AGP 3, which introduced a dedicated type for the DefaultConfig
-   * that wasn't present before then. Since Kotlin always favors the
-   * newer method signature, therefore triggering a NoSuchMethodError on AGP 2.x,
-   * we fall back to using a dynamic Groovy invocation
-   * and cast to the most common base type between both
-   * branches of the Plugin's codebase.
-   *
-   * @param android Android BaseExtension
-   * @return The "defaultConfig" of that extension
-   */
-  @NonNull
-  static CoreProductFlavor baseExtension_defaultConfig(BaseExtension android) {
-    return android.defaultConfig as CoreProductFlavor
-  }
-
-  /**
-   * Add the provided key-value pair to the given TaskInputs object.
-   * Gradle 4.3 included a binary-incompatible change to this method's
-   * return type, which fails for clients running older versions of the
-   * build system.
-   *
-   * Refer to the related issue on GitHub:
-   * https://github.com/mannodermaus/android-junit5/issues/34
-   *
-   * FIXME Once the plugin's minimal Gradle version reaches 4.3, remove this.
-   *
-   * @param inputs TaskInputs to update
-   * @param key Key of the property to set
-   * @param value Value of the property to set
-   * @return Self reference with a backwards-compatible type
-   */
-  @NonNull
-  static TaskInputs taskInputs_safeProperty(TaskInputs inputs, String key, @Nullable Object value) {
-    return inputs.property(key, value) as TaskInputs
-  }
 
   /**
    * Obtains the VariantData of the provided Variant.
@@ -90,7 +48,7 @@ class GroovyInterop {
    * This property doesn't have a visibility modifier in
    * the main Gradle plugin, and therefore needs
    * to be accessed in this fashion.
-   * ?: Collections.emptyList()
+   *
    * @param extension Extension to access
    * @return The list of "exclude class name patterns"
    */
@@ -109,5 +67,22 @@ class GroovyInterop {
    */
   static boolean selectorsExtension_isEmpty(SelectorsExtension extension) {
     return extension.empty
+  }
+
+  /**
+   * Obtains the Java output directory of the provided VariantScope in a safe manner.
+   * In Android Gradle Plugin 3.2.0-alpha02, the original method was removed.
+   *
+   * @param variant VariantScope to retrieve the Java output directory from
+   * @return That file
+   */
+  @NonNull
+  static File variantScope_javaOutputDir(VariantScope scope) {
+    if (scope.hasProperty("javaOutputDir")) {
+      return scope.javaOutputDir
+    } else {
+      return new File(scope.globalScope.intermediatesDir,
+          "/classes/" + scope.variantConfiguration.dirName)
+    }
   }
 }

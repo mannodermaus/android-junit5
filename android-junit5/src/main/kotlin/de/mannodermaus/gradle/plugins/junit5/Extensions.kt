@@ -5,6 +5,8 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.android.build.gradle.internal.dsl.TestOptions
+import com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.APP
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level.INFO
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
@@ -12,6 +14,7 @@ import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
@@ -31,6 +34,14 @@ import java.util.Properties
 
 fun requireGradle(version: String, message: () -> String) {
   require(GradleVersion.current() >= GradleVersion.version(version)) {
+    throw GradleException(message())
+  }
+}
+
+fun requireAgp3(message: () -> String) {
+  val majorVersion = ANDROID_GRADLE_PLUGIN_VERSION.substringBefore('.').toInt()
+
+  require(majorVersion >= 3) {
     throw GradleException(message())
   }
 }
@@ -187,23 +198,49 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
 }
 
 /**
- * Executes the given block within the context of
- * the plugin's transitive dependencies.
- * This is used in our custom dependency handlers, and is required
- * to be used lazily instead of eagerly. This is motivated by the
- * user's capability to override the versions utilized by the plugin to work.
- * We need to wait until the configuration is evaluated by Gradle before
- * accessing our plugin Extension's parameters.
+ * Obtains a configuration using version-agnostic identifiers and an optional BaseVariant.
+ * For instance, using ConfigurationKind.ANDROID_TEST and ConfigurationScope.RUNTIME_ONLY,
+ * this would resolve the "androidTestApk" configuration on AGP 2,
+ * and the "androidTestRuntimeOnly" configuration on AGP 3.
  */
-fun Project.withDependencies(defaults: Properties, config: (Versions) -> Any): Any {
-  val versions = Versions(
-      project = this,
-      extension = project.junit5,
-      defaults = defaults)
-  return config(versions)
+fun Set<Configuration>.findConfiguration(
+    variant: BaseVariant? = null,
+    kind: ConfigurationKind = APP,
+    scope: ConfigurationScope): Configuration {
+  val stemName = if (variant != null) {
+    "${variant.name}${kind.value.capitalize()}"
+  } else {
+    kind.value
+  }
+
+  // Compose the configuration's name,
+  // attempting all candidates before failing
+  return scope.values
+      .map { scopeName ->
+        if (stemName.isEmpty()) {
+          scopeName
+        } else {
+          "$stemName${scopeName.capitalize()}"
+        }
+      }
+      .mapNotNull { configName -> this.firstOrNull { it.name == configName } }
+      .first()
 }
 
 /* Types */
+
+enum class ConfigurationKind(internal val value: String) {
+  APP(""),
+  TEST("test"),
+  ANDROID_TEST("androidTest")
+}
+
+enum class ConfigurationScope(internal vararg val values: String) {
+  API("api", "compile"),
+  IMPLEMENTATION("implementation", "compile"),
+  COMPILE_ONLY("compileOnly", "provided"),
+  RUNTIME_ONLY("runtimeOnly", "apk")
+}
 
 /**
  * Multi-language functional construct with no parameters,

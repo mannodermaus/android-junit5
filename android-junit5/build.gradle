@@ -12,7 +12,7 @@ apply plugin: "jacoco"
 //
 // The other way around ("call Kotlin from Groovy") is prohibited explicitly.
 // ------------------------------------------------------------------------------------------------
-compileGroovy.dependsOn = compileGroovy.taskDependencies.values - "compileJava"
+compileGroovy.dependsOn = compileGroovy.taskDependencies.mutableValues - "compileJava"
 compileKotlin.dependsOn compileGroovy
 compileKotlin.classpath += files(compileGroovy.destinationDir)
 classes.dependsOn compileKotlin
@@ -81,8 +81,8 @@ dependencies {
 
   // Dependent Plugins
   compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
+  compile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
   compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-  compileOnly "com.android.tools.build:gradle:$ANDROID_PLUGIN_3X_VERSION"
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 ![Logo](.images/logo.png)
 
 A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments.
+**It requires Android Gradle Plugin 3.0.0 or later.**
 
 ## Why a separate plugin?
 
@@ -43,7 +44,7 @@ dependencies {
   // (Optional) If you need "Parameterized Tests".
   testImplementation junit5.parameterized()
     
-  // (Optional) For running tests inside Android Studio 3.x
+  // (Optional) For running tests inside Android Studio 3
   // Please refer to the "Android Studio Workarounds" section for more insight on this.
   testCompileOnly junit5.unitTestsRuntime()
 
@@ -128,13 +129,6 @@ android.testOptions {
 ```
 
 ## Android Studio Workarounds
-
-> **Note:**
->
-> The following section deals with fixing Test Execution within **Android Studio 3**.
-> Running your JUnit 5 tests directly from Android Studio 2.3.3 and earlier **will not work**:
-> You will encounter an `AbstractMethodError` when trying to do so ([more information here][as2issue]).
-> Therefore, please use Gradle for unit testing in Android Studio 2.
 
 All versions up to **Android Studio 3.1 Canary 6** are built
 on a version of IntelliJ IDEA that depends on outdated JUnit 5 APIs.

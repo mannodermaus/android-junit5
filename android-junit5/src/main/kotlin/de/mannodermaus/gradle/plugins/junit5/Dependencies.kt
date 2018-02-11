@@ -248,6 +248,14 @@ class Other(
         groupId = "de.mannodermaus.junit5",
         artifactId = "android-instrumentation-test",
         version = extension.instrumentationTests.version ?:
-            properties.getProperty(INSTRUMENTATION_TEST_VERSION_PROP))
+        properties.getProperty(INSTRUMENTATION_TEST_VERSION_PROP))
+  }
+
+  val instrumentationRunner by lazy {
+    dependency(
+        groupId = "de.mannodermaus.junit5",
+        artifactId = "android-instrumentation-test-runner",
+        version = extension.instrumentationTests.version ?:
+        properties.getProperty(INSTRUMENTATION_TEST_VERSION_PROP))
   }
 }

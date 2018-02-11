@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * still kinda look good when invoked from Java.
  *
  * This class serves purely as syntactical validation,
- * and doesn't actually contains meaningful tests itself.
- * Check the {@link ActivityTestIntegrationTests} for that sort of thing.
+ * and doesn't actually conduct meaningful tests itself -
+ * check the {@link ActivityTestIntegrationTests} for that sort of thing.
  */
 @ActivityTest(FirstActivity.class)
 class JavaInteropVerificationTests {

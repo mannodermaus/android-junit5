@@ -56,8 +56,12 @@ configurations {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
   implementation "com.android.support.test:runner:$SUPPORT_TEST_LIBRARY_VERSION"
-  implementation "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
-  compileOnly "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  implementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+
+  // This is required by the "instrumentation-runner" companion library,
+  // since it can't provide any JUnit 5 runtime libraries itself
+  // due to fear of prematurely incrementing the minSdkVersion requirement.
+  runtimeOnly "org.junit.platform:junit-platform-runner:$JUNIT_PLATFORM_VERSION"
 
   commonTestImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
   commonTestImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
@@ -66,8 +70,16 @@ dependencies {
 
   androidTestImplementation "com.squareup.assertj:assertj-android:$ASSERTJ_ANDROID_VERSION"
   androidTestImplementation "com.android.support.test.espresso:espresso-core:$ESPRESSO_VERSION"
+  androidTestRuntimeOnly project(":instrumentation-runner")
 
+  // Obviously, these dependencies should be mostly "runtimeOnly",
+  // but we have to override bundled APIs from the IDE as much as possible for Android Studio.
   testCompileOnly project(":android-junit5-embedded-runtime")
+  testImplementation "org.junit.platform:junit-platform-launcher:$JUNIT_PLATFORM_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.platform:junit-platform-engine:$JUNIT_PLATFORM_VERSION"
+  testImplementation "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
 }
 
 // ------------------------------------------------------------------------------------------------
