@@ -115,7 +115,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
     // Kotlin Integration
     if (projectConfig.kotlinPluginApplied) {
-      providers += KotlinDirectoryProvider(project, variant)
+      providers += KotlinDirectoryProvider(this, variant)
     }
 
     return providers

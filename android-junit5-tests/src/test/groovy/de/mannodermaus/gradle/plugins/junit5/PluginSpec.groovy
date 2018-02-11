@@ -10,7 +10,6 @@ import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.internal.plugins.PluginApplicationException
-import spock.lang.Ignore
 import spock.lang.Specification
 
 /*
@@ -61,7 +60,6 @@ class PluginSpec extends Specification {
     expect.cause.message == "An Android plugin must be applied to this project"
   }
 
-  @Ignore
   def "Requires Gradle 2.5 or later"() {
     // Below Gradle 2.8, TestKit's pluginClasspath() API
     // doesn't work with GradleRunner. Therefore, we have

@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import org.gradle.api.tasks.TaskInputs
 import org.junit.platform.gradle.plugin.FiltersExtension
@@ -70,7 +71,7 @@ class GroovyInterop {
    * This property doesn't have a visibility modifier in
    * the main Gradle plugin, and therefore needs
    * to be accessed in this fashion.
-   * ?: Collections.emptyList()
+   *
    * @param extension Extension to access
    * @return The list of "exclude class name patterns"
    */
@@ -89,5 +90,22 @@ class GroovyInterop {
    */
   static boolean selectorsExtension_isEmpty(SelectorsExtension extension) {
     return extension.empty
+  }
+
+  /**
+   * Obtains the Java output directory of the provided VariantScope in a safe manner.
+   * In Android Gradle Plugin 3.2.0-alpha02, the original method was removed.
+   *
+   * @param variant VariantScope to retrieve the Java output directory from
+   * @return That file
+   */
+  @NonNull
+  static File variantScope_javaOutputDir(VariantScope scope) {
+    if (scope.hasProperty("javaOutputDir")) {
+      return scope.javaOutputDir
+    } else {
+      return new File(scope.globalScope.intermediatesDir,
+          "/classes/" + scope.variantConfiguration.dirName)
+    }
   }
 }

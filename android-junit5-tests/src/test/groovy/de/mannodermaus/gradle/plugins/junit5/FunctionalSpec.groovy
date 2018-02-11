@@ -332,6 +332,10 @@ class FunctionalSpec extends Specification {
         }
       }
 
+      // Disabled because the Lint library dependency
+      // can't be resolved within the offline-only virtual project execution
+      lint.enabled false
+
       dependencies {
         testCompile files(${
       ClasspathSplitter.splitClasspath(testCompileClasspath)

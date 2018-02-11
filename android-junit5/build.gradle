@@ -12,7 +12,7 @@ apply plugin: "jacoco"
 //
 // The other way around ("call Kotlin from Groovy") is prohibited explicitly.
 // ------------------------------------------------------------------------------------------------
-compileGroovy.dependsOn = compileGroovy.taskDependencies.values - "compileJava"
+compileGroovy.dependsOn = compileGroovy.taskDependencies.mutableValues - "compileJava"
 compileKotlin.dependsOn compileGroovy
 compileKotlin.classpath += files(compileGroovy.destinationDir)
 classes.dependsOn compileKotlin

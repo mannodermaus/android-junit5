@@ -187,12 +187,9 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
         junit5: AndroidJUnitPlatformExtension) {
       // Connect to the default unit test task
       val variantUnitTestTask = this.getDefaultJUnit4Task()
-      try {
-        // Android Gradle Plugin 3.x provides additional input parameters
-        task.resCollection = variantUnitTestTask.resCollection
-        task.assetsCollection = variantUnitTestTask.assetsCollection
-      } catch (ignored: Throwable) {
-      }
+      task.resCollection = variantUnitTestTask.resCollection
+      task.assetsCollection = variantUnitTestTask.assetsCollection
+
       variantUnitTestTask.enabled = junit5.enableStandardTestTask
       variantUnitTestTask.dependsOn(task)
 

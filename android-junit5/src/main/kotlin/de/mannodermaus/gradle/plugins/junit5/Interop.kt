@@ -1,10 +1,12 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import org.gradle.api.tasks.TaskInputs
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.SelectorsExtension
+import java.io.File
 
 /*
  * Special Extension Methods for accessors
@@ -27,3 +29,7 @@ val BaseVariant.variantData: BaseVariantData
 
 fun TaskInputs.safeProperty(key: String, value: Any?) =
     GroovyInterop.taskInputs_safeProperty(this, key, value)
+
+val VariantScope.safeJavaOutputDir: File
+  get() = GroovyInterop.variantScope_javaOutputDir(this)
+
