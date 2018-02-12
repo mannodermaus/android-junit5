@@ -13,9 +13,7 @@ buildscript {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     classpath "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
     classpath "com.github.dcendents:android-maven-gradle-plugin:$DCENDENTS_MAVEN_PLUGIN_VERSION"
-    // TODO Replace with new proper release for Gradle 4.5 support
-    // classpath "digital.wup:android-maven-publish:$ANDROID_MAVEN_PLUGIN_VERSION"
-    classpath "com.github.wupdigital:android-maven-publish:$ANDROID_MAVEN_PLUGIN_VERSION"
+    classpath "digital.wup:android-maven-publish:$ANDROID_MAVEN_PLUGIN_VERSION"
   }
 }
 
