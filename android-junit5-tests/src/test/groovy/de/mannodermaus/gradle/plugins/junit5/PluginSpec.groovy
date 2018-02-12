@@ -866,26 +866,6 @@ class PluginSpec extends Specification {
     project.tasks.findByName("jacocoTestReportRelease") == null
   }
 
-  def "Instrumentation Test Integration: Doesn't attach RunnerBuilder if disabled"() {
-    when:
-    Project project = factory.newProject(rootProject())
-        .asAndroidApplication()
-        .applyJunit5Plugin()
-        .build()
-
-    project.android {
-      testOptions.junitPlatform.instrumentationTests {
-        enabled false
-      }
-    }
-
-    project.evaluate()
-
-    then:
-    def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
-    assert !args.containsKey("runnerBuilder")
-  }
-
   def "Instrumentation Test Integration: Attaches RunnerBuilder"() {
     when:
     Project project = factory.newProject(rootProject())
@@ -907,7 +887,7 @@ class PluginSpec extends Specification {
     assert args["runnerBuilder"].contains("AndroidJUnit5Builder")
   }
 
-  def "Instrumentation Test Integration: Appends RunnerBuilder if another is already present"() {
+  def "Instrumentation Test Integration: Raise error if another RunnerBuilder replaces ours"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
@@ -927,37 +907,37 @@ class PluginSpec extends Specification {
     project.evaluate()
 
     then:
-    def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
-    assert args.containsKey("runnerBuilder")
-
-    // Intentional comma
-    assert args["runnerBuilder"].contains("com.something.else.OtherRunnerBuilder,")
-    assert args["runnerBuilder"].contains("AndroidJUnit5Builder")
+    def expect = thrown(ProjectConfigurationException)
+    assert expect.cause.message == "Custom runnerBuilder is overwriting JUnit 5 integration! Change your declaration to 'com.something.else.OtherRunnerBuilder,de.mannodermaus.junit5.AndroidJUnit5Builder'."
   }
 
-  def "Instrumentation Test Integration: Runner Library is not added automatically if disabled"() {
+  def "Instrumentation Test Integration: Don't raise error if another RunnerBuilder acknowledges ours"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()
+        .applyJunit5Plugin()
         .build()
 
     project.android {
-      testOptions.junitPlatform {
-        instrumentationTests {
-          enabled false
-        }
+      defaultConfig {
+        testInstrumentationRunnerArgument "runnerBuilder", "com.something.else.OtherRunnerBuilder,de.mannodermaus.junit5.AndroidJUnit5Builder"
+      }
+
+      testOptions.junitPlatform.instrumentationTests {
+        enabled true
       }
     }
 
     project.evaluate()
 
     then:
-    def config = ExtensionsKt.findConfiguration(project.configurations, null,
-        ConfigurationKind.ANDROID_TEST, ConfigurationScope.RUNTIME_ONLY)
-    assert config.dependencies.find { it.name == "android-instrumentation-test-runner" } == null
+    def args = project.android.defaultConfig.getTestInstrumentationRunnerArguments()
+    assert args.containsKey("runnerBuilder")
+    assert args["runnerBuilder"].contains("com.something.else.OtherRunnerBuilder")
+    assert args["runnerBuilder"].contains("de.mannodermaus.junit5.AndroidJUnit5Builder")
   }
 
-  def "Instrumentation Test Integration: Runner Library is added automatically if enabled"() {
+  def "Instrumentation Test Integration: Runner Library is added automatically"() {
     when:
     Project project = factory.newProject(rootProject())
         .asAndroidApplication()

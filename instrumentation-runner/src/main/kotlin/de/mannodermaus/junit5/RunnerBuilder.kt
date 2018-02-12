@@ -31,26 +31,29 @@ private val jupiterTestAnnotations = listOf(
 @Suppress("unused")
 class AndroidJUnit5Builder : RunnerBuilder() {
 
-  @Suppress("UNCHECKED_CAST")
-  private val runnerClassConstructor by lazy {
-    // We mustn't explicitly reference junit-platform classes
-    // because that would enforce a premature minSdkVersion requirement
-    // on all flavors of a target application.
-    // Instead, an enabled flavor would provide the dependency automatically
-    // through the "instrumentation" library artifact.
-    val klass: Class<Runner> = Class.forName(
-        "de.mannodermaus.junit5.AndroidJUnit5") as Class<Runner>
-    klass.getConstructor(Class::class.java)
+  private val junit5Available by lazy {
+    try {
+      Class.forName("org.junit.jupiter.api.Test")
+      Class.forName("org.junit.jupiter.params.ParameterizedTest")
+      Class.forName("de.mannodermaus.junit5.AndroidJUnit5")
+      true
+    } catch (e: Throwable) {
+      false
+    }
   }
 
   @Throws(Throwable::class)
   override fun runnerForClass(testClass: Class<*>): Runner? {
     try {
+      if (!junit5Available) {
+        return null
+      }
+
       if (!testClass.hasJupiterTestMethods()) {
         return null
       }
 
-      return runnerClassConstructor.newInstance(testClass)
+      return createJUnit5Runner(testClass)
 
     } catch (e: NoClassDefFoundError) {
       Log.e(LOG_TAG, "JUnitPlatform not found on runtime classpath")

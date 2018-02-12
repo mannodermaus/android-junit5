@@ -128,6 +128,15 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   }
 
   private fun Project.applyConfigurationParameters() {
+    // Verify that the JUnit 5 RunnerBuilder wasn't overwritten by user code,
+    // and if so, throw an exception
+    val actualRunnerBuilder = android.defaultConfig.testInstrumentationRunnerArguments[RUNNER_BUILDER_ARG]!!
+    if (!actualRunnerBuilder.contains(JUNIT5_RUNNER_BUILDER_CLASS_NAME)) {
+      throw IllegalArgumentException(
+          "Custom runnerBuilder is overwriting JUnit 5 integration! " +
+              "Change your declaration to '$actualRunnerBuilder,$JUNIT5_RUNNER_BUILDER_CLASS_NAME'.")
+    }
+
     // Attach runtime-only dependency on JUnit 5 instrumentation test facade
     val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
     val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
