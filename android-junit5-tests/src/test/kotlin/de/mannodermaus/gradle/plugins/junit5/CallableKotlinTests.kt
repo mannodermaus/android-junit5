@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class CallableKotlinTests {
   @Test

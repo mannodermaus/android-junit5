@@ -1,5 +1,6 @@
 import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.junit.platform.console.options.Details
 
 apply plugin: "groovy"
 apply plugin: "java-gradle-plugin"
@@ -7,6 +8,7 @@ apply plugin: "java-library"
 apply plugin: "idea"
 apply plugin: "jacoco"
 apply plugin: "kotlin"
+apply plugin: "org.junit.platform.gradle.plugin"
 
 // Add custom dependency configurations
 configurations {
@@ -39,6 +41,11 @@ test.testLogging {
   exceptionFormat = "full"
 }
 
+junitPlatform {
+  details Details.TREE
+  enableStandardTestTask true
+}
+
 dependencies {
   // Test Plugin Dependencies
   testCompile project(":android-junit5")
@@ -52,6 +59,9 @@ dependencies {
   testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
 
   // Test Execution
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
+
   testCompile "junit:junit:$JUNIT4_VERSION"
   testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
     exclude group: "org.codehaus.groovy"
