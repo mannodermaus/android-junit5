@@ -85,6 +85,12 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     // Create the custom dependency endpoints for JUnit 5
     val dependencyHandler = JUnit5DependencyHandler(this, defaults)
     dependencyHandler.configure()
+
+    // For instrumentation tests, attach the JUnit 5 RunnerBuilder automatically
+    // to the test instrumentation runner's parameters
+    // (runtime dependency is being added after evaluation, though)
+    val runnerArgs = android.defaultConfig.testInstrumentationRunnerArguments
+    runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
   }
 
   private fun Project.configureTasks() {
@@ -122,20 +128,11 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   }
 
   private fun Project.applyConfigurationParameters() {
-    // Consume Instrumentation Test options &
-    // apply configuration if enabled
-    if (junit5.instrumentationTests.enabled) {
-      // Attach the JUnit 5 RunnerBuilder automatically
-      // to the test instrumentation runner's parameters,
-      // and attach the runner's artifact automatically to the runtime configuration
-      val runnerArgs = android.defaultConfig.testInstrumentationRunnerArguments
-      runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
-
-      val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
-      val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
-      withLoadedVersions(defaults) {
-        rtOnly.dependencies.add(it.others.instrumentationRunner)
-      }
+    // Attach runtime-only dependency on JUnit 5 instrumentation test facade
+    val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
+    val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
+    withLoadedVersions(defaults) {
+      rtOnly.dependencies.add(it.others.instrumentationRunner)
     }
   }
 
