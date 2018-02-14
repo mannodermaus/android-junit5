@@ -11,7 +11,7 @@ class CallableKotlinTests {
 
   @Test
   fun callable1() {
-    val obj = Callable1<Boolean, Int> { state -> 2 + if (state) 1 else 0 }
+    val obj = Callable1<Boolean, Int> { 2 + if (this) 1 else 0 }
     assert(obj(true) == 3)
     assert(obj(false) == 2)
   }

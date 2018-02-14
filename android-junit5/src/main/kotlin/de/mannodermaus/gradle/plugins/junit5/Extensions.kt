@@ -6,11 +6,12 @@ import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.android.build.gradle.internal.dsl.TestOptions
 import com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension.InstrumentationTestOptions
+import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension.UnitTestOptions
 import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.APP
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level.INFO
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
-import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -161,6 +162,31 @@ val Project.junit5: AndroidJUnitPlatformExtension
   get() = this.android.testOptions.junitPlatform
 
 /**
+ * Configuration clause for the plugin's extension.
+ *
+ * Note: Once the Groovy code has been migrated to full Kotlin,
+ * this can be moved into the Extension class itself.
+ */
+operator fun AndroidJUnitPlatformExtension.invoke(
+    config: AndroidJUnitPlatformExtension.() -> Unit) {
+  this.config()
+}
+
+operator fun InstrumentationTestOptions.invoke(
+    config: InstrumentationTestOptions.() -> Unit) {
+  this.config()
+}
+
+operator fun UnitTestOptions.invoke(
+    config: UnitTestOptions.() -> Unit) {
+  this.config()
+}
+
+fun UnitTestOptions.all(action: JUnit5UnitTest.() -> Unit) {
+  this.onAll(action)
+}
+
+/**
  * Access the extra properties of a DependencyHandler.
  * Equivalent to "DependencyHandler#ext" in Groovy.
  */
@@ -170,6 +196,12 @@ val DependencyHandler.ext: ExtraPropertiesExtension
     return aware.extensions.getByName(
         ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
   }
+
+/**
+ * Access the JUnit 5 dependency handler containing all relevant dependency groups.
+ */
+val DependencyHandler.junit5: JUnit5DependencyHandler
+  get() = this.ext[DEP_HANDLER_NAME] as JUnit5DependencyHandler
 
 val BaseVariant.unitTestVariant: UnitTestVariant
   get() {
@@ -240,56 +272,4 @@ enum class ConfigurationScope(internal vararg val values: String) {
   IMPLEMENTATION("implementation", "compile"),
   COMPILE_ONLY("compileOnly", "provided"),
   RUNTIME_ONLY("runtimeOnly", "apk")
-}
-
-/**
- * Multi-language functional construct with no parameters,
- * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
- *
- * A [Callable0] can be invoked with the short-hand
- * function syntax from both Kotlin & Groovy:
- *
- * <code><pre>
- *   val callable = Callable0 { 2 + 2 }
- *   val result = callable()  // result == 4
- * </pre></code>
- *
- * <code><pre>
- *   def callable = new Callable0({ 2 + 2 })
- *   def result = callable()  // result == 4
- * </pre></code>
- */
-@Suppress("unused")
-class Callable0<R>(private val body: () -> R) : Closure<R>(null) {
-  /** Kotlin's call syntax */
-  operator fun invoke(): R = body()
-
-  /** Groovy's call syntax */
-  fun doCall(): R = body()
-}
-
-/**
- * Multi-language functional construct with 1 parameter,
- * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
- *
- * A [Callable1] can be invoked with the short-hand
- * function syntax from both Kotlin & Groovy:
- *
- * <code><pre>
- *   val callable = Callable1 { 2 + it }
- *   val result = callable(2)  // result == 4
- * </pre></code>
- *
- * <code><pre>
- *   def callable = new Callable1({ input ->  2 + input })
- *   def result = callable(2)  // result == 4
- * </pre></code>
- */
-@Suppress("unused")
-class Callable1<in T : Any, R>(private val body: (T) -> R) : Closure<R>(null) {
-  /** Kotlin's call syntax */
-  operator fun invoke(arg: T): R = body(arg)
-
-  /** Groovy's call syntax */
-  fun doCall(arg: T): R = body(arg)
 }

@@ -955,7 +955,7 @@ class PluginSpec extends Specification {
     project.evaluate()
 
     then:
-    def config = ExtensionsKt.findConfiguration(project.configurations, null,
+    def config = TestExtensionsKt.findConfiguration(project.configurations, null,
         ConfigurationKind.ANDROID_TEST, ConfigurationScope.RUNTIME_ONLY)
     assert config.dependencies.find {
       it.group == "de.mannodermaus.junit5" &&

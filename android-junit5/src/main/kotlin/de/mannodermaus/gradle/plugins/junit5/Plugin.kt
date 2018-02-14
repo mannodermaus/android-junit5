@@ -56,12 +56,6 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
             filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
           }
         }
-
-    // FIXME Deprecated --------------------------------------------------------------------------------
-    // For backwards compatibility, still offer the "old" entry point "project.junitPlatform",
-    // which should redirect to the testOptions-based DSL dynamically
-    this.extend<ExtensionProxy>(EXTENSION_NAME, arrayOf(this, this.junit5))
-    // END Deprecation  --------------------------------------------------------------------------------
   }
 
   private fun Project.configureDependencies() {
