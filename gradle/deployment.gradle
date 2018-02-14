@@ -106,11 +106,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
   from javadoc.destinationDir
 }
 
-if (targetPlatform == "java") {
-  artifacts {
-    archives sourcesJar
-    archives javadocJar
-  }
+artifacts {
+  archives sourcesJar
+  archives javadocJar
 }
 
 // ------------------------------------------------------------------------------------------------
