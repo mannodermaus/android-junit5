@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.PluginApplicationException
-import org.gradle.api.tasks.JavaExec
 import org.gradle.testkit.runner.GradleRunner
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
@@ -270,7 +269,7 @@ class NewPluginSpec : Spek({
         val buildTypeName = buildType.capitalize()
 
         it("uses that directory for $buildType test task") {
-          val task = project.tasks.get<JavaExec>("junitPlatformTest$buildTypeName")
+          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTest$buildTypeName")
           val argument = task.getArgument("--reports-dir")
           assertThat(argument)
               .endsWith("/other-path/test-reports/$buildType")
@@ -296,6 +295,43 @@ class NewPluginSpec : Spek({
         assertThat(project.tasks.getByName("junitPlatformTest")
             .dependsOn.map { (it as Task).name })
             .contains("junitPlatformTestStaging")
+      }
+    }
+
+    on("using product flavors") {
+      val project = testProjectBuilder.build()
+
+      project.android.flavorDimensions("price")
+      project.android.productFlavors {
+        it.create("free").dimension = "price"
+        it.create("paid").dimension = "price"
+      }
+
+      project.evaluate()
+
+      (listOf("free", "paid") * listOf("debug", "release")).forEach { (flavor, buildType) ->
+        val variantName = "$flavor${buildType.capitalize()}"
+
+        it("creates task for build variant '$variantName'") {
+          assertThat(project.tasks.findByName("junitPlatformTest${variantName.capitalize()}"))
+              .isNotNull()
+        }
+
+        it("hooks '$variantName' into the main task") {
+          assertThat(project.tasks.getByName("junitPlatformTest")
+              .dependsOn.map { (it as Task).name })
+              .contains("junitPlatformTest${variantName.capitalize()}")
+        }
+      }
+
+      it("uses unique report directories for all variants") {
+        val tasks = project.tasks.withType(AndroidJUnit5UnitTest::class.java)
+        val reportDirsCount = tasks
+            .map { it.getArgument("--reports-dir") }
+            .distinct()
+            .count()
+
+        assertThat(tasks.size).isEqualTo(reportDirsCount)
       }
     }
 
@@ -422,11 +458,13 @@ class NewPluginSpec : Spek({
 
           // Create some fake class files to verify the Jacoco tree
           beforeEachTest {
-            project.file("build/intermediates/classes").mkdirs()
-            project.file("build/intermediates/classes/R.class").createNewFile()
-            project.file("build/intermediates/classes/SecondFile.class").createNewFile()
             project.file("build/intermediates/classes/debug").mkdirs()
+            project.file("build/intermediates/classes/debug/R.class").createNewFile()
             project.file("build/intermediates/classes/debug/FirstFile.class").createNewFile()
+            project.file("build/intermediates/classes/debug/SecondFile.class").createNewFile()
+            project.file("build/intermediates/classes/release").mkdirs()
+            project.file("build/intermediates/classes/release/R.class").createNewFile()
+            project.file("build/intermediates/classes/release/SecondFile.class").createNewFile()
             project.file("src/main/java").mkdirs()
             project.file("src/main/java/OkFile.java").createNewFile()
             project.file("src/main/java/AnnoyingFile.java").createNewFile()
@@ -434,7 +472,7 @@ class NewPluginSpec : Spek({
             project.file("src/release/java/ReleaseOnlyFile.java").createNewFile()
           }
 
-          on("adding additional rules") {
+          on("adding rules") {
             project.android.testOptions.junitPlatform {
               jacocoOptions {
                 excludedClasses.add("Second*.class")
@@ -515,6 +553,54 @@ class NewPluginSpec : Spek({
                       "OkFile.java",
                       "ReleaseOnlyFile.java")
                   .doesNotContain("AnnoyingFile.java")
+            }
+          }
+
+          on("replacing class rules") {
+            project.android.testOptions.junitPlatform {
+              jacocoOptions {
+                excludedClasses = emptyList()
+              }
+            }
+
+            project.evaluate()
+
+            listOf("debug", "release").forEach { buildType ->
+              it("doesn't exclude R.class anymore for the $buildType build type") {
+                val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(
+                    "jacocoTestReport${buildType.capitalize()}")
+                    .classDirectories.asFileTree.files
+                    .map { it.name }
+
+                assertThat(fileNames).contains("R.class")
+              }
+            }
+          }
+        }
+
+        on("using product flavors") {
+          val project = testProjectBuilder.build()
+
+          project.android.flavorDimensions("price")
+          project.android.productFlavors {
+            it.create("free").dimension = "price"
+            it.create("paid").dimension = "price"
+          }
+
+          project.evaluate()
+
+          (listOf("free", "paid") * listOf("debug", "release")).forEach { (flavor, buildType) ->
+            val variantName = "$flavor${buildType.capitalize()}"
+
+            it("creates Jacoco task for build variant '$variantName'") {
+              assertThat(project.tasks.findByName("jacocoTestReport${variantName.capitalize()}"))
+                  .isNotNull()
+            }
+
+            it("hooks '$variantName' into the main Jacoco task") {
+              assertThat(project.tasks.getByName("jacocoTestReport")
+                  .dependsOn.map { (it as Task).name })
+                  .contains("jacocoTestReport${variantName.capitalize()}")
             }
           }
         }
