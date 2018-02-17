@@ -7,6 +7,7 @@ import com.android.build.gradle.internal.api.TestedVariant
 import com.android.build.gradle.internal.dsl.TestOptions
 import com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension.InstrumentationTestOptions
+import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension.JacocoOptions
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension.UnitTestOptions
 import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.APP
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
@@ -29,6 +30,7 @@ import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.PackagesExtension
 import org.junit.platform.gradle.plugin.SelectorsExtension
 import org.junit.platform.gradle.plugin.TagsExtension
+import java.io.File
 import java.util.Properties
 
 /* General */
@@ -172,6 +174,9 @@ operator fun AndroidJUnitPlatformExtension.invoke(
   this.config()
 }
 
+fun AndroidJUnitPlatformExtension.reportsDir(file: File) =
+    this.setReportsDir(file)
+
 operator fun InstrumentationTestOptions.invoke(
     config: InstrumentationTestOptions.() -> Unit) {
   this.config()
@@ -184,6 +189,16 @@ operator fun UnitTestOptions.invoke(
 
 fun UnitTestOptions.all(action: JUnit5UnitTest.() -> Unit) {
   this.onAll(action)
+}
+
+operator fun JacocoOptions.invoke(
+    config: JacocoOptions.() -> Unit) {
+  this.config()
+}
+
+operator fun JacocoOptions.Report.invoke(
+    config: JacocoOptions.Report.() -> Unit) {
+  this.config()
 }
 
 /**
