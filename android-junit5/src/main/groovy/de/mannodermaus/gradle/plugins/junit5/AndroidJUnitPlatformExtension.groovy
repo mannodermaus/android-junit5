@@ -194,20 +194,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
    * Configures Jacoco reporting options.*/
   JacocoOptions getJacocoOptions() { return jacoco }
 
-  // FIXME DEPRECATED ---------------------------------------------------------------
-
-  void jacoco(Closure closure) {
-    logDeprecationWarning("jacoco", "jacocoOptions")
-    jacocoOptions(closure)
-  }
-
-  JacocoOptions getJacoco() {
-    logDeprecationWarning("jacoco", "jacocoOptions")
-    return getJacocoOptions()
-  }
-
-  // END DEPRECATED ---------------------------------------------------------------
-
   /**
    * Options for controlling Jacoco reporting.*/
   static class JacocoOptions {
@@ -253,30 +239,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     Report getXml() {
       return xml
     }
-
-    // FIXME DEPRECATED ---------------------------------------------------------------
-    def htmlReport(boolean state) {
-      logDeprecationWarning("htmlReport", "html.enabled")
-      html.enabled = state
-    }
-
-    def csvReport(boolean state) {
-      logDeprecationWarning("csvReport", "csv.enabled")
-      csv.enabled = state
-    }
-
-    def xmlReport(boolean state) {
-      logDeprecationWarning("xmlReport", "xml.enabled")
-      xml.enabled = state
-    }
-
-    private def logDeprecationWarning(String dontUse, String useInstead) {
-      LogUtils.agpStyleLog(project.logger,
-          LogUtils.Level.WARNING,
-          "Accessing the Jacoco property '$dontUse' for JUnit 5 configuration " + "is deprecated and will be removed in a future version. Please use '$useInstead' instead")
-    }
-
-    // END DEPRECATED -----------------------------------------------------------------
 
     class Report {
 
