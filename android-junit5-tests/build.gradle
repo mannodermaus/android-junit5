@@ -55,13 +55,6 @@ test.testLogging {
   exceptionFormat = "full"
 }
 
-sourceSets {
-  test.java {
-    srcDirs += "src/test/kotlin"
-    srcDirs += "src/test/groovy"
-  }
-}
-
 junitPlatform {
   details Details.TREE
   enableStandardTestTask false
