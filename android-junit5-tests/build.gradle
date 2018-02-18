@@ -55,10 +55,16 @@ test.testLogging {
   exceptionFormat = "full"
 }
 
+sourceSets {
+  test.java {
+    srcDirs += "src/test/kotlin"
+    srcDirs += "src/test/groovy"
+  }
+}
+
 junitPlatform {
   details Details.TREE
   enableStandardTestTask false
-  filters.engines.include "spek"
 }
 
 dependencies {
@@ -74,14 +80,16 @@ dependencies {
   testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
 
   // Test Execution
+  testImplementation "junit:junit:$JUNIT4_VERSION"
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
   testImplementation "org.jetbrains.spek:spek-api:$SPEK_VERSION"
   testRuntimeOnly "org.jetbrains.spek:spek-junit-platform-engine:$SPEK_VERSION"
 
   testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
+  testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
 
-  testCompile "junit:junit:$JUNIT4_VERSION"
   testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
     exclude group: "org.codehaus.groovy"
   }
