@@ -337,7 +337,7 @@ class FunctionalSpec extends Specification {
       lint.enabled false
 
       dependencies {
-        testCompile files(${
+        testImplementation files(${
       ClasspathSplitter.splitClasspath(testCompileClasspath)
     })
       }
@@ -361,8 +361,10 @@ class FunctionalSpec extends Specification {
     buildFile << """
       apply plugin: "de.mannodermaus.android-junit5"
 
-      junitPlatform {
-        details "flat"
+      android.testOptions {
+        junitPlatform {
+          details "flat"
+        }
       }
 
       dependencies {
