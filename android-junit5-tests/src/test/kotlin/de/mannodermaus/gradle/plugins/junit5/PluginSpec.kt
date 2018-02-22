@@ -725,6 +725,87 @@ class PluginSpec : Spek({
               }
             }
           }
+
+          context("restricting task generation") {
+            val project by memoized { testProjectBuilder.build() }
+
+            on("disabling task generation altogether") {
+              project.android.testOptions.junitPlatform {
+                jacocoOptions {
+                  taskGenerationEnabled = false
+                }
+              }
+
+              project.evaluate()
+
+              listOf("jacocoTestReport", "jacocoTestReportDebug", "jacocoTestReportRelease")
+                  .forEach { task ->
+                    it("doesn't generate task '$task'") {
+                      assertThat(project.tasks.findByName(task)).isNull()
+                    }
+                  }
+            }
+
+            on("specifying specific variants without product flavors") {
+              project.android.testOptions.junitPlatform {
+                jacocoOptions {
+                  onlyGenerateTasksForVariants("debug")
+                }
+              }
+
+              project.evaluate()
+
+              it("generates main task") {
+                assertThat(project.tasks.findByName("jacocoTestReport")).isNotNull()
+              }
+
+              it("generates debug task") {
+                assertThat(project.tasks.findByName("jacocoTestReportDebug")).isNotNull()
+              }
+
+              it("doesn't generate release task") {
+                assertThat(project.tasks.findByName("jacocoTestReportRelease")).isNull()
+              }
+            }
+
+            on("specifying specific variants with product flavors") {
+              project.android.flavorDimensions("tier")
+              project.android.productFlavors {
+                it.create("paid").dimension = "tier"
+                it.create("free").dimension = "tier"
+              }
+
+              project.android.testOptions.junitPlatform {
+                jacocoOptions {
+                  onlyGenerateTasksForVariants("paidDebug", "freeRelease")
+                }
+              }
+
+              project.evaluate()
+
+              it("generates main task") {
+                assertThat(project.tasks.findByName("jacocoTestReport")).isNotNull()
+              }
+
+              listOf("paidDebug", "freeRelease")
+                  .forEach { generatedTask ->
+                    it("generates $generatedTask task") {
+                      assertThat(
+                          project.tasks.findByName("jacocoTestReport${generatedTask.capitalize()}"))
+                          .isNotNull()
+                    }
+                  }
+
+              listOf("paidRelease", "freeDebug")
+                  .forEach { filteredTask ->
+                    it("doesn't generate $filteredTask task") {
+                      assertThat(
+                          project.tasks.findByName("jacocoTestReport${filteredTask.capitalize()}"))
+                          .isNull()
+                    }
+                  }
+            }
+          }
         }
       }
     }

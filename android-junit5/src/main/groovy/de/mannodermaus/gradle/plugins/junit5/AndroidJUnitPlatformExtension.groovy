@@ -209,11 +209,24 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     @NonNull
     public List<String> excludedSources = []
 
+    @NonNull
+    private List<String> onlyGenerateTasksForVariants = new ArrayList<>()
+    public boolean taskGenerationEnabled = true
+
     JacocoOptions(Project project) {
       this.project = project
       this.html = new Report()
       this.csv = new Report()
       this.xml = new Report()
+    }
+
+    void onlyGenerateTasksForVariants(String... variantNames) {
+      this.onlyGenerateTasksForVariants.addAll(variantNames)
+    }
+
+    @NonNull
+    List<String> onlyGenerateTasksForVariants() {
+      return Collections.unmodifiableList(onlyGenerateTasksForVariants)
     }
 
     void html(Closure closure) {
