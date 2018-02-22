@@ -1,5 +1,6 @@
 import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.junit.platform.console.options.Details
 
 apply plugin: "groovy"
 apply plugin: "java-gradle-plugin"
@@ -7,6 +8,21 @@ apply plugin: "java-library"
 apply plugin: "idea"
 apply plugin: "jacoco"
 apply plugin: "kotlin"
+apply plugin: "org.junit.platform.gradle.plugin"
+
+// ------------------------------------------------------------------------------------------------
+// Compilation Tweaks
+//
+// The plugin currently consists of a codebase wherein Groovy & Kotlin coexist.
+// Therefore, the compilation chain has to be well-defined to allow Kotlin
+// to call into Groovy code.
+//
+// The other way around ("call Kotlin from Groovy") is prohibited explicitly.
+// ------------------------------------------------------------------------------------------------
+compileTestGroovy.dependsOn = compileTestGroovy.taskDependencies.mutableValues - "compileTestJava"
+compileTestKotlin.dependsOn compileTestGroovy
+compileTestKotlin.classpath += files(compileTestGroovy.destinationDir)
+testClasses.dependsOn compileTestKotlin
 
 // Add custom dependency configurations
 configurations {
@@ -30,30 +46,39 @@ processTestResources {
   }
 }
 
-tasks.withType(WriteClasspathResource).all {
-  processTestResources.finalizedBy it
-}
-
 test.testLogging {
   events "passed", "skipped", "failed"
   exceptionFormat = "full"
 }
 
+junitPlatform {
+  details Details.TREE
+  enableStandardTestTask true
+}
+
 dependencies {
   // Test Plugin Dependencies
-  testCompile project(":android-junit5")
+  testImplementation project(":android-junit5")
 
   // Utilities for assertions & tests in general
-  testCompile "commons-io:commons-io:$APACHE_COMMONS_VERSION"
-  testCompile "commons-lang:commons-lang:$APACHE_COMMONS_VERSION"
+  testImplementation "commons-io:commons-io:$APACHE_COMMONS_VERSION"
+  testImplementation "commons-lang:commons-lang:$APACHE_COMMONS_VERSION"
 
   // Dependent Plugins
-  testCompile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
-  testCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+  testImplementation "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
+  testImplementation "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
 
   // Test Execution
-  testCompile "junit:junit:$JUNIT4_VERSION"
-  testCompile("org.spockframework:spock-core:$SPOCK_VERSION") {
+  testImplementation "junit:junit:$JUNIT4_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.jetbrains.spek:spek-api:$SPEK_VERSION"
+  testRuntimeOnly "org.jetbrains.spek:spek-junit-platform-engine:$SPEK_VERSION"
+
+  testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
+  testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
+
+  testImplementation("org.spockframework:spock-core:$SPOCK_VERSION") {
     exclude group: "org.codehaus.groovy"
   }
 
@@ -76,4 +101,9 @@ task writeFunctionalTestCompileClasspath(type: WriteClasspathResource) {
   inputFiles = configurations.functionalTest
   outputDir = file("$buildDir/resources/test")
   resourceFileName = "functional-test-compile-classpath.txt"
+}
+
+tasks.withType(WriteClasspathResource).all {
+  processTestResources.finalizedBy it
+  junitPlatformTest.mustRunAfter it
 }

@@ -12,7 +12,7 @@ enum FileLanguage {
     this.fileExtension = fileExtension
   }
 
-  def appendExtension(String nameWithoutExtension) {
+  String appendExtension(String nameWithoutExtension) {
     return "${nameWithoutExtension}.$fileExtension"
   }
 }

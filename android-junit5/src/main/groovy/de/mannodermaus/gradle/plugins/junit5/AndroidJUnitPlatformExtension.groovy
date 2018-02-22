@@ -44,18 +44,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
         "Accessing '$dontUse' is deprecated and will be removed in a future version. Please use '$useInstead' instead")
   }
 
-  @Deprecated
-  void applyDefaultTestOptions(boolean enabled) {
-    logDeprecationWarning("applyDefaultTestOptions", "unitTests.all")
-    unitTests.applyDefaultTestOptions(enabled)
-  }
-
-  @Deprecated
-  boolean getApplyDefaultTestOptions() {
-    logDeprecationWarning("applyDefaultTestOptions", "unitTests.all")
-    return unitTests.getApplyDefaultTestOptions()
-  }
-
   // END DEPRECATED ---------------------------------------------------------------
 
   /**
@@ -119,12 +107,21 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
      * @param configClosure Closure to apply
      */
     void all(Closure<JUnit5UnitTest> configClosure) {
-      this.testTasks.all(new Action<JUnit5UnitTest>() {
+      this.onAll(new Action<JUnit5UnitTest>() {
         @Override
         void execute(JUnit5UnitTest task) {
           ConfigureUtil.configure(configClosure, task)
         }
       })
+    }
+
+    /**
+     * Applies the provided config action to all JUnit 5 test tasks,
+     * and any task that'll be added in the future
+     * @param configAction Action to apply
+     */
+    void onAll(Action<JUnit5UnitTest> configAction) {
+      this.testTasks.all(configAction)
     }
 
     /**
@@ -197,20 +194,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
    * Configures Jacoco reporting options.*/
   JacocoOptions getJacocoOptions() { return jacoco }
 
-  // FIXME DEPRECATED ---------------------------------------------------------------
-
-  void jacoco(Closure closure) {
-    logDeprecationWarning("jacoco", "jacocoOptions")
-    jacocoOptions(closure)
-  }
-
-  JacocoOptions getJacoco() {
-    logDeprecationWarning("jacoco", "jacocoOptions")
-    return getJacocoOptions()
-  }
-
-  // END DEPRECATED ---------------------------------------------------------------
-
   /**
    * Options for controlling Jacoco reporting.*/
   static class JacocoOptions {
@@ -256,30 +239,6 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
     Report getXml() {
       return xml
     }
-
-    // FIXME DEPRECATED ---------------------------------------------------------------
-    def htmlReport(boolean state) {
-      logDeprecationWarning("htmlReport", "html.enabled")
-      html.enabled = state
-    }
-
-    def csvReport(boolean state) {
-      logDeprecationWarning("csvReport", "csv.enabled")
-      csv.enabled = state
-    }
-
-    def xmlReport(boolean state) {
-      logDeprecationWarning("xmlReport", "xml.enabled")
-      xml.enabled = state
-    }
-
-    private def logDeprecationWarning(String dontUse, String useInstead) {
-      LogUtils.agpStyleLog(project.logger,
-          LogUtils.Level.WARNING,
-          "Accessing the Jacoco property '$dontUse' for JUnit 5 configuration " + "is deprecated and will be removed in a future version. Please use '$useInstead' instead")
-    }
-
-    // END DEPRECATED -----------------------------------------------------------------
 
     class Report {
 

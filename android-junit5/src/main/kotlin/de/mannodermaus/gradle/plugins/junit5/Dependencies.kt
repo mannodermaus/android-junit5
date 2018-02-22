@@ -104,40 +104,7 @@ class JUnit5DependencyHandler(
   internal fun configure() {
     // "dependencies.junit5" is the gateway to the sharded dependency groups
     project.dependencies.ext[DEP_HANDLER_NAME] = this
-
-    // FIXME Deprecation ----------------------------------------------------------------------------------------------------
-    // "dependencies.junit5()" is the old way to specify unit tests
-    // this backwards compatibility is realized through the invoke() operator
-    // (see class declaration!)
-
-    // "dependencies.junit5Params()" is the old way to specify parameterized tests
-    project.dependencies.ext["junit5Params"] = Callable0 {
-      project.logger.replacementWarning(oldName = "junit5Params()",
-          newName = "junit5.parameterized()")
-      this.parameterized()
-    }
-
-    // "dependencies.junit5EmbeddedRuntime()" is the old way to specify the embedded runtime
-    project.dependencies.ext["junit5EmbeddedRuntime"] = Callable0 {
-      project.logger.replacementWarning(
-          oldName = "junit5EmbeddedRuntime()",
-          newName = "junit5.unitTestsRuntime()")
-      this.unitTestsRuntime()
-    }
   }
-
-  // "dependencies.junit5()" is the old way to specify unit tests
-  @Suppress("MemberVisibilityCanPrivate")
-  operator fun invoke(): List<Dependency> {
-    project.logger.replacementWarning(oldName = "junit5()", newName = "junit5.unitTests()")
-    return this.unitTests()
-  }
-
-  @Suppress("unused")
-  fun doCall(): List<Dependency> {
-    return this()
-  }
-  // END Deprecation ----------------------------------------------------------------------------------------------------
 }
 
 /* Internal API */
@@ -247,15 +214,15 @@ class Other(
     dependency(
         groupId = "de.mannodermaus.junit5",
         artifactId = "android-instrumentation-test",
-        version = extension.instrumentationTests.version ?:
-        properties.getProperty(INSTRUMENTATION_TEST_VERSION_PROP))
+        version = extension.instrumentationTests.version ?: properties.getProperty(
+            INSTRUMENTATION_TEST_VERSION_PROP))
   }
 
   val instrumentationRunner by lazy {
     dependency(
         groupId = "de.mannodermaus.junit5",
         artifactId = "android-instrumentation-test-runner",
-        version = extension.instrumentationTests.version ?:
-        properties.getProperty(INSTRUMENTATION_TEST_VERSION_PROP))
+        version = extension.instrumentationTests.version ?: properties.getProperty(
+            INSTRUMENTATION_TEST_VERSION_PROP))
   }
 }
