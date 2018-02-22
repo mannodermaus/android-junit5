@@ -100,8 +100,15 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       val testTask = AndroidJUnit5UnitTest.create(this, variant, directoryProviders)
 
       if (isJacocoApplied) {
-        // Create a Jacoco friend task
-        AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
+        val jacocoOptions = junit5.jacocoOptions
+
+        if (jacocoOptions.taskGenerationEnabled) {
+          // Create a Jacoco friend task
+          val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants()
+          if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
+            AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
+          }
+        }
       }
     }
   }
