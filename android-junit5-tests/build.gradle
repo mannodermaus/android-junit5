@@ -46,10 +46,6 @@ processTestResources {
   }
 }
 
-tasks.withType(WriteClasspathResource).all {
-  processTestResources.finalizedBy it
-}
-
 test.testLogging {
   events "passed", "skipped", "failed"
   exceptionFormat = "full"
@@ -105,4 +101,9 @@ task writeFunctionalTestCompileClasspath(type: WriteClasspathResource) {
   inputFiles = configurations.functionalTest
   outputDir = file("$buildDir/resources/test")
   resourceFileName = "functional-test-compile-classpath.txt"
+}
+
+tasks.withType(WriteClasspathResource).all {
+  processTestResources.finalizedBy it
+  junitPlatformTest.mustRunAfter it
 }
