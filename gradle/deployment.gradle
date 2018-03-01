@@ -65,10 +65,8 @@ if (!["java", "android"].contains(targetPlatform)) {
 apply plugin: "com.jfrog.bintray"
 
 if (targetPlatform == "java") {
-  apply plugin: "maven"
   apply plugin: "maven-publish"
 } else if (targetPlatform == "android") {
-  apply plugin: "com.github.dcendents.android-maven"
   apply plugin: "digital.wup.android-maven-publish"
 }
 
@@ -104,11 +102,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
   baseName = artifactId
   classifier = "javadoc"
   from javadoc.destinationDir
-}
-
-artifacts {
-  archives sourcesJar
-  archives javadocJar
 }
 
 // ------------------------------------------------------------------------------------------------
