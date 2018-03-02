@@ -32,7 +32,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.process.JavaForkOptions
 import org.gradle.process.ProcessForkOptions
 import org.gradle.process.internal.DefaultJavaForkOptions
-import org.gradle.process.internal.DefaultProcessForkOptions
 import org.junit.platform.console.ConsoleLauncher
 import java.io.File
 
@@ -68,6 +67,10 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
   @InputFiles
   @Optional
   var assetsCollection: FileCollection? = null
+
+  override fun isRunAllTask() = false
+
+  override fun javaForkOptions() = java.util.Optional.of<JavaForkOptions>(this)
 
   /**
    * Configuration closure for an Android JUnit5 test task.
@@ -272,110 +275,36 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
  * Allows the default task to also be configured by unitTests.all.
  */
 open class JUnit5UnitTestRunAll : DefaultTask(), JUnit5UnitTest {
-
   private val emptyJavaForkOptions = DefaultJavaForkOptions(IdentityFileResolver())
-  private val emptyProcessForkOptions = DefaultProcessForkOptions(IdentityFileResolver())
-  private val emptyFileCollection = project.files()
 
-  override fun setSystemProperties(p0: MutableMap<String, *>?) {
+  override fun isRunAllTask() = true
+
+  override fun javaForkOptions() = java.util.Optional.empty<JavaForkOptions>()
+
+  /* JavaForkOptions facade */
+
+  override fun getJvmArgs() = emptyList<String>()
+  override fun setJvmArgs(var1: MutableList<String>?) {
   }
 
-  override fun getExecutable() = ""
-
-  override fun setDefaultCharacterEncoding(p0: String?) {
+  override fun setJvmArgs(var1: MutableIterable<*>?) {
   }
 
-  override fun jvmArgs(p0: MutableIterable<*>?) = emptyJavaForkOptions
+  override fun jvmArgs(var1: MutableIterable<*>?): JavaForkOptions = emptyJavaForkOptions
+  override fun jvmArgs(vararg var1: Any?): JavaForkOptions = emptyJavaForkOptions
 
-  override fun jvmArgs(vararg p0: Any?) = emptyJavaForkOptions
-
-  override fun environment(p0: MutableMap<String, *>?) = emptyProcessForkOptions
-
-  override fun environment(p0: String?, p1: Any?) = emptyProcessForkOptions
-
-  override fun setMinHeapSize(p0: String?) {
+  override fun getSystemProperties() = mutableMapOf<String, Any>()
+  override fun setSystemProperties(var1: MutableMap<String, *>?) {
   }
 
-  override fun systemProperties(p0: MutableMap<String, *>?) = emptyJavaForkOptions
+  override fun systemProperties(
+      var1: MutableMap<String, *>?): JavaForkOptions = emptyJavaForkOptions
 
-  override fun setExecutable(p0: String?) {
+  override fun systemProperty(var1: String?, var2: Any?): JavaForkOptions = emptyJavaForkOptions
+  override fun getEnvironment() = mutableMapOf<String, Any>()
+  override fun setEnvironment(var1: MutableMap<String, *>?) {
   }
 
-  override fun setExecutable(p0: Any?) {
-  }
-
-  override fun executable(p0: Any?) = emptyProcessForkOptions
-
-  override fun setJvmArgs(p0: MutableList<String>?) {
-  }
-
-  override fun setJvmArgs(p0: MutableIterable<*>?) {
-  }
-
-  override fun setAllJvmArgs(p0: MutableList<String>?) {
-  }
-
-  override fun setAllJvmArgs(p0: MutableIterable<*>?) {
-  }
-
-  override fun setDebug(p0: Boolean) {
-  }
-
-  override fun getWorkingDir() = project.file("")
-
-  override fun setBootstrapClasspath(p0: FileCollection?) {
-  }
-
-  override fun getDefaultCharacterEncoding() = ""
-
-  override fun setMaxHeapSize(p0: String?) {
-  }
-
-  override fun systemProperty(p0: String?, p1: Any?) = emptyJavaForkOptions
-
-  override fun getBootstrapClasspath() = emptyFileCollection
-
-  override fun workingDir(p0: Any?) = emptyProcessForkOptions
-
-  override fun setWorkingDir(p0: File?) {
-  }
-
-  override fun setWorkingDir(p0: Any?) {
-  }
-
-  override fun setEnvironment(p0: MutableMap<String, *>?) {
-  }
-
-  override fun getEnableAssertions() = false
-
-  override fun setEnableAssertions(p0: Boolean) {
-  }
-
-  override fun getMaxHeapSize() = ""
-
-  override fun copyTo(p0: JavaForkOptions?) = emptyJavaForkOptions
-
-  override fun copyTo(p0: ProcessForkOptions?) = emptyProcessForkOptions
-
-  override fun getJvmArgs(): MutableList<String> {
-    return mutableListOf()
-  }
-
-  override fun getSystemProperties(): MutableMap<String, Any> {
-    return mutableMapOf()
-  }
-
-  override fun getMinHeapSize() = ""
-
-  override fun getEnvironment(): MutableMap<String, Any> {
-    return mutableMapOf()
-  }
-
-  override fun getAllJvmArgs(): MutableList<String> {
-    return mutableListOf()
-  }
-
-  override fun getDebug() = false
-
-  override fun bootstrapClasspath(vararg p0: Any?) = emptyJavaForkOptions
+  override fun environment(var1: MutableMap<String, *>?): ProcessForkOptions = emptyJavaForkOptions
+  override fun environment(var1: String?, var2: Any?): ProcessForkOptions = emptyJavaForkOptions
 }

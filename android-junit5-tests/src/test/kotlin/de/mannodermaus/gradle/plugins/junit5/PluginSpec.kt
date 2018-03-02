@@ -350,7 +350,7 @@ class PluginSpec : Spek({
           unitTests.all {
             dependsOn(anotherTaskDep)
 
-            if (name == "junitPlatformTest") {
+            if (isRunAllTask) {
               dependsOn(defaultTaskDep)
             }
           }
