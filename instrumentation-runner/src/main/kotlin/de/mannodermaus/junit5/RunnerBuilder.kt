@@ -8,9 +8,9 @@ import org.junit.runners.model.RunnerBuilder
 
 private const val LOG_TAG = "AndroidJUnit5"
 private val jupiterTestAnnotations = listOf(
-    org.junit.jupiter.api.Test::class.java,
-    org.junit.jupiter.api.TestFactory::class.java,
-    org.junit.jupiter.params.ParameterizedTest::class.java)
+    "org.junit.jupiter.api.Test",
+    "org.junit.jupiter.api.TestFactory",
+    "org.junit.jupiter.params.ParameterizedTest")
 
 /* Types */
 
@@ -34,7 +34,6 @@ class AndroidJUnit5Builder : RunnerBuilder() {
   private val junit5Available by lazy {
     try {
       Class.forName("org.junit.jupiter.api.Test")
-      Class.forName("org.junit.jupiter.params.ParameterizedTest")
       Class.forName("de.mannodermaus.junit5.AndroidJUnit5")
       true
     } catch (e: Throwable) {
@@ -52,7 +51,6 @@ class AndroidJUnit5Builder : RunnerBuilder() {
       if (!testClass.hasJupiterTestMethods()) {
         return null
       }
-
       return createJUnit5Runner(testClass)
 
     } catch (e: NoClassDefFoundError) {
@@ -74,12 +72,14 @@ class AndroidJUnit5Builder : RunnerBuilder() {
       // Check each method in the Class for the presence
       // of the well-known list of JUnit Jupiter annotations
       val testMethod = declaredMethods.firstOrNull { method ->
+        val annotationClassNames = method.declaredAnnotations.map { it.annotationClass.qualifiedName }
         jupiterTestAnnotations.firstOrNull { annotation ->
-          method.isAnnotationPresent(annotation)
+          annotationClassNames.contains(annotation)
         } != null
       }
 
       if (testMethod != null) {
+        Log.i(LOG_TAG, "Jupiter Test Class detected: ${this.name}")
         return true
       }
 
@@ -91,7 +91,7 @@ class AndroidJUnit5Builder : RunnerBuilder() {
       }
 
     } catch (t: Throwable) {
-      Log.w(LOG_TAG, "$t in hasTestMethods for $name")
+      Log.w(LOG_TAG, "${t.javaClass.name} in 'hasJupiterTestMethods()' for $name", t)
     }
 
     return false

@@ -11,6 +11,7 @@ android {
     targetSdkVersion TARGET_SDK_VERSION
     versionCode 1
     versionName "1.0"
+    multiDexEnabled true
 
     // Usually, this is automatically applied through the Gradle Plugin
     testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
