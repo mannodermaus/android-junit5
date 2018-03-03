@@ -99,7 +99,10 @@ class JUnit5DependencyHandler(
     return listOf(
         versions.others.instrumentationTest,
 
-        // Required at runtime
+        // Provided to instrumentation-runner at runtime,
+        // very important for the execution of JUnit 5 instrumentation tests.
+        // Also refer to AndroidJUnit5Builder's documentation for
+        // more info on how this is pieced together.
         versions.platform.runner
     )
   }
