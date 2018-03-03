@@ -58,6 +58,7 @@ deploy:
     script: ./scripts/deploy_instrumentation_release.sh
     skip_cleanup: true
     on:
+      tags: true
       condition: "\"${TRAVIS_TAG/instrumentation-}\" != \"$TRAVIS_TAG\""
 
 notifications:
