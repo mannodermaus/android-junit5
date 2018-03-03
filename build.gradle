@@ -7,12 +7,18 @@ buildscript {
     maven { url "https://jitpack.io" }
   }
   dependencies {
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$BINTRAY_PLUGIN_VERSION"
-    classpath "com.github.ben-manes:gradle-versions-plugin:$VERSIONS_PLUGIN_VERSION"
+    // Miscellaneous
     classpath "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    classpath "com.github.ben-manes:gradle-versions-plugin:$VERSIONS_PLUGIN_VERSION"
     classpath "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
+
+    // Deployment: Snapshots
     classpath "digital.wup:android-maven-publish:$ANDROID_MAVEN_PLUGIN_VERSION"
+
+    // Deployment: Releases
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$BINTRAY_PLUGIN_VERSION"
+    classpath "com.github.dcendents:android-maven-gradle-plugin:$DCENDENTS_MAVEN_PLUGIN_VERSION"
   }
 }
 

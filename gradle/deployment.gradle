@@ -65,8 +65,14 @@ if (!["java", "android"].contains(targetPlatform)) {
 apply plugin: "com.jfrog.bintray"
 
 if (targetPlatform == "java") {
+  // Releases
+  apply plugin: "maven"
+  // Snapshots
   apply plugin: "maven-publish"
 } else if (targetPlatform == "android") {
+  // Releases
+  apply plugin: "com.github.dcendents.android-maven"
+  // Snapshots
   apply plugin: "digital.wup.android-maven-publish"
 }
 
