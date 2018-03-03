@@ -3,6 +3,7 @@ import org.junit.platform.console.options.Details
 
 buildscript {
   repositories {
+    google()
     jcenter()
   }
 

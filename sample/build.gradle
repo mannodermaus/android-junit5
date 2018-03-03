@@ -1,5 +1,6 @@
 buildscript {
   repositories {
+    google()
     jcenter()
   }
 
@@ -24,20 +25,22 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
   }
 
-  flavorDimensions "kind"
-  productFlavors {
-    experimental {
-      dimension "kind"
-      minSdkVersion 26
-    }
-
-    normal {
-      dimension "kind"
-    }
-  }
+  // Since the minSdkVersion requirement for JUnit 5 Instrumentation Tests is quite high,
+  // we introduce a product flavor that uses an elevated version other than the application's default.
+  // With this, we are able to write JUnit 5
+//  flavorDimensions "kind"
+//  productFlavors {
+//    experimental {
+//      dimension "kind"
+//      minSdkVersion 26
+//    }
+//
+//    normal {
+//      dimension "kind"
+//    }
+//  }
 
   // Add Kotlin source directory to all source sets
   sourceSets.each {
@@ -71,8 +74,6 @@ dependencies {
   androidTestImplementation "junit:junit:$JUNIT4_VERSION"
   androidTestImplementation "com.android.support.test:runner:$SUPPORT_TEST_LIBRARY_VERSION"
 
-  androidTestRuntimeOnly project(":instrumentation-runner")
-  androidTestExperimentalImplementation junit5.unitTests()
-  androidTestExperimentalImplementation junit5.parameterized()
-  androidTestExperimentalImplementation project(":instrumentation")
+//  androidTestExperimentalImplementation junit5.unitTests()
+//  androidTestExperimentalImplementation junit5.instrumentationTests()
 }
