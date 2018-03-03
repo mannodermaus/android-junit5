@@ -152,6 +152,17 @@ dependencies {
 }
 ```
 
+## Gradle Compatibility
+
+The plugin's minimum required version of Gradle has increased over time to maximize its leverage with new APIs and performance.
+The chart describes the evolution of this requirement. If you can't use the latest version of this plugin due to your
+project's Gradle version, please refer to the following table to find the corresponding plugin that works for you.
+
+|Plugin Version|Minimum Gradle Version|
+|---|---|
+|1.0.30|2.5|
+|1.0.31|4.3|
+
 ## Licenses
 
 #### android-junit5-embedded-runtime:
