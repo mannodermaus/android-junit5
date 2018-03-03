@@ -29,18 +29,18 @@ android {
 
   // Since the minSdkVersion requirement for JUnit 5 Instrumentation Tests is quite high,
   // we introduce a product flavor that uses an elevated version other than the application's default.
-  // With this, we are able to write JUnit 5
-//  flavorDimensions "kind"
-//  productFlavors {
-//    experimental {
-//      dimension "kind"
-//      minSdkVersion 26
-//    }
-//
-//    normal {
-//      dimension "kind"
-//    }
-//  }
+  // With this, we are able to try JUnit 5 tests without sacrificing the minSdkVersion completely.
+  flavorDimensions "kind"
+  productFlavors {
+    experimental {
+      dimension "kind"
+      minSdkVersion 26
+    }
+
+    normal {
+      dimension "kind"
+    }
+  }
 
   // Add Kotlin source directory to all source sets
   sourceSets.each {
@@ -74,6 +74,7 @@ dependencies {
   androidTestImplementation "junit:junit:$JUNIT4_VERSION"
   androidTestImplementation "com.android.support.test:runner:$SUPPORT_TEST_LIBRARY_VERSION"
 
-//  androidTestExperimentalImplementation junit5.unitTests()
-//  androidTestExperimentalImplementation junit5.instrumentationTests()
+  // Include the instrumentation test dependencies to the product flavor
+  androidTestExperimentalImplementation junit5.unitTests()
+  androidTestExperimentalImplementation junit5.instrumentationTests()
 }
