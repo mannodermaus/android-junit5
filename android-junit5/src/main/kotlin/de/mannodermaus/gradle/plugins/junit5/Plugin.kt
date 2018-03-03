@@ -138,11 +138,14 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
               "Change your declaration to '$actualRunnerBuilder,$JUNIT5_RUNNER_BUILDER_CLASS_NAME'.")
     }
 
-    // Attach runtime-only dependency on JUnit 5 instrumentation test facade
-    val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
-    val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
-    withLoadedVersions(defaults) {
-      rtOnly.dependencies.add(it.others.instrumentationRunner)
+    // Attach runtime-only dependency on JUnit 5 instrumentation test facade, unless disabled
+    if (junit5.instrumentationTests.enabled) {
+      val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
+      val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
+      withLoadedVersions(defaults) {
+        rtOnly.dependencies.add(it.others.instrumentationRunner)
+        rtOnly.dependencies.add(it.platform.runner)
+      }
     }
   }
 

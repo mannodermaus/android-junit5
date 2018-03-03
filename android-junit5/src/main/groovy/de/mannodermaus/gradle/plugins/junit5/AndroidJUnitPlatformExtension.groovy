@@ -164,7 +164,7 @@ class AndroidJUnitPlatformExtension extends JUnitPlatformExtension {
   static class InstrumentationTestOptions {
 
     /** Whether or not to enable support for JUnit 5 instrumentation tests. */
-    private boolean enabled = false
+    private boolean enabled = true
 
     /** The version of the instrumentation companion library to use. */
     @Nullable String version

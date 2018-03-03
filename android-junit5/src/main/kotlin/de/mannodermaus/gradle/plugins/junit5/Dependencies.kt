@@ -85,9 +85,9 @@ class JUnit5DependencyHandler(
     if (!project.junit5.instrumentationTests.enabled) {
       @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
       throw ProjectConfigurationException("""
-        The JUnit 5 Instrumentation Test library can only be used
-        if support for them is explicitly enabled as well.
-        Please add the following to your build.gradle:
+        The JUnit 5 Instrumentation Test library can't be used
+        if it is disabled via the plugin.
+        Please revise the following in your build.gradle:
         android.testOptions {
           junitPlatform {
             instrumentationTests.enabled true
@@ -96,7 +96,9 @@ class JUnit5DependencyHandler(
         """.trimIndent(), null)
     }
 
-    return listOf(versions.others.instrumentationTest)
+    return listOf(
+        versions.others.instrumentationTest
+    )
   }
 
   /* Internal */
@@ -172,6 +174,7 @@ class Platform(
   val launcher = dependency("junit-platform-launcher")
   val console = dependency("junit-platform-console")
   val engine = dependency("junit-platform-engine")
+  val runner = dependency("junit-platform-runner")
 }
 
 /**

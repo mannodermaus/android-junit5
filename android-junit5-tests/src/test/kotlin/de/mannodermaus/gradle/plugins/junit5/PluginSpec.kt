@@ -224,7 +224,6 @@ class PluginSpec : Spek({
           vintageVersion = "1.2.3"
 
           instrumentationTests {
-            enabled(true)
             version = "4.8.15"
           }
         }
