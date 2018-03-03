@@ -97,7 +97,10 @@ class JUnit5DependencyHandler(
     }
 
     return listOf(
-        versions.others.instrumentationTest
+        versions.others.instrumentationTest,
+
+        // Required at runtime
+        versions.platform.runner
     )
   }
 

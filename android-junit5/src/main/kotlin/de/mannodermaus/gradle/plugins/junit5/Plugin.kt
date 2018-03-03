@@ -139,13 +139,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     }
 
     // Attach runtime-only dependency on JUnit 5 instrumentation test facade, unless disabled
-    if (junit5.instrumentationTests.enabled) {
-      val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
-      val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
-      withLoadedVersions(defaults) {
-        rtOnly.dependencies.add(it.others.instrumentationRunner)
-        rtOnly.dependencies.add(it.platform.runner)
-      }
+    val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
+    val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
+    withLoadedVersions(defaults) {
+      rtOnly.dependencies.add(it.others.instrumentationRunner)
     }
   }
 
