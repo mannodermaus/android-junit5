@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload -PbintrayUser=$bintrayUser -PbintrayKey=$bintrayKey -PdryRun=false --info
+./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload :instrumentation-runner:bintrayUpload -PbintrayUser=$bintrayUser -PbintrayKey=$bintrayKey -PdryRun=false --info
