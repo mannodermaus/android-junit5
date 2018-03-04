@@ -60,6 +60,15 @@ android {
   }
 }
 
+configurations.all {
+  // The Instrumentation Test Runner uses the plugin,
+  // which in turn provides the Instrumentation Test Runner again -
+  // that's kind of deep.
+  // To avoid conflicts, prefer using the local classes
+  // and exclude the dependency from being pulled in externally.
+  exclude module: INSTRUMENTATION_RUNNER_ARTIFACT_ID
+}
+
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
   implementation "org.jetbrains.kotlin:kotlin-reflect:$KOTLIN_VERSION"
