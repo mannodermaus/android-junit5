@@ -2,8 +2,10 @@
 
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.ANDROID_TEST
-import de.mannodermaus.gradle.plugins.junit5.ConfigurationScope.RUNTIME_ONLY
+import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
+import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
+import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
@@ -259,7 +261,7 @@ class PluginSpec : Spek({
         }
 
         it("automatically includes instrumentation-test-runner at runtime") {
-          val androidTestRuntimeOnly = project.configurations.findConfiguration(
+          val androidTestRuntimeOnly = project.configurations.find(
               kind = ANDROID_TEST, scope = RUNTIME_ONLY)
 
           assertThat(androidTestRuntimeOnly.dependencies
@@ -679,7 +681,7 @@ class PluginSpec : Spek({
             on("replacing class rules") {
               project.android.testOptions.junitPlatform {
                 jacocoOptions {
-                  excludedClasses = emptyList()
+                  excludedClasses = mutableListOf()
                 }
               }
 

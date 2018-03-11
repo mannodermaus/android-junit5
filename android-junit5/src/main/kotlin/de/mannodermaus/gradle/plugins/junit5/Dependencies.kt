@@ -1,6 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
+import de.mannodermaus.gradle.plugins.junit5.internal.agpStyleLog
+import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.ext
 import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
@@ -31,12 +34,12 @@ private fun Logger.replacementWarning(oldName: String, newName: String) {
 @Suppress("MemberVisibilityCanPrivate")
 class JUnit5DependencyHandler(
     private val project: Project,
-    defaults: Properties) : Closure<Any>(null) /* FIXME Part of junit5 deprecation */ {
+    defaults: Properties) {
 
   private val versions: Versions by lazy {
     Versions(
         project = project,
-        extension = project.junit5,
+        extension = project.android.testOptions.junitPlatform,
         defaults = defaults)
   }
 
@@ -82,7 +85,7 @@ class JUnit5DependencyHandler(
   fun instrumentationTests(): List<Dependency> {
     // Abort if JUnit 5 Instrumentation Tests aren't enabled,
     // since that would cause confusion otherwise.
-    if (!project.junit5.instrumentationTests.enabled) {
+    if (!project.android.testOptions.junitPlatform.instrumentationTests.enabled) {
       @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
       throw ProjectConfigurationException("""
         The JUnit 5 Instrumentation Test library can't be used

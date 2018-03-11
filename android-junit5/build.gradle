@@ -75,13 +75,14 @@ task test(overwrite: true) {}
 
 dependencies {
   // Language Support
-  compile gradleApi()
-  compile "org.codehaus.groovy:groovy:$GROOVY_VERSION"
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+  implementation gradleApi()
+  implementation "org.codehaus.groovy:groovy:$GROOVY_VERSION"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 
   // Dependent Plugins
-  compile "org.junit.platform:junit-platform-gradle-plugin:$JUNIT_PLATFORM_VERSION"
-  compile "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
+  implementation "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
+  implementation "org.junit.platform:junit-platform-commons:$JUNIT_PLATFORM_VERSION"
+  implementation "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
   compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
 }
 

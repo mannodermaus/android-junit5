@@ -1,14 +1,17 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
-import de.mannodermaus.gradle.plugins.junit5.jacoco
-import de.mannodermaus.gradle.plugins.junit5.junit5
-import de.mannodermaus.gradle.plugins.junit5.junit5Info
-import de.mannodermaus.gradle.plugins.junit5.maybeCreate
+import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
+import de.mannodermaus.gradle.plugins.junit5.internal.maybeCreate
+import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import java.io.File
 
@@ -46,7 +49,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
     override fun execute(reportTask: AndroidJUnit5JacocoReport) {
       // Project-level configuration
-      val projectJacoco = project.jacoco
+      val projectJacoco = project.extensionByName<JacocoPluginExtension>("jacoco")
       projectJacoco.applyTo(testTask)
       reportTask.dependsOn(testTask)
       reportTask.group = GROUP_REPORTING
@@ -54,19 +57,19 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
           "for the ${variant.name.capitalize()} variant."
 
       // Apply JUnit 5 configuration parameters
-      val junit5Jacoco = project.junit5.jacocoOptions
+      val junit5Jacoco = project.android.testOptions.junitPlatform.jacocoOptions
       val allReports = listOf(
           junit5Jacoco.csv to reportTask.reports.csv,
           junit5Jacoco.xml to reportTask.reports.xml,
           junit5Jacoco.html to reportTask.reports.html)
 
       allReports.forEach { (from, to) ->
-        to.isEnabled = from.isEnabled
+        to.isEnabled = from.enabled
         from.destination?.let { to.destination = it }
       }
 
       // Task-level Configuration
-      val taskJacoco = testTask.jacoco
+      val taskJacoco = testTask.extensionByName<JacocoTaskExtension>("jacoco")
       reportTask.executionData = project.files(taskJacoco.destinationFile.path)
 
       // Apply exclusion rules to both class & source directories for Jacoco,

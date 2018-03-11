@@ -4,8 +4,6 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import groovy.lang.Closure
-import org.junit.platform.gradle.plugin.FiltersExtension
-import org.junit.platform.gradle.plugin.SelectorsExtension
 import java.io.File
 
 /*
@@ -14,15 +12,6 @@ import java.io.File
  * unfortunate lack of visibility modifiers in the main JUnit 5 Gradle Plugin,
  * which prevents the static typing of Kotlin from working properly.
  */
-
-fun SelectorsExtension.isEmpty(): Boolean =
-    GroovyInterop.selectorsExtension_isEmpty(this)
-
-fun FiltersExtension.getIncludeClassNamePatterns(): List<String> =
-    GroovyInterop.filtersExtension_includeClassNamePatterns(this)
-
-fun FiltersExtension.getExcludeClassNamePatterns(): List<String> =
-    GroovyInterop.filtersExtension_excludeClassNamePatterns(this)
 
 val BaseVariant.variantData: BaseVariantData
   get() = GroovyInterop.baseVariant_variantData(this)

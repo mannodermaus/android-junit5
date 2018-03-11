@@ -1,8 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5.providers
 
 import com.android.build.gradle.api.BaseVariant
+import de.mannodermaus.gradle.plugins.junit5.internal.unitTestVariant
 import de.mannodermaus.gradle.plugins.junit5.safeJavaOutputDir
-import de.mannodermaus.gradle.plugins.junit5.unitTestVariant
 import de.mannodermaus.gradle.plugins.junit5.variantData
 
 /**
