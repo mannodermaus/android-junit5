@@ -4,9 +4,9 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.TaskConfigAction
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
-import com.android.builder.core.VariantType
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.JUnit5UnitTest
+import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
@@ -138,7 +138,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
     /* Private */
 
     private fun getDefaultJUnit4Task(): AndroidUnitTest {
-      val name = scope.getTaskName(VariantType.UNIT_TEST.prefix, VariantType.UNIT_TEST.suffix)
+      val name = scope.getTaskName(VariantTypeCompat.UNIT_TEST_PREFIX,
+          VariantTypeCompat.UNIT_TEST_SUFFIX)
       return project.tasks.getByName(name) as AndroidUnitTest
     }
 
@@ -189,7 +190,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       variantUnitTestTask.dependsOn(task)
 
       // Require that test classes are assembled first
-      val defaultAssembleTestName = scope.getTaskName("assemble", VariantType.UNIT_TEST.suffix)
+      val defaultAssembleTestName = scope.getTaskName("assemble",
+          VariantTypeCompat.UNIT_TEST_SUFFIX)
       val defaultAssembleTask = project.tasks.getByName(defaultAssembleTestName)
       task.dependsOn(defaultAssembleTask)
 

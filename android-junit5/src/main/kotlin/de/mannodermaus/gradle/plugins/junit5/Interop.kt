@@ -21,6 +21,13 @@ val VariantScope.safeJavaOutputDir: File
 
 /* Types */
 
+class VariantTypeCompat {
+  companion object {
+    val UNIT_TEST_PREFIX = GroovyInterop.variantType_unitTestPrefix()
+    val UNIT_TEST_SUFFIX = GroovyInterop.variantType_unitTestSuffix()
+  }
+}
+
 /**
  * Multi-language functional construct with no parameters,
  * mapped to Groovy's dynamic Closures as well as Kotlin's invoke syntax.
