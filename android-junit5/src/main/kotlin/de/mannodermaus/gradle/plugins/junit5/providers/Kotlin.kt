@@ -2,7 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.providers
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.builder.model.SourceProvider
-import de.mannodermaus.gradle.plugins.junit5.unitTestVariant
+import de.mannodermaus.gradle.plugins.junit5.internal.unitTestVariant
 import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.internal.HasConvention

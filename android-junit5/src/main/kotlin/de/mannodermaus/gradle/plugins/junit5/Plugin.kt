@@ -1,8 +1,14 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
-import de.mannodermaus.gradle.plugins.junit5.ConfigurationKind.ANDROID_TEST
-import de.mannodermaus.gradle.plugins.junit5.ConfigurationScope.RUNTIME_ONLY
+import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
+import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
+import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.append
+import de.mannodermaus.gradle.plugins.junit5.internal.find
+import de.mannodermaus.gradle.plugins.junit5.internal.loadProperties
+import de.mannodermaus.gradle.plugins.junit5.internal.requireAgp3
+import de.mannodermaus.gradle.plugins.junit5.internal.requireGradle
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -10,11 +16,6 @@ import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.junit.platform.gradle.plugin.EnginesExtension
-import org.junit.platform.gradle.plugin.FiltersExtension
-import org.junit.platform.gradle.plugin.PackagesExtension
-import org.junit.platform.gradle.plugin.SelectorsExtension
-import org.junit.platform.gradle.plugin.TagsExtension
 import java.util.Properties
 
 /**
@@ -47,15 +48,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
   private fun Project.configureExtensions() {
     // Hook the JUnit Platform configuration into the Android testOptions
-    android.testOptions
-        .extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(this)) { ju5 ->
-          ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
-          ju5.extend<FiltersExtension>(FILTERS_EXTENSION_NAME) { filters ->
-            filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
-            filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
-            filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
-          }
-        }
+    attachDsl(this)
   }
 
   private fun Project.configureDependencies() {
@@ -83,7 +76,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     // For instrumentation tests, attach the JUnit 5 RunnerBuilder automatically
     // to the test instrumentation runner's parameters
     // (runtime dependency is being added after evaluation, though)
-    val runnerArgs = android.defaultConfig.testInstrumentationRunnerArguments
+    val runnerArgs = this.android.defaultConfig.testInstrumentationRunnerArguments
     runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
   }
 
@@ -100,11 +93,11 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       val testTask = AndroidJUnit5UnitTest.create(this, variant, directoryProviders)
 
       if (isJacocoApplied) {
-        val jacocoOptions = junit5.jacocoOptions
+        val jacocoOptions = this.android.testOptions.junitPlatform.jacocoOptions
 
         if (jacocoOptions.taskGenerationEnabled) {
           // Create a Jacoco friend task
-          val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants()
+          val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
           if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
             AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
           }
@@ -140,7 +133,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
     // Attach runtime-only dependency on JUnit 5 instrumentation test facade, unless disabled
     val defaults = loadProperties(VERSIONS_RESOURCE_NAME)
-    val rtOnly = configurations.findConfiguration(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
+    val rtOnly = configurations.find(kind = ANDROID_TEST, scope = RUNTIME_ONLY)
     withLoadedVersions(defaults) {
       rtOnly.dependencies.add(it.others.instrumentationRunner)
     }
@@ -158,7 +151,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   private fun Project.withLoadedVersions(defaults: Properties, config: (Versions) -> Any): Any {
     val versions = Versions(
         project = this,
-        extension = project.junit5,
+        extension = project.android.testOptions.junitPlatform,
         defaults = defaults)
     return config(versions)
   }

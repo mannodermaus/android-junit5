@@ -7,18 +7,11 @@ import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.android.builder.core.VariantType
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.JUnit5UnitTest
-import de.mannodermaus.gradle.plugins.junit5.engines
-import de.mannodermaus.gradle.plugins.junit5.filters
-import de.mannodermaus.gradle.plugins.junit5.getExcludeClassNamePatterns
-import de.mannodermaus.gradle.plugins.junit5.getIncludeClassNamePatterns
-import de.mannodermaus.gradle.plugins.junit5.isEmpty
-import de.mannodermaus.gradle.plugins.junit5.junit5
-import de.mannodermaus.gradle.plugins.junit5.junit5Info
-import de.mannodermaus.gradle.plugins.junit5.packages
+import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
+import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
-import de.mannodermaus.gradle.plugins.junit5.selectors
-import de.mannodermaus.gradle.plugins.junit5.tags
 import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -95,7 +88,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
           "for the ${variant.name.capitalize()} variant."
 
       // JUnit 5 properties configuration
-      val junit5 = project.junit5
+      val junit5 = project.android.testOptions.junitPlatform
       configureTaskInputs(task, junit5)
       configureTaskDependencies(task, junit5)
       val reportsDir = configureTaskOutputs(task, junit5)
@@ -139,7 +132,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       defaultJUnit5Task.dependsOn(task)
 
       // Apply additional user configuration
-      project.junit5.unitTests.applyConfiguration(task)
+      project.android.testOptions.junitPlatform.unitTests.applyConfiguration(task)
     }
 
     /* Private */
@@ -153,7 +146,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       var defaultTask = project.tasks.findByName(TASK_NAME_DEFAULT)
       if (defaultTask == null) {
         defaultTask = project.tasks.create(TASK_NAME_DEFAULT, JUnit5UnitTestRunAll::class.java)
-        project.junit5.unitTests.applyConfiguration(defaultTask)
+        project.android.testOptions.junitPlatform.unitTests.applyConfiguration(defaultTask)
       }
       return defaultTask!!
     }
@@ -175,12 +168,12 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       task.inputs.property("filters.tags.include", junit5.filters.tags.include)
       task.inputs.property("filters.tags.exclude", junit5.filters.tags.exclude)
       task.inputs.property("filters.includeClassNamePatterns",
-          junit5.filters.getIncludeClassNamePatterns())
+          junit5.filters.includeClassNamePatterns)
       task.inputs.property("filters.packages.include", junit5.filters.packages.include)
       task.inputs.property("filters.packages.exclude", junit5.filters.packages.exclude)
 
       junit5.logManager?.let {
-        task.systemProperty("java.util.logging.manager", junit5.logManager)
+        task.systemProperty("java.util.logging.manager", it)
       }
     }
 
@@ -208,9 +201,10 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
     private fun configureTaskOutputs(
         task: AndroidJUnit5UnitTest,
         junit5: AndroidJUnitPlatformExtension): File {
-      val reportsDir = if (junit5.reportsDir != null) {
+      val specifiedDir = junit5.reportsDir
+      val reportsDir = if (specifiedDir != null) {
         // Ensure per-variant directory even with a custom "reportsDir"
-        project.file("${junit5.reportsDir.absolutePath}/${variant.name}")
+        project.file("${specifiedDir.absolutePath}/${variant.name}")
       } else {
         // Default path
         project.file("${project.buildDir}/test-results/${variant.name}/junit-platform")
@@ -227,7 +221,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       val args = mutableListOf<String>()
 
       // Log Details
-      junit5.details?.let { args += arrayOf("--details", it.name) }
+      junit5.details.let { args += arrayOf("--details", it.name) }
 
       // Selectors
       if (junit5.selectors.isEmpty()) {
@@ -247,8 +241,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       }
 
       // Filters
-      junit5.filters.getIncludeClassNamePatterns().forEach { args += arrayOf("-n", it) }
-      junit5.filters.getExcludeClassNamePatterns().forEach { args += arrayOf("-N", it) }
+      junit5.filters.includeClassNamePatterns.forEach { args += arrayOf("-n", it) }
+      junit5.filters.excludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
       junit5.filters.packages.include.forEach { args += arrayOf("--include-package", it) }
       junit5.filters.packages.exclude.forEach { args += arrayOf("--exclude-package", it) }
       junit5.filters.tags.include.forEach { args += arrayOf("-t", it) }

@@ -10,7 +10,6 @@ const val FILTERS_EXTENSION_NAME = "filters"
 const val PACKAGES_EXTENSION_NAME = "packages"
 const val TAGS_EXTENSION_NAME = "tags"
 const val ENGINES_EXTENSION_NAME = "engines"
-const val JACOCO_EXTENSION_NAME = "jacoco"
 
 // Mirrored from "versions.properties" resource file
 const val ANDROID_JUNIT5_VERSION_PROP = "androidJunit5Version"
@@ -26,6 +25,3 @@ const val JUNIT5_RUNNER_BUILDER_CLASS_NAME = "de.mannodermaus.junit5.AndroidJUni
 
 // Dependency Handler Names
 const val DEP_HANDLER_NAME = "junit5"
-
-// Configuration Names
-const val PARAM_NAME_ENABLE_INSTRUMENTED_TESTS = "junit5InstrumentedTestsEnabled"

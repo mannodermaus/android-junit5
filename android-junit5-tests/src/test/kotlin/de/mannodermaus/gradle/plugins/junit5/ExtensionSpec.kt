@@ -1,6 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
+import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind
+import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope
+import de.mannodermaus.gradle.plugins.junit5.internal.find
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.api.artifacts.Configuration
 import org.jetbrains.spek.api.Spek
@@ -17,7 +20,7 @@ import org.mockito.Mockito
  */
 class ExtensionSpec : Spek({
 
-  describe("tests for ConfigurationContainer#findConfiguration()") {
+  describe("tests for ConfigurationContainer#find()") {
 
     // Quick-hand mock creator for Configurations
     fun mockConfiguration(name: String): Configuration =
@@ -137,7 +140,7 @@ class ExtensionSpec : Spek({
             pairs.forEach { (kind, expected) ->
 
               it("finds configuration '${expected.name}' for kind == $kind") {
-                assertThat(container.findConfiguration(
+                assertThat(container.find(
                     variant = variant,
                     kind = kind,
                     scope = scope))

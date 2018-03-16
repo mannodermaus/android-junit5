@@ -12,6 +12,8 @@ import de.mannodermaus.gradle.plugins.junit5.Type.Application
 import de.mannodermaus.gradle.plugins.junit5.Type.Feature
 import de.mannodermaus.gradle.plugins.junit5.Type.Library
 import de.mannodermaus.gradle.plugins.junit5.Type.Test
+import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.hasPlugin
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
