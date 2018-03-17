@@ -16,10 +16,17 @@ import java.io.File
 val BaseVariant.variantData: BaseVariantData
   get() = GroovyInterop.baseVariant_variantData(this)
 
-val VariantScope.safeJavaOutputDir: File
-  get() = GroovyInterop.variantScope_javaOutputDir(this)
+val VariantScope.safeJavaOutputDirs: Set<File>
+  get() = GroovyInterop.variantScope_javaOutputDirs(this)
 
 /* Types */
+
+class VariantTypeCompat {
+  companion object {
+    val UNIT_TEST_PREFIX = GroovyInterop.variantType_unitTestPrefix()
+    val UNIT_TEST_SUFFIX = GroovyInterop.variantType_unitTestSuffix()
+  }
+}
 
 /**
  * Multi-language functional construct with no parameters,

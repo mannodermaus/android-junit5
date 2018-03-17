@@ -2,7 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.providers
 
 import com.android.build.gradle.api.BaseVariant
 import de.mannodermaus.gradle.plugins.junit5.internal.unitTestVariant
-import de.mannodermaus.gradle.plugins.junit5.safeJavaOutputDir
+import de.mannodermaus.gradle.plugins.junit5.safeJavaOutputDirs
 import de.mannodermaus.gradle.plugins.junit5.variantData
 
 /**
@@ -25,5 +25,5 @@ class JavaDirectoryProvider(private val variant: BaseVariant) : DirectoryProvide
           .toSet()
 
   private fun classFoldersOf(variant: BaseVariant) =
-      setOf(variant.variantData.scope.safeJavaOutputDir)
+      variant.variantData.scope.safeJavaOutputDirs
 }
