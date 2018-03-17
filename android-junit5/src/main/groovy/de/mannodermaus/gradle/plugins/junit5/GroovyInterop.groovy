@@ -4,16 +4,22 @@ import com.android.annotations.NonNull
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
+import com.annimon.stream.Optional
 
 /**
  * Utility functions exposed to Kotlin consumers
- * that can't safely access Groovy members otherwise.*/
+ * that can't safely access Groovy members otherwise,
+ * or require reflection to access in a compatible manner
+ * across all supported versions of the Android Gradle Plugin.*/
 class GroovyInterop {
 
-  // Access to UNIT_TEST was moved from VariantType to VariantTypeImpl in AGP 3.2.0-alpha06
-  private static final Optional<Class> VariantType =
+  //   Access to UNIT_TEST was moved from VariantType to VariantTypeImpl in AGP 3.2.0-alpha06
+  private static final def VariantType =
       reflectiveClass("com.android.builder.core.VariantTypeImpl")
-          .orElseGet { reflectiveClass("com.android.builder.core.VariantType") }
+          .or { reflectiveClass("com.android.builder.core.VariantType") }
+  // Java outputs are accessed through this enum in AGP 3.2.0-alpha02
+  private static final def InternalArtifactType =
+      reflectiveClass("com.android.build.gradle.internal.scope.InternalArtifactType")
 
   // No instances
   private GroovyInterop() { throw new AssertionError() }
@@ -23,9 +29,9 @@ class GroovyInterop {
    * @param fqcn Fully qualified class name
    * @return The class, or an empty Optional
    */
-  private static Optional<Class> reflectiveClass(fqcn) {
+  private static Optional<Class> reflectiveClass(String fqcn) {
     try {
-      return Optional.ofNullable(Class.forName(fqcn))
+      return Optional.of(Class.forName(fqcn))
     } catch (ignored) {
       return Optional.empty()
     }
@@ -51,17 +57,32 @@ class GroovyInterop {
    * @return That file
    */
   @NonNull
-  static File variantScope_javaOutputDir(VariantScope scope) {
-    if (scope.hasProperty("javaOutputDir")) {
-      return scope.javaOutputDir
+  static Set<File> variantScope_javaOutputDirs(VariantScope scope) {
+    if (scope.hasProperty("buildArtifactsHolder") && InternalArtifactType.isPresent()) {
+      def artifactType = InternalArtifactType
+          .map { it.getDeclaredField("JAVAC").get(null) }
+          .get()
+      if (scope.buildArtifactsHolder.hasArtifact(artifactType)) {
+        // 3.2.0-alpha04 and above:
+        // Java outputs are moved into an "artifacts_transform" subdirectory
+        return scope.buildArtifactsHolder.getArtifactFiles(artifactType).files
+      } else {
+        // 3.2.0-alpha02 and above:
+        // Java outputs are still inside the "intermediates/classes" directory,
+        // but there is no public API for that, so construct the path yourself
+        return [new File(scope.globalScope.intermediatesDir,
+            "/classes/" + scope.variantConfiguration.dirName)]
+      }
     } else {
-      return new File(scope.globalScope.intermediatesDir,
-          "/classes/" + scope.variantConfiguration.dirName)
+      // Below 3.2.0-alpha02:
+      // Java outputs are expressed through the javaOutputDir property
+      return [scope.javaOutputDir]
     }
   }
 
   /**
    * Obtains the task name prefix for Unit Test variants.
+   *
    * @because In Android Gradle Plugin 3.2.0-alpha06, the underlying constants on VariantType were renamed
    * @return The unit test prefix
    */
@@ -75,6 +96,7 @@ class GroovyInterop {
 
   /**
    * Obtains the task name suffix for Unit Test variants.
+   *
    * @because In Android Gradle Plugin 3.2.0-alpha06, the underlying constants on VariantType were renamed
    * @return The unit test prefix
    */

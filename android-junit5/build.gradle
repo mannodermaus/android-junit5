@@ -79,9 +79,14 @@ dependencies {
   implementation "org.codehaus.groovy:groovy:$GROOVY_VERSION"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 
-  // Dependent Plugins
+  // Other Dependencies
+  implementation "com.annimon:stream:$STREAMS_BACKPORT_VERSION"
+
+  // JUnit Platform
   implementation "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
   implementation "org.junit.platform:junit-platform-commons:$JUNIT_PLATFORM_VERSION"
+
+  // Dependent Plugins
   implementation "com.android.tools.build:gradle:$ANDROID_PLUGIN_VERSION"
   compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
 }

@@ -578,15 +578,36 @@ class PluginSpec : Spek({
           context("using custom exclusion rules") {
             val project by memoized { testProjectBuilder.build() }
 
-            // Create some fake class files to verify the Jacoco tree
+            // Create some fake files to verify the Jacoco tree
             beforeEachTest {
-              project.file("build/intermediates/classes/debug").mkdirs()
-              project.file("build/intermediates/classes/debug/R.class").createNewFile()
-              project.file("build/intermediates/classes/debug/FirstFile.class").createNewFile()
-              project.file("build/intermediates/classes/debug/SecondFile.class").createNewFile()
-              project.file("build/intermediates/classes/release").mkdirs()
-              project.file("build/intermediates/classes/release/R.class").createNewFile()
-              project.file("build/intermediates/classes/release/SecondFile.class").createNewFile()
+              // Since the location of intermediate class files changed in different
+              // versions of the Android Gradle Plugin,
+              // create each class file in multiple directories to remain compatible with all approaches
+              listOf(
+                  // AGP 3.2.0-alpha06 and above
+                  "build/intermediates/artifact_transform/compileDebugJavaWithJavac/classes",
+                  // AGP 3.2.0-alpha04 and above
+                  "build/intermediates/artifact_transform/javac/debug/classes",
+                  // Everything below
+                  "build/intermediates/classes/debug").forEach { folder ->
+                project.file(folder).mkdirs()
+                project.file("$folder/R.class").createNewFile()
+                project.file("$folder/FirstFile.class").createNewFile()
+                project.file("$folder/SecondFile.class").createNewFile()
+              }
+
+              listOf(
+                  // AGP 3.2.0-alpha06 and above
+                  "build/intermediates/artifact_transform/compileReleaseJavaWithJavac/classes",
+                  // AGP 3.2.0-alpha04 and above
+                  "build/intermediates/artifact_transform/javac/release/classes",
+                  // Everything below
+                  "build/intermediates/classes/release").forEach { folder ->
+                project.file(folder).mkdirs()
+                project.file("$folder/R.class").createNewFile()
+                project.file("$folder/SecondFile.class").createNewFile()
+              }
+
               project.file("src/main/java").mkdirs()
               project.file("src/main/java/OkFile.java").createNewFile()
               project.file("src/main/java/AnnoyingFile.java").createNewFile()

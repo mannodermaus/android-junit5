@@ -16,8 +16,8 @@ import java.io.File
 val BaseVariant.variantData: BaseVariantData
   get() = GroovyInterop.baseVariant_variantData(this)
 
-val VariantScope.safeJavaOutputDir: File
-  get() = GroovyInterop.variantScope_javaOutputDir(this)
+val VariantScope.safeJavaOutputDirs: Set<File>
+  get() = GroovyInterop.variantScope_javaOutputDirs(this)
 
 /* Types */
 
