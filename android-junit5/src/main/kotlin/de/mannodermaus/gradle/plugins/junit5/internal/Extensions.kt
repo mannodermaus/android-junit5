@@ -6,15 +6,16 @@ import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.android.builder.model.Version
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin
-import de.mannodermaus.gradle.plugins.junit5.LogUtils
-import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
-import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level.INFO
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.APP
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.logging.LogLevel.ERROR
+import org.gradle.api.logging.LogLevel.INFO
+import org.gradle.api.logging.LogLevel.WARN
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
@@ -70,8 +71,19 @@ fun MutableMap<String, String>.append(
 
 /* Extensions for Gradle */
 
-fun Logger.agpStyleLog(message: String, level: Level = INFO) {
-  LogUtils.agpStyleLog(this, level, message)
+/**
+ * Log a message with the Android Gradle Plugin style syntax,
+ * which will cause Android Studio to pick it up & display it inside the Messages window.
+ */
+fun Logger.agpLog(level: LogLevel, message: String) {
+  val pair: Pair<String, (String) -> Unit> = when (level) {
+    ERROR -> "error" to { s -> error(s) }
+    WARN -> "warning" to { s -> warn(s) }
+    INFO -> "info" to { s -> info(s) }
+    else -> "debug" to { s -> debug(s) }
+  }
+  val (kind, log) = pair
+  log("""AGBPI: {"kind": "$kind","text":"$message"}""")
 }
 
 /* Interoperability layer for Gradle */

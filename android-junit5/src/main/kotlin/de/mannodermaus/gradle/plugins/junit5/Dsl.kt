@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extend
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5UnitTest
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.Project

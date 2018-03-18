@@ -5,7 +5,6 @@ import com.android.build.gradle.internal.scope.TaskConfigAction
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
-import de.mannodermaus.gradle.plugins.junit5.JUnit5UnitTest
 import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
@@ -23,7 +22,6 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.gradle.process.JavaForkOptions
-import org.gradle.process.ProcessForkOptions
 import org.gradle.process.internal.DefaultJavaForkOptions
 import org.junit.platform.console.ConsoleLauncher
 import java.io.File
@@ -61,9 +59,10 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
   @Optional
   var assetsCollection: FileCollection? = null
 
-  override fun isRunAllTask() = false
+  override val isRunAllTask = false
 
-  override fun javaForkOptions() = java.util.Optional.of<JavaForkOptions>(this)
+  @Suppress("LeakingThis")
+  override val javaForkOptions = this as JavaForkOptions
 
   /**
    * Configuration closure for an Android JUnit5 test task.
@@ -271,36 +270,18 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
  * Allows the default task to also be configured by unitTests.all.
  */
 open class JUnit5UnitTestRunAll : DefaultTask(), JUnit5UnitTest {
+
   private val emptyJavaForkOptions = DefaultJavaForkOptions(IdentityFileResolver())
 
-  override fun isRunAllTask() = true
+  override val isRunAllTask = true
 
-  override fun javaForkOptions() = java.util.Optional.empty<JavaForkOptions>()
+  override val javaForkOptions: JavaForkOptions? = null
 
   /* JavaForkOptions facade */
 
-  override fun getJvmArgs() = emptyList<String>()
-  override fun setJvmArgs(var1: MutableList<String>?) {
-  }
+  override fun jvmArgs(vararg args: Any) = emptyJavaForkOptions
 
-  override fun setJvmArgs(var1: MutableIterable<*>?) {
-  }
+  override fun systemProperty(key: String, value: Any?) = emptyJavaForkOptions
 
-  override fun jvmArgs(var1: MutableIterable<*>?): JavaForkOptions = emptyJavaForkOptions
-  override fun jvmArgs(vararg var1: Any?): JavaForkOptions = emptyJavaForkOptions
-
-  override fun getSystemProperties() = mutableMapOf<String, Any>()
-  override fun setSystemProperties(var1: MutableMap<String, *>?) {
-  }
-
-  override fun systemProperties(
-      var1: MutableMap<String, *>?): JavaForkOptions = emptyJavaForkOptions
-
-  override fun systemProperty(var1: String?, var2: Any?): JavaForkOptions = emptyJavaForkOptions
-  override fun getEnvironment() = mutableMapOf<String, Any>()
-  override fun setEnvironment(var1: MutableMap<String, *>?) {
-  }
-
-  override fun environment(var1: MutableMap<String, *>?): ProcessForkOptions = emptyJavaForkOptions
-  override fun environment(var1: String?, var2: Any?): ProcessForkOptions = emptyJavaForkOptions
+  override fun environment(key: String, value: Any?) = emptyJavaForkOptions
 }

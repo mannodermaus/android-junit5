@@ -1,29 +1,16 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.LogUtils.Level
-import de.mannodermaus.gradle.plugins.junit5.internal.agpStyleLog
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.ext
-import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.logging.Logger
 import java.util.Properties
 
 /*
  * Model classes holding information about the transitive dependencies of the plugin,
  * exposed to consumers through the custom dependency handler.
  */
-
-/* Extensions */
-
-private fun Logger.replacementWarning(oldName: String, newName: String) {
-  this.agpStyleLog(
-      message = "The JUnit 5 dependency on '$oldName' " +
-          "is deprecated and will be removed in a future version. Please use '$newName' instead!",
-      level = Level.WARNING)
-}
 
 /* Types */
 
