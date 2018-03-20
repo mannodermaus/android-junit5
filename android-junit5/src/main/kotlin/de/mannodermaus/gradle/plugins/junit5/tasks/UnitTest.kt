@@ -53,11 +53,11 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
 
   @InputFiles
   @Optional
-  var resCollection: FileCollection? = null
+  var resCollection: Set<File>? = null
 
   @InputFiles
   @Optional
-  var assetsCollection: FileCollection? = null
+  var assetsCollection: Set<File>? = null
 
   override val isRunAllTask = false
 
@@ -182,8 +182,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
         junit5: AndroidJUnitPlatformExtension) {
       // Connect to the default unit test task
       val variantUnitTestTask = this.getDefaultJUnit4Task()
-      task.resCollection = variantUnitTestTask.resCollection
-      task.assetsCollection = variantUnitTestTask.assetsCollection
+      task.resCollection = variantUnitTestTask.resCollection?.files
+      task.assetsCollection = variantUnitTestTask.assetsCollection?.files
 
       variantUnitTestTask.enabled = junit5.enableStandardTestTask
       variantUnitTestTask.dependsOn(task)

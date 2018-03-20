@@ -583,8 +583,11 @@ class PluginSpec : Spek({
               // Since the location of intermediate class files changed in different
               // versions of the Android Gradle Plugin,
               // create each class file in multiple directories to remain compatible with all approaches
+              // TODO Clean this mess up once the Android Gradle Plugin 3.2.0 finally decides on something. :|
               listOf(
-                  // AGP 3.2.0-alpha06 and above
+                  // AGP 3.2.0-alpha07 and above
+                  "build/intermediates/javac/debug/compileDebugJavaWithJavac/classes",
+                  // AGP 3.2.0-alpha06
                   "build/intermediates/artifact_transform/compileDebugJavaWithJavac/classes",
                   // AGP 3.2.0-alpha04 and above
                   "build/intermediates/artifact_transform/javac/debug/classes",
@@ -597,7 +600,9 @@ class PluginSpec : Spek({
               }
 
               listOf(
-                  // AGP 3.2.0-alpha06 and above
+                  // AGP 3.2.0-alpha07 and above
+                  "build/intermediates/javac/release/compileReleaseJavaWithJavac/classes",
+                  // AGP 3.2.0-alpha06
                   "build/intermediates/artifact_transform/compileReleaseJavaWithJavac/classes",
                   // AGP 3.2.0-alpha04 and above
                   "build/intermediates/artifact_transform/javac/release/classes",

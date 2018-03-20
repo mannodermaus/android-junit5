@@ -51,6 +51,7 @@ class GroovyInterop {
 
   /**
    * Obtains the Java output directory of the provided VariantScope in a safe manner.
+   * TODO Clean this mess up once the Android Gradle Plugin 3.2.0 finally decides on something. :|
    *
    * @because In Android Gradle Plugin 3.2.0-alpha02, the original method was removed
    * @param variant VariantScope to retrieve the Java output directory from
@@ -64,7 +65,7 @@ class GroovyInterop {
           .get()
       if (scope.buildArtifactsHolder.hasArtifact(artifactType)) {
         // 3.2.0-alpha04 and above:
-        // Java outputs are moved into an "artifacts_transform" subdirectory
+        // Java outputs are moved into a subdirectory exposed by the compilation BuildArtifact
         return scope.buildArtifactsHolder.getArtifactFiles(artifactType).files
       } else {
         // 3.2.0-alpha02 and above:
