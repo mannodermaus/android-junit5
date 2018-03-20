@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
+import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import groovy.lang.Closure
 import java.io.File
 
@@ -18,6 +19,9 @@ val BaseVariant.variantData: BaseVariantData
 
 val VariantScope.safeJavaOutputDirs: Set<File>
   get() = GroovyInterop.variantScope_javaOutputDirs(this)
+
+val AndroidUnitTest.safeAssetsCollection: Set<File>?
+  get() = GroovyInterop.androidUnitTest_assetsCollection(this)
 
 /* Types */
 

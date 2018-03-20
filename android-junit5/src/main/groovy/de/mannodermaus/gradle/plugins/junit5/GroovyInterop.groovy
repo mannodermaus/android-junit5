@@ -4,7 +4,10 @@ import com.android.annotations.NonNull
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
+import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.annimon.stream.Optional
+
+import javax.annotation.Nullable
 
 /**
  * Utility functions exposed to Kotlin consumers
@@ -79,6 +82,19 @@ class GroovyInterop {
       // Java outputs are expressed through the javaOutputDir property
       return [scope.javaOutputDir]
     }
+  }
+
+  /**
+   * Obtains the Assets Collection of the given AndroidUnitTest.
+   *
+   * @because 'assetsCollection' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha07
+   * @param test The Android JUnit 4 test to access
+   * @return Its assets collection
+   */
+  @Nullable
+  static Set<File> androidUnitTest_assetsCollection(AndroidUnitTest test) {
+    def collection = test.assetsCollection
+    return collection == null ? null : collection.files
   }
 
   /**

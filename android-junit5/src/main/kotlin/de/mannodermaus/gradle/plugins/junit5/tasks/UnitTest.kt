@@ -11,6 +11,7 @@ import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
+import de.mannodermaus.gradle.plugins.junit5.safeAssetsCollection
 import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -183,7 +184,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       // Connect to the default unit test task
       val variantUnitTestTask = this.getDefaultJUnit4Task()
       task.resCollection = variantUnitTestTask.resCollection?.files
-      task.assetsCollection = variantUnitTestTask.assetsCollection?.files
+      task.assetsCollection = variantUnitTestTask.safeAssetsCollection
 
       variantUnitTestTask.enabled = junit5.enableStandardTestTask
       variantUnitTestTask.dependsOn(task)
