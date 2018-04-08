@@ -63,225 +63,249 @@ class FunctionalSpec extends Specification {
    * ===============================================================================================
    */
 
-  def "Executes Java tests in default source set"() {
-    given:
-    androidPlugin()
-    junit5Plugin()
-    javaFile()
-    javaTest()
+//  def "Executes Java tests in default source set"() {
+//    given:
+//    androidPlugin()
+//    junit5Plugin()
+//    javaFile()
+//    javaTest()
+//
+//    when:
+//    BuildResult result = runGradle()
+//        .withArguments("build")
+//        .build()
+//
+//    then:
+//    result.task(":build").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
+//
+//    // 1 per build type (Debug & Release)
+//    StringUtils.countMatches(result.output, "1 tests successful") == 2
+//  }
+//
+//  def "Executes Kotlin tests in default source set"() {
+//    given:
+//    androidPlugin()
+//    kotlinPlugin()
+//    junit5Plugin()
+//    javaFile()
+//    kotlinTest()
+//
+//    when:
+//    BuildResult result = runGradle()
+//        .withArguments("build")
+//        .build()
+//
+//    then:
+//    result.task(":build").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
+//
+//    // 1 per build type (Debug & Release)
+//    StringUtils.countMatches(result.output, "1 tests successful") == 2
+//  }
+//
+//  def "Executes Java tests in build-type-specific source set"() {
+//    given:
+//    androidPlugin()
+//    junit5Plugin()
+//    javaFile()
+//    javaTest()
+//    javaTest(null, "debug")
+//
+//    when:
+//    BuildResult result = runGradle()
+//        .withArguments("junitPlatformTestDebug")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("2 tests successful")
+//    result.output.contains("JavaDebugAdderTest")
+//    result.output.contains("JavaAdderTest")
+//
+//    when:
+//    result = runGradle()
+//        .withArguments("junitPlatformTestRelease")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("1 tests successful")
+//    result.output.contains("JavaAdderTest")
+//  }
+//
+//  def "Executes Kotlin tests in build-type-specific source set"() {
+//    given:
+//    androidPlugin()
+//    kotlinPlugin()
+//    junit5Plugin()
+//    javaFile()
+//    kotlinTest()
+//    kotlinTest(null, "debug")
+//
+//    when:
+//    BuildResult result = runGradle()
+//        .withArguments("junitPlatformTestDebug")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("2 tests successful")
+//    result.output.contains("KotlinDebugAdderTest")
+//    result.output.contains("KotlinAdderTest")
+//
+//    when:
+//    result = runGradle()
+//        .withArguments("junitPlatformTestRelease")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("1 tests successful")
+//    result.output.contains("KotlinAdderTest")
+//  }
+//
+//  def "Executes Java tests in flavor-specific source set"() {
+//    given:
+//    androidPlugin(flavorNames: ["free"])
+//    junit5Plugin()
+//    javaFile()
+//    javaTest()
+//    javaTest("free", null)
+//
+//    when:
+//    BuildResult result = runGradle()
+//        .withArguments("build")
+//        .build()
+//
+//    then:
+//    result.task(":build").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
+//
+//    // 1 per build type (Debug & Release)
+//    StringUtils.countMatches(result.output, "2 tests successful") == 2
+//  }
+//
+//  def "Executes Kotlin tests in flavor-specific source set"() {
+//    given:
+//    androidPlugin(flavorNames: ["free"])
+//    kotlinPlugin()
+//    junit5Plugin()
+//    javaFile()
+//    kotlinTest()
+//    kotlinTest("free", null)
+//
+//    when:
+//    BuildResult result = runGradle()
+//        .withArguments("build")
+//        .build()
+//
+//    then:
+//    result.task(":build").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
+//    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
+//
+//    // 1 per build type (Debug & Release)
+//    StringUtils.countMatches(result.output, "2 tests successful") == 2
+//  }
+//
+//  def "Executes Java tests in build-type-and-flavor-specific source set"() {
+//    given:
+//    androidPlugin(flavorNames: ["free"])
+//    junit5Plugin()
+//    javaFile()
+//    javaTest()
+//    javaTest(null, "debug")
+//    javaTest("free", "debug")
+//    javaTest(null, "release")
+//    GradleRunner runner = runGradle()
+//
+//    when:
+//    BuildResult result = runner
+//        .withArguments("junitPlatformTestFreeDebug")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("3 tests successful")
+//    result.output.contains("JavaFreeDebugAdderTest")
+//    result.output.contains("JavaDebugAdderTest")
+//    result.output.contains("JavaAdderTest")
+//
+//    when:
+//    result = runner
+//        .withArguments("junitPlatformTestFreeRelease")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("2 tests successful")
+//    result.output.contains("JavaReleaseAdderTest")
+//    result.output.contains("JavaAdderTest")
+//  }
+//
+//  def "Executes Kotlin tests in build-type-and-flavor-specific source set"() {
+//    given:
+//    androidPlugin(flavorNames: ["free"])
+//    kotlinPlugin()
+//    junit5Plugin()
+//    javaFile()
+//    kotlinTest()
+//    kotlinTest("free", "debug")
+//    kotlinTest(null, "debug")
+//    kotlinTest(null, "release")
+//    GradleRunner runner = runGradle()
+//
+//    when:
+//    BuildResult result = runner
+//        .withArguments("junitPlatformTestFreeDebug")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("3 tests successful")
+//    result.output.contains("KotlinFreeDebugAdderTest")
+//    result.output.contains("KotlinDebugAdderTest")
+//    result.output.contains("KotlinAdderTest")
+//
+//    when:
+//    result = runner
+//        .withArguments("junitPlatformTestFreeRelease")
+//        .build()
+//
+//    then:
+//    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
+//    result.output.contains("2 tests successful")
+//    result.output.contains("KotlinReleaseAdderTest")
+//    result.output.contains("KotlinAdderTest")
+//  }
 
-    when:
-    BuildResult result = runGradle()
-        .withArguments("build")
-        .build()
 
-    then:
-    result.task(":build").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
 
-    // 1 per build type (Debug & Release)
-    StringUtils.countMatches(result.output, "1 tests successful") == 2
-  }
+    def "Includes Android resources successfully"() {
+      given:
+      androidPlugin()
+      junit5Plugin("""
+        unitTests {
+          includeAndroidResources = true
+        }
+      """)
+      androidTest()
+      GradleRunner runner = runGradle()
 
-  def "Executes Kotlin tests in default source set"() {
-    given:
-    androidPlugin()
-    kotlinPlugin()
-    junit5Plugin()
-    javaFile()
-    kotlinTest()
+      when:
+      BuildResult result = runner
+          .withArguments("junitPlatformTestDebug")
+          .build()
 
-    when:
-    BuildResult result = runGradle()
-        .withArguments("build")
-        .build()
-
-    then:
-    result.task(":build").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
-
-    // 1 per build type (Debug & Release)
-    StringUtils.countMatches(result.output, "1 tests successful") == 2
-  }
-
-  def "Executes Java tests in build-type-specific source set"() {
-    given:
-    androidPlugin()
-    junit5Plugin()
-    javaFile()
-    javaTest()
-    javaTest(null, "debug")
-
-    when:
-    BuildResult result = runGradle()
-        .withArguments("junitPlatformTestDebug")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
-    result.output.contains("2 tests successful")
-    result.output.contains("JavaDebugAdderTest")
-    result.output.contains("JavaAdderTest")
-
-    when:
-    result = runGradle()
-        .withArguments("junitPlatformTestRelease")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
-    result.output.contains("1 tests successful")
-    result.output.contains("JavaAdderTest")
-  }
-
-  def "Executes Kotlin tests in build-type-specific source set"() {
-    given:
-    androidPlugin()
-    kotlinPlugin()
-    junit5Plugin()
-    javaFile()
-    kotlinTest()
-    kotlinTest(null, "debug")
-
-    when:
-    BuildResult result = runGradle()
-        .withArguments("junitPlatformTestDebug")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
-    result.output.contains("2 tests successful")
-    result.output.contains("KotlinDebugAdderTest")
-    result.output.contains("KotlinAdderTest")
-
-    when:
-    result = runGradle()
-        .withArguments("junitPlatformTestRelease")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestRelease").outcome == TaskOutcome.SUCCESS
-    result.output.contains("1 tests successful")
-    result.output.contains("KotlinAdderTest")
-  }
-
-  def "Executes Java tests in flavor-specific source set"() {
-    given:
-    androidPlugin(flavorNames: ["free"])
-    junit5Plugin()
-    javaFile()
-    javaTest()
-    javaTest("free", null)
-
-    when:
-    BuildResult result = runGradle()
-        .withArguments("build")
-        .build()
-
-    then:
-    result.task(":build").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
-
-    // 1 per build type (Debug & Release)
-    StringUtils.countMatches(result.output, "2 tests successful") == 2
-  }
-
-  def "Executes Kotlin tests in flavor-specific source set"() {
-    given:
-    androidPlugin(flavorNames: ["free"])
-    kotlinPlugin()
-    junit5Plugin()
-    javaFile()
-    kotlinTest()
-    kotlinTest("free", null)
-
-    when:
-    BuildResult result = runGradle()
-        .withArguments("build")
-        .build()
-
-    then:
-    result.task(":build").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
-    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
-
-    // 1 per build type (Debug & Release)
-    StringUtils.countMatches(result.output, "2 tests successful") == 2
-  }
-
-  def "Executes Java tests in build-type-and-flavor-specific source set"() {
-    given:
-    androidPlugin(flavorNames: ["free"])
-    junit5Plugin()
-    javaFile()
-    javaTest()
-    javaTest(null, "debug")
-    javaTest("free", "debug")
-    javaTest(null, "release")
-    GradleRunner runner = runGradle()
-
-    when:
-    BuildResult result = runner
-        .withArguments("junitPlatformTestFreeDebug")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
-    result.output.contains("3 tests successful")
-    result.output.contains("JavaFreeDebugAdderTest")
-    result.output.contains("JavaDebugAdderTest")
-    result.output.contains("JavaAdderTest")
-
-    when:
-    result = runner
-        .withArguments("junitPlatformTestFreeRelease")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
-    result.output.contains("2 tests successful")
-    result.output.contains("JavaReleaseAdderTest")
-    result.output.contains("JavaAdderTest")
-  }
-
-  def "Executes Kotlin tests in build-type-and-flavor-specific source set"() {
-    given:
-    androidPlugin(flavorNames: ["free"])
-    kotlinPlugin()
-    junit5Plugin()
-    javaFile()
-    kotlinTest()
-    kotlinTest("free", "debug")
-    kotlinTest(null, "debug")
-    kotlinTest(null, "release")
-    GradleRunner runner = runGradle()
-
-    when:
-    BuildResult result = runner
-        .withArguments("junitPlatformTestFreeDebug")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestFreeDebug").outcome == TaskOutcome.SUCCESS
-    result.output.contains("3 tests successful")
-    result.output.contains("KotlinFreeDebugAdderTest")
-    result.output.contains("KotlinDebugAdderTest")
-    result.output.contains("KotlinAdderTest")
-
-    when:
-    result = runner
-        .withArguments("junitPlatformTestFreeRelease")
-        .build()
-
-    then:
-    result.task(":junitPlatformTestFreeRelease").outcome == TaskOutcome.SUCCESS
-    result.output.contains("2 tests successful")
-    result.output.contains("KotlinReleaseAdderTest")
-    result.output.contains("KotlinAdderTest")
-  }
+      then:
+      result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+      result.output.contains("1 tests successful")
+      result.output.contains("AndroidJavaAdderTest")
+    }
 
   /*
    * ===============================================================================================
@@ -357,13 +381,14 @@ class FunctionalSpec extends Specification {
     """
   }
 
-  protected final def junit5Plugin() {
+  protected final def junit5Plugin(String extraConfig = "") {
     buildFile << """
       apply plugin: "de.mannodermaus.android-junit5"
 
       android.testOptions {
         junitPlatform {
           details "flat"
+          $extraConfig
         }
       }
 
@@ -421,6 +446,28 @@ class FunctionalSpec extends Specification {
     Files.createDirectories(filePath.parent)
 
     filePath.withWriter { it.write(content.replace("__NAME__", testName)) }
+  }
+
+  protected final def androidTest(String flavorName = null, String buildType = null) {
+    this.test(language: FileLanguage.Java,
+        flavorName: flavorName,
+        buildType: buildType,
+        content: """
+          package de.mannodermaus.app;
+
+          import static org.junit.jupiter.api.Assertions.assertEquals;
+
+          import org.junit.jupiter.api.Test;
+          import android.content.Intent;
+
+          class Android__NAME__ {
+            @Test
+            void test() {
+              Intent intent = new Intent();
+              assertEquals(null, intent.getAction());
+            }
+          }
+        """)
   }
 
   protected final def javaTest(String flavorName = null, String buildType = null) {

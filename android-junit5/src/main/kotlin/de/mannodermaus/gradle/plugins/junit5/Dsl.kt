@@ -502,7 +502,8 @@ class UnitTestOptions(private val project: Project) {
    *
    * @since 1.0.32
    */
-  var returnDefaultValues: Boolean = false
+  var returnDefaultValues: Boolean
+    get() = project.android.testOptions.unitTests.isReturnDefaultValues
     set(value) {
       project.android.testOptions.unitTests.isReturnDefaultValues = value
     }
@@ -534,7 +535,8 @@ class UnitTestOptions(private val project: Project) {
    *
    * @since 1.0.32
    */
-  var includeAndroidResources: Boolean = false
+  var includeAndroidResources: Boolean
+    get() = project.android.testOptions.unitTests.isIncludeAndroidResources
     set(value) {
       project.android.testOptions.unitTests.isIncludeAndroidResources = value
     }
