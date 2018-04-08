@@ -455,6 +455,56 @@ class PluginSpec : Spek({
         }
       }
 
+      context("unitTests.returnDefaultValues") {
+        val project by memoized { testProjectBuilder.build() }
+
+        listOf(true, false).forEach { state ->
+          on("set to $state") {
+            project.android.testOptions.junitPlatform.unitTests {
+              returnDefaultValues = state
+            }
+
+            project.evaluate()
+
+            it("configures the AGP setting correctly") {
+              assertThat(project.android.testOptions.unitTests.isReturnDefaultValues)
+                  .isEqualTo(state)
+            }
+
+            it("generates a mockable android.jar with the correct suffix") {
+              val variant = ProjectConfig(project).unitTestVariants.first()
+              val file = variant.variantData.scope.globalScope.mockableAndroidJarFile
+              val assertion = assertThat(file.name)
+
+              if (state) {
+                assertion.contains("default-values")
+              } else {
+                assertion.doesNotContain("default-values")
+              }
+            }
+          }
+        }
+      }
+
+      context("unitTests.includeAndroidResources") {
+        val project by memoized { testProjectBuilder.build() }
+
+        listOf(true, false).forEach { state ->
+          on("set to $state") {
+            project.android.testOptions.junitPlatform.unitTests {
+              includeAndroidResources = state
+            }
+
+            project.evaluate()
+
+            it("configures the AGP setting correctly") {
+              assertThat(project.android.testOptions.unitTests.isIncludeAndroidResources)
+                  .isEqualTo(state)
+            }
+          }
+        }
+      }
+
       context("jacoco integration") {
         beforeEachTest { testProjectBuilder.applyJacocoPlugin() }
 

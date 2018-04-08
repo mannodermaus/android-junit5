@@ -283,6 +283,82 @@ class FunctionalSpec extends Specification {
     result.output.contains("KotlinAdderTest")
   }
 
+  def "Returns default values successfully"() {
+    given:
+    androidPlugin()
+    junit5Plugin("""
+      unitTests {
+        returnDefaultValues = true
+      }
+    """)
+    test(language: FileLanguage.Java,
+        content: """
+        package de.mannodermaus.app;
+
+        import static org.junit.jupiter.api.Assertions.assertNull;
+
+        import org.junit.jupiter.api.Test;
+        import android.content.Intent;
+
+        class AndroidTest {
+          @Test
+          void test() {
+            Intent intent = new Intent();
+            assertNull(intent.getAction());
+          }
+        }
+      """)
+    GradleRunner runner = runGradle()
+
+    when:
+    BuildResult result = runner
+        .withArguments("junitPlatformTestDebug")
+        .build()
+
+    then:
+    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+    result.output.contains("1 tests successful")
+    result.output.contains("AndroidTest")
+  }
+
+  def "Includes Android resources successfully"() {
+    given:
+    androidPlugin()
+    junit5Plugin("""
+        unitTests {
+          includeAndroidResources = true
+        }
+      """)
+    test(language: FileLanguage.Java,
+        content: """
+          package de.mannodermaus.app;
+
+          import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+          import org.junit.jupiter.api.Test;
+          import java.io.InputStream;
+
+          class AndroidTest {
+            @Test
+            void test() {
+              InputStream is = getClass().getResourceAsStream("/com/android/tools/test_config.properties");
+              assertNotNull(is);
+            }
+          }
+        """)
+    GradleRunner runner = runGradle()
+
+    when:
+    BuildResult result = runner
+        .withArguments("junitPlatformTestDebug")
+        .build()
+
+    then:
+    result.task(":junitPlatformTestDebug").outcome == TaskOutcome.SUCCESS
+    result.output.contains("1 tests successful")
+    result.output.contains("AndroidTest")
+  }
+
   /*
    * ===============================================================================================
    * Helpers, Factories & Utilities
@@ -357,13 +433,14 @@ class FunctionalSpec extends Specification {
     """
   }
 
-  protected final def junit5Plugin() {
+  protected final def junit5Plugin(String extraConfig = "") {
     buildFile << """
       apply plugin: "de.mannodermaus.android-junit5"
 
       android.testOptions {
         junitPlatform {
           details "flat"
+          $extraConfig
         }
       }
 

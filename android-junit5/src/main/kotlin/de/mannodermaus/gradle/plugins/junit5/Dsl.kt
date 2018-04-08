@@ -43,6 +43,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * The version of JUnit Platform to use
    */
   var platformVersion: String? = null
+
   fun platformVersion(version: String?) {
     this.platformVersion = version
   }
@@ -51,6 +52,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * The version of JUnit Jupiter to use
    */
   var jupiterVersion: String? = null
+
   fun jupiterVersion(version: String?) {
     this.jupiterVersion = version
   }
@@ -59,6 +61,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * The version of JUnit Vintage to use
    */
   var vintageVersion: String? = null
+
   fun vintageVersion(version: String?) {
     this.vintageVersion = version
   }
@@ -67,6 +70,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * The directory for the test report files
    */
   var reportsDir: File? = null
+
   fun reportsDir(reportsDir: File?) {
     // Work around for https://discuss.gradle.org/t/bug-in-project-file-on-windows/19917
     if (reportsDir is File) {
@@ -82,6 +86,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * system property to this value
    */
   var logManager: String? = null
+
   fun logManager(logManager: String?) {
     this.logManager = logManager
   }
@@ -90,6 +95,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * Whether or not the standard Gradle {@code test} task should be enabled
    */
   var enableStandardTestTask = false
+
   fun enableStandardTestTask(state: Boolean) {
     this.enableStandardTestTask = state
   }
@@ -98,6 +104,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * Select test execution plan details mode
    */
   var details = Details.NONE
+
   fun details(details: Details) {
     this.details = details
   }
@@ -157,7 +164,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    *
    * @since 1.0.23
    */
-  val unitTests = UnitTestOptions()
+  val unitTests = UnitTestOptions(project)
 
   /**
    * Configures unit test options
@@ -462,7 +469,7 @@ open class IncludeExcludeContainer {
 /**
  * Options for controlling how JUnit 5 Unit Tests should be executed
  */
-class UnitTestOptions {
+class UnitTestOptions(private val project: Project) {
 
   operator fun invoke(config: UnitTestOptions.() -> Unit) {
     this.config()
@@ -482,9 +489,57 @@ class UnitTestOptions {
    * - environment variables
    */
   var applyDefaultTestOptions = true
+
   fun applyDefaultTestOptions(state: Boolean) {
     this.applyDefaultTestOptions = state
   }
+
+  /**
+   * Whether unmocked methods from android.jar should throw exceptions or return default
+   * values (i.e. zero or null).
+   *
+   * Defaults to false, which will throw exceptions on unmocked method invocations
+   *
+   * @since 1.0.32
+   */
+  var returnDefaultValues: Boolean
+    get() = project.android.testOptions.unitTests.isReturnDefaultValues
+    set(value) {
+      project.android.testOptions.unitTests.isReturnDefaultValues = value
+    }
+
+  /**
+   * Enables unit tests to use Android resources, assets, and manifests.
+   * <p>
+   * If you enable this setting, the Android Gradle Plugin performs resource, asset,
+   * and manifest merging before running your unit tests. Your tests can then inspect a file
+   * called {@code com/android/tools/test_config.properties} on the classpath, which is a Java
+   * properties file with the following keys:
+   *
+   * <ul>
+   *   <li><code>android_sdk_home</code>: the absolute path to the Android SDK.
+   *   <li><code>android_merged_resources</code>: the absolute path to the merged resources
+   *       directory, which contains all the resources from this subproject and all its
+   *       dependencies.
+   *   <li><code>android_merged_assets</code>: the absolute path to the merged assets
+   *       directory. For app subprojects, the merged assets directory contains assets from
+   *       this subproject and its dependencies. For library subprojects, the merged assets
+   *       directory contains only the assets from this subproject.
+   *   <li><code>android_merged_manifest</code>: the absolute path to the merged manifest
+   *       file. Only app subprojects merge manifests of its dependencies. So, library
+   *       subprojects won't include manifest components from their dependencies.
+   *   <li><code>android_custom_package</code>: the package name of the final R class. If you
+   *       modify the application ID in your build scripts, this package name may not match
+   *       the <code>package</code> attribute in the final app manifest.
+   * </ul>
+   *
+   * @since 1.0.32
+   */
+  var includeAndroidResources: Boolean
+    get() = project.android.testOptions.unitTests.isIncludeAndroidResources
+    set(value) {
+      project.android.testOptions.unitTests.isIncludeAndroidResources = value
+    }
 
   /**
    * Applies the provided config closure to all JUnit 5 test tasks,
@@ -535,6 +590,7 @@ class InstrumentationTestOptions {
    * Whether or not to enable support for JUnit 5 instrumentation tests
    */
   var enabled: Boolean = true
+
   fun enabled(state: Boolean) {
     this.enabled = state
   }
@@ -543,6 +599,7 @@ class InstrumentationTestOptions {
    * The version of the instrumentation companion library to use
    */
   var version: String? = null
+
   fun version(version: String?) {
     this.version = version
   }
@@ -562,6 +619,7 @@ class JacocoOptions {
    * Whether or not to enable Jacoco task integration
    */
   var taskGenerationEnabled = true
+
   fun taskGenerationEnabled(state: Boolean) {
     this.taskGenerationEnabled = state
   }
@@ -620,6 +678,7 @@ class JacocoOptions {
    * By default, this will exclude R.class & BuildConfig.class
    */
   var excludedClasses = mutableListOf("**/R.class", "**/R$*.class", "**/BuildConfig.*")
+
   fun excludedClasses(vararg classes: String) = excludedClasses.addAll(classes)
 
   /**
@@ -627,6 +686,7 @@ class JacocoOptions {
    * By default, this is an empty list
    */
   var excludedSources = mutableListOf<String>()
+
   fun excludedSources(vararg sources: String) = excludedSources.addAll(sources)
 
   class Report {
@@ -639,6 +699,7 @@ class JacocoOptions {
      * Whether or not this report should be generated
      */
     var enabled: Boolean = true
+
     fun enabled(state: Boolean) {
       this.enabled = state
     }
@@ -649,6 +710,7 @@ class JacocoOptions {
      * each variant will be assigned a distinct folder if necessary
      */
     var destination: File? = null
+
     fun destination(file: File?) {
       this.destination = file
     }
