@@ -16,7 +16,6 @@ import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.file.IdentityFileResolver
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.InputFiles
@@ -39,6 +38,12 @@ private const val VERIFICATION_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
 
   companion object {
+    fun find(project: Project, variant: BaseVariant): AndroidJUnit5UnitTest {
+      return project.tasks.getByName(
+          variant.variantData.scope.getTaskName(TASK_NAME_DEFAULT))
+          as AndroidJUnit5UnitTest
+    }
+
     fun create(
         project: Project,
         variant: BaseVariant,

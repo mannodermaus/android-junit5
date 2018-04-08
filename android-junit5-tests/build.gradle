@@ -46,9 +46,12 @@ processTestResources {
   }
 }
 
-test.testLogging {
-  events "passed", "skipped", "failed"
-  exceptionFormat = "full"
+test {
+  failFast = true
+  testLogging {
+    events "passed", "skipped", "failed"
+    exceptionFormat = "full"
+  }
 }
 
 junitPlatform {

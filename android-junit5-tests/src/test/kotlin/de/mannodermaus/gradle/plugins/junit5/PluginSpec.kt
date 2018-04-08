@@ -455,6 +455,32 @@ class PluginSpec : Spek({
         }
       }
 
+      context("unitTests.returnDefaultValues") {
+        val project by memoized { testProjectBuilder.build() }
+
+        listOf(true, false).forEach { state ->
+          on("set to $state") {
+            project.android.testOptions.junitPlatform.unitTests {
+              returnDefaultValues = state
+            }
+
+            project.evaluate()
+
+            it("generates a mockable android.jar with the correct suffix") {
+              val variant = ProjectConfig(project).unitTestVariants.first()
+              val file = variant.variantData.scope.globalScope.mockableAndroidJarFile
+              val assertion = assertThat(file.name)
+
+              if (state) {
+                assertion.contains("default-values")
+              } else {
+                assertion.doesNotContain("default-values")
+              }
+            }
+          }
+        }
+      }
+
       context("jacoco integration") {
         beforeEachTest { testProjectBuilder.applyJacocoPlugin() }
 

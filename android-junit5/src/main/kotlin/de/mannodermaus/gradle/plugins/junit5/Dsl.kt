@@ -164,7 +164,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    *
    * @since 1.0.23
    */
-  val unitTests = UnitTestOptions()
+  val unitTests = UnitTestOptions(project)
 
   /**
    * Configures unit test options
@@ -469,7 +469,7 @@ open class IncludeExcludeContainer {
 /**
  * Options for controlling how JUnit 5 Unit Tests should be executed
  */
-class UnitTestOptions {
+class UnitTestOptions(private val project: Project) {
 
   operator fun invoke(config: UnitTestOptions.() -> Unit) {
     this.config()
@@ -499,8 +499,13 @@ class UnitTestOptions {
    * values (i.e. zero or null).
    *
    * Defaults to false, which will throw exceptions on unmocked method invocations
+   *
+   * @since 1.0.32
    */
-  var returnDefaultValues = false
+  var returnDefaultValues: Boolean = false
+    set(value) {
+      project.android.testOptions.unitTests.isReturnDefaultValues = value
+    }
 
   /**
    * Enables unit tests to use Android resources, assets, and manifests.
@@ -526,8 +531,13 @@ class UnitTestOptions {
    *       modify the application ID in your build scripts, this package name may not match
    *       the <code>package</code> attribute in the final app manifest.
    * </ul>
+   *
+   * @since 1.0.32
    */
-  var includeAndroidResources = false
+  var includeAndroidResources: Boolean = false
+    set(value) {
+      project.android.testOptions.unitTests.isIncludeAndroidResources = value
+    }
 
   /**
    * Applies the provided config closure to all JUnit 5 test tasks,

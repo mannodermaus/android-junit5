@@ -40,9 +40,11 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
     project.configureExtensions()
     project.configureDependencies()
+
     project.afterEvaluate {
-      it.configureTasks()
-      it.applyConfigurationParameters()
+      it.configureTestTasks()
+      it.configureJacocoTasks()
+      it.applyEvaluatedConfiguration()
     }
   }
 
@@ -80,27 +82,30 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
   }
 
-  private fun Project.configureTasks() {
-    // Add the test task to each of the project's unit test variants,
-    // and connect a Code Coverage report to it if Jacoco is enabled.
-    val testVariants = projectConfig.unitTestVariants
-    val isJacocoApplied = projectConfig.jacocoPluginApplied
-
-    testVariants.all { variant ->
+  private fun Project.configureTestTasks() {
+    // Add the test task to each of the project's unit test variants
+    projectConfig.unitTestVariants.all { variant ->
       val directoryProviders = collectDirectoryProviders(variant)
+      AndroidJUnit5UnitTest.create(this, variant, directoryProviders)
+    }
+  }
 
-      // Create JUnit 5 test task
-      val testTask = AndroidJUnit5UnitTest.create(this, variant, directoryProviders)
+  /* After evaluate */
 
-      if (isJacocoApplied) {
-        val jacocoOptions = this.android.testOptions.junitPlatform.jacocoOptions
+  private fun Project.configureJacocoTasks() {
+    // Connect a Code Coverage report to it if Jacoco is enabled.
+    val isJacocoApplied = projectConfig.jacocoPluginApplied
+    val jacocoOptions = this.android.testOptions.junitPlatform.jacocoOptions
 
-        if (jacocoOptions.taskGenerationEnabled) {
-          // Create a Jacoco friend task
-          val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
-          if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
-            AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
-          }
+    if (isJacocoApplied && jacocoOptions.taskGenerationEnabled) {
+      projectConfig.unitTestVariants.all { variant ->
+        val directoryProviders = collectDirectoryProviders(variant)
+        val testTask = AndroidJUnit5UnitTest.find(project, variant)
+
+        // Create a Jacoco friend task
+        val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
+        if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
+          AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
         }
       }
     }
@@ -121,7 +126,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     return providers
   }
 
-  private fun Project.applyConfigurationParameters() {
+  private fun Project.applyEvaluatedConfiguration() {
     // Verify that the JUnit 5 RunnerBuilder wasn't overwritten by user code,
     // and if so, throw an exception
     val actualRunnerBuilder = android.defaultConfig.testInstrumentationRunnerArguments[RUNNER_BUILDER_ARG]!!
