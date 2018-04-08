@@ -466,6 +466,11 @@ class PluginSpec : Spek({
 
             project.evaluate()
 
+            it("configures the AGP setting correctly") {
+              assertThat(project.android.testOptions.unitTests.isReturnDefaultValues)
+                  .isEqualTo(state)
+            }
+
             it("generates a mockable android.jar with the correct suffix") {
               val variant = ProjectConfig(project).unitTestVariants.first()
               val file = variant.variantData.scope.globalScope.mockableAndroidJarFile
@@ -476,6 +481,25 @@ class PluginSpec : Spek({
               } else {
                 assertion.doesNotContain("default-values")
               }
+            }
+          }
+        }
+      }
+
+      context("unitTests.includeAndroidResources") {
+        val project by memoized { testProjectBuilder.build() }
+
+        listOf(true, false).forEach { state ->
+          on("set to $state") {
+            project.android.testOptions.junitPlatform.unitTests {
+              includeAndroidResources = state
+            }
+
+            project.evaluate()
+
+            it("configures the AGP setting correctly") {
+              assertThat(project.android.testOptions.unitTests.isIncludeAndroidResources)
+                  .isEqualTo(state)
             }
           }
         }
