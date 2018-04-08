@@ -575,6 +575,14 @@ class UnitTestOptions(private val project: Project) {
   fun applyConfiguration(task: JUnit5UnitTest) {
     this.testTasks.add(task)
   }
+
+  /**
+   * Enables unit tests to use Android resources, assets, and manifests
+   */
+  var includeAndroidResources = false
+  fun includeAndroidResources(state: Boolean) {
+    this.includeAndroidResources = state
+  }
 }
 
 /**
