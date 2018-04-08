@@ -16,8 +16,10 @@ import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.file.IdentityFileResolver
 import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
@@ -64,6 +66,12 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
   @InputFiles
   @Optional
   var assetsCollection: Set<File>? = null
+
+  @Input
+  var sdkPlatformDirPath: String? = null
+
+  @InputFiles
+  var mergedManifest: FileCollection? = null
 
   override val isRunAllTask = false
 
@@ -137,7 +145,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       defaultJUnit5Task.dependsOn(task)
 
       // Apply additional user configuration
-      project.android.testOptions.junitPlatform.unitTests.applyConfiguration(task)
+      junit5.unitTests.applyConfiguration(task)
     }
 
     /* Private */
@@ -190,6 +198,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       val variantUnitTestTask = this.getDefaultJUnit4Task()
       task.resCollection = variantUnitTestTask.resCollection?.files
       task.assetsCollection = variantUnitTestTask.safeAssetsCollection
+      task.sdkPlatformDirPath = variantUnitTestTask.sdkPlatformDirPath
+      task.mergedManifest = variantUnitTestTask.mergedManifest
 
       variantUnitTestTask.enabled = junit5.enableStandardTestTask
       variantUnitTestTask.dependsOn(task)
