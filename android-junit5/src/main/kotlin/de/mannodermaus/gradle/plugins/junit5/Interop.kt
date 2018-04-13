@@ -23,6 +23,9 @@ val VariantScope.safeJavaOutputDirs: Set<File>
 val AndroidUnitTest.safeAssetsCollection: Set<File>?
   get() = GroovyInterop.androidUnitTest_assetsCollection(this)
 
+val AndroidUnitTest.safeMergedManifest: Set<File>?
+  get() = GroovyInterop.androidUnitTest_mergedManifest(this)
+
 /* Types */
 
 class VariantTypeCompat {

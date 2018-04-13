@@ -12,11 +12,11 @@ import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
 import de.mannodermaus.gradle.plugins.junit5.safeAssetsCollection
+import de.mannodermaus.gradle.plugins.junit5.safeMergedManifest
 import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.file.IdentityFileResolver
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Input
@@ -71,7 +71,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
   var sdkPlatformDirPath: String? = null
 
   @InputFiles
-  var mergedManifest: FileCollection? = null
+  var mergedManifest: Set<File>? = null
 
   override val isRunAllTask = false
 
@@ -199,7 +199,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       task.resCollection = variantUnitTestTask.resCollection?.files
       task.assetsCollection = variantUnitTestTask.safeAssetsCollection
       task.sdkPlatformDirPath = variantUnitTestTask.sdkPlatformDirPath
-      task.mergedManifest = variantUnitTestTask.mergedManifest
+      task.mergedManifest = variantUnitTestTask.safeMergedManifest
 
       variantUnitTestTask.enabled = junit5.enableStandardTestTask
       variantUnitTestTask.dependsOn(task)
