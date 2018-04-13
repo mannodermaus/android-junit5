@@ -192,8 +192,8 @@ class FunctionalSpec extends Specification {
   def "Executes Kotlin tests in flavor-specific source set"() {
     given:
     androidPlugin(flavorNames: ["free"])
-    kotlinPlugin()
     junit5Plugin()
+    kotlinPlugin()
     javaFile()
     kotlinTest()
     kotlinTest("free", null)

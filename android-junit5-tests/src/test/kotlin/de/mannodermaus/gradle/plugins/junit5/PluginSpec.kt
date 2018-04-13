@@ -6,8 +6,11 @@ import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.find
+import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
+import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils.argument
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
@@ -500,6 +503,35 @@ class PluginSpec : Spek({
             it("configures the AGP setting correctly") {
               assertThat(project.android.testOptions.unitTests.isIncludeAndroidResources)
                   .isEqualTo(state)
+            }
+          }
+        }
+      }
+
+      context("Test directory detection") {
+        // The order of applying the Kotlin plugin shoudln't interfere
+        // with the detection of its source directories
+        // https://github.com/mannodermaus/android-junit5/issues/72
+        beforeEachTest { testProjectBuilder.applyKotlinPlugin() }
+
+        listOf("debug", "release").forEach { buildType ->
+
+          on("assembling the $buildType task") {
+            val project = testProjectBuilder.buildAndEvaluate()
+            val projectConfig = ProjectConfig(project)
+            val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTest${buildType.capitalize()}")
+            val folders = argument(task, "--scan-class-path")?.split(":") ?: listOf()
+
+            val variant = projectConfig.unitTestVariants.find { it.name == buildType }
+            require(variant != null)
+
+            listOf(
+                JavaDirectoryProvider(variant!!),
+                KotlinDirectoryProvider(project, variant)).forEach { provider ->
+
+              it(" all class folders for the ${provider.javaClass.simpleName}") {
+                assertThat(folders).containsAll(provider.classDirectories().map { it.absolutePath })
+              }
             }
           }
         }
