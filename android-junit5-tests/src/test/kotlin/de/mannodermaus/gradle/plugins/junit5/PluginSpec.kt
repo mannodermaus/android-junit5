@@ -508,10 +508,10 @@ class PluginSpec : Spek({
         }
       }
 
-      context("Test directory detection") {
-        // The order of applying the Kotlin plugin shoudln't interfere
+      context("test folder detection") {
+        // The order of applying the Kotlin plugin shouldn't interfere
         // with the detection of its source directories
-        // https://github.com/mannodermaus/android-junit5/issues/72
+        // (https://github.com/mannodermaus/android-junit5/issues/72)
         beforeEachTest { testProjectBuilder.applyKotlinPlugin() }
 
         listOf("debug", "release").forEach { buildType ->
@@ -529,7 +529,7 @@ class PluginSpec : Spek({
                 JavaDirectoryProvider(variant!!),
                 KotlinDirectoryProvider(project, variant)).forEach { provider ->
 
-              it(" all class folders for the ${provider.javaClass.simpleName}") {
+              it("contains all class folders of the ${provider.javaClass.simpleName}") {
                 assertThat(folders).containsAll(provider.classDirectories().map { it.absolutePath })
               }
             }
