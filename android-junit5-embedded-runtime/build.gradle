@@ -28,7 +28,7 @@ dependencies {
 shadowJar {
   // Remove '-all' suffix from the generated JAR
   classifier = null
-  version = PLUGIN_RUNTIME_VERSION_NAME
+  version = RUNTIME_VERSION_NAME
 }
 
 // Replace the default JAR task with the "shadow version",
@@ -46,7 +46,7 @@ jar.dependsOn shadowJar
 project.ext.deployConfig = [platform       : "java",
                             groupId        : RUNTIME_GROUP_ID,
                             artifactId     : RUNTIME_ARTIFACT_ID,
-                            version        : PLUGIN_RUNTIME_VERSION_NAME,
+                            version        : RUNTIME_VERSION_NAME,
                             license        : LICENSE_NAME,
                             description    : RUNTIME_DESCRIPTION,
                             doBeforePublish: {
