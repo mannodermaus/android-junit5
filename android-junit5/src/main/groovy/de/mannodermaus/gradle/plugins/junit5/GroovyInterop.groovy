@@ -98,6 +98,19 @@ class GroovyInterop {
   }
 
   /**
+   * Obtains the Merged Manifest of the given AndroidUnitTest.
+   *
+   * @because 'mergedManifest' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha07
+   * @param test The Android JUnit 4 test to access
+   * @return Its merged manifest
+   */
+  @Nullable
+  static Set<File> androidUnitTest_mergedManifest(AndroidUnitTest test) {
+    def collection = test.mergedManifest
+    return collection == null ? null : collection.files
+  }
+
+  /**
    * Obtains the task name prefix for Unit Test variants.
    *
    * @because In Android Gradle Plugin 3.2.0-alpha06, the underlying constants on VariantType were renamed
