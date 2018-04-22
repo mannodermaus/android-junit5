@@ -48,12 +48,13 @@ gradlePlugin {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
-  def tokens = [ANDROID_JUNIT5_VERSION      : PLUGIN_RUNTIME_VERSION_NAME,
-                JUNIT4_VERSION              : JUNIT4_VERSION,
-                INSTRUMENTATION_TEST_VERSION: INSTRUMENTATION_VERSION_NAME_LATEST_STABLE,
-                JUNIT_PLATFORM_VERSION      : JUNIT_PLATFORM_VERSION,
-                JUNIT_JUPITER_VERSION       : JUNIT_JUPITER_VERSION,
-                JUNIT_VINTAGE_VERSION       : JUNIT_VINTAGE_VERSION]
+  def tokens = [ANDROID_JUNIT5_VERSION        : PLUGIN_VERSION_NAME,
+                ANDROID_JUNIT5_RUNTIME_VERSION: RUNTIME_VERSION_NAME,
+                JUNIT4_VERSION                : JUNIT4_VERSION,
+                INSTRUMENTATION_TEST_VERSION  : INSTRUMENTATION_VERSION_NAME_LATEST_STABLE,
+                JUNIT_PLATFORM_VERSION        : JUNIT_PLATFORM_VERSION,
+                JUNIT_JUPITER_VERSION         : JUNIT_JUPITER_VERSION,
+                JUNIT_VINTAGE_VERSION         : JUNIT_VINTAGE_VERSION]
 
   inputs.properties(tokens)
 
@@ -100,7 +101,7 @@ dependencies {
 project.ext.deployConfig = [platform   : "java",
                             groupId    : PLUGIN_GROUP_ID,
                             artifactId : PLUGIN_ARTIFACT_ID,
-                            version    : PLUGIN_RUNTIME_VERSION_NAME,
+                            version    : PLUGIN_VERSION_NAME,
                             license    : LICENSE_NAME,
                             description: PLUGIN_DESCRIPTION]
 apply from: "$rootDir/gradle/deployment.gradle"

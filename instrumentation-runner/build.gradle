@@ -9,7 +9,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:$PLUGIN_RUNTIME_VERSION_NAME_LATEST_STABLE"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:$PLUGIN_VERSION_NAME_LATEST_STABLE"
   }
 }
 
