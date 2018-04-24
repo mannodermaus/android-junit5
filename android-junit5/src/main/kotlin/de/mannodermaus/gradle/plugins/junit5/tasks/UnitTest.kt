@@ -13,6 +13,7 @@ import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.classDirectories
 import de.mannodermaus.gradle.plugins.junit5.safeAssetsCollection
 import de.mannodermaus.gradle.plugins.junit5.safeMergedManifest
+import de.mannodermaus.gradle.plugins.junit5.safeResCollection
 import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -196,7 +197,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
         junit5: AndroidJUnitPlatformExtension) {
       // Connect to the default unit test task
       val variantUnitTestTask = this.getDefaultJUnit4Task()
-      task.resCollection = variantUnitTestTask.resCollection?.files
+      task.resCollection = variantUnitTestTask.safeResCollection
       task.assetsCollection = variantUnitTestTask.safeAssetsCollection
       task.sdkPlatformDirPath = variantUnitTestTask.sdkPlatformDirPath
       task.mergedManifest = variantUnitTestTask.safeMergedManifest

@@ -98,6 +98,19 @@ class GroovyInterop {
   }
 
   /**
+   * Obtains the Res Collection of the given AndroidUnitTest.
+   *
+   * @because 'resCollection' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha11
+   * @param test The Android JUnit 4 test to access
+   * @return Its assets collection
+   */
+  @Nullable
+  static Set<File> androidUnitTest_resCollection(AndroidUnitTest test) {
+    def collection = test.resCollection
+    return collection == null ? null : collection.files
+  }
+
+  /**
    * Obtains the Merged Manifest of the given AndroidUnitTest.
    *
    * @because 'mergedManifest' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha07
