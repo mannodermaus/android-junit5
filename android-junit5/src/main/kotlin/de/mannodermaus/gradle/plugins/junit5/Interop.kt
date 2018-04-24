@@ -20,6 +20,9 @@ val BaseVariant.variantData: BaseVariantData
 val VariantScope.safeJavaOutputDirs: Set<File>
   get() = GroovyInterop.variantScope_javaOutputDirs(this)
 
+val AndroidUnitTest.safeResCollection: Set<File>?
+  get() = GroovyInterop.androidUnitTest_resCollection(this)
+
 val AndroidUnitTest.safeAssetsCollection: Set<File>?
   get() = GroovyInterop.androidUnitTest_assetsCollection(this)
 
