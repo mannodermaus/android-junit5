@@ -412,6 +412,11 @@ class FunctionalSpec extends Specification {
       // can't be resolved within the offline-only virtual project execution
       lint.enabled false
 
+      // Required by AAPT2 
+      repositories {
+        google()
+      }
+
       dependencies {
         testImplementation files(${
       ClasspathSplitter.splitClasspath(testCompileClasspath)

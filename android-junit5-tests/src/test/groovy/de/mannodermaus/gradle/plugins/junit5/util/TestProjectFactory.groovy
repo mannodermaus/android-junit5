@@ -118,16 +118,16 @@ class TestProjectFactory {
           break
       }
 
-      if (applyJunit5Plugin) {
-        project.apply plugin: "de.mannodermaus.android-junit5"
-      }
-
       if (applyJacocoPlugin) {
         project.apply plugin: "jacoco"
       }
 
       if (applyKotlinPlugin) {
         project.apply plugin: "kotlin-android"
+      }
+
+      if (applyJunit5Plugin) {
+        project.apply plugin: "de.mannodermaus.android-junit5"
       }
 
       // Default configuration
