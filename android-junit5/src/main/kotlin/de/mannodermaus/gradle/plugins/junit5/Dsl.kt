@@ -681,14 +681,6 @@ class JacocoOptions {
 
   fun excludedClasses(vararg classes: String) = excludedClasses.addAll(classes)
 
-  /**
-   * List of source name patterns that should be excluded from being processed by Jacoco.
-   * By default, this is an empty list
-   */
-  var excludedSources = mutableListOf<String>()
-
-  fun excludedSources(vararg sources: String) = excludedSources.addAll(sources)
-
   class Report {
 
     operator fun invoke(config: Report.() -> Unit) {

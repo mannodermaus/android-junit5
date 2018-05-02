@@ -43,6 +43,10 @@ fun assertAll(vararg assertions: () -> Unit) {
   Assertions.assertAll(*assertions.map { Executable { it() } }.toTypedArray())
 }
 
+fun assertAll(heading: String, vararg assertions: () -> Unit) {
+  Assertions.assertAll(heading, *assertions.map { Executable { it() } }.toTypedArray())
+}
+
 /* Extensions */
 
 fun Project.evaluate() {
