@@ -76,8 +76,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       // using the sum of all DirectoryProviders' outputs as a foundation:
       reportTask.classDirectories = directoryProviders.mainClassDirectories()
           .toFileCollectionExcluding(junit5Jacoco.excludedClasses)
-      reportTask.sourceDirectories = directoryProviders.mainSourceDirectories()
-          .toFileCollectionExcluding(junit5Jacoco.excludedSources)
+      reportTask.sourceDirectories = project.files(directoryProviders.mainSourceDirectories())
 
       project.logger.junit5Info(
           "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")

@@ -724,7 +724,6 @@ class PluginSpec : Spek({
               project.android.testOptions.junitPlatform {
                 jacocoOptions {
                   excludedClasses.add("Second*.class")
-                  excludedSources.add("AnnoyingFile.java")
                 }
               }
 
@@ -765,42 +764,6 @@ class PluginSpec : Spek({
                         "R.class",
                         "FirstFile.class",
                         "SecondFile.class")
-              }
-
-              it("honors the debug source exclusion rules") {
-                // Should be included:
-                //  * OkFile.java
-                // Should be excluded:
-                //  * AnnoyingFile.java (through rule)
-                //  * ReleaseOnlyFile.java (other source set)
-                val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(
-                    "jacocoTestReportDebug")
-                    .sourceDirectories.asFileTree.files
-                    .map { it.name }
-
-                assertThat(fileNames)
-                    .contains("OkFile.java")
-                    .doesNotContain(
-                        "AnnoyingFile.java",
-                        "ReleaseOnlyFile.java")
-              }
-
-              it("honors the release source exclusion rules") {
-                // Should be included:
-                //  * OkFile.java
-                //  * ReleaseOnly.java
-                // Should be excluded:
-                //  * AnnoyingFile.java (through rule)
-                val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(
-                    "jacocoTestReportRelease")
-                    .sourceDirectories.asFileTree.files
-                    .map { it.name }
-
-                assertThat(fileNames)
-                    .contains(
-                        "OkFile.java",
-                        "ReleaseOnlyFile.java")
-                    .doesNotContain("AnnoyingFile.java")
               }
             }
 
