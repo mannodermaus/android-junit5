@@ -519,7 +519,8 @@ class PluginSpec : Spek({
           on("assembling the $buildType task") {
             val project = testProjectBuilder.buildAndEvaluate()
             val projectConfig = ProjectConfig(project)
-            val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTest${buildType.capitalize()}")
+            val task = project.tasks.get<AndroidJUnit5UnitTest>(
+                "junitPlatformTest${buildType.capitalize()}")
             val folders = argument(task, "--scan-class-path")?.split(":") ?: listOf()
 
             val variant = projectConfig.unitTestVariants.find { it.name == buildType }
@@ -556,6 +557,22 @@ class PluginSpec : Spek({
                   .contains("jacocoTestReport${buildType.capitalize()}")
             }
 
+            it("includes Main-scoped source dirs for the $buildType build type") {
+              // Expected items: "src/main/java" & "src/<TypeName>/java"
+              val sourceDirs = project.tasks.get<AndroidJUnit5JacocoReport>(
+                  "jacocoTestReport${buildType.capitalize()}")
+                  .sourceDirectories
+                  .map { it.absolutePath }
+
+              val mainDir = sourceDirs.find { it.endsWith("src/main/java") }
+              val typeDir = sourceDirs.find { it.endsWith("src/$buildType/java") }
+              assertAll(
+                  "Mismatch! Actual dirs: $sourceDirs",
+                  { assertThat(mainDir).withFailMessage("main").isNotNull() },
+                  { assertThat(typeDir).withFailMessage(buildType).isNotNull() }
+              )
+            }
+
             it("doesn't include Test-scoped source dirs for the $buildType build type") {
               // Expected omissions: "src/test/java" & "src/test<TypeName>/java"
               val sourceDirs = project.tasks.get<AndroidJUnit5JacocoReport>(
@@ -563,6 +580,7 @@ class PluginSpec : Spek({
                   .sourceDirectories.asPath
 
               assertAll(
+                  "Mismatch! Actual dirs: $sourceDirs",
                   { assertThat(sourceDirs).doesNotContain("src/test/java") },
                   {
                     assertThat(sourceDirs).doesNotContain("src/test${buildType.capitalize()}/java")
