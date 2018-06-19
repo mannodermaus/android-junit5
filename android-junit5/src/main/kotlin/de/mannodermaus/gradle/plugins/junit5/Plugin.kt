@@ -1,14 +1,15 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
+import com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.append
 import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.internal.loadProperties
-import de.mannodermaus.gradle.plugins.junit5.internal.requireAgp3
 import de.mannodermaus.gradle.plugins.junit5.internal.requireGradle
+import de.mannodermaus.gradle.plugins.junit5.internal.requireVersion
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -31,8 +32,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       "android-junit5 plugin requires Gradle $MIN_REQUIRED_GRADLE_VERSION or later"
     }
 
-    requireAgp3 {
-      "android-junit5 plugin requires Android Gradle Plugin 3.0.0 or later"
+    requireVersion(
+        actual = ANDROID_GRADLE_PLUGIN_VERSION,
+        required = MIN_REQUIRED_AGP_VERSION) {
+      "android-junit5 plugin requires Android Gradle Plugin $MIN_REQUIRED_AGP_VERSION or later"
     }
 
     // Validates that the project's plugins are configured correctly

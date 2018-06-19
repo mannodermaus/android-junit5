@@ -1,6 +1,5 @@
 import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.junit.platform.console.options.Details
 
 apply plugin: "groovy"
 apply plugin: "java-gradle-plugin"
@@ -55,9 +54,12 @@ test {
 }
 
 junitPlatform {
-  details Details.TREE
+  details "tree"
   enableStandardTestTask true
 }
+
+// Enable this line to run slow Functional Tests on the local device as well
+//junitPlatformTest.environment("CI", "true")
 
 dependencies {
   // Test Plugin Dependencies
@@ -74,16 +76,14 @@ dependencies {
   // Test Execution
   testImplementation "junit:junit:$JUNIT4_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
   testImplementation "org.jetbrains.spek:spek-api:$SPEK_VERSION"
   testRuntimeOnly "org.jetbrains.spek:spek-junit-platform-engine:$SPEK_VERSION"
+  testImplementation "org.junit-pioneer:junit-pioneer:$JUNIT_PIONEER_VERSION"
 
   testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
   testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
-
-  testImplementation("org.spockframework:spock-core:$SPOCK_VERSION") {
-    exclude group: "org.codehaus.groovy"
-  }
 
   // Compilation of local classpath for functional tests
   functionalTest "junit:junit:$JUNIT4_VERSION"

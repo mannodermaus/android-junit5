@@ -95,31 +95,6 @@
           <option name="NAME_COUNT_TO_USE_STAR_IMPORT_FOR_MEMBERS" value="999" />
           <option name="IMPORT_NESTED_CLASSES" value="true" />
         </JetCodeStyleSettings>
-        <Objective-C-extensions>
-          <file>
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Import" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Macro" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Typedef" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Enum" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Constant" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Global" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Struct" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="FunctionPredecl" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Function" />
-          </file>
-          <class>
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Property" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Synthesize" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="InitMethod" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="StaticMethod" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="InstanceMethod" />
-            <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="DeallocMethod" />
-          </class>
-          <extensions>
-            <pair source="cpp" header="h" />
-            <pair source="c" header="h" />
-          </extensions>
-        </Objective-C-extensions>
         <Properties>
           <option name="SPACES_AROUND_KEY_VALUE_DELIMITER" value="true" />
           <option name="KEEP_BLANK_LINES" value="true" />

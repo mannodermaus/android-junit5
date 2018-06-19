@@ -4,7 +4,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
-import com.android.builder.model.Version
+import com.github.zafarkhaja.semver.Version
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.APP
 import org.gradle.api.GradleException
@@ -37,10 +37,10 @@ internal fun requireGradle(version: String, message: () -> String) {
   }
 }
 
-internal fun requireAgp3(message: () -> String) {
-  val majorVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION.substringBefore('.').toInt()
-
-  require(majorVersion >= 3) {
+fun requireVersion(actual: String, required: String, message: () -> String) {
+  val actualVersion = Version.valueOf(actual)
+  val requiredVersion = Version.valueOf(required)
+  require(actualVersion.greaterThanOrEqualTo(requiredVersion)) {
     throw GradleException(message())
   }
 }

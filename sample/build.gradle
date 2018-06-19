@@ -56,6 +56,9 @@ android {
   testOptions {
     junitPlatform {
       details "tree"
+      platformVersion "1.2.0"
+      jupiterVersion "5.2.0"
+      vintageVersion "5.2.0"
     }
   }
 

@@ -70,7 +70,9 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
       // Task-level Configuration
       val taskJacoco = testTask.extensionByName<JacocoTaskExtension>("jacoco")
-      reportTask.executionData = project.files(taskJacoco.destinationFile.path)
+      taskJacoco.destinationFile?.let {
+        reportTask.executionData = project.files(it.path)
+      }
 
       // Apply exclusion rules to both class & source directories for Jacoco,
       // using the sum of all DirectoryProviders' outputs as a foundation:
