@@ -81,6 +81,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 
   // Other Dependencies
+  implementation "com.github.zafarkhaja:java-semver:$JAVA_SEMVER_VERSION"
   implementation "com.annimon:stream:$STREAMS_BACKPORT_VERSION"
 
   // JUnit Platform

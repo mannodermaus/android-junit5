@@ -138,8 +138,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
 
       // Build the task arguments
       task.args = buildArgs(junit5, reportsDir, testRootDirs)
-      project.logger.junit5Info("Launcher Arguments: ${task.args.joinToString()}")
-      project.logger.junit5Info("JVM Arguments: ${task.jvmArgs.joinToString()}")
+      project.logger.junit5Info("Launcher Arguments: ${task.args?.joinToString()}")
+      project.logger.junit5Info("JVM Arguments: ${task.jvmArgs?.joinToString()}")
 
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = getDefaultJUnit5Task()

@@ -14,6 +14,12 @@ import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils.argument
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
+import de.mannodermaus.gradle.plugins.junit5.util.assertAll
+import de.mannodermaus.gradle.plugins.junit5.util.evaluate
+import de.mannodermaus.gradle.plugins.junit5.util.get
+import de.mannodermaus.gradle.plugins.junit5.util.getArgument
+import de.mannodermaus.gradle.plugins.junit5.util.throws
+import de.mannodermaus.gradle.plugins.junit5.util.times
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.gradle.api.ProjectConfigurationException
@@ -75,13 +81,13 @@ class PluginSpec : Spek({
 
       it("throws an error") {
         val result = GradleRunner.create()
-            .withGradleVersion("4.2")
+            .withGradleVersion("4.6")
             .withProjectDir(project.projectDir)
             .withArguments("--stacktrace")
             .buildAndFail()
 
         assertThat(result.output)
-            .contains("android-junit5 plugin requires Gradle 4.3 or later")
+            .contains("android-junit5 plugin requires Gradle $MIN_REQUIRED_GRADLE_VERSION or later")
       }
     }
 
@@ -472,18 +478,6 @@ class PluginSpec : Spek({
             it("configures the AGP setting correctly") {
               assertThat(project.android.testOptions.unitTests.isReturnDefaultValues)
                   .isEqualTo(state)
-            }
-
-            it("generates a mockable android.jar with the correct suffix") {
-              val variant = ProjectConfig(project).unitTestVariants.first()
-              val file = variant.variantData.scope.globalScope.mockableAndroidJarFile
-              val assertion = assertThat(file.name)
-
-              if (state) {
-                assertion.contains("default-values")
-              } else {
-                assertion.doesNotContain("default-values")
-              }
             }
           }
         }

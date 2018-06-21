@@ -1,16 +1,18 @@
-package de.mannodermaus.gradle.plugins.junit5
+package de.mannodermaus.gradle.plugins.junit5.util
 
-import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils
+import de.mannodermaus.gradle.plugins.junit5.FunctionalTests
 import org.apache.commons.lang.StringUtils
+import org.assertj.core.api.AbstractAssert
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.function.Executable
 import java.io.File
-import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -47,6 +49,34 @@ fun assertAll(heading: String, vararg assertions: () -> Unit) {
   Assertions.assertAll(heading, *assertions.map { Executable { it() } }.toTypedArray())
 }
 
+fun assertThat(buildResult: BuildResult) = AssertBuildResult(buildResult)
+
+class AssertBuildResult(buildResult: BuildResult) : AbstractAssert<AssertBuildResult, BuildResult>(
+    buildResult, AssertBuildResult::class.java) {
+  fun executedTaskSuccessfully(name: String) {
+    val task = actual.task(name) ?: throw AssertionError("didn't execute task $name")
+    org.assertj.core.api.Assertions.assertThat(task.outcome).isEqualTo(TaskOutcome.SUCCESS)
+  }
+
+  fun hasOutputContaining(substring: String, times: Int = 1) {
+    val actualCount = StringUtils.countMatches(actual.output, substring)
+    org.assertj.core.api.Assertions.assertThat(actualCount)
+        .withFailMessage(
+            "expected substring '$substring' to be contained $times times in output, but it was actually contained $actualCount times")
+        .isEqualTo(times)
+  }
+}
+
+fun loadClassPathManifestResource(name: String): List<File> {
+  val classpathResource = FunctionalTests::class.java.classLoader.getResourceAsStream(name)
+      ?: throw IllegalStateException("Did not find required resource with name $name")
+
+  return classpathResource.bufferedReader()
+      .lineSequence()
+      .map { File(it) }
+      .toList()
+}
+
 /* Extensions */
 
 fun Project.evaluate() {
@@ -62,17 +92,19 @@ fun JavaExec.getArgument(name: String): String? =
 
 fun File.newFile(filePath: String, separator: String = "/"): File {
   val path = Paths.get(this.toString(),
-      *filePath.split(delimiters = *arrayOf(separator)).toTypedArray())
+      *filePath.splitToArray(delimiter = separator))
   path.parent.mkdirs()
   return path.toFile()
 }
 
 fun String.countMatches(sub: String) = StringUtils.countMatches(this, sub)
 
+fun String.splitToArray(delimiter: String = "/"): Array<String> =
+    this.split(delimiter).toTypedArray()
+
 fun Path.mkdirs() = Files.createDirectories(this)
 
-fun Path.writeText(text: String, charset: Charset = Charsets.UTF_8) =
-    this.toFile().writeText(text, charset)
+fun Path.newFile(path: String) = this.resolve(path).toFile()
 
 /* Operators */
 
