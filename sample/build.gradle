@@ -73,7 +73,6 @@ dependencies {
 
   testImplementation junit5.unitTests()
   testImplementation junit5.parameterized()
-  testCompileOnly junit5.unitTestsRuntime()
 
   androidTestImplementation "junit:junit:$JUNIT4_VERSION"
   androidTestImplementation "com.android.support.test:runner:$SUPPORT_TEST_LIBRARY_VERSION"
