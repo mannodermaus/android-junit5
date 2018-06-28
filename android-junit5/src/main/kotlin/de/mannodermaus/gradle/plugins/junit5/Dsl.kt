@@ -457,13 +457,33 @@ open class EnginesExtension : IncludeExcludeContainer() {
 }
 
 open class IncludeExcludeContainer {
-  private val _include = mutableListOf<String>()
-  val include @Input get() = _include.toList()
-  fun include(vararg items: String) = this._include.addAll(items)
+  private val _include = mutableSetOf<String>()
+  val include @Input get() = _include.toSet()
+  fun include(vararg items: String) {
+    this._include.addAll(items)
+    this._exclude.removeAll(items)
+  }
 
-  private val _exclude = mutableListOf<String>()
-  val exclude @Input get() = _exclude.toList()
-  fun exclude(vararg items: String) = this._exclude.addAll(items)
+  private val _exclude = mutableSetOf<String>()
+  val exclude @Input get() = _exclude.toSet()
+  fun exclude(vararg items: String) {
+    this._exclude.addAll(items)
+    this._include.removeAll(items)
+  }
+
+  operator fun plus(other: IncludeExcludeContainer): IncludeExcludeContainer {
+    val result = IncludeExcludeContainer()
+
+    result._include.addAll(this.include)
+    result._include.addAll(other.include)
+    result._include.removeAll(other.exclude)
+
+    result._exclude.addAll(this.exclude)
+    result._exclude.addAll(other.exclude)
+    result._exclude.removeAll(other.include)
+
+    return result
+  }
 }
 
 /**
