@@ -22,7 +22,7 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
   project.android.testOptions
       .extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(project)) { ju5 ->
         // General-purpose filters
-        attachFiltersDsl(ju5)
+        ju5.attachFiltersDsl(qualifier = null)
 
         // Variant-specific filters:
         // This will add filters for build types (e.g. "debug" or "release")
@@ -31,10 +31,10 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
         // requires manual track-keeping, however.
         val addedFlavors = mutableListOf<String>()
         projectConfig.unitTestVariants.whenObjectAdded {variant ->
-          attachFiltersDsl(ju5, variant.name)
+          ju5.attachFiltersDsl(qualifier = variant.name)
 
           if (variant.flavorName !in addedFlavors) {
-            attachFiltersDsl(ju5, variant.flavorName)
+            ju5.attachFiltersDsl(qualifier = variant.flavorName)
             addedFlavors += variant.flavorName
           }
         }
@@ -44,13 +44,13 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
       }
 }
 
-private fun attachFiltersDsl(ju5: AndroidJUnitPlatformExtension, variantName: String? = null) {
-  val extensionName = if (variantName == null)
+private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = null) {
+  val extensionName = if (qualifier == null)
     FILTERS_EXTENSION_NAME
   else
-    "$variantName${FILTERS_EXTENSION_NAME.capitalize()}"
+    "$qualifier${FILTERS_EXTENSION_NAME.capitalize()}"
 
-  ju5.extend<FiltersExtension>(extensionName) { filters ->
+  this.extend<FiltersExtension>(extensionName) { filters ->
     filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
     filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
     filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
