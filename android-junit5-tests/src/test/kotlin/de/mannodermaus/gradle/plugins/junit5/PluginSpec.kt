@@ -995,6 +995,10 @@ class PluginSpec : Spek({
                 include("global-include-engine")
                 exclude("global-exclude-engine")
               }
+              packages {
+                include("com.example.package1")
+                exclude("com.example.package2")
+              }
             }
           }
 
@@ -1007,6 +1011,8 @@ class PluginSpec : Spek({
               assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
               assertThat(task.hasEngineInclude("global-include-engine")).isTrue()
               assertThat(task.hasEngineExclude("global-exclude-engine")).isTrue()
+              assertThat(task.hasPackageInclude("com.example.package1")).isTrue()
+              assertThat(task.hasPackageExclude("com.example.package2")).isTrue()
             }
           }
         }
@@ -1024,10 +1030,17 @@ class PluginSpec : Spek({
                 include("global-include-tag")
                 exclude("global-exclude-tag")
               }
+              packages {
+                include("com.example.package1")
+              }
             }
             filters("paid") {
               engines {
                 include("paid-include-engine")
+              }
+              packages {
+                include("com.example.paid")
+                exclude("com.example.package1")
               }
             }
             filters("freeDebug") {
@@ -1039,6 +1052,9 @@ class PluginSpec : Spek({
               tags {
                 include("paidRelease-include-tag")
                 include("global-exclude-tag")
+              }
+              packages {
+                include("com.example.paid.release")
               }
             }
           }
@@ -1053,6 +1069,10 @@ class PluginSpec : Spek({
             assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
 
             assertThat(task.hasEngineInclude("paid-include-engine")).isFalse()
+
+            assertThat(task.hasPackageInclude("com.example.package1")).isTrue()
+            assertThat(task.hasPackageInclude("com.example.paid")).isFalse()
+            assertThat(task.hasPackageInclude("com.example.paid.release")).isFalse()
           }
 
           it("applies freeRelease configuration correctly") {
@@ -1063,6 +1083,10 @@ class PluginSpec : Spek({
             assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
 
             assertThat(task.hasEngineInclude("paid-include-engine")).isFalse()
+
+            assertThat(task.hasPackageInclude("com.example.package1")).isTrue()
+            assertThat(task.hasPackageInclude("com.example.paid")).isFalse()
+            assertThat(task.hasPackageInclude("com.example.paid.release")).isFalse()
           }
 
           it("applies paidDebug configuration correctly") {
@@ -1073,6 +1097,11 @@ class PluginSpec : Spek({
             assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
 
             assertThat(task.hasEngineInclude("paid-include-engine")).isTrue()
+
+            assertThat(task.hasPackageInclude("com.example.package1")).isFalse()
+            assertThat(task.hasPackageExclude("com.example.package1")).isTrue()
+            assertThat(task.hasPackageInclude("com.example.paid")).isTrue()
+            assertThat(task.hasPackageInclude("com.example.paid.release")).isFalse()
           }
 
           it("applies paidRelease configuration correctly") {
@@ -1084,6 +1113,11 @@ class PluginSpec : Spek({
             assertThat(task.hasTagInclude("paidRelease-include-tag")).isTrue()
 
             assertThat(task.hasEngineInclude("paid-include-engine")).isTrue()
+
+            assertThat(task.hasPackageInclude("com.example.package1")).isFalse()
+            assertThat(task.hasPackageExclude("com.example.package1")).isTrue()
+            assertThat(task.hasPackageInclude("com.example.paid")).isTrue()
+            assertThat(task.hasPackageInclude("com.example.paid.release")).isTrue()
           }
         }
 

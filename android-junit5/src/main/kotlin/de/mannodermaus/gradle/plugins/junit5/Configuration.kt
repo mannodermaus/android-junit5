@@ -82,7 +82,7 @@ private fun findType(project: Project): Type<BaseExtension> {
 }
 
 internal class JUnit5TaskConfig(
-    variant: BaseVariant,
+    private val variant: BaseVariant,
     project: Project) {
 
   private val extension = project.android.testOptions.junitPlatform
@@ -94,13 +94,13 @@ internal class JUnit5TaskConfig(
   // 2) Build-type-specific (e.g. "debug")
   // 3) Flavor-specific (e.g. "free")
   // 4) Variant-specific (e.g. "freeDebug")
-  val combinedTags = extension.filters.tags +
-      extension.findFilters(variant.buildType.name).tags +
-      extension.findFilters(variant.flavorName).tags +
-      extension.findFilters(variant.name).tags
+  private fun collect(collectorFunction: (FiltersExtension) -> IncludeExcludeContainer) =
+      collectorFunction(extension.filters) +
+          collectorFunction(extension.findFilters(variant.buildType.name)) +
+          collectorFunction(extension.findFilters(variant.flavorName)) +
+          collectorFunction(extension.findFilters(variant.name))
 
-  val combinedEngines = extension.filters.engines +
-      extension.findFilters(variant.buildType.name).engines +
-      extension.findFilters(variant.flavorName).engines +
-      extension.findFilters(variant.name).engines
+  val combinedPackages = this.collect { it.packages }
+  val combinedTags = this.collect { it.tags }
+  val combinedEngines = this.collect { it.engines }
 }

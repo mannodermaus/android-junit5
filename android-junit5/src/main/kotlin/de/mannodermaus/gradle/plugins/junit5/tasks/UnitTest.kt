@@ -81,6 +81,12 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
   @Suppress("LeakingThis")
   override val javaForkOptions = this as JavaForkOptions
 
+  /* JUnit5Task */
+
+  override fun hasPackageInclude(name: String) = this.argumentValues("--include-package").any { it == name }
+
+  override fun hasPackageExclude(name: String) = this.argumentValues("--exclude-package").any { it == name }
+
   override fun hasTagInclude(tag: String) = this.argumentValues("-t").any { it == tag }
 
   override fun hasTagExclude(tag: String) = this.argumentValues("-T").any { it == tag }
@@ -272,8 +278,8 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
       // Filters
       junit5.filters.includeClassNamePatterns.forEach { args += arrayOf("-n", it) }
       junit5.filters.excludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
-      junit5.filters.packages.include.forEach { args += arrayOf("--include-package", it) }
-      junit5.filters.packages.exclude.forEach { args += arrayOf("--exclude-package", it) }
+      configuration.combinedPackages.include.forEach { args += arrayOf("--include-package", it) }
+      configuration.combinedPackages.exclude.forEach { args += arrayOf("--exclude-package", it) }
       configuration.combinedTags.include.forEach { args += arrayOf("-t", it) }
       configuration.combinedTags.exclude.forEach { args += arrayOf("-T", it) }
       configuration.combinedEngines.include.forEach { args += arrayOf("-e", it) }

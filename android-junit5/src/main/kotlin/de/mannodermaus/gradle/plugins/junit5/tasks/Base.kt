@@ -15,6 +15,8 @@ import org.gradle.process.ProcessForkOptions
  * not the "Run All" task.
  */
 interface JUnit5Task : Task {
+  fun hasPackageInclude(name: String): Boolean
+  fun hasPackageExclude(name: String): Boolean
   fun hasTagInclude(tag: String): Boolean
   fun hasTagExclude(tag: String): Boolean
   fun hasEngineInclude(name: String): Boolean
