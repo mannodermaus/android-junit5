@@ -6,6 +6,7 @@ import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.github.zafarkhaja.semver.Version
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin
+import de.mannodermaus.gradle.plugins.junit5.JUnit5TaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.APP
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -146,6 +147,9 @@ fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null
  */
 val Project.android: BaseExtension
   get() = this.extensions.getByName("android") as BaseExtension
+
+internal fun Project.createJUnit5ConfigurationFor(variant: BaseVariant) =
+    JUnit5TaskConfig(variant, this)
 
 /**
  * Access the extra properties of a DependencyHandler.

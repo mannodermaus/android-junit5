@@ -27,17 +27,19 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
 
         // Variant-specific filters:
         // This will add filters for build types (e.g. "debug" or "release")
-        // as well as composed variants  (e.g. "freeDebug" or "paidRelease").
-        // Adding filters for flavors (e.g. "free" or "paid")
-        // requires manual track-keeping, however.
-        val addedFlavors = mutableListOf<String>()
-        projectConfig.unitTestVariants.whenObjectAdded { variant ->
-          ju5.attachFiltersDsl(qualifier = variant.name)
+        // as well as composed variants  (e.g. "freeDebug" or "paidRelease")
+        // and product flavors (e.g. "free" or "paid")
+        project.android.buildTypes.all { buildType ->
+          ju5.attachFiltersDsl(qualifier = buildType.name)
+        }
 
-          if (variant.flavorName !in addedFlavors) {
-            ju5.attachFiltersDsl(qualifier = variant.flavorName)
-            addedFlavors += variant.flavorName
-          }
+        projectConfig.unitTestVariants.all { variant ->
+          ju5.attachFiltersDsl(qualifier = variant.name)
+          ju5.attachFiltersDsl(qualifier = variant.buildType.name)
+        }
+
+        project.android.productFlavors.all { flavor ->
+          ju5.attachFiltersDsl(qualifier = flavor.name)
         }
 
         // Selectors for test classes
@@ -49,8 +51,9 @@ internal fun evaluateDsl(project: Project) {
   val ju5 = project.android.testOptions
       .extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
 
-  ju5._filters.forEach { variant, configs ->
-    val extension = ju5.extensionByName<FiltersExtension>(ju5.filtersExtensionName(variant))
+  ju5._filters.forEach { qualifier, configs ->
+    val extensionName = ju5.filtersExtensionName(qualifier)
+    val extension = ju5.extensionByName<FiltersExtension>(extensionName)
     configs.forEach { config ->
       extension.config()
     }
@@ -59,6 +62,10 @@ internal fun evaluateDsl(project: Project) {
 
 private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = null) {
   val extensionName = filtersExtensionName(qualifier)
+
+  if (this.extensionExists(extensionName)) {
+    return
+  }
 
   this.extend<FiltersExtension>(extensionName) { filters ->
     filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
@@ -177,16 +184,16 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
 
   internal val _filters = mutableMapOf<String?, MutableList<FiltersExtension.() -> Unit>>()
 
-  internal fun filtersExtensionName(variant: String? = null) = if (variant == null)
+  internal fun filtersExtensionName(qualifier: String? = null) = if (qualifier.isNullOrEmpty())
     FILTERS_EXTENSION_NAME
   else
-    "$variant${FILTERS_EXTENSION_NAME.capitalize()}"
+    "$qualifier${FILTERS_EXTENSION_NAME.capitalize()}"
 
   /**
    * Return the {@link FiltersExtension}
    * for all executed tests, applied to all variants
    */
-  val filters: FiltersExtension get() = filters(variant = null)
+  val filters: FiltersExtension get() = findFilters(qualifier = null)
 
   /**
    * Configure the {@link FiltersExtension}
@@ -208,14 +215,9 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * Return the {@link FiltersExtension}
    * for tests that belong to the provided build variant
    */
-  fun filters(variant: String? = null): FiltersExtension {
-    val extensionName = this.filtersExtensionName(variant)
-
-    return if (extensionExists(extensionName)) {
-      extensionByName(extensionName)
-    } else {
-      extend(extensionName)
-    }
+  fun findFilters(qualifier: String? = null): FiltersExtension {
+    val extensionName = this.filtersExtensionName(qualifier)
+    return extensionByName(extensionName)
   }
 
   /**
@@ -223,10 +225,10 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * for tests that belong to the provided build variant
    * (Kotlin version)
    */
-  fun filters(variant: String? = null, config: FiltersExtension.() -> Unit) {
-    val configs = _filters.getOrDefault(variant, mutableListOf())
+  fun filters(qualifier: String? = null, config: FiltersExtension.() -> Unit) {
+    val configs = _filters.getOrDefault(qualifier, mutableListOf())
     configs += config
-    _filters[variant] = configs
+    _filters[qualifier] = configs
   }
 
   /**
@@ -234,8 +236,8 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    * for tests that belong to the provided build variant
    * (Groovy version)
    */
-  fun filters(variant: String? = null, action: Action<FiltersExtension>) = filters(
-      variant) { action.execute(this) }
+  fun filters(qualifier: String? = null, action: Action<FiltersExtension>) = filters(
+      qualifier) { action.execute(this) }
 
   /**
    * Configure the {@link SelectorsExtension} for this plugin

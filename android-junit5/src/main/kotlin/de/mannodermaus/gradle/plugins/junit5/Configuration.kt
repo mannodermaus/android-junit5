@@ -28,7 +28,7 @@ import org.gradle.api.ProjectConfigurationException
  * [ProjectConfigurationException] early, whenever the plugin
  * is not applied in an Android environment.
  */
-class ProjectConfig(private val project: Project) {
+class ProjectConfig(val project: Project) {
   private val type: Type<BaseExtension> = findType(project)
 
   val unitTestVariants get() = type.variants(project.android)
@@ -50,8 +50,9 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
   }
 
   object Library : Type<LibraryExtension>("com.android.library") {
-    override fun variants(extension: LibraryExtension): DomainObjectSet<LibraryVariant> =
-        extension.libraryVariants
+    override fun variants(extension: LibraryExtension): DomainObjectSet<LibraryVariant> {
+        return extension.libraryVariants
+    }
   }
 
   // Although there are "featureVariants" for modules applying the Feature plugin,
@@ -78,4 +79,28 @@ private fun findType(project: Project): Type<BaseExtension> {
   } else {
     return type as Type<BaseExtension>
   }
+}
+
+internal class JUnit5TaskConfig(
+    variant: BaseVariant,
+    project: Project) {
+
+  private val extension = project.android.testOptions.junitPlatform
+
+  // There is a distinct application order, which determines how values are merged and overwritten.
+  // From top to bottom, this list goes as follows (values on the bottom will override conflicting
+  // entries specified above them):
+  // 1) Default ("filters")
+  // 2) Build-type-specific (e.g. "debug")
+  // 3) Flavor-specific (e.g. "free")
+  // 4) Variant-specific (e.g. "freeDebug")
+  val combinedTags = extension.filters.tags +
+      extension.findFilters(variant.buildType.name).tags +
+      extension.findFilters(variant.flavorName).tags +
+      extension.findFilters(variant.name).tags
+
+  val combinedEngines = extension.filters.engines +
+      extension.findFilters(variant.buildType.name).engines +
+      extension.findFilters(variant.flavorName).engines +
+      extension.findFilters(variant.name).engines
 }

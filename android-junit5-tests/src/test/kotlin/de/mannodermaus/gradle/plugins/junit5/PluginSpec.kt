@@ -25,7 +25,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
-import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testkit.runner.GradleRunner
 import org.jetbrains.spek.api.Spek
@@ -247,8 +246,8 @@ class PluginSpec : Spek({
           val extension = ju5.extensionByName<FiltersExtension>("filters")
           assertThat(extension).isNotNull()
           assertThat(ju5.filters).isEqualTo(extension)
-          assertThat(ju5.filters()).isEqualTo(extension)
-          assertThat(ju5.filters(variant = null)).isEqualTo(extension)
+          assertThat(ju5.findFilters()).isEqualTo(extension)
+          assertThat(ju5.findFilters(qualifier = null)).isEqualTo(extension)
         }
 
         listOf("debug", "release").forEach { buildType ->
@@ -267,7 +266,7 @@ class PluginSpec : Spek({
           it("adds a $buildType-specific filter to the JUnit 5 extension point") {
             val extension = ju5.extensionByName<FiltersExtension>("${buildType}Filters")
             assertThat(extension).isNotNull()
-            assertThat(ju5.filters(variant = buildType)).isEqualTo(extension)
+            assertThat(ju5.findFilters(qualifier = buildType)).isEqualTo(extension)
           }
         }
       }
@@ -515,7 +514,7 @@ class PluginSpec : Spek({
           it("adds a $flavor-specific filter to the JUnit 5 extension point") {
             val extension = ju5.extensionByName<FiltersExtension>("${flavor}Filters")
             assertThat(extension).isNotNull()
-            assertThat(ju5.filters(variant = flavor)).isEqualTo(extension)
+            assertThat(ju5.findFilters(qualifier = flavor)).isEqualTo(extension)
           }
 
           listOf("debug", "release").forEach { buildType ->
@@ -535,7 +534,7 @@ class PluginSpec : Spek({
             it("adds a $variantName-specific filter to the JUnit 5 extension point") {
               val extension = ju5.extensionByName<FiltersExtension>("${variantName}Filters")
               assertThat(extension).isNotNull()
-              assertThat(ju5.filters(variant = variantName)).isEqualTo(extension)
+              assertThat(ju5.findFilters(qualifier = variantName)).isEqualTo(extension)
             }
           }
         }
@@ -985,16 +984,16 @@ class PluginSpec : Spek({
       context("filters DSL") {
         val project by memoized { testProjectBuilder.build() }
 
-        on("using only global filters") {
+        on("using global filters") {
           project.android.testOptions.junitPlatform {
             filters {
               tags {
-                include("slow")
-                exclude("fast")
+                include("global-include-tag")
+                exclude("global-exclude-tag")
               }
               engines {
-                include("junit-jupiter")
-                exclude("spek")
+                include("global-include-engine")
+                exclude("global-exclude-engine")
               }
             }
           }
@@ -1004,38 +1003,115 @@ class PluginSpec : Spek({
           listOf("debug", "release").forEach { buildType ->
             it("applies configuration correctly to the $buildType task") {
               val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
-              assertThat(task.hasTagInclude("slow")).isTrue()
-              assertThat(task.hasTagExclude("fast")).isTrue()
-              assertThat(task.hasEngineInclude("junit-jupiter")).isTrue()
-              assertThat(task.hasEngineExclude("spek")).isTrue()
+              assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+              assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
+              assertThat(task.hasEngineInclude("global-include-engine")).isTrue()
+              assertThat(task.hasEngineExclude("global-exclude-engine")).isTrue()
             }
           }
         }
 
-        on("using build-type-specific filters as well") {
+        on("using flavor-specific filters") {
+          project.android.flavorDimensions("tier")
+          project.android.productFlavors.apply {
+            create("free").dimension = "tier"
+            create("paid").dimension = "tier"
+          }
+
           project.android.testOptions.junitPlatform {
             filters {
               tags {
-                include("fast")
+                include("global-include-tag")
+                exclude("global-exclude-tag")
+              }
+            }
+            filters("paid") {
+              engines {
+                include("paid-include-engine")
+              }
+            }
+            filters("freeDebug") {
+              tags {
+                include("freeDebug-include-tag")
+              }
+            }
+            filters("paidRelease") {
+              tags {
+                include("paidRelease-include-tag")
+                include("global-exclude-tag")
+              }
+            }
+          }
+
+          project.evaluate()
+
+          it("applies freeDebug configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeDebug")
+            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+            assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
+            assertThat(task.hasTagInclude("freeDebug-include-tag")).isTrue()
+            assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
+
+            assertThat(task.hasEngineInclude("paid-include-engine")).isFalse()
+          }
+
+          it("applies freeRelease configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeRelease")
+            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+            assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
+            assertThat(task.hasTagInclude("freeDebug-include-tag")).isFalse()
+            assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
+
+            assertThat(task.hasEngineInclude("paid-include-engine")).isFalse()
+          }
+
+          it("applies paidDebug configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidDebug")
+            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+            assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
+            assertThat(task.hasTagInclude("freeDebug-include-tag")).isFalse()
+            assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
+
+            assertThat(task.hasEngineInclude("paid-include-engine")).isTrue()
+          }
+
+          it("applies paidRelease configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidRelease")
+            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+            assertThat(task.hasTagInclude("global-exclude-tag")).isTrue()
+            assertThat(task.hasTagExclude("global-exclude-tag")).isFalse()
+            assertThat(task.hasTagInclude("freeDebug-include-tag")).isFalse()
+            assertThat(task.hasTagInclude("paidRelease-include-tag")).isTrue()
+
+            assertThat(task.hasEngineInclude("paid-include-engine")).isTrue()
+          }
+        }
+
+        on("using build-type-specific filters") {
+          project.android.testOptions.junitPlatform {
+            filters {
+              tags {
+                include("global-include-tag")
               }
               engines {
-                include("junit-jupiter")
+                include("global-include-engine")
               }
             }
             filters("debug") {
               tags {
-                exclude("slow")
+                exclude("debug-exclude-tag")
               }
               engines {
-                exclude("spek")
+                exclude("debug-exclude-engine")
               }
             }
             filters("release") {
               tags {
-                include("signing")
+                include("rel-include-tag")
               }
               engines {
-                include("lol-tests")
+                include("rel-include-engine")
+                exclude("global-include-engine")
               }
             }
           }
@@ -1044,24 +1120,25 @@ class PluginSpec : Spek({
 
           it("applies configuration correctly to the debug task") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestDebug")
-            assertThat(task.hasTagInclude("fast")).isTrue()
-            assertThat(task.hasTagExclude("slow")).isTrue()
-            assertThat(task.hasTagInclude("signing")).isFalse()
+            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+            assertThat(task.hasTagExclude("debug-exclude-tag")).isTrue()
+            assertThat(task.hasTagInclude("rel-include-tag")).isFalse()
 
-            assertThat(task.hasEngineInclude("junit-jupiter")).isTrue()
-            assertThat(task.hasEngineExclude("spek")).isTrue()
-            assertThat(task.hasEngineInclude("lol-tests")).isFalse()
+            assertThat(task.hasEngineInclude("global-include-engine")).isTrue()
+            assertThat(task.hasEngineExclude("debug-exclude-engine")).isTrue()
+            assertThat(task.hasEngineInclude("rel-include-engine")).isFalse()
           }
 
           it("applies configuration correctly to the release task") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestRelease")
-            assertThat(task.hasTagInclude("fast")).isTrue()
-            assertThat(task.hasTagInclude("signing")).isTrue()
-            assertThat(task.hasTagExclude("slow")).isFalse()
+            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
+            assertThat(task.hasTagInclude("rel-include-tag")).isTrue()
+            assertThat(task.hasTagExclude("debug-exclude-tag")).isFalse()
 
-            assertThat(task.hasEngineInclude("junit-jupiter")).isTrue()
-            assertThat(task.hasEngineInclude("lol-tests")).isTrue()
-            assertThat(task.hasEngineExclude("spek")).isFalse()
+            assertThat(task.hasEngineInclude("global-include-engine")).isFalse()
+            assertThat(task.hasEngineExclude("global-include-engine")).isTrue()
+            assertThat(task.hasEngineInclude("rel-include-engine")).isTrue()
+            assertThat(task.hasEngineExclude("debug-exclude-engine")).isFalse()
           }
         }
       }

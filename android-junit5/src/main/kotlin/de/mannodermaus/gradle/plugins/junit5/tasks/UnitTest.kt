@@ -8,6 +8,7 @@ import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.argumentValues
+import de.mannodermaus.gradle.plugins.junit5.internal.createJUnit5ConfigurationFor
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
@@ -98,6 +99,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
   ) : TaskConfigAction<AndroidJUnit5UnitTest> {
 
     private val scope: VariantScope = variant.variantData.scope
+    private val configuration = project.createJUnit5ConfigurationFor(variant)
 
     override fun getName(): String = scope.getTaskName(TASK_NAME_DEFAULT)
 
@@ -187,10 +189,10 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
       task.inputs.property("selectors.classes", junit5.selectors.classes)
       task.inputs.property("selectors.methods", junit5.selectors.methods)
       task.inputs.property("selectors.resources", junit5.selectors.resources)
-      task.inputs.property("filters.engines.include", junit5.filters.engines.include)
-      task.inputs.property("filters.engines.exclude", junit5.filters.engines.exclude)
-      task.inputs.property("filters.tags.include", junit5.filters.tags.include)
-      task.inputs.property("filters.tags.exclude", junit5.filters.tags.exclude)
+      task.inputs.property("filters.engines.include", configuration.combinedEngines.include)
+      task.inputs.property("filters.engines.exclude", configuration.combinedEngines.exclude)
+      task.inputs.property("filters.tags.include", configuration.combinedTags.include)
+      task.inputs.property("filters.tags.exclude", configuration.combinedTags.exclude)
       task.inputs.property("filters.includeClassNamePatterns",
           junit5.filters.includeClassNamePatterns)
       task.inputs.property("filters.packages.include", junit5.filters.packages.include)
@@ -272,10 +274,10 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
       junit5.filters.excludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
       junit5.filters.packages.include.forEach { args += arrayOf("--include-package", it) }
       junit5.filters.packages.exclude.forEach { args += arrayOf("--exclude-package", it) }
-      junit5.filters.tags.include.forEach { args += arrayOf("-t", it) }
-      junit5.filters.tags.exclude.forEach { args += arrayOf("-T", it) }
-      junit5.filters.engines.include.forEach { args += arrayOf("-e", it) }
-      junit5.filters.engines.exclude.forEach { args += arrayOf("-E", it) }
+      configuration.combinedTags.include.forEach { args += arrayOf("-t", it) }
+      configuration.combinedTags.exclude.forEach { args += arrayOf("-T", it) }
+      configuration.combinedEngines.include.forEach { args += arrayOf("-e", it) }
+      configuration.combinedEngines.exclude.forEach { args += arrayOf("-E", it) }
 
       // Custom Configuration Parameters
       junit5.configurationParameters.forEach { entry ->
