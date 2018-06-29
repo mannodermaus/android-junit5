@@ -5,20 +5,20 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.argumentValues
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
-import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils.argument
+import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5Task
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
-import de.mannodermaus.gradle.plugins.junit5.util.getArgument
 import de.mannodermaus.gradle.plugins.junit5.util.throws
 import de.mannodermaus.gradle.plugins.junit5.util.times
 import org.assertj.core.api.Assertions.assertThat
@@ -118,16 +118,22 @@ class PluginSpec : Spek({
       }
     }
 
-    on("accessing unavailable DSL values") {
+    on("configuring unavailable DSL values") {
       val project = testProjectBuilder
           .asAndroidLibrary()
           .applyJunit5Plugin(true)
-          .buildAndEvaluate()
+          .build()
+
+      project.android.testOptions.junitPlatform {
+        filters("unknown") {
+          tags {
+            include("doesnt-matter")
+          }
+        }
+      }
 
       it("doesn't have a filters extension point for an unknown build type") {
-        val ju5 = project.android.testOptions
-            .extensionByName<AndroidJUnitPlatformExtension>("junitPlatform")
-        val expected = throws<UnknownDomainObjectException> { ju5.filters("unknown") }
+        val expected = throws<ProjectConfigurationException> { project.evaluate() }
         assertAll(
             { assertThat(expected.message?.contains("Extension with name")) },
             { assertThat(expected.message?.contains("does not exist")) }
@@ -463,9 +469,9 @@ class PluginSpec : Spek({
 
           it("uses that directory for $buildType test task") {
             val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTest$buildTypeName")
-            val argument = task.getArgument("--reports-dir")
-            assertThat(argument)
-                .endsWith("/other-path/test-reports/$buildType")
+            val argument = task.argumentValues("--reports-dir")
+            assertThat(argument).hasSize(1)
+            assertThat(argument[0]).endsWith("/other-path/test-reports/$buildType")
           }
         }
       }
@@ -507,7 +513,7 @@ class PluginSpec : Spek({
 
         listOf("free", "paid").forEach { flavor ->
           it("adds a $flavor-specific filter to the JUnit 5 extension point") {
-            val extension =ju5.extensionByName<FiltersExtension>("${flavor}Filters")
+            val extension = ju5.extensionByName<FiltersExtension>("${flavor}Filters")
             assertThat(extension).isNotNull()
             assertThat(ju5.filters(variant = flavor)).isEqualTo(extension)
           }
@@ -537,7 +543,7 @@ class PluginSpec : Spek({
         it("uses unique report directories for all variants") {
           val tasks = project.tasks.withType(AndroidJUnit5UnitTest::class.java)
           val reportDirsCount = tasks
-              .map { it.getArgument("--reports-dir") }
+              .mapNotNull { it.argumentValues("--reports-dir").getOrNull(0) }
               .distinct()
               .count()
 
@@ -596,7 +602,9 @@ class PluginSpec : Spek({
             val projectConfig = ProjectConfig(project)
             val task = project.tasks.get<AndroidJUnit5UnitTest>(
                 "junitPlatformTest${buildType.capitalize()}")
-            val folders = argument(task, "--scan-class-path")?.split(":") ?: listOf()
+            val folders = task.argumentValues("--scan-class-path")
+                .getOrNull(0)
+                ?.split(":") ?: emptyList()
 
             val variant = projectConfig.unitTestVariants.find { it.name == buildType }
             require(variant != null)
@@ -970,6 +978,90 @@ class PluginSpec : Spek({
                     }
                   }
             }
+          }
+        }
+      }
+
+      context("filters DSL") {
+        val project by memoized { testProjectBuilder.build() }
+
+        on("using only global filters") {
+          project.android.testOptions.junitPlatform {
+            filters {
+              tags {
+                include("slow")
+                exclude("fast")
+              }
+              engines {
+                include("junit-jupiter")
+                exclude("spek")
+              }
+            }
+          }
+
+          project.evaluate()
+
+          listOf("debug", "release").forEach { buildType ->
+            it("applies configuration correctly to the $buildType task") {
+              val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
+              assertThat(task.hasTagInclude("slow")).isTrue()
+              assertThat(task.hasTagExclude("fast")).isTrue()
+              assertThat(task.hasEngineInclude("junit-jupiter")).isTrue()
+              assertThat(task.hasEngineExclude("spek")).isTrue()
+            }
+          }
+        }
+
+        on("using build-type-specific filters as well") {
+          project.android.testOptions.junitPlatform {
+            filters {
+              tags {
+                include("fast")
+              }
+              engines {
+                include("junit-jupiter")
+              }
+            }
+            filters("debug") {
+              tags {
+                exclude("slow")
+              }
+              engines {
+                exclude("spek")
+              }
+            }
+            filters("release") {
+              tags {
+                include("signing")
+              }
+              engines {
+                include("lol-tests")
+              }
+            }
+          }
+
+          project.evaluate()
+
+          it("applies configuration correctly to the debug task") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestDebug")
+            assertThat(task.hasTagInclude("fast")).isTrue()
+            assertThat(task.hasTagExclude("slow")).isTrue()
+            assertThat(task.hasTagInclude("signing")).isFalse()
+
+            assertThat(task.hasEngineInclude("junit-jupiter")).isTrue()
+            assertThat(task.hasEngineExclude("spek")).isTrue()
+            assertThat(task.hasEngineInclude("lol-tests")).isFalse()
+          }
+
+          it("applies configuration correctly to the release task") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestRelease")
+            assertThat(task.hasTagInclude("fast")).isTrue()
+            assertThat(task.hasTagInclude("signing")).isTrue()
+            assertThat(task.hasTagExclude("slow")).isFalse()
+
+            assertThat(task.hasEngineInclude("junit-jupiter")).isTrue()
+            assertThat(task.hasEngineInclude("lol-tests")).isTrue()
+            assertThat(task.hasEngineExclude("spek")).isFalse()
           }
         }
       }

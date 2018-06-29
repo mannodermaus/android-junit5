@@ -19,6 +19,7 @@ import org.gradle.api.logging.LogLevel.WARN
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.util.GradleVersion
 import java.util.Properties
@@ -107,6 +108,14 @@ inline fun <reified T> Any.extend(
   return created
 }
 
+fun Any.extensionExists(name: String): Boolean {
+  if (this !is ExtensionAware) {
+    throw IllegalArgumentException("Argument is not ExtensionAware: $this")
+  }
+
+  return this.extensions.findByName(name) != null
+}
+
 /**
  * Obtain an Extension by name & directly cast it to the expected type.
  */
@@ -173,6 +182,23 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
     new.group = group
     new
   }
+}
+
+/**
+ * Access an argument passed to a JavaExec task based on its name.
+ * Returns the associated values with that name, or an empty list
+ * if it doesn't exist
+ */
+fun JavaExec.argumentValues(name: String): List<String> {
+  return this.args?.let { args ->
+    // Find all occurrences of the provided argument,
+    // filter "out-of-bounds" values
+    // and collect the rest into a list
+    args.withIndex()
+        .filter { name == it.value }
+        .filter { it.index > -1 && it.index < args.size + 1 }
+        .map { args[it.index + 1] }
+  } ?: emptyList()
 }
 
 /**

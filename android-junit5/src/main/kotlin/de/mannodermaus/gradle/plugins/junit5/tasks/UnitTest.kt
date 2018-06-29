@@ -7,6 +7,7 @@ import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.argumentValues
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
@@ -38,7 +39,7 @@ private const val VERIFICATION_GROUP = JavaBasePlugin.VERIFICATION_GROUP
  * pretty closely, and it takes advantage of the efforts related to
  * classpath construction prevalent in the platform's default implementation.
  */
-open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
+open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
 
   companion object {
     fun find(project: Project, variant: BaseVariant): AndroidJUnit5UnitTest {
@@ -78,6 +79,14 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
 
   @Suppress("LeakingThis")
   override val javaForkOptions = this as JavaForkOptions
+
+  override fun hasTagInclude(tag: String) = this.argumentValues("-t").any { it == tag }
+
+  override fun hasTagExclude(tag: String) = this.argumentValues("-T").any { it == tag }
+
+  override fun hasEngineInclude(name: String) = this.argumentValues("-e").any { it == name }
+
+  override fun hasEngineExclude(name: String) = this.argumentValues("-E").any { it == name }
 
   /**
    * Configuration closure for an Android JUnit5 test task.

@@ -87,9 +87,6 @@ fun Project.evaluate() {
 fun <T : Task> TaskContainer.get(name: String): T =
     this.getByName(name) as T
 
-fun JavaExec.getArgument(name: String): String? =
-    TaskUtils.argument(this, name)
-
 fun File.newFile(filePath: String, separator: String = "/"): File {
   val path = Paths.get(this.toString(),
       *filePath.splitToArray(delimiter = separator))

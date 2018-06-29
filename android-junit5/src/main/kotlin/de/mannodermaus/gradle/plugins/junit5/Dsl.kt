@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extend
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.extensionExists
 import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5UnitTest
 import groovy.lang.Closure
 import org.gradle.api.Action
@@ -30,7 +31,7 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
         // Adding filters for flavors (e.g. "free" or "paid")
         // requires manual track-keeping, however.
         val addedFlavors = mutableListOf<String>()
-        projectConfig.unitTestVariants.whenObjectAdded {variant ->
+        projectConfig.unitTestVariants.whenObjectAdded { variant ->
           ju5.attachFiltersDsl(qualifier = variant.name)
 
           if (variant.flavorName !in addedFlavors) {
@@ -44,11 +45,20 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
       }
 }
 
+internal fun evaluateDsl(project: Project) {
+  val ju5 = project.android.testOptions
+      .extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
+
+  ju5._filters.forEach { variant, configs ->
+    val extension = ju5.extensionByName<FiltersExtension>(ju5.filtersExtensionName(variant))
+    configs.forEach { config ->
+      extension.config()
+    }
+  }
+}
+
 private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = null) {
-  val extensionName = if (qualifier == null)
-    FILTERS_EXTENSION_NAME
-  else
-    "$qualifier${FILTERS_EXTENSION_NAME.capitalize()}"
+  val extensionName = filtersExtensionName(qualifier)
 
   this.extend<FiltersExtension>(extensionName) { filters ->
     filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
@@ -165,6 +175,13 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
 
   /* Filters */
 
+  internal val _filters = mutableMapOf<String?, MutableList<FiltersExtension.() -> Unit>>()
+
+  internal fun filtersExtensionName(variant: String? = null) = if (variant == null)
+    FILTERS_EXTENSION_NAME
+  else
+    "$variant${FILTERS_EXTENSION_NAME.capitalize()}"
+
   /**
    * Return the {@link FiltersExtension}
    * for all executed tests, applied to all variants
@@ -174,34 +191,51 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
   /**
    * Configure the {@link FiltersExtension}
    * for all executed tests, applied to all variants
+   * (Kotlin version)
    */
-  fun filters(action: Action<FiltersExtension>) {
-    filters(null, action)
+  fun filters(config: FiltersExtension.() -> Unit) {
+    filters(null, config)
   }
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for all executed tests, applied to all variants
+   * (Groovy version)
+   */
+  fun filters(action: Action<FiltersExtension>) = filters(null) { action.execute(this) }
 
   /**
    * Return the {@link FiltersExtension}
    * for tests that belong to the provided build variant
    */
   fun filters(variant: String? = null): FiltersExtension {
-    // Construct the extension's name based on the variant
-    val extensionName = if (variant == null)
-      FILTERS_EXTENSION_NAME
-    else
-      "$variant${FILTERS_EXTENSION_NAME.capitalize()}"
+    val extensionName = this.filtersExtensionName(variant)
 
-    return extensionByName(extensionName)
+    return if (extensionExists(extensionName)) {
+      extensionByName(extensionName)
+    } else {
+      extend(extensionName)
+    }
   }
 
   /**
    * Configure the {@link FiltersExtension}
    * for tests that belong to the provided build variant
+   * (Kotlin version)
    */
-  fun filters(variant: String? = null, action: Action<FiltersExtension>) {
-    // Look up the extension, then configure it through the passed Action
-    val extension = filters(variant)
-    action.execute(extension)
+  fun filters(variant: String? = null, config: FiltersExtension.() -> Unit) {
+    val configs = _filters.getOrDefault(variant, mutableListOf())
+    configs += config
+    _filters[variant] = configs
   }
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   * (Groovy version)
+   */
+  fun filters(variant: String? = null, action: Action<FiltersExtension>) = filters(
+      variant) { action.execute(this) }
 
   /**
    * Configure the {@link SelectorsExtension} for this plugin

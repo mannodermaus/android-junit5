@@ -10,6 +10,18 @@ import org.gradle.process.JavaForkOptions
 import org.gradle.process.ProcessForkOptions
 
 /**
+ * Base for test tasks. Unlike "JUnit5UnitTest",
+ * this is only overridden by actual variant-aware tasks,
+ * not the "Run All" task.
+ */
+interface JUnit5Task : Task {
+  fun hasTagInclude(tag: String): Boolean
+  fun hasTagExclude(tag: String): Boolean
+  fun hasEngineInclude(name: String): Boolean
+  fun hasEngineExclude(name: String): Boolean
+}
+
+/**
  * Base for tasks added by plugin, shared between
  * the "Run All" task and its individual variant-aware ones.
  */
