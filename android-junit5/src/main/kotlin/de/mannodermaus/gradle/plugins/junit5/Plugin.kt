@@ -53,7 +53,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
   private fun Project.configureExtensions() {
     // Hook the JUnit Platform configuration into the Android testOptions
-    attachDsl(this)
+    attachDsl(this, projectConfig)
   }
 
   private fun Project.configureDependencies() {

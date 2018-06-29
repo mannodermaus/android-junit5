@@ -111,7 +111,7 @@ inline fun <reified T> Any.extend(
  * Obtain an Extension by name & directly cast it to the expected type.
  */
 @Suppress("UNCHECKED_CAST")
-internal fun <T> Any.extensionByName(name: String): T {
+fun <T> Any.extensionByName(name: String): T {
   if (this !is ExtensionAware) {
     throw IllegalArgumentException("Argument is not ExtensionAware: $this")
   }

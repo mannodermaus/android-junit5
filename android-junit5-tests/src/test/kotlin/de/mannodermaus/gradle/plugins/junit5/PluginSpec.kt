@@ -5,6 +5,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -196,6 +197,7 @@ class PluginSpec : Spek({
 
       on("build & evaluate") {
         val project = testProjectBuilder.buildAndEvaluate()
+        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>("junitPlatform")
 
         it("creates a JUnit 5 dependency handler") {
           assertThat(project.dependencies.junit5).isNotNull()
@@ -211,6 +213,14 @@ class PluginSpec : Spek({
               .isNull()
         }
 
+        it("adds an JUnit 5 extension point to the testOptions") {
+          assertThat(ju5).isNotNull()
+        }
+
+        it("adds a general-purpose filter to the JUnit 5 extension point") {
+          assertThat(ju5.extensionByName<FiltersExtension>("filters")).isNotNull()
+        }
+
         listOf("debug", "release").forEach { buildType ->
           val buildTypeName = buildType.capitalize()
 
@@ -222,6 +232,10 @@ class PluginSpec : Spek({
           it("doesn't create a Jacoco task for the $buildType build type") {
             assertThat(project.tasks.findByName("jacocoTestReport$buildTypeName"))
                 .isNull()
+          }
+
+          it("adds a $buildType-specific filter to the JUnit 5 extension point") {
+            assertThat(ju5.extensionByName<FiltersExtension>("${buildType}Filters")).isNotNull()
           }
         }
       }
@@ -438,18 +452,30 @@ class PluginSpec : Spek({
 
         project.evaluate()
 
-        (listOf("free", "paid") * listOf("debug", "release")).forEach { (flavor, buildType) ->
-          val variantName = "$flavor${buildType.capitalize()}"
+        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>("junitPlatform")
 
-          it("creates task for build variant '$variantName'") {
-            assertThat(project.tasks.findByName("junitPlatformTest${variantName.capitalize()}"))
-                .isNotNull()
+        listOf("free", "paid").forEach { flavor ->
+          it("adds a $flavor-specific filter to the JUnit 5 extension point") {
+            assertThat(ju5.extensionByName<FiltersExtension>("${flavor}Filters")).isNotNull()
           }
 
-          it("hooks '$variantName' into the main task") {
-            assertThat(project.tasks.getByName("junitPlatformTest")
-                .dependsOn.map { (it as Task).name })
-                .contains("junitPlatformTest${variantName.capitalize()}")
+          listOf("debug", "release").forEach { buildType ->
+            val variantName = "$flavor${buildType.capitalize()}"
+
+            it("creates task for build variant '$variantName'") {
+              assertThat(project.tasks.findByName("junitPlatformTest${variantName.capitalize()}"))
+                  .isNotNull()
+            }
+
+            it("hooks '$variantName' into the main task") {
+              assertThat(project.tasks.getByName("junitPlatformTest")
+                  .dependsOn.map { (it as Task).name })
+                  .contains("junitPlatformTest${variantName.capitalize()}")
+            }
+
+            it("adds a $variantName-specific filter to the JUnit 5 extension point") {
+              assertThat(ju5.extensionByName<FiltersExtension>("${variantName}Filters")).isNotNull()
+            }
           }
         }
 

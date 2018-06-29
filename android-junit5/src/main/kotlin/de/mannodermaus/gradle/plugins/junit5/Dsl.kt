@@ -15,18 +15,48 @@ import org.junit.platform.console.options.Details
 import org.junit.platform.engine.discovery.ClassNameFilter
 import java.io.File
 
-internal fun attachDsl(project: Project) {
-  // Hook the JUnit Platform configuration into the Android testOptions
+internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
+  // Hook the JUnit Platform configuration into the Android testOptions,
+  // adding an extension point for all variants, as well as the default one
+  // shared between them
   project.android.testOptions
       .extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(project)) { ju5 ->
-        ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
-        ju5.extend<FiltersExtension>(FILTERS_EXTENSION_NAME) { filters ->
-          filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
-          filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
-          filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
+        // General-purpose filters
+        attachFiltersDsl(ju5)
+
+        // Variant-specific filters:
+        // This will add filters for build types (e.g. "debug" or "release")
+        // as well as composed variants  (e.g. "freeDebug" or "paidRelease").
+        // Adding filters for flavors (e.g. "free" or "paid")
+        // requires manual track-keeping, however.
+        val addedFlavors = mutableListOf<String>()
+        projectConfig.unitTestVariants.whenObjectAdded {variant ->
+          attachFiltersDsl(ju5, variant.name)
+
+          if (variant.flavorName !in addedFlavors) {
+            attachFiltersDsl(ju5, variant.flavorName)
+            addedFlavors += variant.flavorName
+          }
         }
+
+        // Deprecated
+        ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
       }
 }
+
+private fun attachFiltersDsl(ju5: AndroidJUnitPlatformExtension, variantName: String? = null) {
+  val extensionName = if (variantName == null)
+    FILTERS_EXTENSION_NAME
+  else
+    "$variantName${FILTERS_EXTENSION_NAME.capitalize()}"
+
+  ju5.extend<FiltersExtension>(extensionName) { filters ->
+    filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
+    filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
+    filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
+  }
+}
+
 
 /**
  * The main extension provided through the android-junit5 Gradle plugin.
@@ -133,6 +163,39 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
     parameters.forEach { configurationParameter(it.key, it.value) }
   }
 
+  /* Filters */
+
+  private val _filters = mutableMapOf<String, FiltersExtension>()
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for all executed tests, applied to all variants
+   */
+  val filters: FiltersExtension get() = extensionByName(FILTERS_EXTENSION_NAME)
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for all executed tests, applied to all variants
+   */
+  fun filters(action: Action<FiltersExtension>) {
+    filters(null, action)
+  }
+
+  fun filters(variant: String? = null, action: Action<FiltersExtension>) {
+    // Construct the extension's name based on the variant
+    val extensionName = if (variant == null)
+      FILTERS_EXTENSION_NAME
+    else
+      "$variant${FILTERS_EXTENSION_NAME.capitalize()}"
+
+    val extension = if (variant !in _filters) {
+      extend<FiltersExtension>(extensionName)
+    } else {
+      extensionByName(extensionName)
+    }
+    action.execute(extension)
+  }
+
   /**
    * Configure the {@link SelectorsExtension} for this plugin
    */
@@ -143,18 +206,6 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    */
   fun selectors(action: Action<SelectorsExtension>) {
     action.execute(selectors)
-  }
-
-  /**
-   * Configure the {@link FiltersExtension} for this plugin
-   */
-  val filters: FiltersExtension get() = extensionByName(FILTERS_EXTENSION_NAME)
-
-  /**
-   * Configure the {@link FiltersExtension} for this plugin
-   */
-  fun filters(action: Action<FiltersExtension>) {
-    action.execute(filters)
   }
 
   /* Android Unit Test support */
@@ -471,7 +522,14 @@ open class IncludeExcludeContainer {
     this._include.removeAll(items)
   }
 
+  fun isEmpty() = _include.isEmpty() && _exclude.isEmpty()
+
   operator fun plus(other: IncludeExcludeContainer): IncludeExcludeContainer {
+    // Fast path, where nothing needs to be merged
+    if (this.isEmpty()) return other
+    if (other.isEmpty()) return this
+
+    // Slow path, where rules need to be merged
     val result = IncludeExcludeContainer()
 
     result._include.addAll(this.include)
@@ -483,6 +541,10 @@ open class IncludeExcludeContainer {
     result._exclude.removeAll(other.include)
 
     return result
+  }
+
+  override fun toString(): String {
+    return "IncludeExcludeContainer(include=$_include, exclude=$_exclude)"
   }
 }
 

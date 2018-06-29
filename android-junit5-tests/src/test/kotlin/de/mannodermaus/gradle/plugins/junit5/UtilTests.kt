@@ -52,6 +52,44 @@ class IncludeExcludeContainerTests {
   }
 
   @Test
+  fun `emptiness is properly reported for include rules`() {
+    val container = IncludeExcludeContainer()
+    Assertions.assertThat(container.isEmpty()).isTrue()
+
+    container.include("slow")
+    Assertions.assertThat(container.isEmpty()).isFalse()
+  }
+
+  @Test
+  fun `emptiness is properly reported for exclude rules`() {
+    val container = IncludeExcludeContainer()
+    Assertions.assertThat(container.isEmpty()).isTrue()
+
+    container.exclude("slow")
+    Assertions.assertThat(container.isEmpty()).isFalse()
+  }
+
+  @Test
+  fun `adding an empty container returns the original one`() {
+    val container1 = IncludeExcludeContainer().apply {
+      include("slow")
+    }
+    val container2 = IncludeExcludeContainer()
+    val merged = container1 + container2
+    Assertions.assertThat(merged).isEqualTo(container1)
+  }
+
+  @Test
+  fun `adding something to an empty container returns the new one`() {
+    val container1 = IncludeExcludeContainer()
+    val container2 = IncludeExcludeContainer().apply {
+      include("slow")
+    }
+    val merged = container1 + container2
+    Assertions.assertThat(merged).isEqualTo(container2)
+  }
+
+  @Test
   fun `adding two conainers will merge the include rules together`() {
     val container1 = IncludeExcludeContainer().apply {
       include("slow")
