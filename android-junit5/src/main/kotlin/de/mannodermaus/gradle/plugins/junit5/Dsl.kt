@@ -39,7 +39,7 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
           }
         }
 
-        // Deprecated
+        // Selectors for test classes
         ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
       }
 }
@@ -151,8 +151,8 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    */
   fun configurationParameter(key: String, value: String) {
     Preconditions.notBlank(key, "key must not be blank")
-    Preconditions.condition(!key.contains('='), { "key must not contain \'=\': \"$key\"" })
-    Preconditions.notNull(value, { "value must not be null for key: \"$key\"" })
+    Preconditions.condition(!key.contains('=')) { "key must not contain '=': \"$key\"" }
+    Preconditions.notNull(value) { "value must not be null for key: \"$key\"" }
     _configurationParameters[key] = value
   }
 
@@ -165,13 +165,11 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
 
   /* Filters */
 
-  private val _filters = mutableMapOf<String, FiltersExtension>()
-
   /**
-   * Configure the {@link FiltersExtension}
+   * Return the {@link FiltersExtension}
    * for all executed tests, applied to all variants
    */
-  val filters: FiltersExtension get() = extensionByName(FILTERS_EXTENSION_NAME)
+  val filters: FiltersExtension get() = filters(variant = null)
 
   /**
    * Configure the {@link FiltersExtension}
@@ -181,18 +179,27 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
     filters(null, action)
   }
 
-  fun filters(variant: String? = null, action: Action<FiltersExtension>) {
+  /**
+   * Return the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   */
+  fun filters(variant: String? = null): FiltersExtension {
     // Construct the extension's name based on the variant
     val extensionName = if (variant == null)
       FILTERS_EXTENSION_NAME
     else
       "$variant${FILTERS_EXTENSION_NAME.capitalize()}"
 
-    val extension = if (variant !in _filters) {
-      extend<FiltersExtension>(extensionName)
-    } else {
-      extensionByName(extensionName)
-    }
+    return extensionByName(extensionName)
+  }
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   */
+  fun filters(variant: String? = null, action: Action<FiltersExtension>) {
+    // Look up the extension, then configure it through the passed Action
+    val extension = filters(variant)
     action.execute(extension)
   }
 

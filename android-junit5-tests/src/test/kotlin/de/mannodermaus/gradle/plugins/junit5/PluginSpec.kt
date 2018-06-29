@@ -25,6 +25,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testkit.runner.GradleRunner
 import org.jetbrains.spek.api.Spek
@@ -33,6 +34,7 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.api.lifecycle.CachingMode.SCOPE
+import org.junit.platform.commons.util.PreconditionViolationException
 
 /**
  * Unit Tests related to the plugin's configurability.
@@ -113,6 +115,23 @@ class PluginSpec : Spek({
       it("throws an error") {
         assertThat(expect.message)
             .contains("instrumentationTests.enabled true")
+      }
+    }
+
+    on("accessing unavailable DSL values") {
+      val project = testProjectBuilder
+          .asAndroidLibrary()
+          .applyJunit5Plugin(true)
+          .buildAndEvaluate()
+
+      it("doesn't have a filters extension point for an unknown build type") {
+        val ju5 = project.android.testOptions
+            .extensionByName<AndroidJUnitPlatformExtension>("junitPlatform")
+        val expected = throws<UnknownDomainObjectException> { ju5.filters("unknown") }
+        assertAll(
+            { assertThat(expected.message?.contains("Extension with name")) },
+            { assertThat(expected.message?.contains("does not exist")) }
+        )
       }
     }
 
@@ -197,7 +216,8 @@ class PluginSpec : Spek({
 
       on("build & evaluate") {
         val project = testProjectBuilder.buildAndEvaluate()
-        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>("junitPlatform")
+        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
+            "junitPlatform")
 
         it("creates a JUnit 5 dependency handler") {
           assertThat(project.dependencies.junit5).isNotNull()
@@ -218,7 +238,11 @@ class PluginSpec : Spek({
         }
 
         it("adds a general-purpose filter to the JUnit 5 extension point") {
-          assertThat(ju5.extensionByName<FiltersExtension>("filters")).isNotNull()
+          val extension = ju5.extensionByName<FiltersExtension>("filters")
+          assertThat(extension).isNotNull()
+          assertThat(ju5.filters).isEqualTo(extension)
+          assertThat(ju5.filters()).isEqualTo(extension)
+          assertThat(ju5.filters(variant = null)).isEqualTo(extension)
         }
 
         listOf("debug", "release").forEach { buildType ->
@@ -235,7 +259,9 @@ class PluginSpec : Spek({
           }
 
           it("adds a $buildType-specific filter to the JUnit 5 extension point") {
-            assertThat(ju5.extensionByName<FiltersExtension>("${buildType}Filters")).isNotNull()
+            val extension = ju5.extensionByName<FiltersExtension>("${buildType}Filters")
+            assertThat(extension).isNotNull()
+            assertThat(ju5.filters(variant = buildType)).isEqualTo(extension)
           }
         }
       }
@@ -365,6 +391,30 @@ class PluginSpec : Spek({
         }
       }
 
+      on("applying configuration parameters") {
+        val project = testProjectBuilder.build()
+
+        it("throws an exception if the key is empty") {
+          val expected = throws<PreconditionViolationException> {
+            project.android.testOptions.junitPlatform {
+              configurationParameter("", "some-value")
+            }
+          }
+
+          assertThat(expected.message).contains("key must not be blank")
+        }
+
+        it("throws an exception if the key contains illegal characters") {
+          val expected = throws<PreconditionViolationException> {
+            project.android.testOptions.junitPlatform {
+              configurationParameter("illegal=key", "some-value")
+            }
+          }
+
+          assertThat(expected.message).contains("key must not contain '='")
+        }
+      }
+
       on("describing task dependencies") {
         val project = testProjectBuilder.build()
         val defaultTaskDep = project.task("onlyDefaultTask")
@@ -452,11 +502,14 @@ class PluginSpec : Spek({
 
         project.evaluate()
 
-        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>("junitPlatform")
+        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
+            "junitPlatform")
 
         listOf("free", "paid").forEach { flavor ->
           it("adds a $flavor-specific filter to the JUnit 5 extension point") {
-            assertThat(ju5.extensionByName<FiltersExtension>("${flavor}Filters")).isNotNull()
+            val extension =ju5.extensionByName<FiltersExtension>("${flavor}Filters")
+            assertThat(extension).isNotNull()
+            assertThat(ju5.filters(variant = flavor)).isEqualTo(extension)
           }
 
           listOf("debug", "release").forEach { buildType ->
@@ -474,7 +527,9 @@ class PluginSpec : Spek({
             }
 
             it("adds a $variantName-specific filter to the JUnit 5 extension point") {
-              assertThat(ju5.extensionByName<FiltersExtension>("${variantName}Filters")).isNotNull()
+              val extension = ju5.extensionByName<FiltersExtension>("${variantName}Filters")
+              assertThat(extension).isNotNull()
+              assertThat(ju5.filters(variant = variantName)).isEqualTo(extension)
             }
           }
         }
