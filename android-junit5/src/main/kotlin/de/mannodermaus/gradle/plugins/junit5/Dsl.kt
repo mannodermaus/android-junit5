@@ -6,6 +6,7 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionExists
 import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5UnitTest
 import groovy.lang.Closure
+import groovy.lang.GroovyObjectSupport
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.internal.DefaultDomainObjectSet
@@ -80,10 +81,27 @@ private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = 
  * It defines the root of the configuration tree exposed by the plugin,
  * and is located under "android.testOptions" using the name "junitPlatform".
  */
-open class AndroidJUnitPlatformExtension(private val project: Project) {
+open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyObjectSupport() {
 
   operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
     this.config()
+  }
+
+  // Interop with Groovy
+  @Suppress("unused")
+  open fun methodMissing(name: String, args: Any): Any? {
+    if (name.endsWith("Filters")) {
+      // Support for filters() DSL called from Groovy
+      val qualifier = name.substring(0, name.indexOf("Filters"))
+      val closure = (args as Array<*>)[0] as Closure<FiltersExtension>
+      return this.filters(qualifier) {
+        closure.delegate = this
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call(this)
+      }
+    }
+
+    return null
   }
 
   /**
