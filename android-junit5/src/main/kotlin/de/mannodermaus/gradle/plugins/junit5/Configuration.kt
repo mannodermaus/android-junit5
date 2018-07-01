@@ -51,7 +51,7 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
 
   object Library : Type<LibraryExtension>("com.android.library") {
     override fun variants(extension: LibraryExtension): DomainObjectSet<LibraryVariant> {
-        return extension.libraryVariants
+      return extension.libraryVariants
     }
   }
 
@@ -100,7 +100,12 @@ internal class JUnit5TaskConfig(
           collectorFunction(extension.findFilters(variant.flavorName)) +
           collectorFunction(extension.findFilters(variant.name))
 
-  val combinedPackages = this.collect { it.packages }
-  val combinedTags = this.collect { it.tags }
-  val combinedEngines = this.collect { it.engines }
+  val combinedIncludeClassNamePatterns = this.collect { it.classNamePatterns }.include
+  val combinedExcludeClassNamePatterns = this.collect { it.classNamePatterns }.exclude
+  val combinedIncludePackages = this.collect { it.packages }.include
+  val combinedExcludePackages = this.collect { it.packages }.exclude
+  val combinedIncludeTags = this.collect { it.tags }.include
+  val combinedExcludeTags = this.collect { it.tags }.exclude
+  val combinedIncludeEngines = this.collect { it.engines }.include
+  val combinedExcludeEngines = this.collect { it.engines }.exclude
 }

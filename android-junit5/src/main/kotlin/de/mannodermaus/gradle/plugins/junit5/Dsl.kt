@@ -432,19 +432,23 @@ open class FiltersExtension {
   }
 
   /**
-   * List of class name patterns in the form of regular expressions for
+   * Class name patterns in the form of regular expressions for
    * classes that should be <em>included</em> in the test plan.
    *
    * <p>The patterns are combined using OR semantics, i.e. if the fully
    * qualified name of a class matches against at least one of the patterns,
    * the class will be included in the test plan.
-   *
-   * <p>If null, defaults to {@value ClassNameFilter#STANDARD_INCLUDE_PATTERN}
    */
-  private var _includeClassNamePatterns: MutableList<String>? = null
-  val includeClassNamePatterns
-    @Input get() = _includeClassNamePatterns?.toList()
-        ?: listOf(ClassNameFilter.STANDARD_INCLUDE_PATTERN)
+  private val _classNamePatterns = IncludeExcludeContainer()
+  internal val classNamePatterns: IncludeExcludeContainer
+    @Input get() {
+      return if (_classNamePatterns.isEmpty()) {
+        // No custom rules specified, so apply the default filter
+        IncludeExcludeContainer().include(ClassNameFilter.STANDARD_INCLUDE_PATTERN)
+      } else {
+        _classNamePatterns
+      }
+    }
 
   /**
    * Add a pattern to the list of <em>included</em> patterns
@@ -455,15 +459,8 @@ open class FiltersExtension {
    * Add patterns to the list of <em>included</em> patterns
    */
   fun includeClassNamePatterns(vararg patterns: String) {
-    if (_includeClassNamePatterns == null) {
-      _includeClassNamePatterns = mutableListOf()
-    }
-    this._includeClassNamePatterns!!.addAll(patterns)
+    _classNamePatterns.include(*patterns)
   }
-
-  private val _excludeClassNamePatterns = mutableListOf<String>()
-  val excludeClassNamePatterns
-    @Input get() = _excludeClassNamePatterns.toList()
 
   /**
    * Add a pattern to the list of <em>excluded</em> patterns
@@ -474,17 +471,7 @@ open class FiltersExtension {
    * Add patterns to the list of <em>excluded</em> patterns
    */
   fun excludeClassNamePatterns(vararg patterns: String) =
-      this._excludeClassNamePatterns.addAll(patterns)
-
-  /**
-   * List of class name patterns in the form of regular expressions for
-   * classes that should be <em>excluded</em> from the test plan.
-   *
-   * <p>The patterns are combined using OR semantics, i.e. if the fully
-   * qualified name of a class matches against at least one of the patterns,
-   * the class will be excluded from the test plan
-   */
-  fun excludeClassNamePatterns() = _excludeClassNamePatterns.toList()
+      _classNamePatterns.exclude(*patterns)
 
   /**
    * Configure the {@link PackagesExtension} for this plugin
@@ -553,14 +540,14 @@ open class EnginesExtension : IncludeExcludeContainer() {
 open class IncludeExcludeContainer {
   private val _include = mutableSetOf<String>()
   val include @Input get() = _include.toSet()
-  fun include(vararg items: String) {
+  fun include(vararg items: String) = this.apply {
     this._include.addAll(items)
     this._exclude.removeAll(items)
   }
 
   private val _exclude = mutableSetOf<String>()
   val exclude @Input get() = _exclude.toSet()
-  fun exclude(vararg items: String) {
+  fun exclude(vararg items: String) = this.apply {
     this._exclude.addAll(items)
     this._include.removeAll(items)
   }
@@ -587,7 +574,7 @@ open class IncludeExcludeContainer {
   }
 
   override fun toString(): String {
-    return "IncludeExcludeContainer(include=$_include, exclude=$_exclude)"
+    return "${super.toString()}(include=$_include, exclude=$_exclude)"
   }
 }
 

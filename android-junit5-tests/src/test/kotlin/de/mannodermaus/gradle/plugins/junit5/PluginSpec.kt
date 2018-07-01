@@ -34,6 +34,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.api.lifecycle.CachingMode.SCOPE
 import org.junit.platform.commons.util.PreconditionViolationException
+import org.junit.platform.engine.discovery.ClassNameFilter
 
 /**
  * Unit Tests related to the plugin's configurability.
@@ -984,6 +985,18 @@ class PluginSpec : Spek({
       context("filters DSL") {
         val project by memoized { testProjectBuilder.build() }
 
+        on("using no custom classNamePatterns") {
+          project.evaluate()
+
+          listOf("debug", "release").forEach { buildType ->
+            it("uses the default pattern for the $buildType task") {
+              val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
+              assertThat(task.classNamePatternIncludes).containsOnly(
+                  ClassNameFilter.STANDARD_INCLUDE_PATTERN)
+            }
+          }
+        }
+
         on("using global filters") {
           project.android.testOptions.junitPlatform {
             filters {
@@ -1007,12 +1020,12 @@ class PluginSpec : Spek({
           listOf("debug", "release").forEach { buildType ->
             it("applies configuration correctly to the $buildType task") {
               val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
-              assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-              assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
-              assertThat(task.hasEngineInclude("global-include-engine")).isTrue()
-              assertThat(task.hasEngineExclude("global-exclude-engine")).isTrue()
-              assertThat(task.hasPackageInclude("com.example.package1")).isTrue()
-              assertThat(task.hasPackageExclude("com.example.package2")).isTrue()
+              assertThat(task.tagIncludes).contains("global-include-tag")
+              assertThat(task.tagExcludes).contains("global-exclude-tag")
+              assertThat(task.engineIncludes).contains("global-include-engine")
+              assertThat(task.engineExcludes).contains("global-exclude-engine")
+              assertThat(task.packageIncludes).contains("com.example.package1")
+              assertThat(task.packageExcludes).contains("com.example.package2")
             }
           }
         }
@@ -1063,61 +1076,59 @@ class PluginSpec : Spek({
 
           it("applies freeDebug configuration correctly") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeDebug")
-            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-            assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
-            assertThat(task.hasTagInclude("freeDebug-include-tag")).isTrue()
-            assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
+            assertThat(task.tagIncludes).contains("global-include-tag", "freeDebug-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("paidRelease-include-tag")
+            assertThat(task.tagExcludes).contains("global-exclude-tag")
 
-            assertThat(task.hasEngineInclude("paid-include-engine")).isFalse()
+            assertThat(task.engineIncludes).doesNotContain("paid-include-engine")
 
-            assertThat(task.hasPackageInclude("com.example.package1")).isTrue()
-            assertThat(task.hasPackageInclude("com.example.paid")).isFalse()
-            assertThat(task.hasPackageInclude("com.example.paid.release")).isFalse()
+            assertThat(task.packageIncludes).contains("com.example.package1")
+            assertThat(task.packageIncludes).doesNotContain("com.example.paid",
+                "com.example.paid.release")
           }
 
           it("applies freeRelease configuration correctly") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeRelease")
-            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-            assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
-            assertThat(task.hasTagInclude("freeDebug-include-tag")).isFalse()
-            assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
+            assertThat(task.tagIncludes).contains("global-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag",
+                "paidRelease-include-tag")
+            assertThat(task.tagExcludes).contains("global-exclude-tag")
 
-            assertThat(task.hasEngineInclude("paid-include-engine")).isFalse()
+            assertThat(task.engineIncludes).doesNotContain("paid-include-engine")
 
-            assertThat(task.hasPackageInclude("com.example.package1")).isTrue()
-            assertThat(task.hasPackageInclude("com.example.paid")).isFalse()
-            assertThat(task.hasPackageInclude("com.example.paid.release")).isFalse()
+            assertThat(task.packageIncludes).contains("com.example.package1")
+            assertThat(task.packageIncludes).doesNotContain("com.example.paid",
+                "com.example.paid.release")
           }
 
           it("applies paidDebug configuration correctly") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidDebug")
-            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-            assertThat(task.hasTagExclude("global-exclude-tag")).isTrue()
-            assertThat(task.hasTagInclude("freeDebug-include-tag")).isFalse()
-            assertThat(task.hasTagInclude("paidRelease-include-tag")).isFalse()
+            assertThat(task.tagIncludes).contains("global-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag",
+                "paidRelease-include-tag")
+            assertThat(task.tagExcludes).contains("global-exclude-tag")
 
-            assertThat(task.hasEngineInclude("paid-include-engine")).isTrue()
+            assertThat(task.engineIncludes).contains("paid-include-engine")
 
-            assertThat(task.hasPackageInclude("com.example.package1")).isFalse()
-            assertThat(task.hasPackageExclude("com.example.package1")).isTrue()
-            assertThat(task.hasPackageInclude("com.example.paid")).isTrue()
-            assertThat(task.hasPackageInclude("com.example.paid.release")).isFalse()
+            assertThat(task.packageIncludes).contains("com.example.paid")
+            assertThat(task.packageExcludes).contains("com.example.package1")
+            assertThat(task.packageIncludes).doesNotContain("com.example.package1",
+                "com.example.paid.release")
           }
 
           it("applies paidRelease configuration correctly") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidRelease")
-            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-            assertThat(task.hasTagInclude("global-exclude-tag")).isTrue()
-            assertThat(task.hasTagExclude("global-exclude-tag")).isFalse()
-            assertThat(task.hasTagInclude("freeDebug-include-tag")).isFalse()
-            assertThat(task.hasTagInclude("paidRelease-include-tag")).isTrue()
+            assertThat(task.tagIncludes).contains("global-include-tag", "global-exclude-tag",
+                "paidRelease-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag")
+            assertThat(task.tagExcludes).doesNotContain("global-exclude-tag")
 
-            assertThat(task.hasEngineInclude("paid-include-engine")).isTrue()
+            assertThat(task.engineIncludes).contains("paid-include-engine")
 
-            assertThat(task.hasPackageInclude("com.example.package1")).isFalse()
-            assertThat(task.hasPackageExclude("com.example.package1")).isTrue()
-            assertThat(task.hasPackageInclude("com.example.paid")).isTrue()
-            assertThat(task.hasPackageInclude("com.example.paid.release")).isTrue()
+            assertThat(task.packageIncludes).contains("com.example.paid",
+                "com.example.paid.release")
+            assertThat(task.packageIncludes).doesNotContain("com.example.package1")
+            assertThat(task.packageExcludes).contains("com.example.package1")
           }
         }
 
@@ -1130,6 +1141,7 @@ class PluginSpec : Spek({
               engines {
                 include("global-include-engine")
               }
+              includeClassNamePattern("pattern123")
             }
             filters("debug") {
               tags {
@@ -1138,6 +1150,8 @@ class PluginSpec : Spek({
               engines {
                 exclude("debug-exclude-engine")
               }
+              excludeClassNamePattern("pattern123")
+              excludeClassNamePattern("debug-pattern")
             }
             filters("release") {
               tags {
@@ -1147,6 +1161,7 @@ class PluginSpec : Spek({
                 include("rel-include-engine")
                 exclude("global-include-engine")
               }
+              includeClassNamePattern("release-pattern")
             }
           }
 
@@ -1154,25 +1169,30 @@ class PluginSpec : Spek({
 
           it("applies configuration correctly to the debug task") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestDebug")
-            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-            assertThat(task.hasTagExclude("debug-exclude-tag")).isTrue()
-            assertThat(task.hasTagInclude("rel-include-tag")).isFalse()
+            assertThat(task.tagIncludes).contains("global-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("rel-include-tag")
+            assertThat(task.tagExcludes).contains("debug-exclude-tag")
 
-            assertThat(task.hasEngineInclude("global-include-engine")).isTrue()
-            assertThat(task.hasEngineExclude("debug-exclude-engine")).isTrue()
-            assertThat(task.hasEngineInclude("rel-include-engine")).isFalse()
+            assertThat(task.engineIncludes).contains("global-include-engine")
+            assertThat(task.engineIncludes).doesNotContain("rel-include-engine")
+            assertThat(task.engineExcludes).contains("debug-exclude-engine")
+
+            assertThat(task.classNamePatternIncludes).doesNotContain("pattern123")
+            assertThat(task.classNamePatternExcludes).contains("pattern123", "debug-pattern")
           }
 
           it("applies configuration correctly to the release task") {
             val task = project.tasks.get<JUnit5Task>("junitPlatformTestRelease")
-            assertThat(task.hasTagInclude("global-include-tag")).isTrue()
-            assertThat(task.hasTagInclude("rel-include-tag")).isTrue()
-            assertThat(task.hasTagExclude("debug-exclude-tag")).isFalse()
+            assertThat(task.tagIncludes).contains("global-include-tag", "rel-include-tag")
+            assertThat(task.tagExcludes).doesNotContain("debug-exclude-tag")
 
-            assertThat(task.hasEngineInclude("global-include-engine")).isFalse()
-            assertThat(task.hasEngineExclude("global-include-engine")).isTrue()
-            assertThat(task.hasEngineInclude("rel-include-engine")).isTrue()
-            assertThat(task.hasEngineExclude("debug-exclude-engine")).isFalse()
+            assertThat(task.engineIncludes).contains("rel-include-engine")
+            assertThat(task.engineIncludes).doesNotContain("global-include-engine")
+            assertThat(task.engineExcludes).contains("global-include-engine")
+            assertThat(task.engineExcludes).doesNotContain("debug-exclude-engine")
+
+            assertThat(task.classNamePatternIncludes).contains("pattern123", "release-pattern")
+            assertThat(task.classNamePatternExcludes).doesNotContain("pattern123")
           }
         }
       }

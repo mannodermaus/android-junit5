@@ -83,17 +83,21 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
 
   /* JUnit5Task */
 
-  override fun hasPackageInclude(name: String) = this.argumentValues("--include-package").any { it == name }
+  override val classNamePatternIncludes get() = this.argumentValues("-n")
 
-  override fun hasPackageExclude(name: String) = this.argumentValues("--exclude-package").any { it == name }
+  override val classNamePatternExcludes get() = this.argumentValues("-N")
 
-  override fun hasTagInclude(tag: String) = this.argumentValues("-t").any { it == tag }
+  override val packageIncludes get() = this.argumentValues("--include-package")
 
-  override fun hasTagExclude(tag: String) = this.argumentValues("-T").any { it == tag }
+  override val packageExcludes get() = this.argumentValues("--exclude-package")
 
-  override fun hasEngineInclude(name: String) = this.argumentValues("-e").any { it == name }
+  override val tagIncludes get() = this.argumentValues("-t")
 
-  override fun hasEngineExclude(name: String) = this.argumentValues("-E").any { it == name }
+  override val tagExcludes get() = this.argumentValues("-T")
+
+  override val engineIncludes get() = this.argumentValues("-e")
+
+  override val engineExcludes get() = this.argumentValues("-E")
 
   /**
    * Configuration closure for an Android JUnit5 test task.
@@ -188,6 +192,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
         junit5: AndroidJUnitPlatformExtension) {
       task.inputs.property("enableStandardTestTask", junit5.enableStandardTestTask)
       task.inputs.property("configurationParameters", junit5.configurationParameters)
+
       task.inputs.property("selectors.uris", junit5.selectors.uris)
       task.inputs.property("selectors.files", junit5.selectors.files)
       task.inputs.property("selectors.directories", junit5.selectors.directories)
@@ -195,14 +200,17 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
       task.inputs.property("selectors.classes", junit5.selectors.classes)
       task.inputs.property("selectors.methods", junit5.selectors.methods)
       task.inputs.property("selectors.resources", junit5.selectors.resources)
-      task.inputs.property("filters.engines.include", configuration.combinedEngines.include)
-      task.inputs.property("filters.engines.exclude", configuration.combinedEngines.exclude)
-      task.inputs.property("filters.tags.include", configuration.combinedTags.include)
-      task.inputs.property("filters.tags.exclude", configuration.combinedTags.exclude)
+
+      task.inputs.property("filters.engines.include", configuration.combinedIncludeEngines)
+      task.inputs.property("filters.engines.exclude", configuration.combinedExcludeEngines)
+      task.inputs.property("filters.tags.include", configuration.combinedIncludeTags)
+      task.inputs.property("filters.tags.exclude", configuration.combinedExcludeTags)
+      task.inputs.property("filters.packages.include", configuration.combinedIncludePackages)
+      task.inputs.property("filters.packages.exclude", configuration.combinedExcludePackages)
       task.inputs.property("filters.includeClassNamePatterns",
-          junit5.filters.includeClassNamePatterns)
-      task.inputs.property("filters.packages.include", junit5.filters.packages.include)
-      task.inputs.property("filters.packages.exclude", junit5.filters.packages.exclude)
+          configuration.combinedIncludeClassNamePatterns)
+      task.inputs.property("filters.excludeClassNamePatterns",
+          configuration.combinedExcludeClassNamePatterns)
 
       junit5.logManager?.let {
         task.systemProperty("java.util.logging.manager", it)
@@ -276,14 +284,14 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
       }
 
       // Filters
-      junit5.filters.includeClassNamePatterns.forEach { args += arrayOf("-n", it) }
-      junit5.filters.excludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
-      configuration.combinedPackages.include.forEach { args += arrayOf("--include-package", it) }
-      configuration.combinedPackages.exclude.forEach { args += arrayOf("--exclude-package", it) }
-      configuration.combinedTags.include.forEach { args += arrayOf("-t", it) }
-      configuration.combinedTags.exclude.forEach { args += arrayOf("-T", it) }
-      configuration.combinedEngines.include.forEach { args += arrayOf("-e", it) }
-      configuration.combinedEngines.exclude.forEach { args += arrayOf("-E", it) }
+      configuration.combinedIncludeClassNamePatterns.forEach { args += arrayOf("-n", it) }
+      configuration.combinedExcludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
+      configuration.combinedIncludePackages.forEach { args += arrayOf("--include-package", it) }
+      configuration.combinedExcludePackages.forEach { args += arrayOf("--exclude-package", it) }
+      configuration.combinedIncludeTags.forEach { args += arrayOf("-t", it) }
+      configuration.combinedExcludeTags.forEach { args += arrayOf("-T", it) }
+      configuration.combinedIncludeEngines.forEach { args += arrayOf("-e", it) }
+      configuration.combinedExcludeEngines.forEach { args += arrayOf("-E", it) }
 
       // Custom Configuration Parameters
       junit5.configurationParameters.forEach { entry ->

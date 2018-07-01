@@ -15,12 +15,14 @@ import org.gradle.process.ProcessForkOptions
  * not the "Run All" task.
  */
 interface JUnit5Task : Task {
-  fun hasPackageInclude(name: String): Boolean
-  fun hasPackageExclude(name: String): Boolean
-  fun hasTagInclude(tag: String): Boolean
-  fun hasTagExclude(tag: String): Boolean
-  fun hasEngineInclude(name: String): Boolean
-  fun hasEngineExclude(name: String): Boolean
+  val classNamePatternIncludes: Collection<String>
+  val classNamePatternExcludes: Collection<String>
+  val packageIncludes: Collection<String>
+  val packageExcludes: Collection<String>
+  val tagIncludes: Collection<String>
+  val tagExcludes: Collection<String>
+  val engineIncludes: Collection<String>
+  val engineExcludes: Collection<String>
 }
 
 /**
