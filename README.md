@@ -111,8 +111,6 @@ limitations under the License.
 
 See also the [full License text](LICENSE).
 
-
-
  [junit5gh]: https://github.com/junit-team/junit5
  [junit5ug]: https://junit.org/junit5/docs/current/user-guide
  [junit5config]: http://junit.org/junit5/docs/current/user-guide/#running-tests-build-gradle-junit-configure
