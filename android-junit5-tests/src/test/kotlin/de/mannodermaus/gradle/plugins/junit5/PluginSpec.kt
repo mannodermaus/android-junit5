@@ -5,19 +5,20 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.argumentValues
+import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
-import de.mannodermaus.gradle.plugins.junit5.util.TaskUtils.argument
+import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5Task
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
-import de.mannodermaus.gradle.plugins.junit5.util.getArgument
 import de.mannodermaus.gradle.plugins.junit5.util.throws
 import de.mannodermaus.gradle.plugins.junit5.util.times
 import org.assertj.core.api.Assertions.assertThat
@@ -32,6 +33,8 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.api.lifecycle.CachingMode.SCOPE
+import org.junit.platform.commons.util.PreconditionViolationException
+import org.junit.platform.engine.discovery.ClassNameFilter
 
 /**
  * Unit Tests related to the plugin's configurability.
@@ -112,6 +115,29 @@ class PluginSpec : Spek({
       it("throws an error") {
         assertThat(expect.message)
             .contains("instrumentationTests.enabled true")
+      }
+    }
+
+    on("configuring unavailable DSL values") {
+      val project = testProjectBuilder
+          .asAndroidLibrary()
+          .applyJunit5Plugin(true)
+          .build()
+
+      project.android.testOptions.junitPlatform {
+        filters("unknown") {
+          tags {
+            include("doesnt-matter")
+          }
+        }
+      }
+
+      it("doesn't have a filters extension point for an unknown build type") {
+        val expected = throws<ProjectConfigurationException> { project.evaluate() }
+        assertAll(
+            { assertThat(expected.message?.contains("Extension with name")) },
+            { assertThat(expected.message?.contains("does not exist")) }
+        )
       }
     }
 
@@ -196,6 +222,8 @@ class PluginSpec : Spek({
 
       on("build & evaluate") {
         val project = testProjectBuilder.buildAndEvaluate()
+        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
+            "junitPlatform")
 
         it("creates a JUnit 5 dependency handler") {
           assertThat(project.dependencies.junit5).isNotNull()
@@ -211,6 +239,18 @@ class PluginSpec : Spek({
               .isNull()
         }
 
+        it("adds an JUnit 5 extension point to the testOptions") {
+          assertThat(ju5).isNotNull()
+        }
+
+        it("adds a general-purpose filter to the JUnit 5 extension point") {
+          val extension = ju5.extensionByName<FiltersExtension>("filters")
+          assertThat(extension).isNotNull()
+          assertThat(ju5.filters).isEqualTo(extension)
+          assertThat(ju5.findFilters()).isEqualTo(extension)
+          assertThat(ju5.findFilters(qualifier = null)).isEqualTo(extension)
+        }
+
         listOf("debug", "release").forEach { buildType ->
           val buildTypeName = buildType.capitalize()
 
@@ -222,6 +262,12 @@ class PluginSpec : Spek({
           it("doesn't create a Jacoco task for the $buildType build type") {
             assertThat(project.tasks.findByName("jacocoTestReport$buildTypeName"))
                 .isNull()
+          }
+
+          it("adds a $buildType-specific filter to the JUnit 5 extension point") {
+            val extension = ju5.extensionByName<FiltersExtension>("${buildType}Filters")
+            assertThat(extension).isNotNull()
+            assertThat(ju5.findFilters(qualifier = buildType)).isEqualTo(extension)
           }
         }
       }
@@ -351,6 +397,30 @@ class PluginSpec : Spek({
         }
       }
 
+      on("applying configuration parameters") {
+        val project = testProjectBuilder.build()
+
+        it("throws an exception if the key is empty") {
+          val expected = throws<PreconditionViolationException> {
+            project.android.testOptions.junitPlatform {
+              configurationParameter("", "some-value")
+            }
+          }
+
+          assertThat(expected.message).contains("key must not be blank")
+        }
+
+        it("throws an exception if the key contains illegal characters") {
+          val expected = throws<PreconditionViolationException> {
+            project.android.testOptions.junitPlatform {
+              configurationParameter("illegal=key", "some-value")
+            }
+          }
+
+          assertThat(expected.message).contains("key must not contain '='")
+        }
+      }
+
       on("describing task dependencies") {
         val project = testProjectBuilder.build()
         val defaultTaskDep = project.task("onlyDefaultTask")
@@ -399,9 +469,9 @@ class PluginSpec : Spek({
 
           it("uses that directory for $buildType test task") {
             val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTest$buildTypeName")
-            val argument = task.getArgument("--reports-dir")
-            assertThat(argument)
-                .endsWith("/other-path/test-reports/$buildType")
+            val argument = task.argumentValues("--reports-dir")
+            assertThat(argument).hasSize(1)
+            assertThat(argument[0]).endsWith("/other-path/test-reports/$buildType")
           }
         }
       }
@@ -438,25 +508,42 @@ class PluginSpec : Spek({
 
         project.evaluate()
 
-        (listOf("free", "paid") * listOf("debug", "release")).forEach { (flavor, buildType) ->
-          val variantName = "$flavor${buildType.capitalize()}"
+        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
+            "junitPlatform")
 
-          it("creates task for build variant '$variantName'") {
-            assertThat(project.tasks.findByName("junitPlatformTest${variantName.capitalize()}"))
-                .isNotNull()
+        listOf("free", "paid").forEach { flavor ->
+          it("adds a $flavor-specific filter to the JUnit 5 extension point") {
+            val extension = ju5.extensionByName<FiltersExtension>("${flavor}Filters")
+            assertThat(extension).isNotNull()
+            assertThat(ju5.findFilters(qualifier = flavor)).isEqualTo(extension)
           }
 
-          it("hooks '$variantName' into the main task") {
-            assertThat(project.tasks.getByName("junitPlatformTest")
-                .dependsOn.map { (it as Task).name })
-                .contains("junitPlatformTest${variantName.capitalize()}")
+          listOf("debug", "release").forEach { buildType ->
+            val variantName = "$flavor${buildType.capitalize()}"
+
+            it("creates task for build variant '$variantName'") {
+              assertThat(project.tasks.findByName("junitPlatformTest${variantName.capitalize()}"))
+                  .isNotNull()
+            }
+
+            it("hooks '$variantName' into the main task") {
+              assertThat(project.tasks.getByName("junitPlatformTest")
+                  .dependsOn.map { (it as Task).name })
+                  .contains("junitPlatformTest${variantName.capitalize()}")
+            }
+
+            it("adds a $variantName-specific filter to the JUnit 5 extension point") {
+              val extension = ju5.extensionByName<FiltersExtension>("${variantName}Filters")
+              assertThat(extension).isNotNull()
+              assertThat(ju5.findFilters(qualifier = variantName)).isEqualTo(extension)
+            }
           }
         }
 
         it("uses unique report directories for all variants") {
           val tasks = project.tasks.withType(AndroidJUnit5UnitTest::class.java)
           val reportDirsCount = tasks
-              .map { it.getArgument("--reports-dir") }
+              .mapNotNull { it.argumentValues("--reports-dir").getOrNull(0) }
               .distinct()
               .count()
 
@@ -515,7 +602,9 @@ class PluginSpec : Spek({
             val projectConfig = ProjectConfig(project)
             val task = project.tasks.get<AndroidJUnit5UnitTest>(
                 "junitPlatformTest${buildType.capitalize()}")
-            val folders = argument(task, "--scan-class-path")?.split(":") ?: listOf()
+            val folders = task.argumentValues("--scan-class-path")
+                .getOrNull(0)
+                ?.split(":") ?: emptyList()
 
             val variant = projectConfig.unitTestVariants.find { it.name == buildType }
             require(variant != null)
@@ -889,6 +978,221 @@ class PluginSpec : Spek({
                     }
                   }
             }
+          }
+        }
+      }
+
+      context("filters DSL") {
+        val project by memoized { testProjectBuilder.build() }
+
+        on("using no custom classNamePatterns") {
+          project.evaluate()
+
+          listOf("debug", "release").forEach { buildType ->
+            it("uses the default pattern for the $buildType task") {
+              val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
+              assertThat(task.classNamePatternIncludes).containsOnly(
+                  ClassNameFilter.STANDARD_INCLUDE_PATTERN)
+            }
+          }
+        }
+
+        on("using global filters") {
+          project.android.testOptions.junitPlatform {
+            filters {
+              tags {
+                include("global-include-tag")
+                exclude("global-exclude-tag")
+              }
+              engines {
+                include("global-include-engine")
+                exclude("global-exclude-engine")
+              }
+              packages {
+                include("com.example.package1")
+                exclude("com.example.package2")
+              }
+            }
+          }
+
+          project.evaluate()
+
+          listOf("debug", "release").forEach { buildType ->
+            it("applies configuration correctly to the $buildType task") {
+              val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
+              assertThat(task.tagIncludes).contains("global-include-tag")
+              assertThat(task.tagExcludes).contains("global-exclude-tag")
+              assertThat(task.engineIncludes).contains("global-include-engine")
+              assertThat(task.engineExcludes).contains("global-exclude-engine")
+              assertThat(task.packageIncludes).contains("com.example.package1")
+              assertThat(task.packageExcludes).contains("com.example.package2")
+            }
+          }
+        }
+
+        on("using flavor-specific filters") {
+          project.android.flavorDimensions("tier")
+          project.android.productFlavors.apply {
+            create("free").dimension = "tier"
+            create("paid").dimension = "tier"
+          }
+
+          project.android.testOptions.junitPlatform {
+            filters {
+              tags {
+                include("global-include-tag")
+                exclude("global-exclude-tag")
+              }
+              packages {
+                include("com.example.package1")
+              }
+            }
+            filters("paid") {
+              engines {
+                include("paid-include-engine")
+              }
+              packages {
+                include("com.example.paid")
+                exclude("com.example.package1")
+              }
+            }
+            filters("freeDebug") {
+              tags {
+                include("freeDebug-include-tag")
+              }
+            }
+            filters("paidRelease") {
+              tags {
+                include("paidRelease-include-tag")
+                include("global-exclude-tag")
+              }
+              packages {
+                include("com.example.paid.release")
+              }
+            }
+          }
+
+          project.evaluate()
+
+          it("applies freeDebug configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeDebug")
+            assertThat(task.tagIncludes).contains("global-include-tag", "freeDebug-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("paidRelease-include-tag")
+            assertThat(task.tagExcludes).contains("global-exclude-tag")
+
+            assertThat(task.engineIncludes).doesNotContain("paid-include-engine")
+
+            assertThat(task.packageIncludes).contains("com.example.package1")
+            assertThat(task.packageIncludes).doesNotContain("com.example.paid",
+                "com.example.paid.release")
+          }
+
+          it("applies freeRelease configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeRelease")
+            assertThat(task.tagIncludes).contains("global-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag",
+                "paidRelease-include-tag")
+            assertThat(task.tagExcludes).contains("global-exclude-tag")
+
+            assertThat(task.engineIncludes).doesNotContain("paid-include-engine")
+
+            assertThat(task.packageIncludes).contains("com.example.package1")
+            assertThat(task.packageIncludes).doesNotContain("com.example.paid",
+                "com.example.paid.release")
+          }
+
+          it("applies paidDebug configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidDebug")
+            assertThat(task.tagIncludes).contains("global-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag",
+                "paidRelease-include-tag")
+            assertThat(task.tagExcludes).contains("global-exclude-tag")
+
+            assertThat(task.engineIncludes).contains("paid-include-engine")
+
+            assertThat(task.packageIncludes).contains("com.example.paid")
+            assertThat(task.packageExcludes).contains("com.example.package1")
+            assertThat(task.packageIncludes).doesNotContain("com.example.package1",
+                "com.example.paid.release")
+          }
+
+          it("applies paidRelease configuration correctly") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidRelease")
+            assertThat(task.tagIncludes).contains("global-include-tag", "global-exclude-tag",
+                "paidRelease-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag")
+            assertThat(task.tagExcludes).doesNotContain("global-exclude-tag")
+
+            assertThat(task.engineIncludes).contains("paid-include-engine")
+
+            assertThat(task.packageIncludes).contains("com.example.paid",
+                "com.example.paid.release")
+            assertThat(task.packageIncludes).doesNotContain("com.example.package1")
+            assertThat(task.packageExcludes).contains("com.example.package1")
+          }
+        }
+
+        on("using build-type-specific filters") {
+          project.android.testOptions.junitPlatform {
+            filters {
+              tags {
+                include("global-include-tag")
+              }
+              engines {
+                include("global-include-engine")
+              }
+              includeClassNamePattern("pattern123")
+            }
+            filters("debug") {
+              tags {
+                exclude("debug-exclude-tag")
+              }
+              engines {
+                exclude("debug-exclude-engine")
+              }
+              excludeClassNamePattern("pattern123")
+              excludeClassNamePattern("debug-pattern")
+            }
+            filters("release") {
+              tags {
+                include("rel-include-tag")
+              }
+              engines {
+                include("rel-include-engine")
+                exclude("global-include-engine")
+              }
+              includeClassNamePattern("release-pattern")
+            }
+          }
+
+          project.evaluate()
+
+          it("applies configuration correctly to the debug task") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestDebug")
+            assertThat(task.tagIncludes).contains("global-include-tag")
+            assertThat(task.tagIncludes).doesNotContain("rel-include-tag")
+            assertThat(task.tagExcludes).contains("debug-exclude-tag")
+
+            assertThat(task.engineIncludes).contains("global-include-engine")
+            assertThat(task.engineIncludes).doesNotContain("rel-include-engine")
+            assertThat(task.engineExcludes).contains("debug-exclude-engine")
+
+            assertThat(task.classNamePatternIncludes).doesNotContain("pattern123")
+            assertThat(task.classNamePatternExcludes).contains("pattern123", "debug-pattern")
+          }
+
+          it("applies configuration correctly to the release task") {
+            val task = project.tasks.get<JUnit5Task>("junitPlatformTestRelease")
+            assertThat(task.tagIncludes).contains("global-include-tag", "rel-include-tag")
+            assertThat(task.tagExcludes).doesNotContain("debug-exclude-tag")
+
+            assertThat(task.engineIncludes).contains("rel-include-engine")
+            assertThat(task.engineIncludes).doesNotContain("global-include-engine")
+            assertThat(task.engineExcludes).contains("global-include-engine")
+            assertThat(task.engineExcludes).doesNotContain("debug-exclude-engine")
+
+            assertThat(task.classNamePatternIncludes).contains("pattern123", "release-pattern")
+            assertThat(task.classNamePatternExcludes).doesNotContain("pattern123")
           }
         }
       }

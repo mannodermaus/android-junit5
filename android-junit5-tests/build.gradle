@@ -77,7 +77,7 @@ dependencies {
   testImplementation "junit:junit:$JUNIT4_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_JUPITER_VERSION"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
+  testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
   testImplementation "org.jetbrains.spek:spek-api:$SPEK_VERSION"
   testRuntimeOnly "org.jetbrains.spek:spek-junit-platform-engine:$SPEK_VERSION"
   testImplementation "org.junit-pioneer:junit-pioneer:$JUNIT_PIONEER_VERSION"

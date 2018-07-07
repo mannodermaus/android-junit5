@@ -45,6 +45,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     project.configureDependencies()
 
     project.afterEvaluate {
+      it.evaluateDsl()
       it.configureTestTasks()
       it.configureJacocoTasks()
       it.applyEvaluatedConfiguration()
@@ -53,7 +54,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
   private fun Project.configureExtensions() {
     // Hook the JUnit Platform configuration into the Android testOptions
-    attachDsl(this)
+    attachDsl(this, projectConfig)
   }
 
   private fun Project.configureDependencies() {
@@ -83,6 +84,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     // (runtime dependency is being added after evaluation, though)
     val runnerArgs = this.android.defaultConfig.testInstrumentationRunnerArguments
     runnerArgs.append(RUNNER_BUILDER_ARG, JUNIT5_RUNNER_BUILDER_CLASS_NAME)
+  }
+
+  private fun Project.evaluateDsl() {
+    evaluateDsl(this)
   }
 
   private fun Project.configureTestTasks() {

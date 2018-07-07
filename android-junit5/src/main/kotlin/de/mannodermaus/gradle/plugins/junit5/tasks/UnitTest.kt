@@ -7,6 +7,8 @@ import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.argumentValues
+import de.mannodermaus.gradle.plugins.junit5.internal.createJUnit5ConfigurationFor
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
@@ -38,7 +40,7 @@ private const val VERIFICATION_GROUP = JavaBasePlugin.VERIFICATION_GROUP
  * pretty closely, and it takes advantage of the efforts related to
  * classpath construction prevalent in the platform's default implementation.
  */
-open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
+open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest, JUnit5Task {
 
   companion object {
     fun find(project: Project, variant: BaseVariant): AndroidJUnit5UnitTest {
@@ -79,6 +81,24 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
   @Suppress("LeakingThis")
   override val javaForkOptions = this as JavaForkOptions
 
+  /* JUnit5Task */
+
+  override val classNamePatternIncludes get() = this.argumentValues("-n")
+
+  override val classNamePatternExcludes get() = this.argumentValues("-N")
+
+  override val packageIncludes get() = this.argumentValues("--include-package")
+
+  override val packageExcludes get() = this.argumentValues("--exclude-package")
+
+  override val tagIncludes get() = this.argumentValues("-t")
+
+  override val tagExcludes get() = this.argumentValues("-T")
+
+  override val engineIncludes get() = this.argumentValues("-e")
+
+  override val engineExcludes get() = this.argumentValues("-E")
+
   /**
    * Configuration closure for an Android JUnit5 test task.
    */
@@ -89,6 +109,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
   ) : TaskConfigAction<AndroidJUnit5UnitTest> {
 
     private val scope: VariantScope = variant.variantData.scope
+    private val configuration = project.createJUnit5ConfigurationFor(variant)
 
     override fun getName(): String = scope.getTaskName(TASK_NAME_DEFAULT)
 
@@ -171,6 +192,7 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
         junit5: AndroidJUnitPlatformExtension) {
       task.inputs.property("enableStandardTestTask", junit5.enableStandardTestTask)
       task.inputs.property("configurationParameters", junit5.configurationParameters)
+
       task.inputs.property("selectors.uris", junit5.selectors.uris)
       task.inputs.property("selectors.files", junit5.selectors.files)
       task.inputs.property("selectors.directories", junit5.selectors.directories)
@@ -178,14 +200,17 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       task.inputs.property("selectors.classes", junit5.selectors.classes)
       task.inputs.property("selectors.methods", junit5.selectors.methods)
       task.inputs.property("selectors.resources", junit5.selectors.resources)
-      task.inputs.property("filters.engines.include", junit5.filters.engines.include)
-      task.inputs.property("filters.engines.exclude", junit5.filters.engines.exclude)
-      task.inputs.property("filters.tags.include", junit5.filters.tags.include)
-      task.inputs.property("filters.tags.exclude", junit5.filters.tags.exclude)
+
+      task.inputs.property("filters.engines.include", configuration.combinedIncludeEngines)
+      task.inputs.property("filters.engines.exclude", configuration.combinedExcludeEngines)
+      task.inputs.property("filters.tags.include", configuration.combinedIncludeTags)
+      task.inputs.property("filters.tags.exclude", configuration.combinedExcludeTags)
+      task.inputs.property("filters.packages.include", configuration.combinedIncludePackages)
+      task.inputs.property("filters.packages.exclude", configuration.combinedExcludePackages)
       task.inputs.property("filters.includeClassNamePatterns",
-          junit5.filters.includeClassNamePatterns)
-      task.inputs.property("filters.packages.include", junit5.filters.packages.include)
-      task.inputs.property("filters.packages.exclude", junit5.filters.packages.exclude)
+          configuration.combinedIncludeClassNamePatterns)
+      task.inputs.property("filters.excludeClassNamePatterns",
+          configuration.combinedExcludeClassNamePatterns)
 
       junit5.logManager?.let {
         task.systemProperty("java.util.logging.manager", it)
@@ -259,14 +284,14 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       }
 
       // Filters
-      junit5.filters.includeClassNamePatterns.forEach { args += arrayOf("-n", it) }
-      junit5.filters.excludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
-      junit5.filters.packages.include.forEach { args += arrayOf("--include-package", it) }
-      junit5.filters.packages.exclude.forEach { args += arrayOf("--exclude-package", it) }
-      junit5.filters.tags.include.forEach { args += arrayOf("-t", it) }
-      junit5.filters.tags.exclude.forEach { args += arrayOf("-T", it) }
-      junit5.filters.engines.include.forEach { args += arrayOf("-e", it) }
-      junit5.filters.engines.exclude.forEach { args += arrayOf("-E", it) }
+      configuration.combinedIncludeClassNamePatterns.forEach { args += arrayOf("-n", it) }
+      configuration.combinedExcludeClassNamePatterns.forEach { args += arrayOf("-N", it) }
+      configuration.combinedIncludePackages.forEach { args += arrayOf("--include-package", it) }
+      configuration.combinedExcludePackages.forEach { args += arrayOf("--exclude-package", it) }
+      configuration.combinedIncludeTags.forEach { args += arrayOf("-t", it) }
+      configuration.combinedExcludeTags.forEach { args += arrayOf("-T", it) }
+      configuration.combinedIncludeEngines.forEach { args += arrayOf("-e", it) }
+      configuration.combinedExcludeEngines.forEach { args += arrayOf("-E", it) }
 
       // Custom Configuration Parameters
       junit5.configurationParameters.forEach { entry ->

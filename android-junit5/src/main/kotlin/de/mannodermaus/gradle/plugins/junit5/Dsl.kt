@@ -3,8 +3,10 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extend
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.extensionExists
 import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5UnitTest
 import groovy.lang.Closure
+import groovy.lang.GroovyObjectSupport
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.internal.DefaultDomainObjectSet
@@ -15,28 +17,91 @@ import org.junit.platform.console.options.Details
 import org.junit.platform.engine.discovery.ClassNameFilter
 import java.io.File
 
-internal fun attachDsl(project: Project) {
-  // Hook the JUnit Platform configuration into the Android testOptions
+internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
+  // Hook the JUnit Platform configuration into the Android testOptions,
+  // adding an extension point for all variants, as well as the default one
+  // shared between them
   project.android.testOptions
       .extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(project)) { ju5 ->
-        ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
-        ju5.extend<FiltersExtension>(FILTERS_EXTENSION_NAME) { filters ->
-          filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
-          filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
-          filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
+        // General-purpose filters
+        ju5.attachFiltersDsl(qualifier = null)
+
+        // Variant-specific filters:
+        // This will add filters for build types (e.g. "debug" or "release")
+        // as well as composed variants  (e.g. "freeDebug" or "paidRelease")
+        // and product flavors (e.g. "free" or "paid")
+        project.android.buildTypes.all { buildType ->
+          ju5.attachFiltersDsl(qualifier = buildType.name)
         }
+
+        projectConfig.unitTestVariants.all { variant ->
+          ju5.attachFiltersDsl(qualifier = variant.name)
+          ju5.attachFiltersDsl(qualifier = variant.buildType.name)
+        }
+
+        project.android.productFlavors.all { flavor ->
+          ju5.attachFiltersDsl(qualifier = flavor.name)
+        }
+
+        // Selectors for test classes
+        ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
       }
 }
+
+internal fun evaluateDsl(project: Project) {
+  val ju5 = project.android.testOptions
+      .extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
+
+  ju5._filters.forEach { qualifier, configs ->
+    val extensionName = ju5.filtersExtensionName(qualifier)
+    val extension = ju5.extensionByName<FiltersExtension>(extensionName)
+    configs.forEach { config ->
+      extension.config()
+    }
+  }
+}
+
+private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = null) {
+  val extensionName = filtersExtensionName(qualifier)
+
+  if (this.extensionExists(extensionName)) {
+    return
+  }
+
+  this.extend<FiltersExtension>(extensionName) { filters ->
+    filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
+    filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
+    filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
+  }
+}
+
 
 /**
  * The main extension provided through the android-junit5 Gradle plugin.
  * It defines the root of the configuration tree exposed by the plugin,
  * and is located under "android.testOptions" using the name "junitPlatform".
  */
-open class AndroidJUnitPlatformExtension(private val project: Project) {
+open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyObjectSupport() {
 
   operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
     this.config()
+  }
+
+  // Interop with Groovy
+  @Suppress("unused")
+  open fun methodMissing(name: String, args: Any): Any? {
+    if (name.endsWith("Filters")) {
+      // Support for filters() DSL called from Groovy
+      val qualifier = name.substring(0, name.indexOf("Filters"))
+      val closure = (args as Array<*>)[0] as Closure<FiltersExtension>
+      return this.filters(qualifier) {
+        closure.delegate = this
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call(this)
+      }
+    }
+
+    return null
   }
 
   /**
@@ -121,8 +186,8 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    */
   fun configurationParameter(key: String, value: String) {
     Preconditions.notBlank(key, "key must not be blank")
-    Preconditions.condition(!key.contains('='), { "key must not contain \'=\': \"$key\"" })
-    Preconditions.notNull(value, { "value must not be null for key: \"$key\"" })
+    Preconditions.condition(!key.contains('=')) { "key must not contain '=': \"$key\"" }
+    Preconditions.notNull(value) { "value must not be null for key: \"$key\"" }
     _configurationParameters[key] = value
   }
 
@@ -132,6 +197,65 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
   fun configurationParameters(parameters: Map<String, String>) {
     parameters.forEach { configurationParameter(it.key, it.value) }
   }
+
+  /* Filters */
+
+  internal val _filters = mutableMapOf<String?, MutableList<FiltersExtension.() -> Unit>>()
+
+  internal fun filtersExtensionName(qualifier: String? = null) = if (qualifier.isNullOrEmpty())
+    FILTERS_EXTENSION_NAME
+  else
+    "$qualifier${FILTERS_EXTENSION_NAME.capitalize()}"
+
+  /**
+   * Return the {@link FiltersExtension}
+   * for all executed tests, applied to all variants
+   */
+  val filters: FiltersExtension get() = findFilters(qualifier = null)
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for all executed tests, applied to all variants
+   * (Kotlin version)
+   */
+  fun filters(config: FiltersExtension.() -> Unit) {
+    filters(null, config)
+  }
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for all executed tests, applied to all variants
+   * (Groovy version)
+   */
+  fun filters(action: Action<FiltersExtension>) = filters(null) { action.execute(this) }
+
+  /**
+   * Return the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   */
+  fun findFilters(qualifier: String? = null): FiltersExtension {
+    val extensionName = this.filtersExtensionName(qualifier)
+    return extensionByName(extensionName)
+  }
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   * (Kotlin version)
+   */
+  fun filters(qualifier: String? = null, config: FiltersExtension.() -> Unit) {
+    val configs = _filters.getOrDefault(qualifier, mutableListOf())
+    configs += config
+    _filters[qualifier] = configs
+  }
+
+  /**
+   * Configure the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   * (Groovy version)
+   */
+  fun filters(qualifier: String? = null, action: Action<FiltersExtension>) = filters(
+      qualifier) { action.execute(this) }
 
   /**
    * Configure the {@link SelectorsExtension} for this plugin
@@ -143,18 +267,6 @@ open class AndroidJUnitPlatformExtension(private val project: Project) {
    */
   fun selectors(action: Action<SelectorsExtension>) {
     action.execute(selectors)
-  }
-
-  /**
-   * Configure the {@link FiltersExtension} for this plugin
-   */
-  val filters: FiltersExtension get() = extensionByName(FILTERS_EXTENSION_NAME)
-
-  /**
-   * Configure the {@link FiltersExtension} for this plugin
-   */
-  fun filters(action: Action<FiltersExtension>) {
-    action.execute(filters)
   }
 
   /* Android Unit Test support */
@@ -338,19 +450,23 @@ open class FiltersExtension {
   }
 
   /**
-   * List of class name patterns in the form of regular expressions for
+   * Class name patterns in the form of regular expressions for
    * classes that should be <em>included</em> in the test plan.
    *
    * <p>The patterns are combined using OR semantics, i.e. if the fully
    * qualified name of a class matches against at least one of the patterns,
    * the class will be included in the test plan.
-   *
-   * <p>If null, defaults to {@value ClassNameFilter#STANDARD_INCLUDE_PATTERN}
    */
-  private var _includeClassNamePatterns: MutableList<String>? = null
-  val includeClassNamePatterns
-    @Input get() = _includeClassNamePatterns?.toList()
-        ?: listOf(ClassNameFilter.STANDARD_INCLUDE_PATTERN)
+  private val _classNamePatterns = IncludeExcludeContainer()
+  internal val classNamePatterns: IncludeExcludeContainer
+    @Input get() {
+      return if (_classNamePatterns.isEmpty()) {
+        // No custom rules specified, so apply the default filter
+        IncludeExcludeContainer().include(ClassNameFilter.STANDARD_INCLUDE_PATTERN)
+      } else {
+        _classNamePatterns
+      }
+    }
 
   /**
    * Add a pattern to the list of <em>included</em> patterns
@@ -361,15 +477,8 @@ open class FiltersExtension {
    * Add patterns to the list of <em>included</em> patterns
    */
   fun includeClassNamePatterns(vararg patterns: String) {
-    if (_includeClassNamePatterns == null) {
-      _includeClassNamePatterns = mutableListOf()
-    }
-    this._includeClassNamePatterns!!.addAll(patterns)
+    _classNamePatterns.include(*patterns)
   }
-
-  private val _excludeClassNamePatterns = mutableListOf<String>()
-  val excludeClassNamePatterns
-    @Input get() = _excludeClassNamePatterns.toList()
 
   /**
    * Add a pattern to the list of <em>excluded</em> patterns
@@ -380,17 +489,7 @@ open class FiltersExtension {
    * Add patterns to the list of <em>excluded</em> patterns
    */
   fun excludeClassNamePatterns(vararg patterns: String) =
-      this._excludeClassNamePatterns.addAll(patterns)
-
-  /**
-   * List of class name patterns in the form of regular expressions for
-   * classes that should be <em>excluded</em> from the test plan.
-   *
-   * <p>The patterns are combined using OR semantics, i.e. if the fully
-   * qualified name of a class matches against at least one of the patterns,
-   * the class will be excluded from the test plan
-   */
-  fun excludeClassNamePatterns() = _excludeClassNamePatterns.toList()
+      _classNamePatterns.exclude(*patterns)
 
   /**
    * Configure the {@link PackagesExtension} for this plugin
@@ -457,13 +556,44 @@ open class EnginesExtension : IncludeExcludeContainer() {
 }
 
 open class IncludeExcludeContainer {
-  private val _include = mutableListOf<String>()
-  val include @Input get() = _include.toList()
-  fun include(vararg items: String) = this._include.addAll(items)
+  private val _include = mutableSetOf<String>()
+  val include @Input get() = _include.toSet()
+  fun include(vararg items: String) = this.apply {
+    this._include.addAll(items)
+    this._exclude.removeAll(items)
+  }
 
-  private val _exclude = mutableListOf<String>()
-  val exclude @Input get() = _exclude.toList()
-  fun exclude(vararg items: String) = this._exclude.addAll(items)
+  private val _exclude = mutableSetOf<String>()
+  val exclude @Input get() = _exclude.toSet()
+  fun exclude(vararg items: String) = this.apply {
+    this._exclude.addAll(items)
+    this._include.removeAll(items)
+  }
+
+  fun isEmpty() = _include.isEmpty() && _exclude.isEmpty()
+
+  operator fun plus(other: IncludeExcludeContainer): IncludeExcludeContainer {
+    // Fast path, where nothing needs to be merged
+    if (this.isEmpty()) return other
+    if (other.isEmpty()) return this
+
+    // Slow path, where rules need to be merged
+    val result = IncludeExcludeContainer()
+
+    result._include.addAll(this.include)
+    result._include.addAll(other.include)
+    result._include.removeAll(other.exclude)
+
+    result._exclude.addAll(this.exclude)
+    result._exclude.addAll(other.exclude)
+    result._exclude.removeAll(other.include)
+
+    return result
+  }
+
+  override fun toString(): String {
+    return "${super.toString()}(include=$_include, exclude=$_exclude)"
+  }
 }
 
 /**
