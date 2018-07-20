@@ -1,5 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
+import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.scope.TaskConfigAction
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
@@ -8,9 +10,10 @@ import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
+import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
-import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
+import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import java.io.File
@@ -27,9 +30,10 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
     fun create(project: Project,
-        testTask: AndroidJUnit5UnitTest,
+        variant: BaseVariant,
+        testTask: Test,
         directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport {
-      val configAction = ConfigAction(project, testTask, directoryProviders)
+      val configAction = ConfigAction(project, variant, testTask, directoryProviders)
       return project.tasks.create(configAction.name, configAction.type, configAction)
     }
   }
@@ -38,10 +42,13 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
    * Configuration closure for an Android JUnit5 Jacoco Report task.
    */
   private class ConfigAction(
-      project: Project,
-      testTask: AndroidJUnit5UnitTest,
+      val project: Project,
+      val variant: BaseVariant,
+      val testTask: Test,
       private val directoryProviders: Collection<DirectoryProvider>
-  ) : JUnit5TaskConfigAction<AndroidJUnit5JacocoReport>(project, testTask) {
+  ) : TaskConfigAction<AndroidJUnit5JacocoReport> {
+
+    private val scope = variant.variantData.scope
 
     override fun getName(): String = scope.getTaskName(TASK_NAME_DEFAULT)
 
@@ -49,8 +56,6 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
     override fun execute(reportTask: AndroidJUnit5JacocoReport) {
       // Project-level configuration
-      val projectJacoco = project.extensionByName<JacocoPluginExtension>("jacoco")
-      projectJacoco.applyTo(testTask)
       reportTask.dependsOn(testTask)
       reportTask.group = GROUP_REPORTING
       reportTask.description = "Generates Jacoco coverage reports " +

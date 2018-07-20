@@ -4,17 +4,13 @@ import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extend
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionExists
-import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5UnitTest
 import groovy.lang.Closure
 import groovy.lang.GroovyObjectSupport
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.internal.DefaultDomainObjectSet
 import org.gradle.api.tasks.Input
 import org.gradle.util.ConfigureUtil
 import org.junit.platform.commons.util.Preconditions
-import org.junit.platform.console.options.Details
-import org.junit.platform.engine.discovery.ClassNameFilter
 import java.io.File
 
 internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
@@ -42,9 +38,6 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
         project.android.productFlavors.all { flavor ->
           ju5.attachFiltersDsl(qualifier = flavor.name)
         }
-
-        // Selectors for test classes
-        ju5.extend<SelectorsExtension>(SELECTORS_EXTENSION_NAME)
       }
 }
 
@@ -69,7 +62,6 @@ private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = 
   }
 
   this.extend<FiltersExtension>(extensionName) { filters ->
-    filters.extend<PackagesExtension>(PACKAGES_EXTENSION_NAME)
     filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
     filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
   }
@@ -93,7 +85,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
     if (name.endsWith("Filters")) {
       // Support for filters() DSL called from Groovy
       val qualifier = name.substring(0, name.indexOf("Filters"))
-      val closure = (args as Array<*>)[0] as Closure<FiltersExtension>
+      val closure = (args as Array<*>)[0] as Closure<*>
       return this.filters(qualifier) {
         closure.delegate = this
         closure.resolveStrategy = Closure.DELEGATE_FIRST
@@ -129,49 +121,6 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
 
   fun vintageVersion(version: String?) {
     this.vintageVersion = version
-  }
-
-  /**
-   * The directory for the test report files
-   */
-  var reportsDir: File? = null
-
-  fun reportsDir(reportsDir: File?) {
-    // Work around for https://discuss.gradle.org/t/bug-in-project-file-on-windows/19917
-    if (reportsDir is File) {
-      this.reportsDir = reportsDir
-    } else {
-      this.reportsDir = project.file(reportsDir ?: "")
-    }
-  }
-
-  /**
-   * The fully qualified class name of the {@link java.util.logging.LogManager}
-   * to use. The plugin will set the {@code java.util.logging.manager}
-   * system property to this value
-   */
-  var logManager: String? = null
-
-  fun logManager(logManager: String?) {
-    this.logManager = logManager
-  }
-
-  /**
-   * Whether or not the standard Gradle {@code test} task should be enabled
-   */
-  var enableStandardTestTask = false
-
-  fun enableStandardTestTask(state: Boolean) {
-    this.enableStandardTestTask = state
-  }
-
-  /**
-   * Select test execution plan details mode
-   */
-  var details = Details.NONE
-
-  fun details(details: Details) {
-    this.details = details
   }
 
   /**
@@ -256,36 +205,6 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
    */
   fun filters(qualifier: String? = null, action: Action<FiltersExtension>) = filters(
       qualifier) { action.execute(this) }
-
-  /**
-   * Configure the {@link SelectorsExtension} for this plugin
-   */
-  val selectors: SelectorsExtension get() = extensionByName(SELECTORS_EXTENSION_NAME)
-
-  /**
-   * Configure the {@link SelectorsExtension} for this plugin
-   */
-  fun selectors(action: Action<SelectorsExtension>) {
-    action.execute(selectors)
-  }
-
-  /* Android Unit Test support */
-
-  /**
-   * Configures unit test options
-   *
-   * @since 1.0.23
-   */
-  val unitTests = UnitTestOptions(project)
-
-  /**
-   * Configures unit test options
-   *
-   * @since 1.0.23
-   */
-  fun unitTests(closure: Closure<UnitTestOptions>) {
-    ConfigureUtil.configure(closure, unitTests)
-  }
 
   /* Android Instrumentation Test support */
 
@@ -457,51 +376,30 @@ open class FiltersExtension {
    * qualified name of a class matches against at least one of the patterns,
    * the class will be included in the test plan.
    */
-  private val _classNamePatterns = IncludeExcludeContainer()
-  internal val classNamePatterns: IncludeExcludeContainer
-    @Input get() {
-      return if (_classNamePatterns.isEmpty()) {
-        // No custom rules specified, so apply the default filter
-        IncludeExcludeContainer().include(ClassNameFilter.STANDARD_INCLUDE_PATTERN)
-      } else {
-        _classNamePatterns
-      }
-    }
+  val patterns = IncludeExcludeContainer()
 
   /**
    * Add a pattern to the list of <em>included</em> patterns
    */
-  fun includeClassNamePattern(pattern: String) = includeClassNamePatterns(pattern)
+  fun includePattern(pattern: String) = includePatterns(pattern)
 
   /**
    * Add patterns to the list of <em>included</em> patterns
    */
-  fun includeClassNamePatterns(vararg patterns: String) {
-    _classNamePatterns.include(*patterns)
+  fun includePatterns(vararg patterns: String) {
+    this.patterns.include(*patterns)
   }
 
   /**
    * Add a pattern to the list of <em>excluded</em> patterns
    */
-  fun excludeClassNamePattern(pattern: String) = excludeClassNamePatterns(pattern)
+  fun excludePattern(pattern: String) = excludePatterns(pattern)
 
   /**
    * Add patterns to the list of <em>excluded</em> patterns
    */
-  fun excludeClassNamePatterns(vararg patterns: String) =
-      _classNamePatterns.exclude(*patterns)
-
-  /**
-   * Configure the {@link PackagesExtension} for this plugin
-   */
-  val packages: PackagesExtension get() = extensionByName(PACKAGES_EXTENSION_NAME)
-
-  /**
-   * Configure the {@link PackagesExtension} for this plugin
-   */
-  fun packages(action: Action<PackagesExtension>) {
-    action.execute(packages)
-  }
+  fun excludePatterns(vararg patterns: String) =
+      this.patterns.exclude(*patterns)
 
   /**
    * Configure the {@link TagsExtension} for this plugin
@@ -525,15 +423,6 @@ open class FiltersExtension {
    */
   fun engines(action: Action<EnginesExtension>) {
     action.execute(engines)
-  }
-}
-
-/**
- * Package configuration options for the plugin
- */
-open class PackagesExtension : IncludeExcludeContainer() {
-  operator fun invoke(config: PackagesExtension.() -> Unit) {
-    this.config()
   }
 }
 
@@ -593,117 +482,6 @@ open class IncludeExcludeContainer {
 
   override fun toString(): String {
     return "${super.toString()}(include=$_include, exclude=$_exclude)"
-  }
-}
-
-/**
- * Options for controlling how JUnit 5 Unit Tests should be executed
- */
-class UnitTestOptions(private val project: Project) {
-
-  operator fun invoke(config: UnitTestOptions.() -> Unit) {
-    this.config()
-  }
-
-  private val testTasks = DefaultDomainObjectSet<JUnit5UnitTest>(JUnit5UnitTest::class.java)
-
-  /**
-   * Whether or not to apply the Android Gradle Plugin's "testOptions"
-   * to JUnit 5 tasks - true by default.
-   *
-   * Note that this will only affect the following properties assigned
-   * by a "testOptions.unitTests.all" closure:
-   *
-   * - jvmArgs
-   * - systemProperties
-   * - environment variables
-   */
-  var applyDefaultTestOptions = true
-
-  fun applyDefaultTestOptions(state: Boolean) {
-    this.applyDefaultTestOptions = state
-  }
-
-  /**
-   * Whether unmocked methods from android.jar should throw exceptions or return default
-   * values (i.e. zero or null).
-   *
-   * Defaults to false, which will throw exceptions on unmocked method invocations
-   *
-   * @since 1.0.32
-   */
-  var returnDefaultValues: Boolean
-    get() = project.android.testOptions.unitTests.isReturnDefaultValues
-    set(value) {
-      project.android.testOptions.unitTests.isReturnDefaultValues = value
-    }
-
-  /**
-   * Enables unit tests to use Android resources, assets, and manifests.
-   * <p>
-   * If you enable this setting, the Android Gradle Plugin performs resource, asset,
-   * and manifest merging before running your unit tests. Your tests can then inspect a file
-   * called {@code com/android/tools/test_config.properties} on the classpath, which is a Java
-   * properties file with the following keys:
-   *
-   * <ul>
-   *   <li><code>android_sdk_home</code>: the absolute path to the Android SDK.
-   *   <li><code>android_merged_resources</code>: the absolute path to the merged resources
-   *       directory, which contains all the resources from this subproject and all its
-   *       dependencies.
-   *   <li><code>android_merged_assets</code>: the absolute path to the merged assets
-   *       directory. For app subprojects, the merged assets directory contains assets from
-   *       this subproject and its dependencies. For library subprojects, the merged assets
-   *       directory contains only the assets from this subproject.
-   *   <li><code>android_merged_manifest</code>: the absolute path to the merged manifest
-   *       file. Only app subprojects merge manifests of its dependencies. So, library
-   *       subprojects won't include manifest components from their dependencies.
-   *   <li><code>android_custom_package</code>: the package name of the final R class. If you
-   *       modify the application ID in your build scripts, this package name may not match
-   *       the <code>package</code> attribute in the final app manifest.
-   * </ul>
-   *
-   * @since 1.0.32
-   */
-  var includeAndroidResources: Boolean
-    get() = project.android.testOptions.unitTests.isIncludeAndroidResources
-    set(value) {
-      project.android.testOptions.unitTests.isIncludeAndroidResources = value
-    }
-
-  /**
-   * Applies the provided config closure to all JUnit 5 test tasks,
-   * and any task that'll be added in the future
-   * @param configClosure Closure to apply
-   */
-  fun all(configClosure: Closure<JUnit5UnitTest>) {
-    this.testTasks.all(configClosure)
-  }
-
-  /**
-   * Applies the provided config action to all JUnit 5 test tasks,
-   * and any task that'll be added in the future
-   * @param configAction Action to apply
-   */
-  fun all(configAction: Action<JUnit5UnitTest>) {
-    this.testTasks.all(configAction)
-  }
-
-  /**
-   * Applies the provided config action to all JUnit 5 test tasks,
-   * and any task that'll be added in the future
-   * @param action Action to apply
-   */
-  fun all(action: JUnit5UnitTest.() -> Unit) {
-    this.testTasks.all(action)
-  }
-
-  /**
-   * Registers a JUnit 5 test task
-   * @param task The task
-   */
-  fun applyConfiguration(task: JUnit5UnitTest) {
-    this.testTasks.add(task)
   }
 }
 

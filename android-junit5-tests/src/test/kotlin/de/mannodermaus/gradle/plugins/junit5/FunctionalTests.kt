@@ -12,8 +12,8 @@ import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.newFile
 import de.mannodermaus.gradle.plugins.junit5.util.splitToArray
-import org.`junit$pioneer`.jupiter.TempDirectory
-import org.`junit$pioneer`.jupiter.TempDirectory.TempDir
+import org.junitpioneer.jupiter.TempDirectory
+import org.junitpioneer.jupiter.TempDirectory.TempDir
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
@@ -412,7 +412,6 @@ class FunctionalTests {
 
           android.testOptions {
             junitPlatform {
-              details "tree"
               ${extraConfig?.invoke()}
             }
           }

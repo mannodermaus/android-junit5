@@ -6,9 +6,7 @@ const val VERSIONS_RESOURCE_NAME = "versions.properties"
 
 const val EXTENSION_NAME = "junitPlatform"
 const val DEP_CONFIGURATION_NAME = "junitPlatform"
-const val SELECTORS_EXTENSION_NAME = "selectors"
 const val FILTERS_EXTENSION_NAME = "filters"
-const val PACKAGES_EXTENSION_NAME = "packages"
 const val TAGS_EXTENSION_NAME = "tags"
 const val ENGINES_EXTENSION_NAME = "engines"
 

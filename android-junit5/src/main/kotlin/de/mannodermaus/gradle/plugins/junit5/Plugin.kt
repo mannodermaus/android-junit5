@@ -6,15 +6,16 @@ import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.append
+import de.mannodermaus.gradle.plugins.junit5.internal.createJUnit5ConfigurationFor
 import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.internal.loadProperties
 import de.mannodermaus.gradle.plugins.junit5.internal.requireGradle
 import de.mannodermaus.gradle.plugins.junit5.internal.requireVersion
+import de.mannodermaus.gradle.plugins.junit5.internal.testTaskOf
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
-import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.util.Properties
@@ -91,10 +92,28 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   }
 
   private fun Project.configureTestTasks() {
-    // Add the test task to each of the project's unit test variants
+    // Configure JUnit 5 for each variant-specific test task
     projectConfig.unitTestVariants.all { variant ->
-      val directoryProviders = collectDirectoryProviders(variant)
-      AndroidJUnit5UnitTest.create(this, variant, directoryProviders)
+      val testTask = tasks.testTaskOf(variant)
+      val configuration = createJUnit5ConfigurationFor(variant)
+
+      testTask.useJUnitPlatform { options ->
+        options.includeTags(*configuration.combinedIncludeTags)
+        options.excludeTags(*configuration.combinedExcludeTags)
+        options.includeEngines(*configuration.combinedIncludeEngines)
+        options.excludeEngines(*configuration.combinedExcludeEngines)
+      }
+
+      testTask.include(*configuration.combinedIncludePatterns)
+      testTask.exclude(*configuration.combinedExcludePatterns)
+
+      // From the User Guide:
+      // "The standard Gradle test task currently does not provide a dedicated DSL
+      // to set JUnit Platform configuration parameters to influence test discovery and execution.
+      // However, you can provide configuration parameters within the build script via system properties"
+      val junit5 = android.testOptions.junitPlatform
+      testTask.systemProperties(junit5.configurationParameters)
+
     }
   }
 
@@ -108,12 +127,12 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     if (isJacocoApplied && jacocoOptions.taskGenerationEnabled) {
       projectConfig.unitTestVariants.all { variant ->
         val directoryProviders = collectDirectoryProviders(variant)
-        val testTask = AndroidJUnit5UnitTest.find(project, variant)
+        val testTask = tasks.testTaskOf(variant)
 
         // Create a Jacoco friend task
         val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
         if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
-          AndroidJUnit5JacocoReport.create(this, testTask, directoryProviders)
+          AndroidJUnit5JacocoReport.create(this, variant, testTask, directoryProviders)
         }
       }
     }
