@@ -11,8 +11,6 @@ const val TAGS_EXTENSION_NAME = "tags"
 const val ENGINES_EXTENSION_NAME = "engines"
 
 // Mirrored from "versions.properties" resource file
-const val ANDROID_JUNIT5_VERSION_PROP = "androidJunit5Version"
-const val ANDROID_JUNIT5_RUNTIME_VERSION_PROP = "androidJunit5RuntimeVersion"
 const val JUNIT_PLATFORM_VERSION_PROP = "junitPlatformVersion"
 const val JUNIT_JUPITER_VERSION_PROP = "junitJupiterVersion"
 const val JUNIT_VINTAGE_VERSION_PROP = "junitVintageVersion"

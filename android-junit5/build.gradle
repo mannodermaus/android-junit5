@@ -49,7 +49,6 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
   def tokens = [ANDROID_JUNIT5_VERSION        : PLUGIN_VERSION_NAME,
-                ANDROID_JUNIT5_RUNTIME_VERSION: RUNTIME_VERSION_NAME,
                 JUNIT4_VERSION                : JUNIT4_VERSION,
                 INSTRUMENTATION_TEST_VERSION  : INSTRUMENTATION_VERSION_NAME_LATEST_STABLE,
                 JUNIT_PLATFORM_VERSION        : JUNIT_PLATFORM_VERSION,

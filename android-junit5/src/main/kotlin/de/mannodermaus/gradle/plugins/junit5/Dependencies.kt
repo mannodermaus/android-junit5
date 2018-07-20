@@ -1,12 +1,10 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.internal.agpLog
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.ext
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.logging.LogLevel.WARN
 import java.util.Properties
 
 /*
@@ -43,12 +41,7 @@ class JUnit5DependencyHandler(
       versions.jupiter.api,
       versions.platform.engine,
       versions.jupiter.engine,
-      versions.vintage.engine,
-
-      // Only needed to run tests in an Android Studio that bundles an older version
-      // (see also http://junit.org/junit5/docs/current/user-guide/#running-tests-ide-intellij-idea)
-      versions.platform.launcher,
-      versions.platform.console
+      versions.vintage.engine
   )
 
   /**
@@ -58,25 +51,6 @@ class JUnit5DependencyHandler(
   fun parameterized() = listOf(
       versions.jupiter.params
   )
-
-  /**
-   * Retrieves the list of dependencies related to
-   * executing Unit Tests in Android Studio 3 properly.
-   *
-   * Deprecated in 1.0.32
-   */
-  @Deprecated(message = "The unitTestsRuntime() dependency has been deprecated " +
-      "with the stable release of Android Studio 3.1, and will be removed in a future release. " +
-      "Please go ahead, update your IDE & remove this dependency!")
-  fun unitTestsRuntime(): List<Dependency> {
-    project.logger.agpLog(WARN, "The unitTestsRuntime() dependency has been deprecated " +
-        "with the stable release of Android Studio 3.1, and will be removed in a future release. " +
-        "Please go ahead, update your IDE & remove this dependency!")
-
-    return listOf(
-        versions.others.embeddedRuntime
-    )
-  }
 
   /**
    * Retrieves the list of dependencies related to
@@ -211,11 +185,6 @@ class Other(
     private val extension: AndroidJUnitPlatformExtension,
     properties: Properties
 ) : BaseDependency(project) {
-
-  val embeddedRuntime = dependency(
-      groupId = "de.mannodermaus.gradle.plugins",
-      artifactId = "android-junit5-embedded-runtime",
-      version = properties.getProperty(ANDROID_JUNIT5_RUNTIME_VERSION_PROP))
 
   val junit4 = dependency(
       groupId = "junit",

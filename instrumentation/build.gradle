@@ -75,7 +75,6 @@ dependencies {
 
   // Obviously, these dependencies should be mostly "runtimeOnly",
   // but we have to override bundled APIs from the IDE as much as possible for Android Studio.
-  testCompileOnly project(":android-junit5-embedded-runtime")
   testImplementation "org.junit.platform:junit-platform-launcher:$JUNIT_PLATFORM_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"

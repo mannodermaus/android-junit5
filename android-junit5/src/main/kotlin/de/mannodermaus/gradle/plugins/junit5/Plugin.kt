@@ -114,6 +114,9 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       val junit5 = android.testOptions.junitPlatform
       testTask.systemProperties(junit5.configurationParameters)
 
+      // Attach the junitPlatform configuration to the task's classpath
+      testTask.classpath = testTask.classpath +
+          project.configurations.getByName(DEP_CONFIGURATION_NAME)
     }
   }
 
