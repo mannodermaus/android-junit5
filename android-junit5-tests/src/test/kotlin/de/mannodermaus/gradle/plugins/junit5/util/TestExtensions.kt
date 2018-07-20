@@ -6,7 +6,6 @@ import org.assertj.core.api.AbstractAssert
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.project.ProjectInternal
-import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
@@ -64,6 +63,10 @@ class AssertBuildResult(buildResult: BuildResult) : AbstractAssert<AssertBuildRe
         .withFailMessage(
             "expected substring '$substring' to be contained $times times in output, but it was actually contained $actualCount times")
         .isEqualTo(times)
+  }
+
+  fun executedTestSuccessfully(testClass: String, testMethod: String = "test()", times: Int = 1) {
+    hasOutputContaining("$testClass > $testMethod PASSED", times)
   }
 }
 
