@@ -94,33 +94,6 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
   }
 
   /**
-   * The version of JUnit Platform to use
-   */
-  var platformVersion: String? = null
-
-  fun platformVersion(version: String?) {
-    this.platformVersion = version
-  }
-
-  /**
-   * The version of JUnit Jupiter to use
-   */
-  var jupiterVersion: String? = null
-
-  fun jupiterVersion(version: String?) {
-    this.jupiterVersion = version
-  }
-
-  /**
-   * The version of JUnit Vintage to use
-   */
-  var vintageVersion: String? = null
-
-  fun vintageVersion(version: String?) {
-    this.vintageVersion = version
-  }
-
-  /**
    * The additional configuration parameters to be used
    */
   private val _configurationParameters = mutableMapOf<String, String>()

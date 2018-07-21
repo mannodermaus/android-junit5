@@ -2,11 +2,8 @@
 
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
-import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
-import de.mannodermaus.gradle.plugins.junit5.internal.find
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
@@ -89,30 +86,6 @@ class PluginSpec : Spek({
       }
     }
 
-    on("using instrumentation-test library without enabling that feature") {
-      val project = testProjectBuilder
-          .asAndroidApplication()
-          .applyJunit5Plugin()
-          .build()
-
-      project.android.testOptions.junitPlatform {
-        instrumentationTests.enabled(false)
-      }
-
-      val expect = throws<ProjectConfigurationException> {
-        project.dependencies.add(
-            "androidTestImplementation",
-            project.dependencies.junit5.instrumentationTests())
-
-        project.evaluate()
-      }
-
-      it("throws an error") {
-        assertThat(expect.message)
-            .contains("instrumentationTests.enabled true")
-      }
-    }
-
     on("configuring unavailable DSL values") {
       val project = testProjectBuilder
           .asAndroidLibrary()
@@ -133,72 +106,6 @@ class PluginSpec : Spek({
         )
       }
     }
-
-    context("JUnit 5 RunnerBuilder") {
-      beforeEachTest {
-        testProjectBuilder
-            .asAndroidApplication()
-            .applyJunit5Plugin()
-      }
-
-      on("build & evaluate") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          instrumentationTests.enabled(true)
-        }
-
-        project.evaluate()
-
-        it("attaches the RunnerBuilder by default") {
-          assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments)
-              .containsKey("runnerBuilder")
-              .containsEntry("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
-        }
-      }
-
-      on("using another one already") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          instrumentationTests.enabled(true)
-        }
-
-        project.android.defaultConfig
-            .testInstrumentationRunnerArgument(
-                "runnerBuilder",
-                "com.something.else.OtherRunnerBuilder")
-
-        val expect = throws<ProjectConfigurationException> { project.evaluate() }
-
-        it("throws an error") {
-          assertThat(expect.cause?.message).isEqualTo(
-              "Custom runnerBuilder is overwriting JUnit 5 integration! Change your declaration to 'com.something.else.OtherRunnerBuilder,de.mannodermaus.junit5.AndroidJUnit5Builder'.")
-        }
-      }
-
-      on("including our own alongside another one") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          instrumentationTests.enabled(true)
-        }
-
-        project.android.defaultConfig
-            .testInstrumentationRunnerArgument(
-                "runnerBuilder",
-                "com.something.else.OtherRunnerBuilder,de.mannodermaus.junit5.AndroidJUnit5Builder")
-
-        project.evaluate()
-
-        it("contains both") {
-          assertThat(
-              project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
-              .contains("com.something.else.OtherRunnerBuilder")
-              .contains("de.mannodermaus.junit5.AndroidJUnit5Builder")
-        }
-      }
-    }
   }
 
   // Perform most tests with all different Android plugins that apply for JUnit 5
@@ -215,12 +122,7 @@ class PluginSpec : Spek({
 
       on("build & evaluate") {
         val project = testProjectBuilder.buildAndEvaluate()
-        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
-            "junitPlatform")
-
-        it("creates a JUnit 5 dependency handler") {
-          assertThat(project.dependencies.junit5).isNotNull()
-        }
+        val ju5 = project.android.testOptions.junitPlatform
 
         it("doesn't create a parent Jacoco task") {
           assertThat(project.tasks.findByName("jacocoTestReport"))
@@ -252,59 +154,6 @@ class PluginSpec : Spek({
             assertThat(extension).isNotNull()
             assertThat(ju5.findFilters(qualifier = buildType)).isEqualTo(extension)
           }
-        }
-      }
-
-      on("overriding default dependency versions") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          platformVersion = "1.3.3.7"
-          jupiterVersion = "0.8.15"
-          vintageVersion = "1.2.3"
-
-          instrumentationTests {
-            version = "4.8.15"
-          }
-        }
-
-        project.evaluate()
-
-        it("uses the overridden unitTests dependencies") {
-          val deps = project.dependencies.junit5.unitTests()
-              .map { it.group to it.version }
-
-          assertThat(deps).contains(
-              "org.junit.platform" to "1.3.3.7",
-              "org.junit.jupiter" to "0.8.15",
-              "org.junit.vintage" to "1.2.3")
-        }
-
-        it("uses the overridden parameterized dependencies") {
-          val deps = project.dependencies.junit5.parameterized()
-              .map { it.group to it.version }
-
-          assertThat(deps).contains(
-              "org.junit.jupiter" to "0.8.15"
-          )
-        }
-
-        it("uses the overridden instrumentationTests dependencies") {
-          val deps = project.dependencies.junit5.instrumentationTests()
-              .map { it.group to it.version }
-
-          assertThat(deps).contains(
-              "de.mannodermaus.junit5" to "4.8.15"
-          )
-        }
-
-        it("automatically includes instrumentation-test-runner at runtime") {
-          val androidTestRuntimeOnly = project.configurations.find(
-              kind = ANDROID_TEST, scope = RUNTIME_ONLY)
-
-          assertThat(androidTestRuntimeOnly.dependencies
-              .map { "${it.group}:${it.name}:${it.version}" })
-              .contains("de.mannodermaus.junit5:android-instrumentation-test-runner:4.8.15")
         }
       }
 

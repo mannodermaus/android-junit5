@@ -423,7 +423,7 @@ class FunctionalTests {
 
           dependencies {
             // Use local dependencies so that defaultDependencies are not used
-            junitPlatform files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+            testImplementation files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
           }
         """)
       }
