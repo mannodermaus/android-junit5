@@ -7,8 +7,6 @@ const val VERSIONS_RESOURCE_NAME = "versions.properties"
 const val EXTENSION_NAME = "junitPlatform"
 const val DEP_CONFIGURATION_NAME = "junitPlatform"
 const val FILTERS_EXTENSION_NAME = "filters"
-const val TAGS_EXTENSION_NAME = "tags"
-const val ENGINES_EXTENSION_NAME = "engines"
 
 // Mirrored from "versions.properties" resource file
 const val JUNIT_PLATFORM_VERSION_PROP = "junitPlatformVersion"

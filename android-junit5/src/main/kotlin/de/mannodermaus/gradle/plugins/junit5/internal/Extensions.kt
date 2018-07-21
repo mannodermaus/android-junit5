@@ -202,21 +202,6 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
   }
 }
 
-val Test.junitPlatformOptions: JUnitPlatformOptions
-  get() = (this.testFramework as JUnitPlatformTestFramework).options
-
-val Test.includeTags: Set<String>
-  get() = junitPlatformOptions.includeTags
-
-val Test.excludeTags: Set<String>
-  get() = junitPlatformOptions.excludeTags
-
-val Test.includeEngines: Set<String>
-  get() = junitPlatformOptions.includeEngines
-
-val Test.excludeEngines: Set<String>
-  get() = junitPlatformOptions.excludeEngines
-
 /**
  * Obtains a configuration using version-agnostic identifiers and an optional BaseVariant.
  * For instance, using ConfigurationKind.ANDROID_TEST and ConfigurationScope.RUNTIME_ONLY,

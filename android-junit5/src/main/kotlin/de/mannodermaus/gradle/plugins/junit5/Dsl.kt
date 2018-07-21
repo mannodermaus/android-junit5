@@ -61,10 +61,7 @@ private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = 
     return
   }
 
-  this.extend<FiltersExtension>(extensionName) { filters ->
-    filters.extend<TagsExtension>(TAGS_EXTENSION_NAME)
-    filters.extend<EnginesExtension>(ENGINES_EXTENSION_NAME)
-  }
+  this.extend<FiltersExtension>(extensionName)
 }
 
 
@@ -376,7 +373,7 @@ open class FiltersExtension {
    * qualified name of a class matches against at least one of the patterns,
    * the class will be included in the test plan.
    */
-  val patterns = IncludeExcludeContainer()
+  internal val patterns = IncludeExcludeContainer()
 
   /**
    * Add a pattern to the list of <em>included</em> patterns
@@ -402,45 +399,41 @@ open class FiltersExtension {
       this.patterns.exclude(*patterns)
 
   /**
-   * Configure the {@link TagsExtension} for this plugin
+   * Included & Excluded JUnit 5 tags.
    */
-  val tags: TagsExtension get() = extensionByName(TAGS_EXTENSION_NAME)
+  internal val tags = IncludeExcludeContainer()
 
   /**
-   * Configure the {@link TagsExtension} for this plugin
+   * Add tags to the list of <em>included</em> tags
    */
-  fun tags(action: Action<TagsExtension>) {
-    action.execute(tags)
+  fun includeTags(vararg tags: String) {
+    this.tags.include(*tags)
   }
 
   /**
-   * Configure the {@link EnginesExtension} for this plugin
+   * Add tags to the list of <em>excluded</em> tags
    */
-  val engines: EnginesExtension get() = extensionByName(ENGINES_EXTENSION_NAME)
+  fun excludeTags(vararg tags: String) {
+    this.tags.exclude(*tags)
+  }
 
   /**
-   * Configure the {@link EnginesExtension} for this plugin
+   * Included & Excluded JUnit 5 engines.
    */
-  fun engines(action: Action<EnginesExtension>) {
-    action.execute(engines)
-  }
-}
+  internal val engines = IncludeExcludeContainer()
 
-/**
- * Tag configuration options for the plugin
- */
-open class TagsExtension : IncludeExcludeContainer() {
-  operator fun invoke(config: TagsExtension.() -> Unit) {
-    this.config()
+  /**
+   * Add engines to the list of <em>included</em> engines
+   */
+  fun includeEngines(vararg engines: String) {
+    this.engines.include(*engines)
   }
-}
 
-/**
- * Engine configuration options for the plugin
- */
-open class EnginesExtension : IncludeExcludeContainer() {
-  operator fun invoke(config: EnginesExtension.() -> Unit) {
-    this.config()
+  /**
+   * Add engines to the list of <em>excluded</em> engines
+   */
+  fun excludeEngines(vararg engines: String) {
+    this.engines.exclude(*engines)
   }
 }
 

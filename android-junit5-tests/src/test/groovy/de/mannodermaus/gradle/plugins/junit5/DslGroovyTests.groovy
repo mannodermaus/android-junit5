@@ -38,15 +38,11 @@ class DslGroovyTests {
 
     project.android.testOptions.junitPlatform {
       filters {
-        tags {
-          include "some-tag"
-          exclude "other-tag"
-        }
+        includeTags "some-tag"
+        excludeTags "other-tag"
       }
       debugFilters {
-        tags {
-          include "debug-tag"
-        }
+        includeTags "debug-tag"
       }
     }
 
@@ -81,25 +77,17 @@ class DslGroovyTests {
 
       testOptions.junitPlatform {
         filters {
-          tags {
-            include "some-tag"
-            exclude "other-tag"
-          }
+          includeTags "some-tag"
+          excludeTags "other-tag"
         }
         freeDebugFilters {
-          tags {
-            include "free-debug-tag"
-          }
+          includeTags "free-debug-tag"
         }
         paidFilters {
-          tags {
-            include "paid-tag"
-          }
+          includeTags "paid-tag"
         }
         releaseFilters {
-          tags {
-            include "release-tag"
-          }
+          includeTags "release-tag"
         }
       }
     }
@@ -107,11 +95,13 @@ class DslGroovyTests {
     project.evaluate()
 
     def freeDebugTask = project.tasks.getByName("testFreeDebugUnitTest") as Test
-    assertThat(freeDebugTask.testFramework.options.includeTags).containsOnly("some-tag", "free-debug-tag")
+    assertThat(freeDebugTask.testFramework.options.includeTags).
+        containsOnly("some-tag", "free-debug-tag")
     assertThat(freeDebugTask.testFramework.options.excludeTags).containsOnly("other-tag")
 
     def freeReleaseTask = project.tasks.getByName("testFreeReleaseUnitTest") as Test
-    assertThat(freeReleaseTask.testFramework.options.includeTags).containsOnly("some-tag", "release-tag")
+    assertThat(freeReleaseTask.testFramework.options.includeTags).
+        containsOnly("some-tag", "release-tag")
     assertThat(freeReleaseTask.testFramework.options.excludeTags).containsOnly("other-tag")
 
     def paidDebugTask = project.tasks.getByName("testPaidDebugUnitTest") as Test
@@ -119,7 +109,8 @@ class DslGroovyTests {
     assertThat(paidDebugTask.testFramework.options.excludeTags).containsOnly("other-tag")
 
     def paidReleaseTask = project.tasks.getByName("testPaidReleaseUnitTest") as Test
-    assertThat(paidReleaseTask.testFramework.options.includeTags).containsOnly("some-tag", "paid-tag", "release-tag")
+    assertThat(paidReleaseTask.testFramework.options.includeTags).
+        containsOnly("some-tag", "paid-tag", "release-tag")
     assertThat(paidReleaseTask.testFramework.options.excludeTags).containsOnly("other-tag")
   }
 }
