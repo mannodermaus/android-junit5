@@ -41,6 +41,10 @@ gradlePlugin {
   }
 }
 
+// This proect doesn't host its own tests.
+// Overwrite the test task so that the IDE doesn't think that it does.
+task test(overwrite: true) {}
+
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
 // ------------------------------------------------------------------------------------------------
