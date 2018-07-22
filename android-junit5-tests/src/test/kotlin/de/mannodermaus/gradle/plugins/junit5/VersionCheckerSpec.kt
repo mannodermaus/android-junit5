@@ -17,10 +17,9 @@ class VersionCheckerSpec : Spek({
   listOf(
       "2.3.3" to false,
       "3.0.0" to false,
-      "3.1.3" to false,
-      "3.2.0-alpha01" to false,
-      "3.2.0-alpha14" to false,
       MIN_REQUIRED_AGP_VERSION to true,
+      "3.2.0-alpha01" to true,
+      "3.2.0-alpha14" to true,
       "3.2.0-beta01" to true,
       "3.2.0" to true,
       "3.3.0" to true,

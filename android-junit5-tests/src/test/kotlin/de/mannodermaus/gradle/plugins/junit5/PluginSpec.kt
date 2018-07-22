@@ -76,7 +76,7 @@ class PluginSpec : Spek({
 
       it("throws an error") {
         val result = GradleRunner.create()
-            .withGradleVersion("4.6")
+            .withGradleVersion("4.5")
             .withProjectDir(project.projectDir)
             .withArguments("--stacktrace")
             .buildAndFail()
