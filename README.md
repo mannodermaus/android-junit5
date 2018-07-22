@@ -2,18 +2,11 @@
 
 ![Logo](.images/logo.png)
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.0.0 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.2.0 or later.**
 
-## Why a separate plugin?
+## How?
 
-The JUnit Platform team provides a Gradle plugin for running JUnit 5 on the JVM. However,
-that plugin is tailored to the needs of a "purely Java" application, and doesn't work in
-the context of the multi-variant world that we live in on Android. As a result, `android-junit5` was born.
-
-This plugin configures a `junitPlatformTest` task for each registered build variant of a project.
-Furthermore, it automatically attaches both the Jupiter & Vintage Engines
-during the execution phase of your tests as well, so there's very little configuration
-necessary to get your project up-and-running on the JUnit Platform.
+This plugin configures the unit test tasks for each build variant of a project to run on the JUnit Platform. Furthermore, it provides additional configuration options for these tests [through a DSL][wiki-dsl] attached to `android.testOptions`.
 
 Instructions on how to write JUnit 5 tests can be found [in their User Guide][junit5ug].
 Furthermore, this repository provides a small showcase of the functionality provided by JUnit 5 [here][sampletests].
@@ -23,7 +16,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
 ```groovy
 buildscript {
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.0.32"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.2.0"
   }
 }
 ```
@@ -37,61 +30,51 @@ apply plugin: "de.mannodermaus.android-junit5"
 
 dependencies {
   // (Required) Writing and executing Unit Tests on the JUnit Platform.
-  testImplementation junit5.unitTests()
+  testImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.2.0"
 
   // (Optional) If you need "Parameterized Tests".
-  testImplementation junit5.parameterized()
+  testImplementation "org.junit.jupiter:junit-jupiter-params:5.2.0"
 
-  // (Optional) Writing and executing Instrumented Tests with the JUnit Platform Runner.
-  //
-  // IMPORTANT:
-  // By declaring this dependency, you have to use a minSdkVersion
-  // of at least 26, since the nature of JUnit 5 relies on APIs that aren't
-  // available on Android devices before then.
-  // Consider creating a product flavor for this - see the sample project for details.
-  androidTestImplementation junit5.instrumentationTests()
+  // (Optional) If you also have JUnit 4-based tests.
+  testImplementation "junit:junit:4.12"
+  testImplementation "org.junit.vintage:junit-vintage-engine:5.2.0"
 }
 ```
 
-## Configuration
+## Requirements
 
-The plugin can be configured through a new configuration container inside `android.testOptions`.
-Please check out the [Wiki page][wikiconfigpage] for an overview of the available DSL.
+The latest version of this plugin requires:
+* Android Gradle Plugin `3.2.0` or above
+* Gradle `4.7` or above
 
-## Gradle Compatibility
+## Instrumentation Test Support
 
-The plugin's minimum required version of Gradle has increased over time to maximize its leverage with new APIs and performance.
-The chart describes the evolution of this requirement. If you can't use the latest version of this plugin due to your
-project's Gradle version, please refer to the following table to find the corresponding plugin that works for you.
+There is experimental support for Android instrumentation tests, which requires some additional configuration & dependencies. Note that since JUnit 5 is based from the ground up on Java 8, the libraries require you to have a `minSdkVersion` of at least `26`.
 
-|Plugin Version|Minimum Gradle Version|
-|---|---|
-|`1.0.30` and older|`2.5`|
-|`1.0.31` and later|`4.3`|
+To include the experimental instrumentation test support, add the following to your `build.gradle`:
 
-## Licenses
-
-#### android-junit5-embedded-runtime:
-
-```
-Copyright 2000-2016 JetBrains s.r.o.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+```groovy
+android {
+  deaultConfig {
+    // (Required) Make sure to use the AndroidJUnitRunner, of a subclass of it
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    // (Required) Connect JUnit 5 to the runner
+    testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
+  }
+}
+dependencies {
+  // (Required) Instrumentation test libraries
+  androidTestImplementation " de.mannodermaus.junit5:android-instrumentation-test:0.2.2"
+  androidTestRuntimeOnly "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2"
+}
 ```
 
-See also the [full License text](android-junit5-embedded-runtime/LICENSE).
+# Migration from 1.0.x
 
-#### Everything else:
+Since the move to utilize the native JUnit 5 support built into the  build system, a lot has changed from the previous version of the plugin. Users seeking to migrate to the new version are encouraged to check out the migration guide located [on the Wiki][wiki-migration] of this repository.
+
+## License
 
 ```
 Copyright 2017-2018 Marcel Schnelle
@@ -113,10 +96,9 @@ See also the [full License text](LICENSE).
 
  [junit5gh]: https://github.com/junit-team/junit5
  [junit5ug]: https://junit.org/junit5/docs/current/user-guide
- [junit5config]: http://junit.org/junit5/docs/current/user-guide/#running-tests-build-gradle-junit-configure
  [travisci]: https://travis-ci.org/mannodermaus/android-junit5
- [as2issue]: https://github.com/mannodermaus/android-junit5/issues/19
- [jacoco]: http://www.eclemma.org/jacoco
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
  [sampletests]: sample/src/test
- [wikiconfigpage]: https://github.com/mannodermaus/android-junit5/wiki/Configuration-DSL
+ [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration-DSL
+ [wiki-migration]: https://github.com/mannodermaus/android-junit5/wiki/Migrating-from-1.0.x
+[wiki-]
