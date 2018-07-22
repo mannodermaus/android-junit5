@@ -116,7 +116,6 @@ See also the [full License text](LICENSE).
  [junit5config]: http://junit.org/junit5/docs/current/user-guide/#running-tests-build-gradle-junit-configure
  [travisci]: https://travis-ci.org/mannodermaus/android-junit5
  [as2issue]: https://github.com/mannodermaus/android-junit5/issues/19
- [jacoco]: http://www.eclemma.org/jacoco
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
  [sampletests]: sample/src/test
  [wikiconfigpage]: https://github.com/mannodermaus/android-junit5/wiki/Configuration-DSL
