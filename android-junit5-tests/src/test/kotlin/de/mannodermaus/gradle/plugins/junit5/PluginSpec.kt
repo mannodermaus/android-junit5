@@ -2,30 +2,23 @@
 
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.ANDROID_TEST
-import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationScope.RUNTIME_ONLY
 import de.mannodermaus.gradle.plugins.junit5.internal.android
-import de.mannodermaus.gradle.plugins.junit5.internal.argumentValues
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
-import de.mannodermaus.gradle.plugins.junit5.internal.find
-import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
-import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
-import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5UnitTest
-import de.mannodermaus.gradle.plugins.junit5.tasks.JUnit5Task
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
+import de.mannodermaus.gradle.plugins.junit5.util.junitPlatformOptions
 import de.mannodermaus.gradle.plugins.junit5.util.throws
 import de.mannodermaus.gradle.plugins.junit5.util.times
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.entry
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.PluginApplicationException
+import org.gradle.api.tasks.testing.Test
 import org.gradle.testkit.runner.GradleRunner
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
@@ -34,7 +27,6 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.api.lifecycle.CachingMode.SCOPE
 import org.junit.platform.commons.util.PreconditionViolationException
-import org.junit.platform.engine.discovery.ClassNameFilter
 
 /**
  * Unit Tests related to the plugin's configurability.
@@ -94,30 +86,6 @@ class PluginSpec : Spek({
       }
     }
 
-    on("using instrumentation-test library without enabling that feature") {
-      val project = testProjectBuilder
-          .asAndroidApplication()
-          .applyJunit5Plugin()
-          .build()
-
-      project.android.testOptions.junitPlatform {
-        instrumentationTests.enabled(false)
-      }
-
-      val expect = throws<ProjectConfigurationException> {
-        project.dependencies.add(
-            "androidTestImplementation",
-            project.dependencies.junit5.instrumentationTests())
-
-        project.evaluate()
-      }
-
-      it("throws an error") {
-        assertThat(expect.message)
-            .contains("instrumentationTests.enabled true")
-      }
-    }
-
     on("configuring unavailable DSL values") {
       val project = testProjectBuilder
           .asAndroidLibrary()
@@ -126,9 +94,7 @@ class PluginSpec : Spek({
 
       project.android.testOptions.junitPlatform {
         filters("unknown") {
-          tags {
-            include("doesnt-matter")
-          }
+          includeTags("doesnt-matter")
         }
       }
 
@@ -138,72 +104,6 @@ class PluginSpec : Spek({
             { assertThat(expected.message?.contains("Extension with name")) },
             { assertThat(expected.message?.contains("does not exist")) }
         )
-      }
-    }
-
-    context("JUnit 5 RunnerBuilder") {
-      beforeEachTest {
-        testProjectBuilder
-            .asAndroidApplication()
-            .applyJunit5Plugin()
-      }
-
-      on("build & evaluate") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          instrumentationTests.enabled(true)
-        }
-
-        project.evaluate()
-
-        it("attaches the RunnerBuilder by default") {
-          assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments)
-              .containsKey("runnerBuilder")
-              .containsEntry("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
-        }
-      }
-
-      on("using another one already") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          instrumentationTests.enabled(true)
-        }
-
-        project.android.defaultConfig
-            .testInstrumentationRunnerArgument(
-                "runnerBuilder",
-                "com.something.else.OtherRunnerBuilder")
-
-        val expect = throws<ProjectConfigurationException> { project.evaluate() }
-
-        it("throws an error") {
-          assertThat(expect.cause?.message).isEqualTo(
-              "Custom runnerBuilder is overwriting JUnit 5 integration! Change your declaration to 'com.something.else.OtherRunnerBuilder,de.mannodermaus.junit5.AndroidJUnit5Builder'.")
-        }
-      }
-
-      on("including our own alongside another one") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          instrumentationTests.enabled(true)
-        }
-
-        project.android.defaultConfig
-            .testInstrumentationRunnerArgument(
-                "runnerBuilder",
-                "com.something.else.OtherRunnerBuilder,de.mannodermaus.junit5.AndroidJUnit5Builder")
-
-        project.evaluate()
-
-        it("contains both") {
-          assertThat(
-              project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
-              .contains("com.something.else.OtherRunnerBuilder")
-              .contains("de.mannodermaus.junit5.AndroidJUnit5Builder")
-        }
       }
     }
   }
@@ -222,17 +122,7 @@ class PluginSpec : Spek({
 
       on("build & evaluate") {
         val project = testProjectBuilder.buildAndEvaluate()
-        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
-            "junitPlatform")
-
-        it("creates a JUnit 5 dependency handler") {
-          assertThat(project.dependencies.junit5).isNotNull()
-        }
-
-        it("creates a parent junitPlatform task") {
-          assertThat(project.tasks.findByName("junitPlatformTest"))
-              .isNotNull()
-        }
+        val ju5 = project.android.testOptions.junitPlatform
 
         it("doesn't create a parent Jacoco task") {
           assertThat(project.tasks.findByName("jacocoTestReport"))
@@ -254,11 +144,6 @@ class PluginSpec : Spek({
         listOf("debug", "release").forEach { buildType ->
           val buildTypeName = buildType.capitalize()
 
-          it("creates a junitPlatform task for the $buildType build type") {
-            assertThat(project.tasks.findByName("junitPlatformTest$buildTypeName"))
-                .isNotNull()
-          }
-
           it("doesn't create a Jacoco task for the $buildType build type") {
             assertThat(project.tasks.findByName("jacocoTestReport$buildTypeName"))
                 .isNull()
@@ -269,131 +154,6 @@ class PluginSpec : Spek({
             assertThat(extension).isNotNull()
             assertThat(ju5.findFilters(qualifier = buildType)).isEqualTo(extension)
           }
-        }
-      }
-
-      on("overriding default dependency versions") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          platformVersion = "1.3.3.7"
-          jupiterVersion = "0.8.15"
-          vintageVersion = "1.2.3"
-
-          instrumentationTests {
-            version = "4.8.15"
-          }
-        }
-
-        project.evaluate()
-
-        it("uses the overridden unitTests dependencies") {
-          val deps = project.dependencies.junit5.unitTests()
-              .map { it.group to it.version }
-
-          assertThat(deps).contains(
-              "org.junit.platform" to "1.3.3.7",
-              "org.junit.jupiter" to "0.8.15",
-              "org.junit.vintage" to "1.2.3")
-        }
-
-        it("uses the overridden parameterized dependencies") {
-          val deps = project.dependencies.junit5.parameterized()
-              .map { it.group to it.version }
-
-          assertThat(deps).contains(
-              "org.junit.jupiter" to "0.8.15"
-          )
-        }
-
-        it("uses the overridden instrumentationTests dependencies") {
-          val deps = project.dependencies.junit5.instrumentationTests()
-              .map { it.group to it.version }
-
-          assertThat(deps).contains(
-              "de.mannodermaus.junit5" to "4.8.15"
-          )
-        }
-
-        it("automatically includes instrumentation-test-runner at runtime") {
-          val androidTestRuntimeOnly = project.configurations.find(
-              kind = ANDROID_TEST, scope = RUNTIME_ONLY)
-
-          assertThat(androidTestRuntimeOnly.dependencies
-              .map { "${it.group}:${it.name}:${it.version}" })
-              .contains("de.mannodermaus.junit5:android-instrumentation-test-runner:4.8.15")
-        }
-      }
-
-      on("applying jvmArgs") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          unitTests.all {
-            if (name.contains("Debug")) {
-              jvmArgs("-noverify")
-            }
-          }
-        }
-
-        project.evaluate()
-
-        it("uses specified jvmArgs in the debug task") {
-          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTestDebug")
-          assertThat(task.jvmArgs).contains("-noverify")
-        }
-
-        it("doesn't use specified jvmArgs in the release task") {
-          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTestRelease")
-          assertThat(task.jvmArgs).doesNotContain("-noverify")
-        }
-      }
-
-      on("applying system properties") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          unitTests.all {
-            if (name.contains("Debug")) {
-              systemProperty("some.prop", "0815")
-            }
-          }
-        }
-
-        project.evaluate()
-
-        it("uses specified property in the debug task") {
-          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTestDebug")
-          assertThat(task.systemProperties).contains(entry("some.prop", "0815"))
-        }
-
-        it("doesn't use specified property in the release task") {
-          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTestRelease")
-          assertThat(task.systemProperties).doesNotContain(entry("some.prop", "0815"))
-        }
-      }
-
-      on("applying environment variables") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          unitTests.all {
-            if (name.contains("Debug")) {
-              environment("MY_ENV_VAR", "MegaShark.bin")
-            }
-          }
-        }
-
-        project.evaluate()
-
-        it("uses specified envvar in the debug task") {
-          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTestDebug")
-          assertThat(task.environment).contains(entry("MY_ENV_VAR", "MegaShark.bin"))
-        }
-
-        it("doesn't use specified envvar in the release task") {
-          val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTestRelease")
-          assertThat(task.environment).doesNotContain(entry("MY_ENV_VAR", "MegaShark.bin"))
         }
       }
 
@@ -421,82 +181,6 @@ class PluginSpec : Spek({
         }
       }
 
-      on("describing task dependencies") {
-        val project = testProjectBuilder.build()
-        val defaultTaskDep = project.task("onlyDefaultTask")
-        val anotherTaskDep = project.task("someOtherTask")
-
-        project.android.testOptions.junitPlatform {
-          unitTests.all {
-            dependsOn(anotherTaskDep)
-
-            if (isRunAllTask) {
-              dependsOn(defaultTaskDep)
-            }
-          }
-        }
-
-        project.evaluate()
-
-        it("honors dependsOn for main test task") {
-          val task = project.tasks.get<Task>("junitPlatformTest")
-          assertThat(task.dependsOn).contains(defaultTaskDep, anotherTaskDep)
-        }
-
-        listOf("debug", "release").forEach { buildType ->
-          val buildTypeName = buildType.capitalize()
-
-          it("honors dependsOn for $buildType test task") {
-            val task = project.tasks.get<Task>("junitPlatformTest$buildTypeName")
-            assertThat(task.dependsOn)
-                .doesNotContain(defaultTaskDep)
-                .contains(anotherTaskDep)
-          }
-        }
-      }
-
-      on("using a custom reportsDir") {
-        val project = testProjectBuilder.build()
-
-        project.android.testOptions.junitPlatform {
-          reportsDir(project.file("${project.buildDir.absolutePath}/other-path/test-reports"))
-        }
-
-        project.evaluate()
-
-        listOf("debug", "release").forEach { buildType ->
-          val buildTypeName = buildType.capitalize()
-
-          it("uses that directory for $buildType test task") {
-            val task = project.tasks.get<AndroidJUnit5UnitTest>("junitPlatformTest$buildTypeName")
-            val argument = task.argumentValues("--reports-dir")
-            assertThat(argument).hasSize(1)
-            assertThat(argument[0]).endsWith("/other-path/test-reports/$buildType")
-          }
-        }
-      }
-
-      on("using a custom build type") {
-        val project = testProjectBuilder.build()
-
-        project.android.buildTypes {
-          it.create("staging")
-        }
-
-        project.evaluate()
-
-        it("creates a junitPlatform task for that build type") {
-          assertThat(project.tasks.findByName("junitPlatformTestStaging"))
-              .isNotNull()
-        }
-
-        it("is hooked into the main test task") {
-          assertThat(project.tasks.getByName("junitPlatformTest")
-              .dependsOn.map { (it as Task).name })
-              .contains("junitPlatformTestStaging")
-        }
-      }
-
       on("using product flavors") {
         val project = testProjectBuilder.build()
 
@@ -521,101 +205,10 @@ class PluginSpec : Spek({
           listOf("debug", "release").forEach { buildType ->
             val variantName = "$flavor${buildType.capitalize()}"
 
-            it("creates task for build variant '$variantName'") {
-              assertThat(project.tasks.findByName("junitPlatformTest${variantName.capitalize()}"))
-                  .isNotNull()
-            }
-
-            it("hooks '$variantName' into the main task") {
-              assertThat(project.tasks.getByName("junitPlatformTest")
-                  .dependsOn.map { (it as Task).name })
-                  .contains("junitPlatformTest${variantName.capitalize()}")
-            }
-
             it("adds a $variantName-specific filter to the JUnit 5 extension point") {
               val extension = ju5.extensionByName<FiltersExtension>("${variantName}Filters")
               assertThat(extension).isNotNull()
               assertThat(ju5.findFilters(qualifier = variantName)).isEqualTo(extension)
-            }
-          }
-        }
-
-        it("uses unique report directories for all variants") {
-          val tasks = project.tasks.withType(AndroidJUnit5UnitTest::class.java)
-          val reportDirsCount = tasks
-              .mapNotNull { it.argumentValues("--reports-dir").getOrNull(0) }
-              .distinct()
-              .count()
-
-          assertThat(tasks.size).isEqualTo(reportDirsCount)
-        }
-      }
-
-      context("unitTests.returnDefaultValues") {
-        val project by memoized { testProjectBuilder.build() }
-
-        listOf(true, false).forEach { state ->
-          on("set to $state") {
-            project.android.testOptions.junitPlatform.unitTests {
-              returnDefaultValues = state
-            }
-
-            project.evaluate()
-
-            it("configures the AGP setting correctly") {
-              assertThat(project.android.testOptions.unitTests.isReturnDefaultValues)
-                  .isEqualTo(state)
-            }
-          }
-        }
-      }
-
-      context("unitTests.includeAndroidResources") {
-        val project by memoized { testProjectBuilder.build() }
-
-        listOf(true, false).forEach { state ->
-          on("set to $state") {
-            project.android.testOptions.junitPlatform.unitTests {
-              includeAndroidResources = state
-            }
-
-            project.evaluate()
-
-            it("configures the AGP setting correctly") {
-              assertThat(project.android.testOptions.unitTests.isIncludeAndroidResources)
-                  .isEqualTo(state)
-            }
-          }
-        }
-      }
-
-      context("test folder detection") {
-        // The order of applying the Kotlin plugin shouldn't interfere
-        // with the detection of its source directories
-        // (https://github.com/mannodermaus/android-junit5/issues/72)
-        beforeEachTest { testProjectBuilder.applyKotlinPlugin() }
-
-        listOf("debug", "release").forEach { buildType ->
-
-          on("assembling the $buildType task") {
-            val project = testProjectBuilder.buildAndEvaluate()
-            val projectConfig = ProjectConfig(project)
-            val task = project.tasks.get<AndroidJUnit5UnitTest>(
-                "junitPlatformTest${buildType.capitalize()}")
-            val folders = task.argumentValues("--scan-class-path")
-                .getOrNull(0)
-                ?.split(":") ?: emptyList()
-
-            val variant = projectConfig.unitTestVariants.find { it.name == buildType }
-            require(variant != null)
-
-            listOf(
-                JavaDirectoryProvider(variant!!),
-                KotlinDirectoryProvider(project, variant)).forEach { provider ->
-
-              it("contains all class folders of the ${provider.javaClass.simpleName}") {
-                assertThat(folders).containsAll(provider.classDirectories().map { it.absolutePath })
-              }
             }
           }
         }
@@ -985,33 +578,15 @@ class PluginSpec : Spek({
       context("filters DSL") {
         val project by memoized { testProjectBuilder.build() }
 
-        on("using no custom classNamePatterns") {
-          project.evaluate()
-
-          listOf("debug", "release").forEach { buildType ->
-            it("uses the default pattern for the $buildType task") {
-              val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
-              assertThat(task.classNamePatternIncludes).containsOnly(
-                  ClassNameFilter.STANDARD_INCLUDE_PATTERN)
-            }
-          }
-        }
-
         on("using global filters") {
           project.android.testOptions.junitPlatform {
             filters {
-              tags {
-                include("global-include-tag")
-                exclude("global-exclude-tag")
-              }
-              engines {
-                include("global-include-engine")
-                exclude("global-exclude-engine")
-              }
-              packages {
-                include("com.example.package1")
-                exclude("com.example.package2")
-              }
+              includeTags("global-include-tag")
+              excludeTags("global-exclude-tag")
+              includeEngines("global-include-engine")
+              excludeEngines("global-exclude-engine")
+              includePattern("com.example.package1")
+              excludePattern("com.example.package2")
             }
           }
 
@@ -1019,13 +594,13 @@ class PluginSpec : Spek({
 
           listOf("debug", "release").forEach { buildType ->
             it("applies configuration correctly to the $buildType task") {
-              val task = project.tasks.get<JUnit5Task>("junitPlatformTest${buildType.capitalize()}")
-              assertThat(task.tagIncludes).contains("global-include-tag")
-              assertThat(task.tagExcludes).contains("global-exclude-tag")
-              assertThat(task.engineIncludes).contains("global-include-engine")
-              assertThat(task.engineExcludes).contains("global-exclude-engine")
-              assertThat(task.packageIncludes).contains("com.example.package1")
-              assertThat(task.packageExcludes).contains("com.example.package2")
+              val task = project.tasks.get<Test>("test${buildType.capitalize()}UnitTest")
+              assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
+              assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
+              assertThat(task.junitPlatformOptions.includeEngines).contains("global-include-engine")
+              assertThat(task.junitPlatformOptions.excludeEngines).contains("global-exclude-engine")
+              assertThat(task.includes).contains("com.example.package1")
+              assertThat(task.excludes).contains("com.example.package2")
             }
           }
         }
@@ -1039,160 +614,146 @@ class PluginSpec : Spek({
 
           project.android.testOptions.junitPlatform {
             filters {
-              tags {
-                include("global-include-tag")
-                exclude("global-exclude-tag")
-              }
-              packages {
-                include("com.example.package1")
-              }
+              includeTags("global-include-tag")
+              excludeTags("global-exclude-tag")
+              includePattern("com.example.package1")
             }
             filters("paid") {
-              engines {
-                include("paid-include-engine")
-              }
-              packages {
-                include("com.example.paid")
-                exclude("com.example.package1")
-              }
+              includeEngines("paid-include-engine")
+              includePattern("com.example.paid")
+              excludePattern("com.example.package1")
             }
             filters("freeDebug") {
-              tags {
-                include("freeDebug-include-tag")
-              }
+              includeTags("freeDebug-include-tag")
             }
             filters("paidRelease") {
-              tags {
-                include("paidRelease-include-tag")
-                include("global-exclude-tag")
-              }
-              packages {
-                include("com.example.paid.release")
-              }
+              includeTags("paidRelease-include-tag")
+              includeTags("global-exclude-tag")
+              includePattern("com.example.paid.release")
             }
           }
 
           project.evaluate()
 
           it("applies freeDebug configuration correctly") {
-            val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeDebug")
-            assertThat(task.tagIncludes).contains("global-include-tag", "freeDebug-include-tag")
-            assertThat(task.tagIncludes).doesNotContain("paidRelease-include-tag")
-            assertThat(task.tagExcludes).contains("global-exclude-tag")
+            val task = project.tasks.get<Test>("testFreeDebugUnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag",
+                "freeDebug-include-tag")
+            assertThat(task.junitPlatformOptions.includeTags).doesNotContain(
+                "paidRelease-include-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
 
-            assertThat(task.engineIncludes).doesNotContain("paid-include-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).doesNotContain(
+                "paid-include-engine")
 
-            assertThat(task.packageIncludes).contains("com.example.package1")
-            assertThat(task.packageIncludes).doesNotContain("com.example.paid",
+            assertThat(task.includes).contains("com.example.package1")
+            assertThat(task.includes).doesNotContain("com.example.paid",
                 "com.example.paid.release")
           }
 
           it("applies freeRelease configuration correctly") {
-            val task = project.tasks.get<JUnit5Task>("junitPlatformTestFreeRelease")
-            assertThat(task.tagIncludes).contains("global-include-tag")
-            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag",
+            val task = project.tasks.get<Test>("testFreeReleaseUnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
+            assertThat(task.junitPlatformOptions.includeTags).doesNotContain(
+                "freeDebug-include-tag",
                 "paidRelease-include-tag")
-            assertThat(task.tagExcludes).contains("global-exclude-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
 
-            assertThat(task.engineIncludes).doesNotContain("paid-include-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).doesNotContain(
+                "paid-include-engine")
 
-            assertThat(task.packageIncludes).contains("com.example.package1")
-            assertThat(task.packageIncludes).doesNotContain("com.example.paid",
+            assertThat(task.includes).contains("com.example.package1")
+            assertThat(task.includes).doesNotContain("com.example.paid",
                 "com.example.paid.release")
           }
 
           it("applies paidDebug configuration correctly") {
-            val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidDebug")
-            assertThat(task.tagIncludes).contains("global-include-tag")
-            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag",
+            val task = project.tasks.get<Test>("testPaidDebugUnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
+            assertThat(task.junitPlatformOptions.includeTags).doesNotContain(
+                "freeDebug-include-tag",
                 "paidRelease-include-tag")
-            assertThat(task.tagExcludes).contains("global-exclude-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
 
-            assertThat(task.engineIncludes).contains("paid-include-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).contains("paid-include-engine")
 
-            assertThat(task.packageIncludes).contains("com.example.paid")
-            assertThat(task.packageExcludes).contains("com.example.package1")
-            assertThat(task.packageIncludes).doesNotContain("com.example.package1",
+            assertThat(task.includes).contains("com.example.paid")
+            assertThat(task.excludes).contains("com.example.package1")
+            assertThat(task.includes).doesNotContain("com.example.package1",
                 "com.example.paid.release")
           }
 
           it("applies paidRelease configuration correctly") {
-            val task = project.tasks.get<JUnit5Task>("junitPlatformTestPaidRelease")
-            assertThat(task.tagIncludes).contains("global-include-tag", "global-exclude-tag",
+            val task = project.tasks.get<Test>("testPaidReleaseUnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag",
+                "global-exclude-tag",
                 "paidRelease-include-tag")
-            assertThat(task.tagIncludes).doesNotContain("freeDebug-include-tag")
-            assertThat(task.tagExcludes).doesNotContain("global-exclude-tag")
+            assertThat(task.junitPlatformOptions.includeTags).doesNotContain(
+                "freeDebug-include-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).doesNotContain("global-exclude-tag")
 
-            assertThat(task.engineIncludes).contains("paid-include-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).contains("paid-include-engine")
 
-            assertThat(task.packageIncludes).contains("com.example.paid",
+            assertThat(task.includes).contains("com.example.paid",
                 "com.example.paid.release")
-            assertThat(task.packageIncludes).doesNotContain("com.example.package1")
-            assertThat(task.packageExcludes).contains("com.example.package1")
+            assertThat(task.includes).doesNotContain("com.example.package1")
+            assertThat(task.excludes).contains("com.example.package1")
           }
         }
 
         on("using build-type-specific filters") {
           project.android.testOptions.junitPlatform {
             filters {
-              tags {
-                include("global-include-tag")
-              }
-              engines {
-                include("global-include-engine")
-              }
-              includeClassNamePattern("pattern123")
+              includeTags("global-include-tag")
+              includeEngines("global-include-engine")
+              includePattern("pattern123")
             }
             filters("debug") {
-              tags {
-                exclude("debug-exclude-tag")
-              }
-              engines {
-                exclude("debug-exclude-engine")
-              }
-              excludeClassNamePattern("pattern123")
-              excludeClassNamePattern("debug-pattern")
+              excludeTags("debug-exclude-tag")
+              excludeEngines("debug-exclude-engine")
+              excludePattern("pattern123")
+              excludePattern("debug-pattern")
             }
             filters("release") {
-              tags {
-                include("rel-include-tag")
-              }
-              engines {
-                include("rel-include-engine")
-                exclude("global-include-engine")
-              }
-              includeClassNamePattern("release-pattern")
+              includeTags("rel-include-tag")
+              includeEngines("rel-include-engine")
+              excludeEngines("global-include-engine")
+              includePattern("release-pattern")
             }
           }
 
           project.evaluate()
 
           it("applies configuration correctly to the debug task") {
-            val task = project.tasks.get<JUnit5Task>("junitPlatformTestDebug")
-            assertThat(task.tagIncludes).contains("global-include-tag")
-            assertThat(task.tagIncludes).doesNotContain("rel-include-tag")
-            assertThat(task.tagExcludes).contains("debug-exclude-tag")
+            val task = project.tasks.get<Test>("testDebugUnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
+            assertThat(task.junitPlatformOptions.includeTags).doesNotContain("rel-include-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).contains("debug-exclude-tag")
 
-            assertThat(task.engineIncludes).contains("global-include-engine")
-            assertThat(task.engineIncludes).doesNotContain("rel-include-engine")
-            assertThat(task.engineExcludes).contains("debug-exclude-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).contains("global-include-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).doesNotContain(
+                "rel-include-engine")
+            assertThat(task.junitPlatformOptions.excludeEngines).contains("debug-exclude-engine")
 
-            assertThat(task.classNamePatternIncludes).doesNotContain("pattern123")
-            assertThat(task.classNamePatternExcludes).contains("pattern123", "debug-pattern")
+            assertThat(task.includes).doesNotContain("pattern123")
+            assertThat(task.excludes).contains("pattern123", "debug-pattern")
           }
 
           it("applies configuration correctly to the release task") {
-            val task = project.tasks.get<JUnit5Task>("junitPlatformTestRelease")
-            assertThat(task.tagIncludes).contains("global-include-tag", "rel-include-tag")
-            assertThat(task.tagExcludes).doesNotContain("debug-exclude-tag")
+            val task = project.tasks.get<Test>("testReleaseUnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag",
+                "rel-include-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).doesNotContain("debug-exclude-tag")
 
-            assertThat(task.engineIncludes).contains("rel-include-engine")
-            assertThat(task.engineIncludes).doesNotContain("global-include-engine")
-            assertThat(task.engineExcludes).contains("global-include-engine")
-            assertThat(task.engineExcludes).doesNotContain("debug-exclude-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).contains("rel-include-engine")
+            assertThat(task.junitPlatformOptions.includeEngines).doesNotContain(
+                "global-include-engine")
+            assertThat(task.junitPlatformOptions.excludeEngines).contains("global-include-engine")
+            assertThat(task.junitPlatformOptions.excludeEngines).doesNotContain(
+                "debug-exclude-engine")
 
-            assertThat(task.classNamePatternIncludes).contains("pattern123", "release-pattern")
-            assertThat(task.classNamePatternExcludes).doesNotContain("pattern123")
+            assertThat(task.includes).contains("pattern123", "release-pattern")
+            assertThat(task.excludes).doesNotContain("pattern123")
           }
         }
       }

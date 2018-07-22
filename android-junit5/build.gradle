@@ -20,12 +20,8 @@ classes.dependsOn compileKotlin
 // ------------------------------------------------------------------------------------------------
 // Plugin Resource Setup
 //
-// This block generates required resource files
-// that provide additional configuration to the plugin.
-// This includes setting up the plugin identifiers
-// with which the plugin can be applied to consumer projects,
-// as well as the population of marker tokens inside
-// the versions.properties resource file.
+// This block generates the required resource files
+// containing the identifiers with which the plugin can be applied to consumer projects.
 // ------------------------------------------------------------------------------------------------
 
 final def pluginClassName =
@@ -45,29 +41,8 @@ gradlePlugin {
   }
 }
 
-import org.apache.tools.ant.filters.ReplaceTokens
-
-processResources {
-  def tokens = [ANDROID_JUNIT5_VERSION        : PLUGIN_VERSION_NAME,
-                ANDROID_JUNIT5_RUNTIME_VERSION: RUNTIME_VERSION_NAME,
-                JUNIT4_VERSION                : JUNIT4_VERSION,
-                INSTRUMENTATION_TEST_VERSION  : INSTRUMENTATION_VERSION_NAME_LATEST_STABLE,
-                JUNIT_PLATFORM_VERSION        : JUNIT_PLATFORM_VERSION,
-                JUNIT_JUPITER_VERSION         : JUNIT_JUPITER_VERSION,
-                JUNIT_VINTAGE_VERSION         : JUNIT_VINTAGE_VERSION]
-
-  inputs.properties(tokens)
-
-  from(sourceSets.main.resources.srcDirs) {
-    include '**/versions.properties'
-    filter(ReplaceTokens, tokens: tokens)
-  }
-}
-
-// For some strange reason, running :android-junit5:test will
-// get the Gradle daemon stuck with an unknown cause.
-// Overwrite the test task entirely to mitigate this
-// (the actual plugin tests have their own modules anyway).
+// This proect doesn't host its own tests.
+// Overwrite the test task so that the IDE doesn't think that it does.
 task test(overwrite: true) {}
 
 // ------------------------------------------------------------------------------------------------
@@ -78,7 +53,7 @@ dependencies {
   // Language Support
   implementation gradleApi()
   implementation "org.codehaus.groovy:groovy:$GROOVY_VERSION"
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
 
   // Other Dependencies
   implementation "com.github.zafarkhaja:java-semver:$JAVA_SEMVER_VERSION"

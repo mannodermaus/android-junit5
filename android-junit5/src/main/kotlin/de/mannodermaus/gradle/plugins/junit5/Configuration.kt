@@ -100,12 +100,10 @@ internal class JUnit5TaskConfig(
           collectorFunction(extension.findFilters(variant.flavorName)) +
           collectorFunction(extension.findFilters(variant.name))
 
-  val combinedIncludeClassNamePatterns = this.collect { it.classNamePatterns }.include
-  val combinedExcludeClassNamePatterns = this.collect { it.classNamePatterns }.exclude
-  val combinedIncludePackages = this.collect { it.packages }.include
-  val combinedExcludePackages = this.collect { it.packages }.exclude
-  val combinedIncludeTags = this.collect { it.tags }.include
-  val combinedExcludeTags = this.collect { it.tags }.exclude
-  val combinedIncludeEngines = this.collect { it.engines }.include
-  val combinedExcludeEngines = this.collect { it.engines }.exclude
+  val combinedIncludePatterns = this.collect { it.patterns }.include.toTypedArray()
+  val combinedExcludePatterns = this.collect { it.patterns }.exclude.toTypedArray()
+  val combinedIncludeTags = this.collect { it.tags }.include.toTypedArray()
+  val combinedExcludeTags = this.collect { it.tags }.exclude.toTypedArray()
+  val combinedIncludeEngines = this.collect { it.engines }.include.toTypedArray()
+  val combinedExcludeEngines = this.collect { it.engines }.exclude.toTypedArray()
 }

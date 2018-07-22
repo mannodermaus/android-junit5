@@ -12,8 +12,8 @@ import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.newFile
 import de.mannodermaus.gradle.plugins.junit5.util.splitToArray
-import org.`junit$pioneer`.jupiter.TempDirectory
-import org.`junit$pioneer`.jupiter.TempDirectory.TempDir
+import org.junitpioneer.jupiter.TempDirectory
+import org.junitpioneer.jupiter.TempDirectory.TempDir
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
@@ -101,11 +101,11 @@ class FunctionalTests {
       listOf(
           // Assert that all tasks ran successfully
           { assertThat(result).executedTaskSuccessfully(":build") },
-          { assertThat(result).executedTaskSuccessfully(":junitPlatformTestDebug") },
-          { assertThat(result).executedTaskSuccessfully(":junitPlatformTestRelease") },
+          { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
+          { assertThat(result).executedTaskSuccessfully(":testReleaseUnitTest") },
 
           // Assert number of tests executed (1 per Build Type)
-          { assertThat(result).hasOutputContaining("1 tests successful", times = 2) }
+          { assertThat(result).executedTestSuccessfully("${language}Test", times = 2) }
       )
     }
   }
@@ -124,20 +124,18 @@ class FunctionalTests {
         test(buildType = "debug")
       }
 
-      runGradle("junitPlatformTestDebug") { result ->
+      runGradle("testDebugUnitTest") { result ->
         listOf(
-            { assertThat(result).executedTaskSuccessfully(":junitPlatformTestDebug") },
-            { assertThat(result).hasOutputContaining("2 tests successful") },
-            { assertThat(result).hasOutputContaining("${language}DebugAdderTest") },
-            { assertThat(result).hasOutputContaining("${language}AdderTest") }
+            { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
+            { assertThat(result).executedTestSuccessfully("${language}DebugTest") },
+            { assertThat(result).executedTestSuccessfully("${language}Test") }
         )
       }
 
-      runGradle("junitPlatformTestRelease") { result ->
+      runGradle("testReleaseUnitTest") { result ->
         listOf(
-            { assertThat(result).executedTaskSuccessfully(":junitPlatformTestRelease") },
-            { assertThat(result).hasOutputContaining("1 tests successful") },
-            { assertThat(result).hasOutputContaining("${language}AdderTest") }
+            { assertThat(result).executedTaskSuccessfully(":testReleaseUnitTest") },
+            { assertThat(result).executedTestSuccessfully("${language}Test") }
         )
       }
     }
@@ -161,9 +159,10 @@ class FunctionalTests {
     runGradle { result ->
       listOf(
           { assertThat(result).executedTaskSuccessfully(":build") },
-          { assertThat(result).executedTaskSuccessfully(":junitPlatformTestFreeDebug") },
-          { assertThat(result).executedTaskSuccessfully(":junitPlatformTestFreeRelease") },
-          { assertThat(result).hasOutputContaining("2 tests successful", times = 2) }
+          { assertThat(result).executedTaskSuccessfully(":testFreeDebugUnitTest") },
+          { assertThat(result).executedTaskSuccessfully(":testFreeReleaseUnitTest") },
+          { assertThat(result).executedTestSuccessfully("${language}FreeTest", times = 2) },
+          { assertThat(result).executedTestSuccessfully("${language}Test", times = 2) }
       )
     }
   }
@@ -184,22 +183,20 @@ class FunctionalTests {
         test(buildType = "release")
       }
 
-      runGradle("junitPlatformTestFreeDebug") { result ->
+      runGradle("testFreeDebugUnitTest") { result ->
         listOf(
-            { assertThat(result).executedTaskSuccessfully(":junitPlatformTestFreeDebug") },
-            { assertThat(result).hasOutputContaining("3 tests successful") },
-            { assertThat(result).hasOutputContaining("${language}FreeDebugAdderTest") },
-            { assertThat(result).hasOutputContaining("${language}DebugAdderTest") },
-            { assertThat(result).hasOutputContaining("${language}AdderTest") }
+            { assertThat(result).executedTaskSuccessfully(":testFreeDebugUnitTest") },
+            { assertThat(result).executedTestSuccessfully("${language}FreeDebugTest") },
+            { assertThat(result).executedTestSuccessfully("${language}DebugTest") },
+            { assertThat(result).executedTestSuccessfully("${language}Test") }
         )
       }
 
-      runGradle("junitPlatformTestFreeRelease") { result ->
+      runGradle("testFreeReleaseUnitTest") { result ->
         listOf(
-            { assertThat(result).executedTaskSuccessfully(":junitPlatformTestFreeRelease") },
-            { assertThat(result).hasOutputContaining("2 tests successful") },
-            { assertThat(result).hasOutputContaining("${language}ReleaseAdderTest") },
-            { assertThat(result).hasOutputContaining("${language}AdderTest") }
+            { assertThat(result).executedTaskSuccessfully(":testFreeReleaseUnitTest") },
+            { assertThat(result).executedTestSuccessfully("${language}ReleaseTest") },
+            { assertThat(result).executedTestSuccessfully("${language}Test") }
         )
       }
     }
@@ -210,13 +207,13 @@ class FunctionalTests {
     given {
       plugins {
         android()
-        junit5 {
-          """
-            unitTests {
-              returnDefaultValues = true
-            }
-          """
-        }
+        junit5(
+            testOptionsConfig = """
+              unitTests {
+                returnDefaultValues = true
+              }
+            """
+        )
       }
       testSources(Java) {
         test(
@@ -235,14 +232,14 @@ class FunctionalTests {
                   assertNull(intent.getAction());
                 }
               }
-            """)
+            """
+        )
       }
 
-      runGradle("junitPlatformTestDebug") { result ->
+      runGradle("testDebugUnitTest") { result ->
         listOf(
-            { assertThat(result).executedTaskSuccessfully(":junitPlatformTestDebug") },
-            { assertThat(result).hasOutputContaining("1 tests successful") },
-            { assertThat(result).hasOutputContaining("AndroidTest") }
+            { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
+            { assertThat(result).executedTestSuccessfully("AndroidTest") }
         )
       }
     }
@@ -253,13 +250,13 @@ class FunctionalTests {
     given {
       plugins {
         android()
-        junit5 {
-          """
-            unitTests {
-              includeAndroidResources = true
-            }
-          """
-        }
+        junit5(
+            testOptionsConfig = """
+              unitTests {
+                includeAndroidResources = true
+              }
+            """
+        )
       }
       testSources(Java) {
         test(
@@ -283,11 +280,10 @@ class FunctionalTests {
       }
     }
 
-    runGradle("junitPlatformTestDebug") { result ->
+    runGradle("testDebugUnitTest") { result ->
       listOf(
-          { assertThat(result).executedTaskSuccessfully(":junitPlatformTestDebug") },
-          { assertThat(result).hasOutputContaining("1 tests successful") },
-          { assertThat(result).hasOutputContaining("AndroidTest") }
+          { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
+          { assertThat(result).executedTestSuccessfully("AndroidTest") }
       )
     }
   }
@@ -406,20 +402,28 @@ class FunctionalTests {
         """)
       }
 
-      fun junit5(extraConfig: (() -> String)? = null) {
+      fun junit5(junitPlatformConfig: String? = null,
+          testOptionsConfig: String? = null) {
         buildFile.appendText("""
           apply plugin: "de.mannodermaus.android-junit5"
 
           android.testOptions {
             junitPlatform {
-              details "tree"
-              ${extraConfig?.invoke()}
+              ${junitPlatformConfig ?: ""}
             }
+            unitTests.all {
+              it.testLogging {
+                // Required to assert the Gradle output for these unit tests
+                events "passed", "failed"
+                exceptionFormat = "full"
+              }
+            }
+            ${testOptionsConfig ?: ""}
           }
 
           dependencies {
             // Use local dependencies so that defaultDependencies are not used
-            junitPlatform files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+            testImplementation files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
           }
         """)
       }
@@ -443,7 +447,7 @@ class FunctionalTests {
           flavorName: String = "",
           buildType: String = "") {
         val variant = "${flavorName.capitalize()}${buildType.capitalize()}"
-        val testName = "${language.name}${variant}AdderTest"
+        val testName = "${language.name}${variant}Test"
         val sourceSet = "test$variant"
         val fileName = language.appendExtension(testName)
 
@@ -466,7 +470,7 @@ class FunctionalTests {
 
           class __NAME__ {
             @Test
-            void createTestInternal() {
+            void test() {
               Adder adder = new Adder();
               assertEquals(4, adder.add(2, 2), "This should succeed!");
             }
@@ -490,7 +494,7 @@ class FunctionalTests {
 
           class __NAME__ {
             @Test
-            fun myTest() {
+            fun test() {
               val adder = Adder()
               assertEquals(4, adder.add(2, 2), "This should succeed!")
             }

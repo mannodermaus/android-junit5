@@ -6,8 +6,10 @@ import org.assertj.core.api.AbstractAssert
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.project.ProjectInternal
-import org.gradle.api.tasks.JavaExec
+import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions
@@ -65,6 +67,10 @@ class AssertBuildResult(buildResult: BuildResult) : AbstractAssert<AssertBuildRe
             "expected substring '$substring' to be contained $times times in output, but it was actually contained $actualCount times")
         .isEqualTo(times)
   }
+
+  fun executedTestSuccessfully(testClass: String, testMethod: String = "test()", times: Int = 1) {
+    hasOutputContaining("$testClass > $testMethod PASSED", times)
+  }
 }
 
 fun loadClassPathManifestResource(name: String): List<File> {
@@ -102,6 +108,9 @@ fun String.splitToArray(delimiter: String = "/"): Array<String> =
 fun Path.mkdirs() = Files.createDirectories(this)
 
 fun Path.newFile(path: String) = this.resolve(path).toFile()
+
+val Test.junitPlatformOptions: JUnitPlatformOptions
+  get() = (this.testFramework as JUnitPlatformTestFramework).options
 
 /* Operators */
 

@@ -4,15 +4,19 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
+import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.github.zafarkhaja.semver.Version
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin
 import de.mannodermaus.gradle.plugins.junit5.JUnit5TaskConfig
+import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.APP
+import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.LogLevel.ERROR
 import org.gradle.api.logging.LogLevel.INFO
@@ -20,8 +24,9 @@ import org.gradle.api.logging.LogLevel.WARN
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions
 import org.gradle.util.GradleVersion
 import java.util.Properties
 
@@ -172,6 +177,15 @@ val BaseVariant.unitTestVariant: UnitTestVariant
   }
 
 /**
+ * Obtains the {AndroidUnitTest} for the provided variant.
+ */
+fun TaskContainer.testTaskOf(variant: BaseVariant): AndroidUnitTest {
+  val taskName = variant.variantData.scope.getTaskName(VariantTypeCompat.UNIT_TEST_PREFIX,
+      VariantTypeCompat.UNIT_TEST_SUFFIX)
+  return getByName(taskName) as AndroidUnitTest
+}
+
+/**
  * Creates a task with the given properties,
  * unless it already exists in the task container,
  * in which case the existing task is returned.
@@ -186,23 +200,6 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
     new.group = group
     new
   }
-}
-
-/**
- * Access an argument passed to a JavaExec task based on its name.
- * Returns the associated values with that name, or an empty list
- * if it doesn't exist
- */
-fun JavaExec.argumentValues(name: String): List<String> {
-  return this.args?.let { args ->
-    // Find all occurrences of the provided argument,
-    // filter "out-of-bounds" values
-    // and collect the rest into a list
-    args.withIndex()
-        .filter { name == it.value }
-        .filter { it.index > -1 && it.index < args.size + 1 }
-        .map { args[it.index + 1] }
-  } ?: emptyList()
 }
 
 /**
