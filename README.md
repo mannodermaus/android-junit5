@@ -2,7 +2,7 @@
 
 ![Logo](.images/logo.png)
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.1.3 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.2.0 or later.**
 
 ## How?
 
@@ -16,7 +16,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
 ```groovy
 buildscript {
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.2.0"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.2.0.0"
   }
 }
 ```
@@ -47,7 +47,7 @@ More information on Getting Started can be found [on the wiki][wiki-gettingstart
 ## Requirements
 
 The latest version of this plugin requires:
-* Android Gradle Plugin `3.1.3` or above
+* Android Gradle Plugin `3.2.0` or above
 * Gradle `4.7` or above
 
 ## Instrumentation Test Support
