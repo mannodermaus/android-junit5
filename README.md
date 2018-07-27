@@ -38,7 +38,7 @@ dependencies {
 
   // (Optional) If you also have JUnit 4-based tests
   testImplementation "junit:junit:4.12"
-  testImplementation "org.junit.vintage:junit-vintage-engine:5.2.0"
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.2.0"
 }
 ```
 
