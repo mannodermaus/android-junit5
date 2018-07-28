@@ -4,7 +4,7 @@ cache_key: &cache_key
   key: jars-{{ checksum "build.gradle" }}-{{ checksum "android-junit5/build.gradle" }}-{{ checksum "android-junit5-tests/build.gradle" }}-{{ checksum "instrumentation/build.gradle" }}-{{ checksum "instrumentation-runner/build.gradle" }}-{{ checksum "sample/build.gradle" }}-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
 jobs:
-  build:
+  prepare-build:
     docker:
       - image: circleci/android:api-28-alpha
         environment:
@@ -13,14 +13,61 @@ jobs:
       - checkout
       - restore_cache:
           <<: *cache_key
-#      - run:
-#          name: Download Dependencies
-#          command: ./gradlew androidDependencies
       - run:
-          name: Test
-          command: ./gradlew check --stacktrace
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
       - save_cache:
           <<: *cache_key
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
+  build-plugin:
+    steps:
+      - run:
+          name: Build
+          command: ./gradlew :android-junit5:assemble --stacktrace
+      - run:
+          name: Test
+          command: ./gradlew :android-junit5-tests:check --stacktrace
+  build-instrumentation:
+    steps:
+      - run:
+          name: Build
+          command: ./gradlew :instrumentation:assemble :instrumentation-runner:assemble --stacktrace
+      - run:
+          name: Test
+          command: ./gradlew :instrumentation:check :instrumentation-runner:check --stacktrace
+  # TODO Unique scripts for plugin & instrumentation
+  deploy-plugin-snapshot:
+    steps:
+      - run:
+        name: Deploy new SNAPSHOT of android-junit5
+        command: ./scripts/deploy_snapshot.sh
+  deploy-plugin-stable:
+    steps:
+      - run:
+        name: Deploy if tests pass and branch is Master
+        command: ./scripts/deploy_plugin_release.sh
+
+workflows:
+  version: 2
+  build-deploy-plugin:
+    jobs:
+      - prepare-build
+      - build-plugin
+          requires:
+            - prepare-build
+      - deploy-plugin-snapshot:
+          requires:
+            - build-plugin
+          # TODO Connect to tags, rather than branches
+          filters:
+            branches:
+              only: staging
+      - deploy-plugin-stable:
+          requires:
+            - build-plugin
+          # TODO Connect to tags, rather than branches
+          filters:
+            branches:
+              only: master
