@@ -1,0 +1,27 @@
+version: 2
+
+cache_key: &cache_key
+  key: jars-{{ checksum "build.gradle" }}-{{ checksum "android-junit5/build.gradle" }}-{{ checksum "android-junit5-tests/build.gradle" }}-{{ checksum "instrumentation/build.gradle" }}-{{ checksum "instrumentation-runner/build.gradle" }}-{{ checksum "sample/build.gradle" }}-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+
+jobs:
+  build:
+    docker:
+      - image: circleci/android:api-28-alpha
+    steps:
+      - checkout
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - run:
+          name: Build
+          command: ./gradlew assemble assembleAndroidTest --stacktrace
+      - run:
+          name: Test
+          command: ./gradlew check --stacktrace
+      - save_cache:
+          <<: *cache_key
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
