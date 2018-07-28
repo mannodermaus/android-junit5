@@ -41,3 +41,23 @@ jobs:
             - ~/.gradle/wrapper
       - persist_to_workspace:
           root: ~/project
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Deploy plugin
+          command: ls
+
+workflows:
+  version: 2
+
+  build_deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+            
