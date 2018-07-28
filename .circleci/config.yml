@@ -41,6 +41,10 @@ jobs:
             - ~/.gradle/wrapper
       - persist_to_workspace:
           root: ~/project
+          paths:
+            - android-junit5/build
+            - instrumentation/build
+            - instrumentation-runner/build
 
   deploy:
     <<: *defaults
@@ -60,4 +64,3 @@ workflows:
       - deploy:
           requires:
             - build
-            
