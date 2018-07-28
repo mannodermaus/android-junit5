@@ -1,14 +1,18 @@
-version: 2
+# Shared default parameters and variables
+defaults: &defaults
+  docker:
+    - image: circleci/android:api-28-alpha
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
+  working_directory: ~/project
 
 cache_key: &cache_key
   key: jars-{{ checksum "build.gradle" }}-{{ checksum "android-junit5/build.gradle" }}-{{ checksum "android-junit5-tests/build.gradle" }}-{{ checksum "instrumentation/build.gradle" }}-{{ checksum "instrumentation-runner/build.gradle" }}-{{ checksum "sample/build.gradle" }}-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
+version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/android:api-28-alpha
-        environment:
-          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -16,45 +20,26 @@ jobs:
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
+
       - run:
-          name: Build
+          name: Build Plugin
           command: ./gradlew :android-junit5:assemble --stacktrace
       - run:
-          name: Test
+          name: Test Plugin
           command: ./gradlew :android-junit5-tests:check --stacktrace
+
+      - run:
+          name: Build Instrumentation
+          command: ./gradlew :instrumentation:assemble :instrumentation-runner:assemble --stacktrace
+      - run:
+          name: Test Instrumentation
+          command: ./gradlew :instrumentation:check :instrumentation-runner:check --stacktrace
       - save_cache:
           <<: *cache_key
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
-  build_instrumentation:
-    docker:
-      - image: circleci/android:api-28-alpha
-        environment:
-          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
-    steps:
-      - run:
-          name: Build
-          command: ./gradlew :instrumentation:assemble :instrumentation-runner:assemble --stacktrace
-      - run:
-          name: Test
-          command: ./gradlew :instrumentation:check :instrumentation-runner:check --stacktrace
-  # TODO Unique scripts for plugin & instrumentation
-  deploy_plugin_snapshot:
-    docker:
-      - image: circleci/android:api-28-alpha
-        environment:
-          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
-    steps:
-      - run:
-        name: Deploy new SNAPSHOT of android-junit5
-        command: ./scripts/deploy_snapshot.sh
-  deploy-plugin-stable:
-    docker:
-      - image: circleci/android:api-28-alpha
-        environment:
-          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
-    steps:
-      - run:
-        name: Deploy if tests pass and branch is Master
-        command: ./scripts/deploy_plugin_release.sh
+      - persist_to_workspace:
+          root: ~
+          paths:
+            - project
