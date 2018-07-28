@@ -1,4 +1,4 @@
-package de.mannodermaus.junit5.sample
+package de.mannodermaus.sample
 
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

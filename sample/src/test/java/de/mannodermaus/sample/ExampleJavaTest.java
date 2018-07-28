@@ -1,4 +1,4 @@
-package de.mannodermaus.junit5.sample;
+package de.mannodermaus.sample;
 
 import java.util.ArrayList;
 import java.util.Collection;
