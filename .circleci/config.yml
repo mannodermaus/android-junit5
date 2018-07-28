@@ -13,12 +13,9 @@ jobs:
       - checkout
       - restore_cache:
           <<: *cache_key
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - run:
-          name: Build
-          command: ./gradlew assemble assembleAndroidTest --stacktrace
+#      - run:
+#          name: Download Dependencies
+#          command: ./gradlew androidDependencies
       - run:
           name: Test
           command: ./gradlew check --stacktrace
