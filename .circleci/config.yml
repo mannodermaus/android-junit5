@@ -27,7 +27,11 @@ jobs:
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
-  build-instrumentation:
+  build_instrumentation:
+    docker:
+      - image: circleci/android:api-28-alpha
+        environment:
+          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
     steps:
       - run:
           name: Build
@@ -36,12 +40,20 @@ jobs:
           name: Test
           command: ./gradlew :instrumentation:check :instrumentation-runner:check --stacktrace
   # TODO Unique scripts for plugin & instrumentation
-  deploy-plugin-snapshot:
+  deploy_plugin_snapshot:
+    docker:
+      - image: circleci/android:api-28-alpha
+        environment:
+          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
     steps:
       - run:
         name: Deploy new SNAPSHOT of android-junit5
         command: ./scripts/deploy_snapshot.sh
   deploy-plugin-stable:
+    docker:
+      - image: circleci/android:api-28-alpha
+        environment:
+          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
     steps:
       - run:
         name: Deploy if tests pass and branch is Master
