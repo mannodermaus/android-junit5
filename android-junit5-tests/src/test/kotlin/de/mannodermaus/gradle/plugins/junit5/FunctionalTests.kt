@@ -55,6 +55,11 @@ class FunctionalTests {
       sdk.dir=${environment.androidSdkFolder.absolutePath}
       """)
 
+    // Write environment settings to gradle.properties
+    testProjectDir.newFile("gradle.properties").writeText("""
+      org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError
+    """)
+
     // Create and prepare build file
     this.buildFile = testProjectDir.newFile("build.gradle")
     this.buildFile.appendText("""
