@@ -46,26 +46,3 @@ jobs:
       - run:
         name: Deploy if tests pass and branch is Master
         command: ./scripts/deploy_plugin_release.sh
-
-workflows:
-  version: 2
-  build-deploy-plugin:
-    jobs:
-      - prepare-build
-      - build
-          requires:
-            - prepare-build
-      - deploy-plugin-snapshot:
-          requires:
-            - build-plugin
-          # TODO Connect to tags, rather than branches
-          filters:
-            branches:
-              only: staging
-      - deploy-plugin-stable:
-          requires:
-            - build-plugin
-          # TODO Connect to tags, rather than branches
-          filters:
-            branches:
-              only: master
