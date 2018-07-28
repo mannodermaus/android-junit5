@@ -7,6 +7,9 @@ jobs:
   build:
     docker:
       - image: circleci/android:api-28-alpha
+        environment:
+          JAVA_OPTS: -Xmx2048m
+          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     steps:
       - checkout
       - restore_cache:
