@@ -20,6 +20,10 @@ apply plugin: "de.mannodermaus.android-junit5"
 android {
   compileSdkVersion COMPILE_SDK_VERSION
 
+  dexOptions {
+    javaMaxHeapSize JAVA_MAX_HEAP_SIZE
+  }
+
   defaultConfig {
     minSdkVersion INSTRUMENTATION_RUNNER_MIN_SDK_VERSION
     targetSdkVersion TARGET_SDK_VERSION
