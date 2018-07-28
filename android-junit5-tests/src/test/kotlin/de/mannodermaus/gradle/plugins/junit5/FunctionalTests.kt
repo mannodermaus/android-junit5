@@ -6,7 +6,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.ClasspathSplitter
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Java
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Kotlin
-import de.mannodermaus.gradle.plugins.junit5.util.OnlyOnCI
+import de.mannodermaus.gradle.plugins.junit5.util.OnlyOnLocalMachine
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
@@ -30,7 +30,7 @@ import java.nio.file.Paths
  * Created by Marcel Schnelle on 2018/06/19.
  * Copyright © 2018 TenTen Technologies Limited. All rights reserved.
  */
-@OnlyOnCI
+@OnlyOnLocalMachine
 @ExtendWith(TempDirectory::class)
 class FunctionalTests {
 
@@ -313,7 +313,7 @@ class FunctionalTests {
     val buildResult = GradleRunner.create()
         .withProjectDir(testProjectDir)
         .withPluginClasspath(pluginClasspath)
-        .withArguments("$tasks --no-daemon")
+        .withArguments(tasks)
         .build()
 
     assertAll(
