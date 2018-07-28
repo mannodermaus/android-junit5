@@ -8,7 +8,7 @@ jobs:
     docker:
       - image: circleci/android:api-28-alpha
         environment:
-          GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxPermSize=1024m -XX:+HeapDumpOnOutOfMemoryError"'
+          GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxPermSize=1024m -XX:+HeapDumpOnOutOfMemoryError"'
     steps:
       - checkout
       - restore_cache:
@@ -18,7 +18,7 @@ jobs:
 #          command: ./gradlew androidDependencies
       - run:
           name: Test
-          command: ./gradlew check --stacktrace
+          command: ./gradlew check --stacktrace --no-daemon
       - save_cache:
           <<: *cache_key
           paths:

@@ -57,7 +57,7 @@ class FunctionalTests {
 
     // Write environment settings to gradle.properties
     testProjectDir.newFile("gradle.properties").writeText("""
-      org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError
+      org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError
     """)
 
     // Create and prepare build file
@@ -313,7 +313,7 @@ class FunctionalTests {
     val buildResult = GradleRunner.create()
         .withProjectDir(testProjectDir)
         .withPluginClasspath(pluginClasspath)
-        .withArguments(tasks)
+        .withArguments("$tasks --no-daemon")
         .build()
 
     assertAll(
