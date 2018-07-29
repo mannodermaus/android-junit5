@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":sample:junitPlatformTest" />
+          <option value=":sample:test" />
         </list>
       </option>
       <option name="vmOptions" value="" />

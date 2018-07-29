@@ -52,9 +52,9 @@ The latest version of this plugin requires:
 
 ## Instrumentation Test Support
 
-There is experimental support for Android instrumentation tests, which requires some additional configuration & dependencies. Note that since JUnit 5 is built on Java 8 from the ground up, these libraries require you to have a `minSdkVersion` of at least `26`.
+There is experimental support for Android instrumentation tests, which requires some additional configuration & dependencies. Note that since JUnit 5 is built on Java 8 from the ground up, these libraries require you to have a `minSdkVersion` of at least `26`. It's recommended to use a product flavor for experimentation if you want to keep your global requirements below `26`. Check the sample for how this can be done!
 
-To include the experimental instrumentation test support, add the following to your `build.gradle`:
+To start writing instrumentation tests with JUnit Jupiter, add the following to your `build.gradle`:
 
 ```groovy
 android {
@@ -67,11 +67,13 @@ android {
 }
 dependencies {
   // (Required) Writing tests for JUnit Jupiter
-  // Note: Including the Engine as well is not required for instrumentation tests
   androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
-
-  // (Required) Instrumentation test libraries
+  // (Required) The instrumentation test companion library
   androidTestImplementation "de.mannodermaus.junit5:android-instrumentation-test:0.2.2"
+
+  // (Required) Runtime dependencies to orchestrate the execution on-device
+  androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.2.0"
+  androidTestRuntimeOnly "org.junit.platform:junit-platform-runner:1.2.0"
   androidTestRuntimeOnly "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2"
 }
 ```
