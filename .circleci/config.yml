@@ -40,13 +40,35 @@ jobs:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
       - persist_to_workspace:
-          root: ~/project
+          root: ~
           paths:
-            - android-junit5/build
-            - instrumentation/build
-            - instrumentation-runner/build
+            - project
+#      - persist_to_workspace:
+#          root: ~/project
+#          paths:
+#            - android-junit5/build/libs
+#            - instrumentation/build/outputs/aar
+#            - instrumentation-runner/build/outputs/aar
+      - store_artifacts:
+          path: android-junit5/build/test-results/
+          destination: reports/plugin
+      - store_artifacts:
+          path: instrumentation/build/test-results/
+          destination: reports/instrumentation
+      - store_artifacts:
+          path: instrumentation-runner/build/test-results/
+          destination: reports/instrumentation-runner
 
-  deploy:
+  deploy_snapshots:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Deploy SNAPSHOTs
+          command: ./scripts/deploy_snapshot.sh
+
+  deploy_plugin_release:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -55,12 +77,37 @@ jobs:
           name: Deploy plugin
           command: ls
 
+  deploy_instrumentation_release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Deploy instrumentation
+          command: ls
+
 workflows:
   version: 2
 
   build_deploy:
     jobs:
       - build
-      - deploy:
+      - deploy_snapshots:
           requires:
             - build
+      - deploy_plugin_release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: plugin-*
+      - deploy_instrumentation_release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: instrumentation-*
