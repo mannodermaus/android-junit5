@@ -43,12 +43,6 @@ jobs:
           root: ~/root
           paths:
             - project
-#      - persist_to_workspace:
-#          root: ~/root/project
-#          paths:
-#            - android-junit5/build/libs
-#            - instrumentation/build/outputs/aar
-#            - instrumentation-runner/build/outputs/aar
       - store_artifacts:
           path: android-junit5-tests/build/reports/tests/test
           destination: plugin
@@ -64,19 +58,19 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/root
-      - run:
-          name: Where am I
-          command: pwd && ls -l
+      - restore_cache:
+          <<: *cache_key
       - run:
           name: Deploy SNAPSHOTs
-          command: ./gradlew check --stacktrace
-#          command: ./project/gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
+          command: ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
 
   deploy_plugin_release:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/root/project
+      - restore_cache:
+          <<: *cache_key
       - run:
           name: Deploy plugin
           command: ls
@@ -86,6 +80,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/root/project
+      - restore_cache:
+          <<: *cache_key
       - run:
           name: Deploy instrumentation
           command: ls
