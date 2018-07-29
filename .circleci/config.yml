@@ -64,27 +64,27 @@ jobs:
           name: Deploy SNAPSHOTs
           command: ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
 
-  deploy_plugin_release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/root/project
-      - restore_cache:
-          <<: *cache_key
-      - run:
-          name: Deploy plugin
-          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace
-
-  deploy_instrumentation_release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/root/project
-      - restore_cache:
-          <<: *cache_key
-      - run:
-          name: Deploy instrumentation
-          command: ./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload :instrumentation-runner:bintrayUpload --stacktrace
+#  deploy_plugin_release:
+#    <<: *defaults
+#    steps:
+#      - attach_workspace:
+#          at: ~/root
+#      - restore_cache:
+#          <<: *cache_key
+#      - run:
+#          name: Deploy plugin
+#          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace
+#
+#  deploy_instrumentation_release:
+#    <<: *defaults
+#    steps:
+#      - attach_workspace:
+#          at: ~/root
+#      - restore_cache:
+#          <<: *cache_key
+#      - run:
+#          name: Deploy instrumentation
+#          command: ./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload :instrumentation-runner:bintrayUpload --stacktrace
 
 workflows:
   version: 2
@@ -98,19 +98,19 @@ workflows:
           filters:
             branches:
               only: master
-      - deploy_plugin_release:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-            tags:
-              only: plugin-*
-      - deploy_instrumentation_release:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-            tags:
-              only: instrumentation-*
+#      - deploy_plugin_release:
+#          requires:
+#            - build
+#          filters:
+#            branches:
+#              only: master
+#            tags:
+#              only: plugin-*
+#      - deploy_instrumentation_release:
+#          requires:
+#            - build
+#          filters:
+#            branches:
+#              only: master
+#            tags:
+#              only: instrumentation-*

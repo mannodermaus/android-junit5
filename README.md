@@ -1,4 +1,4 @@
-# android-junit5 [![Travis Build Status](https://travis-ci.org/mannodermaus/android-junit5.svg?branch=master)][travisci]
+# android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/master.svg?style=svg)][circleci]
 
 ![Logo](.images/logo.png)
 
@@ -102,7 +102,7 @@ See also the [full License text](LICENSE).
 
  [junit5gh]: https://github.com/junit-team/junit5
  [junit5ug]: https://junit.org/junit5/docs/current/user-guide
- [travisci]: https://travis-ci.org/mannodermaus/android-junit5
+ [circleci]: https://circleci.com/gh/mannodermaus/android-junit5
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
  [sampletests]: sample/src/test
  [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration-DSL
