@@ -69,7 +69,8 @@ jobs:
           command: ls -l
       - run:
           name: Deploy SNAPSHOTs
-          command: ./scripts/deploy_snapshot.sh
+          command: ./project/gradlew check --stacktrace
+#          command: ./project/gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
 
   deploy_plugin_release:
     <<: *defaults
