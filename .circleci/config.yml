@@ -66,10 +66,10 @@ jobs:
           at: ~/root/project
       - run:
           name: Where am I
-          command: ls -l
+          command: pwd && ls -l
       - run:
           name: Deploy SNAPSHOTs
-          command: ./project/gradlew check --stacktrace
+          command: cd project && ./gradlew check --stacktrace
 #          command: ./project/gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
 
   deploy_plugin_release:
