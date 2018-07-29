@@ -69,7 +69,7 @@ jobs:
           command: pwd && ls -l
       - run:
           name: Deploy SNAPSHOTs
-          command: cd project && ./gradlew check --stacktrace
+          command: ./gradlew check --stacktrace
 #          command: ./project/gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
 
   deploy_plugin_release:
