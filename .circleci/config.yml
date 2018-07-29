@@ -50,20 +50,23 @@ jobs:
 #            - instrumentation/build/outputs/aar
 #            - instrumentation-runner/build/outputs/aar
       - store_artifacts:
-          path: android-junit5/build/test-results/
-          destination: reports/plugin
+          path: android-junit5/build/reports/tests/test
+          destination: plugin
       - store_artifacts:
-          path: instrumentation/build/test-results/
-          destination: reports/instrumentation
+          path: instrumentation/build/reports
+          destination: instrumentation
       - store_artifacts:
-          path: instrumentation-runner/build/test-results/
-          destination: reports/instrumentation-runner
+          path: instrumentation-runner/build/reports
+          destination: instrumentation-runner
 
   deploy_snapshots:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/root/project
+      - run:
+          name: Where am I
+          command: ls -l
       - run:
           name: Deploy SNAPSHOTs
           command: ./scripts/deploy_snapshot.sh
