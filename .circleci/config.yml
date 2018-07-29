@@ -73,7 +73,7 @@ jobs:
           <<: *cache_key
       - run:
           name: Deploy plugin
-          command: ls
+          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace
 
   deploy_instrumentation_release:
     <<: *defaults
@@ -84,7 +84,7 @@ jobs:
           <<: *cache_key
       - run:
           name: Deploy instrumentation
-          command: ls
+          command: ./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload :instrumentation-runner:bintrayUpload --stacktrace
 
 workflows:
   version: 2
@@ -95,6 +95,9 @@ workflows:
       - deploy_snapshots:
           requires:
             - build
+          filters:
+            branches:
+              only: master
       - deploy_plugin_release:
           requires:
             - build
