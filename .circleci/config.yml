@@ -50,7 +50,7 @@ jobs:
 #            - instrumentation/build/outputs/aar
 #            - instrumentation-runner/build/outputs/aar
       - store_artifacts:
-          path: android-junit5/build/reports/tests/test
+          path: android-junit5-tests/build/reports/tests/test
           destination: plugin
       - store_artifacts:
           path: instrumentation/build/reports
