@@ -1,6 +1,6 @@
 # Shared default parameters and variables
 defaults: &defaults
-  working_directory: ~/project
+  working_directory: ~/root/project
   docker:
     - image: circleci/android:api-28-alpha
       environment:
@@ -40,11 +40,11 @@ jobs:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
       - persist_to_workspace:
-          root: ~
+          root: ~/root
           paths:
             - project
 #      - persist_to_workspace:
-#          root: ~/project
+#          root: ~/root/project
 #          paths:
 #            - android-junit5/build/libs
 #            - instrumentation/build/outputs/aar
@@ -63,7 +63,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/project
+          at: ~/root/project
       - run:
           name: Deploy SNAPSHOTs
           command: ./scripts/deploy_snapshot.sh
@@ -72,7 +72,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/project
+          at: ~/root/project
       - run:
           name: Deploy plugin
           command: ls
@@ -81,7 +81,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/project
+          at: ~/root/project
       - run:
           name: Deploy instrumentation
           command: ls
