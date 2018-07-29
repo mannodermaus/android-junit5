@@ -63,7 +63,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/root/project
+          at: ~/root
       - run:
           name: Where am I
           command: pwd && ls -l
