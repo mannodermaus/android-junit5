@@ -18,6 +18,10 @@ apply plugin: "jacoco"
 android {
   compileSdkVersion COMPILE_SDK_VERSION
 
+  dexOptions {
+    javaMaxHeapSize JAVA_MAX_HEAP_SIZE
+  }
+
   defaultConfig {
     applicationId "de.mannodermaus.junit5.sample"
     minSdkVersion SAMPLE_MIN_SDK_VERSION

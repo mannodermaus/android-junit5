@@ -52,8 +52,8 @@ test {
     exceptionFormat = "full"
   }
 
-  // Enable this line to run slow Functional Tests on the local device as well
-  environment("CI", "true")
+  // Enable this line to run disable running Functional Tests on the local device
+//  environment("CI", "true")
 }
 
 dependencies {

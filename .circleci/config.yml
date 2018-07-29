@@ -1,14 +1,18 @@
-version: 2
+# Shared default parameters and variables
+defaults: &defaults
+  working_directory: ~/root/project
+  docker:
+    - image: circleci/android:api-28-alpha
+      environment:
+        GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError"'
 
 cache_key: &cache_key
   key: jars-{{ checksum "build.gradle" }}-{{ checksum "android-junit5/build.gradle" }}-{{ checksum "android-junit5-tests/build.gradle" }}-{{ checksum "instrumentation/build.gradle" }}-{{ checksum "instrumentation-runner/build.gradle" }}-{{ checksum "sample/build.gradle" }}-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
+version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/android:api-28-alpha
-        environment:
-          GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx512m -XX:+HeapDumpOnOutOfMemoryError"'
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -16,14 +20,97 @@ jobs:
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
+
       - run:
-          name: Build
-          command: ./gradlew assemble assembleAndroidTest --stacktrace
+          name: Build Plugin
+          command: ./gradlew :android-junit5:assemble --stacktrace
       - run:
-          name: Test
-          command: ./gradlew check --stacktrace
+          name: Test Plugin
+          command: ./gradlew :android-junit5-tests:check --stacktrace
+
+      - run:
+          name: Build Instrumentation
+          command: ./gradlew :instrumentation:assemble :instrumentation-runner:assemble --stacktrace
+      - run:
+          name: Test Instrumentation
+          command: ./gradlew :instrumentation:check :instrumentation-runner:check --stacktrace
       - save_cache:
           <<: *cache_key
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
+      - persist_to_workspace:
+          root: ~/root
+          paths:
+            - project
+      - store_artifacts:
+          path: android-junit5-tests/build/reports/tests/test
+          destination: plugin
+      - store_artifacts:
+          path: instrumentation/build/reports
+          destination: instrumentation
+      - store_artifacts:
+          path: instrumentation-runner/build/reports
+          destination: instrumentation-runner
+
+  deploy_snapshots:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/root
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: Deploy SNAPSHOTs
+          command: ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace
+
+  deploy_plugin_release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/root/project
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: Deploy plugin
+          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace
+
+  deploy_instrumentation_release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/root/project
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: Deploy instrumentation
+          command: ./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload :instrumentation-runner:bintrayUpload --stacktrace
+
+workflows:
+  version: 2
+
+  build_deploy:
+    jobs:
+      - build
+      - deploy_snapshots:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy_plugin_release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: plugin-*
+      - deploy_instrumentation_release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: instrumentation-*

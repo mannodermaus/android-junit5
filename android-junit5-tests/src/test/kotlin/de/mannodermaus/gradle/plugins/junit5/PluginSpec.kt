@@ -56,36 +56,6 @@ class PluginSpec : Spek({
       }
     }
 
-    on("running with an old Gradle version") {
-      val project = testProjectBuilder
-          .asAndroidLibrary()
-          .applyJunit5Plugin(false)
-          .build()
-
-      // Write out the build file manually, so we can properly test
-      // if the plugin rejects outdated versions of Gradle.
-      project.file("build.gradle").writeText("""
-            buildscript {
-                dependencies {
-                    classpath files(${environment.pluginClasspathString})
-                }
-            }
-
-            apply plugin: "de.mannodermaus.android-junit5"
-        """.trimIndent())
-
-      it("throws an error") {
-        val result = GradleRunner.create()
-            .withGradleVersion("4.6")
-            .withProjectDir(project.projectDir)
-            .withArguments("--stacktrace")
-            .buildAndFail()
-
-        assertThat(result.output)
-            .contains("android-junit5 plugin requires Gradle $MIN_REQUIRED_GRADLE_VERSION or later")
-      }
-    }
-
     on("configuring unavailable DSL values") {
       val project = testProjectBuilder
           .asAndroidLibrary()
