@@ -27,16 +27,30 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
         // as well as composed variants  (e.g. "freeDebug" or "paidRelease")
         // and product flavors (e.g. "free" or "paid")
         project.android.buildTypes.all { buildType ->
+          // "debugFilters"
+          // "releaseFilters"
           ju5.attachFiltersDsl(qualifier = buildType.name)
         }
 
+        // Attach DSL objects for all permutations of variants available.
+        // As an example, assume the incoming `variant` to be:
+        // Name:                    "brandADevelopmentDebug"
+        // Dimension "brand":       "brandA"
+        // Dimension "environment": "development"
+        // Build Type Name:         "debug"
+        //
+        // The following DSL objects have to be generated from this:
+        // 1) brandADevelopmentDebugFilters
+        // 2) brandAFilters
+        // 3) developmentFilters
         projectConfig.unitTestVariants.all { variant ->
+          // 1) Fully-specialized name ("brandADevelopmentDebugFilters")
           ju5.attachFiltersDsl(qualifier = variant.name)
-          ju5.attachFiltersDsl(qualifier = variant.buildType.name)
-        }
 
-        project.android.productFlavors.all { flavor ->
-          ju5.attachFiltersDsl(qualifier = flavor.name)
+          variant.productFlavors.forEach { flavor ->
+            // 2) & 3) Single flavors ("brandAFilters" & "developmentFilters")
+            ju5.attachFiltersDsl(qualifier = flavor.name)
+          }
         }
       }
 }

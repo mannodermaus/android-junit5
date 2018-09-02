@@ -113,4 +113,74 @@ class DslGroovyTests {
         containsOnly("some-tag", "paid-tag", "release-tag")
     assertThat(paidReleaseTask.testFramework.options.excludeTags).containsOnly("other-tag")
   }
+
+  @org.junit.jupiter.api.Test
+  @DisplayName("complex example with multiple flavor dimensions & build types")
+  void complexExampleWithMultipleFlavorDimensionsAndBuildTypes() {
+    def project = factory.newProject(testRoot)
+        .asAndroidApplication()
+        .build()
+
+    project.android {
+      flavorDimensions "brand", "environment", "payment"
+      productFlavors {
+        brandA {
+          dimension "brand"
+        }
+        brandB {
+          dimension "brand"
+        }
+
+        development {
+          dimension "environment"
+        }
+        production {
+          dimension "environment"
+        }
+
+        free {
+          dimension "payment"
+        }
+        paid {
+          dimension "payment"
+        }
+      }
+
+      buildTypes {
+        ci {
+          initWith debug
+        }
+      }
+
+      testOptions.junitPlatform {
+        filters {
+          includeTags "global-tag"
+        }
+
+        brandAFilters {
+          includeTags "brandA-tag"
+          includeTags "some-other-tag"
+        }
+
+        developmentFilters {
+          includeTags "development-tag"
+        }
+
+        paidFilters {
+          includeTags "paid-tag"
+          excludeTags "some-other-tag"
+        }
+      }
+    }
+
+    project.evaluate()
+
+    def brandADevelopmentPaidDebugTask = project.tasks
+        .getByName("testBrandADevelopmentPaidDebugUnitTest") as Test
+
+    assertThat(brandADevelopmentPaidDebugTask.testFramework.options.includeTags).
+        containsOnly("global-tag", "brandA-tag", "development-tag", "paid-tag")
+    assertThat(brandADevelopmentPaidDebugTask.testFramework.options.excludeTags).
+        containsOnly("some-other-tag")
+  }
 }

@@ -19,7 +19,6 @@ import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.api.tasks.testing.Test
-import org.gradle.testkit.runner.GradleRunner
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
@@ -571,6 +570,76 @@ class PluginSpec : Spek({
               assertThat(task.junitPlatformOptions.excludeEngines).contains("global-exclude-engine")
               assertThat(task.includes).contains("com.example.package1")
               assertThat(task.excludes).contains("com.example.package2")
+            }
+          }
+        }
+
+        on("using custom build types & multiple flavor dimensions") {
+          project.android.apply {
+            flavorDimensions("brand", "environment", "payment")
+            productFlavors.apply {
+              create("brandA").dimension = "brand"
+              create("brandB").dimension = "brand"
+
+              create("development").dimension = "environment"
+              create("production").dimension = "environment"
+
+              create("free").dimension = "payment"
+              create("paid").dimension = "payment"
+            }
+            buildTypes.apply {
+              create("ci").initWith(findByName("debug"))
+            }
+          }
+
+          project.evaluate()
+
+          listOf(   
+              "filters",
+
+              "debugFilters",
+              "releaseFilters",
+              "ciFilters",
+
+              "brandAFilters",
+              "brandBFilters",
+
+              "developmentFilters",
+              "productionFilters",
+
+              "freeFilters",
+              "paidFilters",
+
+              "brandADevelopmentPaidDebugFilters",
+              "brandADevelopmentPaidReleaseFilters",
+              "brandADevelopmentPaidCiFilters",
+              "brandADevelopmentFreeDebugFilters",
+              "brandADevelopmentFreeReleaseFilters",
+              "brandADevelopmentFreeCiFilters",
+              "brandAProductionPaidDebugFilters",
+              "brandAProductionPaidReleaseFilters",
+              "brandAProductionPaidCiFilters",
+              "brandAProductionFreeDebugFilters",
+              "brandAProductionFreeReleaseFilters",
+              "brandAProductionFreeCiFilters",
+
+              "brandBDevelopmentPaidDebugFilters",
+              "brandBDevelopmentPaidReleaseFilters",
+              "brandBDevelopmentPaidCiFilters",
+              "brandBDevelopmentFreeDebugFilters",
+              "brandBDevelopmentFreeReleaseFilters",
+              "brandBDevelopmentFreeCiFilters",
+              "brandBProductionPaidDebugFilters",
+              "brandBProductionPaidReleaseFilters",
+              "brandBProductionPaidCiFilters",
+              "brandBProductionFreeDebugFilters",
+              "brandBProductionFreeReleaseFilters",
+              "brandBProductionFreeCiFilters"
+          ).forEach { name ->
+            it("creates an extension named '$name'") {
+              val ju5 = project.android.testOptions.junitPlatform
+              val extension = ju5.extensionByName<FiltersExtension>(name)
+              assertThat(extension).isNotNull()
             }
           }
         }
