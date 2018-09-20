@@ -28,7 +28,7 @@ class TestProjectFactory {
   class TestProjectBuilder {
 
     enum Type {
-      UNSET, APPLICATION, LIBRARY, FEATURE
+      UNSET, APPLICATION, LIBRARY, FEATURE, DYNAMIC_FEATURE
     }
 
     private final Project project
@@ -52,27 +52,28 @@ class TestProjectFactory {
     /* Public */
 
     TestProjectBuilder asAndroidApplication() {
-      if (projectType != Type.UNSET) {
-        throw new IllegalArgumentException("Project type already set to $projectType")
-      }
+      assertProjectTypeUnset()
 
       projectType = Type.APPLICATION
       return this
     }
 
     TestProjectBuilder asAndroidFeature() {
-      if (projectType != Type.UNSET) {
-        throw new IllegalArgumentException("Project type already set to $projectType")
-      }
+      assertProjectTypeUnset()
 
       projectType = Type.FEATURE
       return this
     }
 
+    TestProjectBuilder asAndroidDynamicFeature() {
+      assertProjectTypeUnset()
+
+      projectType = Type.DYNAMIC_FEATURE
+      return this
+    }
+
     TestProjectBuilder asAndroidLibrary() {
-      if (projectType != Type.UNSET) {
-        throw new IllegalArgumentException("Project type already set to $projectType")
-      }
+      assertProjectTypeUnset()
 
       projectType = Type.LIBRARY
       return this
@@ -111,6 +112,10 @@ class TestProjectFactory {
 
         case Type.FEATURE:
           project.apply plugin: "com.android.feature"
+          break
+
+        case Type.DYNAMIC_FEATURE:
+          project.apply plugin: "com.android.dynamic-feature"
           break
 
         case Type.LIBRARY:
@@ -164,6 +169,12 @@ class TestProjectFactory {
             package="$appId">
         </manifest>
     """
+    }
+
+    private void assertProjectTypeUnset() {
+      if (projectType != Type.UNSET) {
+        throw new IllegalArgumentException("Project type already set to $projectType")
+      }
     }
   }
 }
