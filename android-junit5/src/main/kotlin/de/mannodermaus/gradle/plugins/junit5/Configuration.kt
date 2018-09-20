@@ -62,10 +62,15 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
     override fun variants(extension: FeatureExtension): DomainObjectSet<LibraryVariant> =
         extension.libraryVariants
   }
+
+  object DynamicFeature : Type<FeatureExtension>("com.android.dynamic-feature") {
+    override fun variants(extension: FeatureExtension): DomainObjectSet<LibraryVariant> =
+            extension.libraryVariants
+  }
 }
 
 private val allTypes: List<Type<*>> =
-    listOf(Application, Test, Library, Feature)
+    listOf(Application, Test, Library, Feature, DynamicFeature)
 
 @Suppress("UNCHECKED_CAST")
 private fun findType(project: Project): Type<BaseExtension> {
