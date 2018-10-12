@@ -16,6 +16,8 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
+import org.assertj.core.api.Assumptions
+import org.assertj.core.api.Assumptions.assumeThat
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.PluginApplicationException
@@ -476,13 +478,17 @@ class PluginSpec : Spek({
 
             it("generates a mockable android.jar with the correct suffix") {
               val variant = ProjectConfig(project).unitTestVariants.first()
-              val file = variant.variantData.scope.globalScope.mockableAndroidJarFile
-              val assertion = assertThat(file.name)
+              val file = variant.variantData.scope.globalScope.mockableJarArtifact.singleFile
+              if (file.name != "android.jar") {
+                // Effectively disabled for newer AGP versions, because it doesn't
+                // attach the configuration in the file name anymore
+                val assertion = assertThat(file.name)
 
-              if (state) {
-                assertion.contains("default-values")
-              } else {
-                assertion.doesNotContain("default-values")
+                if (state) {
+                  assertion.contains("default-values")
+                } else {
+                  assertion.doesNotContain("default-values")
+                }
               }
             }
           }

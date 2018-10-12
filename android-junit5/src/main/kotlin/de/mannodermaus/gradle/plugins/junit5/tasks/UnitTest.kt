@@ -137,9 +137,10 @@ open class AndroidJUnit5UnitTest : JavaExec(), JUnit5UnitTest {
       }
 
       // Build the task arguments
-      task.args = buildArgs(junit5, reportsDir, testRootDirs)
-      project.logger.junit5Info("Launcher Arguments: ${task.args.joinToString()}")
-      project.logger.junit5Info("JVM Arguments: ${task.jvmArgs.joinToString()}")
+      val args = buildArgs(junit5, reportsDir, testRootDirs)
+      task.args = args
+      project.logger.junit5Info("Launcher Arguments: ${args.joinToString()}")
+      project.logger.junit5Info("JVM Arguments: ${task.jvmArgs?.joinToString()}")
 
       // Hook into the main JUnit 5 task
       val defaultJUnit5Task = getDefaultJUnit5Task()
@@ -292,7 +293,7 @@ open class JUnit5UnitTestRunAll : DefaultTask(), JUnit5UnitTest {
 
   override val isRunAllTask = true
 
-  override val javaForkOptions: JavaForkOptions? = null
+  override val javaForkOptions: JavaForkOptions? = emptyJavaForkOptions
 
   /* JavaForkOptions facade */
 
