@@ -82,6 +82,7 @@ class PluginSpec : Spek({
   differentPlugins["application"] = { this.asAndroidApplication() }
   differentPlugins["library"] = { this.asAndroidLibrary() }
   differentPlugins["feature"] = { this.asAndroidFeature() }
+  differentPlugins["dynamic-feature"] = { this.asAndroidDynamicFeature() }
 
   differentPlugins.forEach { (pluginName, configFunc) ->
     describe("a project using the $pluginName plugin") {

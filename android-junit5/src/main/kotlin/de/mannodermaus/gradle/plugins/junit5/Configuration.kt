@@ -9,6 +9,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.LibraryVariant
 import de.mannodermaus.gradle.plugins.junit5.Type.Application
+import de.mannodermaus.gradle.plugins.junit5.Type.DynamicFeature
 import de.mannodermaus.gradle.plugins.junit5.Type.Feature
 import de.mannodermaus.gradle.plugins.junit5.Type.Library
 import de.mannodermaus.gradle.plugins.junit5.Type.Test
@@ -62,10 +63,15 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
     override fun variants(extension: FeatureExtension): DomainObjectSet<LibraryVariant> =
         extension.libraryVariants
   }
+
+  object DynamicFeature : Type<AppExtension>("com.android.dynamic-feature") {
+    override fun variants(extension: AppExtension): DomainObjectSet<ApplicationVariant> =
+            extension.applicationVariants
+  }
 }
 
 private val allTypes: List<Type<*>> =
-    listOf(Application, Test, Library, Feature)
+    listOf(Application, Test, Library, Feature, DynamicFeature)
 
 @Suppress("UNCHECKED_CAST")
 private fun findType(project: Project): Type<BaseExtension> {
