@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Plugin: Run Unit Tests" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Plugin: Run Unit Tests (No Functional)" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -15,6 +15,6 @@
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
-    <method />
+    <method v="2" />
   </configuration>
 </component>

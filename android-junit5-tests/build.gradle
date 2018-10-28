@@ -86,6 +86,7 @@ dependencies {
   functionalTest "org.junit.jupiter:junit-jupiter-api:$JUNIT_JUPITER_VERSION"
   functionalTest "org.junit.jupiter:junit-jupiter-engine:$JUNIT_JUPITER_VERSION"
   functionalTest "org.junit.platform:junit-platform-console:$JUNIT_PLATFORM_VERSION"
+  functionalTest "org.jetbrains.kotlin:kotlin-compiler-embeddable:$KOTLIN_VERSION"
 }
 
 // Resource Writers

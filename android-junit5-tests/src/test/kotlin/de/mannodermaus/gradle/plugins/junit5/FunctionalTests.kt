@@ -404,6 +404,12 @@ class FunctionalTests {
               test.java.srcDir "src/test/kotlin"
             }
           }
+
+          dependencies {
+            // Required since Kotlin 1.2.60;
+            // will fail with "can't find kotlin-compiler-embeddable" if not overwritten
+            kotlinCompilerClasspath files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+          }
         """)
       }
 
