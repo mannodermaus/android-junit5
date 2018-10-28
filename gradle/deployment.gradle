@@ -178,6 +178,8 @@ project.configure(project) {
     if (doBeforePublish != null) {
       publish.doFirst doBeforePublish
     }
+    project.tasks.getByName("bintrayUpload").enabled = false
+
   } else {
     // Configure deployment of release versions to Bintray
     project.artifacts {
