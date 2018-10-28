@@ -52,7 +52,6 @@ task test(overwrite: true) {}
 dependencies {
   // Language Support
   implementation gradleApi()
-  implementation "org.codehaus.groovy:groovy:$GROOVY_VERSION"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
 
   // Other Dependencies
