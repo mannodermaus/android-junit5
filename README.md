@@ -16,7 +16,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
 ```groovy
 buildscript {
   dependencies {
-    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.2.0.0"
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.3.1.0"
   }
 }
 ```
@@ -30,15 +30,15 @@ apply plugin: "de.mannodermaus.android-junit5"
 
 dependencies {
   // (Required) Writing and executing Unit Tests on the JUnit Platform
-  testImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.2.0"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:5.3.1"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
 
   // (Optional) If you need "Parameterized Tests"
-  testImplementation "org.junit.jupiter:junit-jupiter-params:5.2.0"
+  testImplementation "org.junit.jupiter:junit-jupiter-params:5.3.1"
 
   // (Optional) If you also have JUnit 4-based tests
   testImplementation "junit:junit:4.12"
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.2.0"
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.3.1"
 }
 ```
 
@@ -67,13 +67,13 @@ android {
 }
 dependencies {
   // (Required) Writing tests for JUnit Jupiter
-  androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
+  androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.3.1"
   // (Required) The instrumentation test companion library
   androidTestImplementation "de.mannodermaus.junit5:android-instrumentation-test:0.2.2"
 
   // (Required) Runtime dependencies to orchestrate the execution on-device
-  androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.2.0"
-  androidTestRuntimeOnly "org.junit.platform:junit-platform-runner:1.2.0"
+  androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+  androidTestRuntimeOnly "org.junit.platform:junit-platform-runner:1.3.1"
   androidTestRuntimeOnly "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2"
 }
 ```
