@@ -1,7 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.scope.TaskConfigAction
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
@@ -34,7 +33,9 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
         testTask: Test,
         directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport {
       val configAction = ConfigAction(project, variant, testTask, directoryProviders)
-      return project.tasks.create(configAction.name, configAction.type, configAction)
+      return project.tasks.create(configAction.name, configAction.type) {
+        configAction.execute(it)
+      }
     }
   }
 
@@ -46,15 +47,15 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       val variant: BaseVariant,
       val testTask: Test,
       private val directoryProviders: Collection<DirectoryProvider>
-  ) : TaskConfigAction<AndroidJUnit5JacocoReport> {
+  ) {
 
     private val scope = variant.variantData.scope
 
-    override fun getName(): String = scope.getTaskName(TASK_NAME_DEFAULT)
+    val name: String = scope.getTaskName(TASK_NAME_DEFAULT)
 
-    override fun getType() = AndroidJUnit5JacocoReport::class.java
+    val type = AndroidJUnit5JacocoReport::class.java
 
-    override fun execute(reportTask: AndroidJUnit5JacocoReport) {
+    fun execute(reportTask: AndroidJUnit5JacocoReport) {
       // Project-level configuration
       reportTask.dependsOn(testTask)
       reportTask.group = GROUP_REPORTING
