@@ -15,6 +15,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.junitPlatformOptions
 import de.mannodermaus.gradle.plugins.junit5.util.throws
 import de.mannodermaus.gradle.plugins.junit5.util.times
 import org.assertj.core.api.Assertions.assertThat
+import org.gradle.api.Action
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.PluginApplicationException
@@ -62,9 +63,9 @@ class PluginSpec : Spek({
           .build()
 
       project.android.testOptions.junitPlatform {
-        filters("unknown") {
-          includeTags("doesnt-matter")
-        }
+        filters("unknown", Action {
+          it.includeTags("doesnt-matter")
+        })
       }
 
       it("doesn't have a filters extension point for an unknown build type") {
@@ -658,19 +659,19 @@ class PluginSpec : Spek({
               excludeTags("global-exclude-tag")
               includePattern("com.example.package1")
             }
-            filters("paid") {
-              includeEngines("paid-include-engine")
-              includePattern("com.example.paid")
-              excludePattern("com.example.package1")
-            }
-            filters("freeDebug") {
-              includeTags("freeDebug-include-tag")
-            }
-            filters("paidRelease") {
-              includeTags("paidRelease-include-tag")
-              includeTags("global-exclude-tag")
-              includePattern("com.example.paid.release")
-            }
+            filters("paid", Action {
+              it.includeEngines("paid-include-engine")
+              it.includePattern("com.example.paid")
+              it.excludePattern("com.example.package1")
+            })
+            filters("freeDebug", Action {
+              it.includeTags("freeDebug-include-tag")
+            })
+            filters("paidRelease", Action {
+              it.includeTags("paidRelease-include-tag")
+              it.includeTags("global-exclude-tag")
+              it.includePattern("com.example.paid.release")
+            })
           }
 
           project.evaluate()
@@ -748,18 +749,18 @@ class PluginSpec : Spek({
               includeEngines("global-include-engine")
               includePattern("pattern123")
             }
-            filters("debug") {
-              excludeTags("debug-exclude-tag")
-              excludeEngines("debug-exclude-engine")
-              excludePattern("pattern123")
-              excludePattern("debug-pattern")
-            }
-            filters("release") {
-              includeTags("rel-include-tag")
-              includeEngines("rel-include-engine")
-              excludeEngines("global-include-engine")
-              includePattern("release-pattern")
-            }
+            filters("debug", Action {
+              it.excludeTags("debug-exclude-tag")
+              it.excludeEngines("debug-exclude-engine")
+              it.excludePattern("pattern123")
+              it.excludePattern("debug-pattern")
+            })
+            filters("release", Action {
+              it.includeTags("rel-include-tag")
+              it.includeEngines("rel-include-engine")
+              it.excludeEngines("global-include-engine")
+              it.includePattern("release-pattern")
+            })
           }
 
           project.evaluate()
