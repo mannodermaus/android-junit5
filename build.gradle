@@ -51,4 +51,6 @@ allprojects {
   ext.bintrayKey = bintrayKey
   ext.sonatypeUser = sonatypeUser
   ext.sonatypePass = sonatypePass
+
+  apply from: "$rootDir/gradle/dependencies.gradle.kts"
 }

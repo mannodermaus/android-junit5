@@ -1,8 +1,7 @@
 // Common logic shared across modules whose artifacts
 // are provided to jCenter and Sonatype OSS.
 //
-// This script expects a Map extension property
-// named "deployConfig" to exist on the Project instance:
+// This script expects an extra named "deployConfig" to exist on the Project instance:
 //
 // * platform        : (String, required)
 //    One of "java" or "android", depending on what type of library is being deployed
@@ -44,21 +43,42 @@ private def required(Map config, String property) {
 if (!project.ext.has("deployConfig")) {
   throw new IllegalStateException("Deployed module '$name' requires a 'deployConfig'")
 }
-final Map deployConfig = project.ext.deployConfig
-final String targetPlatform = required(deployConfig, "platform")
 
-final String groupId = required(deployConfig, "groupId")
-final String artifactId = required(deployConfig, "artifactId")
-final String versionNumber = required(deployConfig, "version")
-final String license = required(deployConfig, "license")
-final String description = required(deployConfig, "description")
+final Object deployConfig = project.ext.deployConfig
+String targetPlatform
+String groupId
+String artifactId
+String versionNumber
+String license
+String description
 
-final def doConfigure = deployConfig.get("doConfigure", null)
-final def doBeforePublish = deployConfig.get("doBeforePublish", null)
+def doConfigure = null
+def doBeforePublish = null
 
-if (!["java", "android"].contains(targetPlatform)) {
-  throw new IllegalStateException(
-      "Deployed module '$name' declared unknown platform '$targetPlatform'")
+if (deployConfig instanceof Map) {
+  // Old
+  targetPlatform = required(deployConfig, "platform")
+  groupId = required(deployConfig, "groupId")
+  artifactId = required(deployConfig, "artifactId")
+  versionNumber = required(deployConfig, "version")
+  license = required(deployConfig, "license")
+  description = required(deployConfig, "description")
+
+  doConfigure = deployConfig.get("doConfigure", null)
+  doBeforePublish = deployConfig.get("doBeforePublish", null)
+
+  if (!["java", "android"].contains(targetPlatform)) {
+    throw new IllegalStateException(
+        "Deployed module '$name' declared unknown platform '$targetPlatform'")
+  }
+} else {
+  // New
+  targetPlatform = deployConfig.platform.toString().toLowerCase(Locale.ROOT)
+  groupId = deployConfig.groupId
+  artifactId = deployConfig.artifactId
+  versionNumber = deployConfig.currentVersion
+  license = deployConfig.license
+  description = deployConfig.description
 }
 
 // Apply required plugins
@@ -179,7 +199,6 @@ project.configure(project) {
       publish.doFirst doBeforePublish
     }
     project.tasks.getByName("bintrayUpload").enabled = false
-
   } else {
     // Configure deployment of release versions to Bintray
     project.artifacts {
