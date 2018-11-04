@@ -1,4 +1,5 @@
 import de.mannodermaus.gradle.plugins.junit5.Artifacts
+import de.mannodermaus.gradle.plugins.junit5.Platform.Android
 
 // Latest Stable Versions of this plugin
 extra["android-junit5.plugin.latestVersion"] = Artifacts.Plugin.latestStableVersion
@@ -17,8 +18,8 @@ extra["android.compileSdkVersion"] = "android-28"
 extra["android.javaMaxHeapSize"] = "3g"
 extra["android.targetSdkVersion"] = 28
 extra["android.sampleMinSdkVersion"] = 14
-extra["android.runnerMinSdkVersion"] = 14
-extra["android.instrumentationMinSdkVersion"] = 26
+extra["android.runnerMinSdkVersion"] = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
+extra["android.instrumentationMinSdkVersion"] = (Artifacts.Instrumentation.Library.platform as Android).minSdk
 
 // Common properties
 val apacheCommonsVersion = "2.6"

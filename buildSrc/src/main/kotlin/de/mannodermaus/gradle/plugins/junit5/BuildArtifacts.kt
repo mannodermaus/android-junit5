@@ -3,20 +3,23 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.Platform.Android
 import de.mannodermaus.gradle.plugins.junit5.Platform.Java
 
-enum class Platform {
-  Java,
-  Android
+sealed class Platform(val name: String) {
+  object Java : Platform("java")
+  class Android(val minSdk: Int) : Platform("android")
 }
 
-data class Artifact internal constructor(
+/**
+ * Encapsulation for "deployable" library artifacts,
+ * containing all sorts of configuration related to Maven coordinates, for instance.
+ */
+open class Artifact internal constructor(
     val platform: Platform,
     val groupId: String,
     val artifactId: String,
     val currentVersion: String,
     val latestStableVersion: String,
     val description: String,
-    val license: String,
-    val minSdk: Int? = null
+    val license: String
 )
 
 object Artifacts {
@@ -46,25 +49,23 @@ object Artifacts {
     val latestStableVersion = "0.2.2"
 
     val Library = Artifact(
-        platform = Android,
+        platform = Android(minSdk = 26),
         groupId = groupId,
         artifactId = "android-instrumentation-test",
         currentVersion = currentVersion,
         latestStableVersion = latestStableVersion,
         license = license,
-        description = "Extensions for instrumented Android tests with JUnit 5.",
-        minSdk = 26
+        description = "Extensions for instrumented Android tests with JUnit 5."
     )
 
     val Runner = Artifact(
-        platform = Android,
+        platform = Android(minSdk = 14),
         groupId = groupId,
         artifactId = "android-instrumentation-test-runner",
         currentVersion = currentVersion,
         latestStableVersion = latestStableVersion,
         license = license,
-        description = "Runner for integration of instrumented Android tests with JUnit 5.",
-        minSdk = 14
+        description = "Runner for integration of instrumented Android tests with JUnit 5."
     )
   }
 }
