@@ -16,7 +16,7 @@ val spekVersion = "1.2.1"
 extra["android.buildToolsVersion"] = "28.0.3"
 extra["android.compileSdkVersion"] = "android-28"
 extra["android.javaMaxHeapSize"] = "3g"
-extra["android.targetSdk"] = 28
+extra["android.targetSdkVersion"] = 28
 
 // Plugins
 extra["plugins.android"] = "com.android.tools.build:gradle:3.2.1"
