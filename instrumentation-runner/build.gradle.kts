@@ -110,4 +110,4 @@ dependencies {
 // ------------------------------------------------------------------------------------------------
 
 val deployConfig by extra<Artifact> { Artifacts.Instrumentation.Runner }
-apply(from = "$rootDir/gradle/deployment.gradle.kts")
+apply(from = "$rootDir/gradle/deployment.gradle")

@@ -1,0 +1,167 @@
+import de.mannodermaus.gradle.plugins.junit5.Artifacts
+
+// Common logic shared across modules whose artifacts are provided to jCenter and Sonatype OSS.
+//
+// This script expects an extra named "deployConfig" to exist on the Project instance.
+// Its type is defined within the buildSrc module of this project.
+
+/** Obtains a required parameter from a Map, or throws an Exception if it's absent */
+private def required(Map config, String property) {
+  def value = config.get(property, null)
+  if (!value) {
+    throw new IllegalStateException(
+        "Deployment for module '$name' is missing required parameter '$property'")
+  }
+  return value
+}
+
+// Access Map properties
+if (!project.ext.has("deployConfig")) {
+  throw new IllegalStateException("Deployed module '$name' requires a 'deployConfig'")
+}
+
+final de.mannodermaus.gradle.plugins.junit5.Artifact deployConfig = project.ext.deployConfig
+final String targetPlatform = deployConfig.platform.name
+final String groupId = deployConfig.groupId
+final String artifactId = deployConfig.artifactId
+final String versionNumber = deployConfig.currentVersion
+final String license = deployConfig.license
+final String description = deployConfig.description
+
+// Apply required plugins
+apply plugin: "com.jfrog.bintray"
+
+if (targetPlatform == "java") {
+  // Releases
+  apply plugin: "maven"
+  // Snapshots
+  apply plugin: "maven-publish"
+} else if (targetPlatform == "android") {
+  // Releases
+  apply plugin: "com.github.dcendents.android-maven"
+  // Snapshots
+  apply plugin: "digital.wup.android-maven-publish"
+}
+
+// ------------------------------------------------------------------------------------------------
+// Artifacts Configuration
+// ------------------------------------------------------------------------------------------------
+
+// Include sources.jar archive in each release
+if (targetPlatform == "java") {
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    baseName = artifactId
+    classifier = "sources"
+    from sourceSets.main.allSource
+  }
+} else {
+  task sourcesJar(type: Jar) {
+    baseName = artifactId
+    classifier = "sources"
+    from android.sourceSets.main.java.srcDirs
+  }
+}
+
+// Include javadoc.jar archive in each release
+if (targetPlatform == "android") {
+  task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    excludes = ["**/*.kt"]
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+  }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  baseName = artifactId
+  classifier = "javadoc"
+  from javadoc.destinationDir
+}
+
+// ------------------------------------------------------------------------------------------------
+// Publication Configuration
+// ------------------------------------------------------------------------------------------------
+
+group = groupId
+archivesBaseName = artifactId
+version = versionNumber
+
+publishing {
+  publications {
+    library(MavenPublication) { p ->
+      p.from components.getByName(targetPlatform)
+      p.artifact sourcesJar
+      p.artifact javadocJar
+      p.groupId groupId
+      p.artifactId artifactId
+      p.version version
+      p.pom.withXml {
+        def root = asNode()
+        root.appendNode("description", description)
+        root.appendNode("name", artifactId)
+        root.appendNode("url", Artifacts.githubUrl)
+      }
+    }
+  }
+}
+
+// Copy POM to location expected by Bintray
+task copyPom(type: Copy) {
+  from "build/publications/library"
+  into "build/poms"
+  include "pom-default.xml"
+}
+
+publish.dependsOn copyPom
+
+// ------------------------------------------------------------------------------------------------
+// Target Configuration
+// ------------------------------------------------------------------------------------------------
+
+project.configure(project) {
+  if (project.version.endsWith("-SNAPSHOT")) {
+    // Configure deployment of snapshot versions to Sonatype OSS
+    project.publishing {
+      repositories {
+        maven {
+          name "snapshot"
+          credentials {
+            username project.ext["deployment.sonatypeUser"]
+            password project.ext["deployment.sonatypePass"]
+          }
+          url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+      }
+    }
+    project.tasks.getByName("bintrayUpload").enabled = false
+
+  } else {
+    // Configure deployment of release versions to Bintray
+    project.artifacts {
+      archives javadocJar
+      archives sourcesJar
+    }
+
+    project.bintray {
+      user = project.ext["deployment.bintrayUser"]
+      key = project.ext["deployment.bintrayKey"]
+      configurations = ["archives"]
+      dryRun = false
+      publish = true
+      pkg {
+        repo = "maven"
+        name = artifactId
+        desc = description
+        licenses = [license]
+        githubRepo = Artifacts.githubRepo
+        websiteUrl = Artifacts.githubUrl
+        vcsUrl = "${Artifacts.githubUrl}.git"
+        issueTrackerUrl = "${Artifacts.githubUrl}/issues"
+        publicDownloadNumbers = true
+        version {
+          name = versionNumber
+          desc = description
+        }
+      }
+    }
+  }
+}
