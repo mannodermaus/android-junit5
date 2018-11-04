@@ -64,17 +64,17 @@ jobs:
           name: Deploy SNAPSHOTs
           command: ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
 
-#  deploy_plugin_release:
-#    <<: *defaults
-#    steps:
-#      - attach_workspace:
-#          at: ~/root
-#      - restore_cache:
-#          <<: *cache_key
-#      - run:
-#          name: Deploy plugin
-#          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
-#
+  deploy_plugin_release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/root
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: Deploy plugin
+          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
+
 #  deploy_instrumentation_release:
 #    <<: *defaults
 #    steps:
@@ -98,14 +98,14 @@ workflows:
           filters:
             branches:
               only: master
-#      - deploy_plugin_release:
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              only: master
-#            tags:
-#              only: plugin-*
+      - deploy_plugin_release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: plugin-*
 #      - deploy_instrumentation_release:
 #          requires:
 #            - build
