@@ -32,6 +32,10 @@ when (deployConfig.platform) {
 // Artifacts Configuration
 // ------------------------------------------------------------------------------------------------
 
+// Android Gradle Plugin types cannot be accessed in this file,
+// because pure-Java artifacts may not have this plugin on the classpath.
+// The result of this method is equivalent to:
+// "android.sourceSets.<named>.java.srcDirs"
 fun androidSourceDirs(named: String): Iterable<File> =
     extensions["android"].withGroovyBuilder {
       val sourceSets = this.getProperty("sourceSets") as NamedDomainObjectContainer<*>
@@ -46,6 +50,10 @@ fun androidSourceDirs(named: String): Iterable<File> =
       }
     }
 
+// Android Gradle Plugin types cannot be accessed in this file,
+// because pure-Java artifacts may not have this plugin on the classpath.
+// The result of this method is equivalent to:
+// "android.getBootClasspath()"
 fun androidBootClasspath(): Iterable<File> {
   val android = extensions["android"]
   return android.javaClass.getDeclaredMethod("getBootClasspath")
