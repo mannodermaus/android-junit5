@@ -187,8 +187,8 @@ project.configure(project) {
         maven {
           name "snapshot"
           credentials {
-            username project.ext.sonatypeUser
-            password project.ext.sonatypePass
+            username project.ext["deployment.sonatypeUser"]
+            password project.ext["deployment.sonatypePass"]
           }
           url "https://oss.sonatype.org/content/repositories/snapshots"
         }
@@ -207,8 +207,8 @@ project.configure(project) {
     }
 
     project.bintray {
-      user = project.ext.bintrayUser
-      key = project.ext.bintrayKey
+      user = project.ext["deployment.bintrayUser"]
+      key = project.ext["deployment.bintrayKey"]
       configurations = ["archives"]
       dryRun = false
       publish = true
