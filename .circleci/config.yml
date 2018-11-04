@@ -7,7 +7,7 @@ defaults: &defaults
         GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"'
 
 cache_key: &cache_key
-  key: jars-{{ checksum "build.gradle" }}-{{ checksum "android-junit5/build.gradle" }}-{{ checksum "android-junit5-tests/build.gradle" }}-{{ checksum "instrumentation/build.gradle" }}-{{ checksum "instrumentation-runner/build.gradle" }}-{{ checksum "sample/build.gradle" }}-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "android-junit5/build.gradle.kts" }}-{{ checksum "android-junit5-tests/build.gradle.kts" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation-runner/build.gradle.kts" }}-{{ checksum "sample/build.gradle.kts" }}-{{ checksum "gradle/dependencies.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
 version: 2
 jobs:
