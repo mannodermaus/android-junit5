@@ -1,4 +1,3 @@
-import de.mannodermaus.gradle.plugins.junit5.Deps
 import java.util.Properties
 
 buildscript {

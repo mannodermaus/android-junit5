@@ -15,7 +15,6 @@ import java.io.File
  * More info:
  * https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
  */
-@Suppress("unused")
 open class WriteClasspathResource : DefaultTask() {
 
   @InputFiles

@@ -34,7 +34,7 @@ android {
 
   defaultConfig {
     applicationId = "de.mannodermaus.junit5.sample"
-    minSdkVersion(14)
+    minSdkVersion(extra["android.sampleMinSdkVersion"] as Int)
     targetSdkVersion(extra["android.targetSdkVersion"] as Int)
     versionCode = 1
     versionName = "1.0"
@@ -86,9 +86,6 @@ tasks.withType<Test> {
   testLogging.events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
 }
 
-val androidTestExperimentalImplementation by configurations
-val androidTestExperimentalRuntimeOnly by configurations
-
 dependencies {
   implementation(kotlin("stdlib", extra["versions.kotlin"] as String))
 
@@ -101,10 +98,12 @@ dependencies {
 
   // Add the Android Instrumentation Test dependencies to the product flavor only
   // (with this, only the "experimental" flavor must have minSdkVersion 26)
+  val androidTestExperimentalImplementation by configurations
   androidTestExperimentalImplementation(extra["libs.junitJupiterApi"] as String)
   androidTestExperimentalImplementation("de.mannodermaus.junit5:android-instrumentation-test:0.2.2")
 
   // Runtime dependencies for Android Instrumentation Tests
+  val androidTestExperimentalRuntimeOnly by configurations
   androidTestExperimentalRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
   androidTestExperimentalRuntimeOnly(extra["libs.junitPlatformRunner"] as String)
   androidTestExperimentalRuntimeOnly(
