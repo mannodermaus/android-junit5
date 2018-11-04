@@ -1,13 +1,11 @@
-// Common properties
-val apacheCommonsVersion = "2.6"
-val junitPlatformVersion = "1.3.1"
-val junitJupiterVersion = "5.3.1"
-val junitVintageVersion = "5.3.1"
-val kotlinVersion = "1.2.61"
-val spekVersion = "1.2.1"
+import de.mannodermaus.gradle.plugins.junit5.Artifacts
 
-// Android Environment
+// Latest Stable Versions of this plugin
+extra["android-junit5.plugin.latestVersion"] = Artifacts.Plugin.latestStableVersion
+extra["android-junit5.instrumentation.latestVersion"] = Artifacts.Instrumentation.latestStableVersion
+
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Android Environment
 // A Note to my forgetful self:
 //
 // When updating these values, make sure
@@ -19,14 +17,22 @@ extra["android.javaMaxHeapSize"] = "3g"
 extra["android.targetSdkVersion"] = 28
 extra["android.sampleMinSdkVersion"] = 14
 
-// Plugins
+// Common properties
+val apacheCommonsVersion = "2.6"
+val junitPlatformVersion = "1.3.1"
+val junitJupiterVersion = "5.3.1"
+val junitVintageVersion = "5.3.1"
+val kotlinVersion = "1.2.61"
+val spekVersion = "1.2.1"
+
+// Dependencies: Plugins
 extra["plugins.android"] = "com.android.tools.build:gradle:3.2.1"
 extra["plugins.androidMaven"] = "digital.wup:android-maven-publish:3.6.2"
 extra["plugins.bintray"] = "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
 extra["plugins.dcendentsMaven"] = "com.github.dcendents:android-maven-gradle-plugin:2.1"
 extra["plugins.versions"] = "com.github.ben-manes:gradle-versions-plugin:0.20.0"
 
-// Dependencies
+// Dependencies: Libraries
 extra["libs.annimonStream"] = "com.annimon:stream:1.2.1"
 extra["libs.javaSemver"] = "com.github.zafarkhaja:java-semver:0.9.0"
 
@@ -49,9 +55,6 @@ extra["libs.junitVintageEngine"] = "org.junit.vintage:junit-vintage-engine:$juni
 extra["libs.mockito"] = "org.mockito:mockito-core:2.19.0"
 extra["libs.spekApi"] = "org.jetbrains.spek:spek-api:$spekVersion"
 extra["libs.spekEngine"] = "org.jetbrains.spek:spek-junit-platform-engine:$spekVersion"
-
-// TODO Needed?
-// extra["libs.junitPlatformConsole"] = "org.junit.platform:junit-platform-console:$junitPlatformVersion"
 
 // Versions
 extra["versions.kotlin"] = kotlinVersion

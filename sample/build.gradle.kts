@@ -11,7 +11,8 @@ buildscript {
   }
 
   dependencies {
-    classpath("de.mannodermaus.gradle.plugins:android-junit5:1.3.1.1")
+    val latest = extra["android-junit5.plugin.latestVersion"]
+    classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
   }
 }
 
@@ -98,14 +99,16 @@ dependencies {
 
   // Add the Android Instrumentation Test dependencies to the product flavor only
   // (with this, only the "experimental" flavor must have minSdkVersion 26)
+  val latestVersion = extra["android-junit5.instrumentation.latestVersion"]
   val androidTestExperimentalImplementation by configurations
   androidTestExperimentalImplementation(extra["libs.junitJupiterApi"] as String)
-  androidTestExperimentalImplementation("de.mannodermaus.junit5:android-instrumentation-test:0.2.2")
+  androidTestExperimentalImplementation(
+      "de.mannodermaus.junit5:android-instrumentation-test:$latestVersion")
 
   // Runtime dependencies for Android Instrumentation Tests
   val androidTestExperimentalRuntimeOnly by configurations
   androidTestExperimentalRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
   androidTestExperimentalRuntimeOnly(extra["libs.junitPlatformRunner"] as String)
   androidTestExperimentalRuntimeOnly(
-      "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2")
+      "de.mannodermaus.junit5:android-instrumentation-test-runner:$latestVersion")
 }
