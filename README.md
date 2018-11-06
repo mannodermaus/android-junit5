@@ -38,6 +38,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
 </details>
 
 <br/>
+
 Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
 
 ## Setup
@@ -87,6 +88,7 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 </details>
 
 <br/>
+
 More information on Getting Started can be found [on the wiki][wiki-gettingstarted].
 
 ## Requirements
@@ -155,7 +157,7 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
 
 # Migration from 1.0.x
 
-Since the move to utilize the native JUnit 5 support built into the build system, a lot has changed from the previous version of the plugin. Users seeking to migrate to the new version are encouraged to check out the migration guide located [on the Wiki][wiki-migration] of this repository.
+Since the move to utilize the native JUnit 5 support built into the build system, a lot has changed from the previous version of the plugin. Users seeking to migrate to the new version are encouraged to check out the migration guide located [on the wiki][wiki-migration].
 
 ## License
 
