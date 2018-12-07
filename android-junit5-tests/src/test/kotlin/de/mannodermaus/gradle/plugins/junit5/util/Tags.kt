@@ -10,5 +10,5 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
  */
 @Retention
 @Target(CLASS, FUNCTION)
-@DisabledIfEnvironmentVariable(named = "CI", matches = "^(?!.*?true).*")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 annotation class OnlyOnLocalMachine
