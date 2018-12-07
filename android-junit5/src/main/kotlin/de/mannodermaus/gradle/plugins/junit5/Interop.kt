@@ -4,7 +4,8 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
-import groovy.lang.Closure
+import org.gradle.api.Project
+import org.gradle.testing.jacoco.tasks.JacocoReportBase
 import java.io.File
 
 /*
@@ -28,6 +29,22 @@ val AndroidUnitTest.safeAssetsCollection: Set<File>?
 
 val AndroidUnitTest.safeMergedManifest: Set<File>?
   get() = GroovyInterop.androidUnitTest_mergedManifest(this)
+
+/*
+ * Compatibility methods for multiple Gradle versions.
+ */
+
+fun JacocoReportBase.safeExecutionDataSetFrom(project: Project, vararg paths: Any) {
+  GroovyInterop.jacocoReportBase_executionData_setFrom(this, project, paths)
+}
+
+fun JacocoReportBase.safeClassDirectoriesSetFrom(project: Project, vararg paths: Any) {
+  GroovyInterop.jacocoReportBase_classDirectories_setFrom(this, project, paths)
+}
+
+fun JacocoReportBase.safeSourceDirectoriesSetFrom(project: Project, vararg paths: Any) {
+  GroovyInterop.jacocoReportBase_sourceDirectories_setFrom(this, project, paths)
+}
 
 /* Types */
 
