@@ -23,9 +23,9 @@ extra["android.instrumentationMinSdkVersion"] = (Artifacts.Instrumentation.Libra
 
 // Common properties
 val apacheCommonsVersion = "2.6"
-val junitPlatformVersion = "1.3.1"
-val junitJupiterVersion = "5.3.1"
-val junitVintageVersion = "5.3.1"
+val junitPlatformVersion = "1.3.2"
+val junitJupiterVersion = "5.3.2"
+val junitVintageVersion = "5.3.2"
 val kotlinVersion = "1.2.61"
 val spekVersion = "1.2.1"
 
