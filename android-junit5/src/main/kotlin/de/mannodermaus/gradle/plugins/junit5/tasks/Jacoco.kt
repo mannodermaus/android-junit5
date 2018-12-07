@@ -1,15 +1,14 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.BaseVariant
+import de.mannodermaus.gradle.plugins.junit5.*
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.internal.maybeCreate
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
-import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.testing.Test
@@ -29,9 +28,9 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
     fun create(project: Project,
-        variant: BaseVariant,
-        testTask: Test,
-        directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport {
+               variant: BaseVariant,
+               testTask: Test,
+               directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport {
       val configAction = ConfigAction(project, variant, testTask, directoryProviders)
       return project.tasks.create(configAction.name, configAction.type) {
         configAction.execute(it)
@@ -77,14 +76,15 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       // Task-level Configuration
       val taskJacoco = testTask.extensionByName<JacocoTaskExtension>("jacoco")
       taskJacoco.destinationFile?.let {
-        reportTask.executionData = project.files(it.path)
+        reportTask.safeExecutionDataSetFrom(project, it.path)
       }
 
       // Apply exclusion rules to both class & source directories for Jacoco,
       // using the sum of all DirectoryProviders' outputs as a foundation:
-      reportTask.classDirectories = directoryProviders.mainClassDirectories()
-          .toFileCollectionExcluding(junit5Jacoco.excludedClasses)
-      reportTask.sourceDirectories = project.files(directoryProviders.mainSourceDirectories())
+      reportTask.safeClassDirectoriesSetFrom(project,
+          directoryProviders.mainClassDirectories().toFileCollectionExcluding(junit5Jacoco.excludedClasses))
+      reportTask.safeSourceDirectoriesSetFrom(project,
+          directoryProviders.mainSourceDirectories())
 
       project.logger.junit5Info(
           "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")

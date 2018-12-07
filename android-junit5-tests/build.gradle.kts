@@ -63,7 +63,7 @@ tasks.withType<Test> {
     exceptionFormat = TestExceptionFormat.FULL
   }
 
-  // Enable this line to run disable running Functional Tests on the local device
+  // Uncomment this line to run disable running Functional Tests on the local device
 //  environment("CI", "true")
 }
 

@@ -6,6 +6,9 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.annimon.stream.Optional
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.testing.jacoco.tasks.JacocoReportBase
 
 import javax.annotation.Nullable
 
@@ -149,5 +152,59 @@ class GroovyInterop {
         .map { it.getDeclaredField("UNIT_TEST").get(null) }
         .map { it.suffix }
         .orElseThrow { new IllegalArgumentException("can't get VariantType.UNIT_TEST.suffix") }
+  }
+
+  /**
+   * Applies the given paths as the execution data of the given Jacoco task.
+   *
+   * @because Gradle 5 removed the ability to reassign this field directly, and replaced it with #setFrom()
+   * @param report Report to operate on
+   * @param project Project to resolve the paths if necessary
+   * @param paths Paths to apply
+   */
+  static void jacocoReportBase_executionData_setFrom(JacocoReportBase report, Project project, Object... paths) {
+    if (report.executionData instanceof ConfigurableFileCollection) {
+      // In Gradle 5.0+, executionData is a ConfigurableFileCollection
+      report.executionData.setFrom(paths)
+    } else {
+      // Below, use the mutator method to configure the data
+      report.executionData = project.files(paths)
+    }
+  }
+
+  /**
+   * Applies the given paths as the class directories of the given Jacoco task.
+   *
+   * @because Gradle 5 removed the ability to reassign this field directly, and replaced it with #setFrom()
+   * @param report Report to operate on
+   * @param project Project to resolve the paths if necessary
+   * @param paths Paths to apply
+   */
+  static void jacocoReportBase_classDirectories_setFrom(JacocoReportBase report, Project project, Object... paths) {
+    if (report.classDirectories instanceof ConfigurableFileCollection) {
+      // In Gradle 5.0+, executionData is a ConfigurableFileCollection
+      report.classDirectories.setFrom(paths)
+    } else {
+      // Below, use the mutator method to configure the data
+      report.classDirectories = project.files(paths)
+    }
+  }
+
+  /**
+   * Applies the given paths as the source directories of the given Jacoco task.
+   *
+   * @because Gradle 5 removed the ability to reassign this field directly, and replaced it with #setFrom()
+   * @param report Report to operate on
+   * @param project Project to resolve the paths if necessary
+   * @param paths Paths to apply
+   */
+  static void jacocoReportBase_sourceDirectories_setFrom(JacocoReportBase report, Project project, Object... paths) {
+    if (report.sourceDirectories instanceof ConfigurableFileCollection) {
+      // In Gradle 5.0+, executionData is a ConfigurableFileCollection
+      report.sourceDirectories.setFrom(paths)
+    } else {
+      // Below, use the mutator method to configure the data
+      report.sourceDirectories = project.files(paths)
+    }
   }
 }

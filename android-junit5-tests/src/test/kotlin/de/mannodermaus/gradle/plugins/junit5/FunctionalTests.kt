@@ -2,25 +2,17 @@
 
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.util.ClasspathSplitter
-import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage
+import de.mannodermaus.gradle.plugins.junit5.util.*
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Java
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Kotlin
-import de.mannodermaus.gradle.plugins.junit5.util.OnlyOnLocalMachine
-import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
-import de.mannodermaus.gradle.plugins.junit5.util.assertAll
-import de.mannodermaus.gradle.plugins.junit5.util.assertThat
-import de.mannodermaus.gradle.plugins.junit5.util.newFile
-import de.mannodermaus.gradle.plugins.junit5.util.splitToArray
-import org.junitpioneer.jupiter.TempDirectory
-import org.junitpioneer.jupiter.TempDirectory.TempDir
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
+import org.junitpioneer.jupiter.TempDirectory
+import org.junitpioneer.jupiter.TempDirectory.TempDir
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -34,6 +26,14 @@ import java.nio.file.Paths
 @ExtendWith(TempDirectory::class)
 class FunctionalTests {
 
+  companion object {
+    private val SUPPORTED_GRADLE_VERSIONS = listOf("4.7", "5.0")
+    private val SUPPORTED_LANGUAGES = FileLanguage.values().toList()
+
+    // Combine each tested Gradle version with a File Language for these tests
+    val ALL_VARIATIONS = (SUPPORTED_GRADLE_VERSIONS * SUPPORTED_LANGUAGES).toList()
+  }
+
   private lateinit var testProjectDir: File
   private lateinit var buildFile: File
   private lateinit var pluginClasspath: List<File>
@@ -43,9 +43,11 @@ class FunctionalTests {
 
   /* Lifecycle */
 
-  @BeforeEach
-  fun beforeEach(@TempDir testProjectDir: Path) {
-    this.testProjectDir = testProjectDir.toFile()
+  // Sets up a fresh temporary folder containing a project structure.
+  // This cannot be a @BeforeEach method, since this class uses dynamic tests
+  // which require a distinct folder, and they don't partake in the lifecycle.
+  private fun setupNewProject(testProjectDir: File) {
+    this.testProjectDir = testProjectDir
     this.pluginClasspath = loadClassPathManifestResource("plugin-classpath.txt")
     this.testCompileClasspath = loadClassPathManifestResource(
         "functional-test-compile-classpath.txt")
@@ -88,127 +90,157 @@ class FunctionalTests {
 
   /* Tests */
 
-  @EnumSource(FileLanguage::class)
-  @ParameterizedTest
-  fun `Executes tests in default source set`(language: FileLanguage) {
-    given {
-      plugins {
-        android()
-        if (language == Kotlin) kotlin()
-        junit5()
-      }
-      testSources(language) {
-        test()
-      }
-    }
+  @TestFactory
+  fun `Executes tests in default source set`(@TempDir testProjectDir: Path) =
+      ALL_VARIATIONS
+          .map { (gradleVersion, language) ->
+            dynamicTest("Using $language & Gradle $gradleVersion") {
+              // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
+              val folder = testProjectDir.newFile("$language-$gradleVersion")
+              setupNewProject(folder)
 
-    runGradle { result ->
-      listOf(
-          // Assert that all tasks ran successfully
-          { assertThat(result).executedTaskSuccessfully(":build") },
-          { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
-          { assertThat(result).executedTaskSuccessfully(":testReleaseUnitTest") },
+              given {
+                plugins {
+                  android()
+                  if (language == Kotlin) kotlin()
+                  junit5()
+                }
+                testSources(language) {
+                  test()
+                }
+              }
 
-          // Assert number of tests executed (1 per Build Type)
-          { assertThat(result).executedTestSuccessfully("${language}Test", times = 2) }
-      )
-    }
-  }
+              runGradle(version = gradleVersion) { result ->
+                listOf(
+                    // Assert that all tasks ran successfully
+                    { assertThat(result).executedTaskSuccessfully(":build") },
+                    { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
+                    { assertThat(result).executedTaskSuccessfully(":testReleaseUnitTest") },
 
-  @EnumSource(FileLanguage::class)
-  @ParameterizedTest
-  fun `Executes tests in build-type-specific source set`(language: FileLanguage) {
-    given {
-      plugins {
-        android()
-        if (language == Kotlin) kotlin()
-        junit5()
-      }
-      testSources(language) {
-        test()
-        test(buildType = "debug")
-      }
+                    // Assert number of tests executed (1 per Build Type)
+                    { assertThat(result).executedTestSuccessfully("${language}Test", times = 2) }
+                )
+              }
+            }
+          }
 
-      runGradle("testDebugUnitTest") { result ->
-        listOf(
-            { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
-            { assertThat(result).executedTestSuccessfully("${language}DebugTest") },
-            { assertThat(result).executedTestSuccessfully("${language}Test") }
-        )
-      }
+  @TestFactory
+  fun `Executes tests in build-type-specific source set`(@TempDir testProjectDir: Path) =
+      ALL_VARIATIONS
+          .map { (gradleVersion, language) ->
+            dynamicTest("Using $language & Gradle $gradleVersion") {
+              // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
+              val folder = testProjectDir.newFile("$language-$gradleVersion")
+              setupNewProject(folder)
 
-      runGradle("testReleaseUnitTest") { result ->
-        listOf(
-            { assertThat(result).executedTaskSuccessfully(":testReleaseUnitTest") },
-            { assertThat(result).executedTestSuccessfully("${language}Test") }
-        )
-      }
-    }
-  }
+              given {
+                plugins {
+                  android()
+                  if (language == Kotlin) kotlin()
+                  junit5()
+                }
+                testSources(language) {
+                  test()
+                  test(buildType = "debug")
+                }
 
-  @EnumSource(FileLanguage::class)
-  @ParameterizedTest
-  fun `Executes tests in flavor-specific source set`(language: FileLanguage) {
-    given {
-      plugins {
-        android(flavorNames = listOf("free"))
-        if (language == Kotlin) kotlin()
-        junit5()
-      }
-      testSources(language) {
-        test()
-        test(flavorName = "free")
-      }
-    }
+                runGradle(version = gradleVersion, tasks = "testDebugUnitTest") { result ->
+                  listOf(
+                      { assertThat(result).executedTaskSuccessfully(":testDebugUnitTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}DebugTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}Test") }
+                  )
+                }
 
-    runGradle { result ->
-      listOf(
-          { assertThat(result).executedTaskSuccessfully(":build") },
-          { assertThat(result).executedTaskSuccessfully(":testFreeDebugUnitTest") },
-          { assertThat(result).executedTaskSuccessfully(":testFreeReleaseUnitTest") },
-          { assertThat(result).executedTestSuccessfully("${language}FreeTest", times = 2) },
-          { assertThat(result).executedTestSuccessfully("${language}Test", times = 2) }
-      )
-    }
-  }
+                runGradle(version = gradleVersion, tasks = "testReleaseUnitTest") { result ->
+                  listOf(
+                      { assertThat(result).executedTaskSuccessfully(":testReleaseUnitTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}Test") }
+                  )
+                }
+              }
+            }
+          }
 
-  @EnumSource(FileLanguage::class)
-  @ParameterizedTest
-  fun `Executes tests in build-type-and-flavor-specific source set`(language: FileLanguage) {
-    given {
-      plugins {
-        android(flavorNames = listOf("free"))
-        if (language == Kotlin) kotlin()
-        junit5()
-      }
-      testSources(language) {
-        test()
-        test(buildType = "debug")
-        test(flavorName = "free", buildType = "debug")
-        test(buildType = "release")
-      }
+  @TestFactory
+  fun `Executes tests in flavor-specific source set`(@TempDir testProjectDir: Path) =
+      ALL_VARIATIONS
+          .map { (gradleVersion, language) ->
+            dynamicTest("Using $language & Gradle $gradleVersion") {
+              // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
+              val folder = testProjectDir.newFile("$language-$gradleVersion")
+              setupNewProject(folder)
 
-      runGradle("testFreeDebugUnitTest") { result ->
-        listOf(
-            { assertThat(result).executedTaskSuccessfully(":testFreeDebugUnitTest") },
-            { assertThat(result).executedTestSuccessfully("${language}FreeDebugTest") },
-            { assertThat(result).executedTestSuccessfully("${language}DebugTest") },
-            { assertThat(result).executedTestSuccessfully("${language}Test") }
-        )
-      }
+              given {
+                plugins {
+                  android(flavorNames = listOf("free"))
+                  if (language == Kotlin) kotlin()
+                  junit5()
+                }
+                testSources(language) {
+                  test()
+                  test(flavorName = "free")
+                }
+              }
 
-      runGradle("testFreeReleaseUnitTest") { result ->
-        listOf(
-            { assertThat(result).executedTaskSuccessfully(":testFreeReleaseUnitTest") },
-            { assertThat(result).executedTestSuccessfully("${language}ReleaseTest") },
-            { assertThat(result).executedTestSuccessfully("${language}Test") }
-        )
-      }
-    }
-  }
+              runGradle(version = gradleVersion) { result ->
+                listOf(
+                    { assertThat(result).executedTaskSuccessfully(":build") },
+                    { assertThat(result).executedTaskSuccessfully(":testFreeDebugUnitTest") },
+                    { assertThat(result).executedTaskSuccessfully(":testFreeReleaseUnitTest") },
+                    { assertThat(result).executedTestSuccessfully("${language}FreeTest", times = 2) },
+                    { assertThat(result).executedTestSuccessfully("${language}Test", times = 2) }
+                )
+              }
+            }
+          }
+
+  @TestFactory
+  fun `Executes tests in build-type-and-flavor-specific source set`(@TempDir testProjectDir: Path) =
+      ALL_VARIATIONS
+          .map { (gradleVersion, language) ->
+            dynamicTest("Using $language & Gradle $gradleVersion") {
+              // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
+              val folder = testProjectDir.newFile("$language-$gradleVersion")
+              setupNewProject(folder)
+
+              given {
+                plugins {
+                  android(flavorNames = listOf("free"))
+                  if (language == Kotlin) kotlin()
+                  junit5()
+                }
+                testSources(language) {
+                  test()
+                  test(buildType = "debug")
+                  test(flavorName = "free", buildType = "debug")
+                  test(buildType = "release")
+                }
+
+                runGradle(version = gradleVersion, tasks = "testFreeDebugUnitTest") { result ->
+                  listOf(
+                      { assertThat(result).executedTaskSuccessfully(":testFreeDebugUnitTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}FreeDebugTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}DebugTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}Test") }
+                  )
+                }
+
+                runGradle(version = gradleVersion, tasks = "testFreeReleaseUnitTest") { result ->
+                  listOf(
+                      { assertThat(result).executedTaskSuccessfully(":testFreeReleaseUnitTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}ReleaseTest") },
+                      { assertThat(result).executedTestSuccessfully("${language}Test") }
+                  )
+                }
+              }
+            }
+          }
 
   @Test
-  fun `Returns default values successfully`() {
+  fun `Returns default values successfully`(@TempDir testProjectDir: Path) {
+    setupNewProject(testProjectDir.toFile())
+
     given {
       plugins {
         android()
@@ -251,7 +283,9 @@ class FunctionalTests {
   }
 
   @Test
-  fun `Includes Android resources successfully`() {
+  fun `Includes Android resources successfully`(@TempDir testProjectDir: Path) {
+    setupNewProject(testProjectDir.toFile())
+
     given {
       plugins {
         android()
@@ -309,11 +343,18 @@ class FunctionalTests {
     configuration(Given())
   }
 
-  private fun runGradle(tasks: String = "build", assertions: (BuildResult) -> List<() -> Unit>) {
+  private fun runGradle(tasks: String = "build",
+                        version: String? = null,
+                        assertions: (BuildResult) -> List<() -> Unit>) {
     val buildResult = GradleRunner.create()
         .withProjectDir(testProjectDir)
         .withPluginClasspath(pluginClasspath)
         .withArguments(tasks)
+        .apply {
+          if (version != null) {
+            withGradleVersion(version)
+          }
+        }
         .build()
 
     assertAll(
@@ -414,7 +455,7 @@ class FunctionalTests {
       }
 
       fun junit5(junitPlatformConfig: String? = null,
-          testOptionsConfig: String? = null) {
+                 testOptionsConfig: String? = null) {
         buildFile.appendText("""
           apply plugin: "de.mannodermaus.android-junit5"
 
@@ -443,8 +484,8 @@ class FunctionalTests {
     inner class TestSources(private val language: FileLanguage) {
 
       fun test(content: String? = null,
-          flavorName: String = "",
-          buildType: String = "") {
+               flavorName: String = "",
+               buildType: String = "") {
         when (language) {
           Java -> javaTest(content, flavorName, buildType)
           Kotlin -> kotlinTest(content, flavorName, buildType)
@@ -454,9 +495,9 @@ class FunctionalTests {
       /* Private */
 
       private fun createTestInternal(language: FileLanguage,
-          content: String,
-          flavorName: String = "",
-          buildType: String = "") {
+                                     content: String,
+                                     flavorName: String = "",
+                                     buildType: String = "") {
         val variant = "${flavorName.capitalize()}${buildType.capitalize()}"
         val testName = "${language.name}${variant}Test"
         val sourceSet = "test$variant"
@@ -489,7 +530,7 @@ class FunctionalTests {
         """
 
       private fun javaTest(content: String? = null, flavorName: String = "",
-          buildType: String = "") {
+                           buildType: String = "") {
         val fileContent = content ?: defaultJavaTestContent
         this.createTestInternal(language = Java,
             flavorName = flavorName,
@@ -513,7 +554,7 @@ class FunctionalTests {
         """
 
       private fun kotlinTest(content: String? = null, flavorName: String = "",
-          buildType: String = "") {
+                             buildType: String = "") {
         val fileContent = content ?: defaultKotlinTestContent
         this.createTestInternal(language = Kotlin,
             flavorName = flavorName,

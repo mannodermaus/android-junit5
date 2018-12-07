@@ -6,4 +6,5 @@ local.properties
 !.idea/codeStyleSettings.xml
 .DS_Store
 build/
+out/
 captures/
