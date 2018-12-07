@@ -118,12 +118,12 @@ val Test.junitPlatformOptions: JUnitPlatformOptions
  * Produces the [cartesian product](http://en.wikipedia.org/wiki/Cartesian_product#n-ary_product) as a sequence of ordered pairs of elements lazily obtained
  * from two [[Iterable]] instances
  */
-operator fun <T : Any> Iterable<T>.times(other: Iterable<T>): Sequence<Pair<T, T>> {
+operator fun <T : Any, U: Any> Iterable<T>.times(other: Iterable<U>): Sequence<Pair<T, U>> {
   val first = iterator()
   var second = other.iterator()
   var a: T? = null
 
-  fun nextPair(): Pair<T, T>? {
+  fun nextPair(): Pair<T, U>? {
     if (a == null && first.hasNext()) a = first.next()
     if (second.hasNext()) return Pair(a!!, second.next())
     if (first.hasNext()) {

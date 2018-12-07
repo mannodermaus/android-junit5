@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.util
 
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.FUNCTION
 
@@ -10,5 +10,5 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
  */
 @Retention
 @Target(CLASS, FUNCTION)
-@EnabledIfEnvironmentVariable(named = "CI", matches = "^(?!.*?true).*")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "^(?!.*?true).*")
 annotation class OnlyOnLocalMachine
