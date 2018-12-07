@@ -34,7 +34,7 @@ object Artifacts {
       platform = Java,
       groupId = "de.mannodermaus.gradle.plugins",
       artifactId = "android-junit5",
-      currentVersion = "1.3.1.2-SNAPSHOT",
+      currentVersion = "1.3.2.0-SNAPSHOT",
       latestStableVersion = "1.3.1.1",
       license = license,
       description = "Unit Testing with JUnit 5 for Android."
