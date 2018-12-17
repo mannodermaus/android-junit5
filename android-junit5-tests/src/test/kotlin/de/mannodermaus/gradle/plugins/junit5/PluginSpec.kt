@@ -208,7 +208,7 @@ class PluginSpec : Spek({
               // Expected items: "src/main/java" & "src/<TypeName>/java"
               val sourceDirs = project.tasks.get<AndroidJUnit5JacocoReport>(
                   "jacocoTestReport${buildType.capitalize()}")
-                  .sourceDirectories
+                  .sourceDirectories!!
                   .map { it.absolutePath }
 
               val mainDir = sourceDirs.find { it.endsWith("src/main/java") }
@@ -224,7 +224,7 @@ class PluginSpec : Spek({
               // Expected omissions: "src/test/java" & "src/test<TypeName>/java"
               val sourceDirs = project.tasks.get<AndroidJUnit5JacocoReport>(
                   "jacocoTestReport${buildType.capitalize()}")
-                  .sourceDirectories.asPath
+                  .sourceDirectories!!.asPath
 
               assertAll(
                   "Mismatch! Actual dirs: $sourceDirs",
@@ -239,7 +239,7 @@ class PluginSpec : Spek({
               // Expected omissions: "classes/test"
               val classDirs = project.tasks.get<AndroidJUnit5JacocoReport>(
                   "jacocoTestReport${buildType.capitalize()}")
-                  .classDirectories.asPath
+                  .classDirectories!!.asPath
 
               assertThat(classDirs).doesNotContain("classes/test")
             }
@@ -384,7 +384,7 @@ class PluginSpec : Spek({
                 //  * SecondFile.class (through rule)
                 val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(
                     "jacocoTestReportDebug")
-                    .classDirectories.asFileTree.files
+                    .classDirectories!!.asFileTree.files
                     .map { it.name }
 
                 assertThat(fileNames)
@@ -403,7 +403,7 @@ class PluginSpec : Spek({
                 //  * SecondFile.class (through rule)
                 val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(
                     "jacocoTestReportRelease")
-                    .classDirectories.asFileTree.files
+                    .classDirectories!!.asFileTree.files
                     .map { it.name }
 
                 assertThat(fileNames)
@@ -427,7 +427,7 @@ class PluginSpec : Spek({
                 it("doesn't exclude R.class anymore for the $buildType build type") {
                   val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(
                       "jacocoTestReport${buildType.capitalize()}")
-                      .classDirectories.asFileTree.files
+                      .classDirectories!!.asFileTree.files
                       .map { it.name }
 
                   assertThat(fileNames).contains("R.class")

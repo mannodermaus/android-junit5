@@ -38,6 +38,26 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
     }
   }
 
+  /*
+   * Gradle 5.0 changed the return type of these methods from FileCollection to ConfigurableFileCollection.
+   * By explicitly re-declaring them here with the old return type, the binary incompatibility is bridged.
+   */
+
+  @Suppress("RedundantOverride")
+  override fun getExecutionData(): FileCollection? {
+    return super.getExecutionData()
+  }
+
+  @Suppress("RedundantOverride")
+  override fun getClassDirectories(): FileCollection? {
+    return super.getClassDirectories()
+  }
+
+  @Suppress("RedundantOverride")
+  override fun getSourceDirectories(): FileCollection? {
+    return super.getSourceDirectories()
+  }
+
   /**
    * Configuration closure for an Android JUnit5 Jacoco Report task.
    */
@@ -88,9 +108,9 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
       project.logger.junit5Info(
           "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")
-      project.logger.junit5Info("|__ Execution Data: ${reportTask.executionData.asPath}")
-      project.logger.junit5Info("|__ Source Dirs: ${reportTask.sourceDirectories.asPath}")
-      project.logger.junit5Info("|__ Class Dirs: ${reportTask.classDirectories.asPath}")
+      project.logger.junit5Info("|__ Execution Data: ${reportTask.executionData?.asPath}")
+      project.logger.junit5Info("|__ Source Dirs: ${reportTask.sourceDirectories?.asPath}")
+      project.logger.junit5Info("|__ Class Dirs: ${reportTask.classDirectories?.asPath}")
 
       // Hook into the main Jacoco task
       val defaultJacocoTask = project.tasks.maybeCreate(
