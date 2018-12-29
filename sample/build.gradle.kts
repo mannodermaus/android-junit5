@@ -63,7 +63,7 @@ android {
 
   // Add Kotlin source directory to all source sets
   sourceSets.forEach {
-    it.java.srcDir("src/$it.name/kotlin")
+    it.java.srcDir("src/${it.name}/kotlin")
   }
 
   compileOptions {
