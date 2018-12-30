@@ -1,5 +1,3 @@
-import de.mannodermaus.gradle.plugins.junit5.Artifact
-import de.mannodermaus.gradle.plugins.junit5.Artifacts
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -10,7 +8,7 @@ buildscript {
   }
 
   dependencies {
-    val latest = extra["android-junit5.plugin.latestVersion"]
+    val latest = Artifacts.Plugin.latestStableVersion
     classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
   }
 }
@@ -25,15 +23,15 @@ apply {
 }
 
 android {
-  compileSdkVersion(extra["android.compileSdkVersion"] as String)
+  compileSdkVersion(Android.compileSdkVersion)
 
   dexOptions {
-    javaMaxHeapSize = extra["android.javaMaxHeapSize"] as String
+    javaMaxHeapSize = Android.javaMaxHeapSize
   }
 
   defaultConfig {
-    minSdkVersion(extra["android.runnerMinSdkVersion"] as Int)
-    targetSdkVersion(extra["android.targetSdkVersion"] as Int)
+    minSdkVersion(Android.runnerMinSdkVersion)
+    targetSdkVersion(Android.targetSdkVersion)
     versionCode = 1
     versionName = "1.0"
   }
@@ -76,30 +74,30 @@ configurations.all {
   // that's kind of deep.
   // To avoid conflicts, prefer using the local classes
   // and exclude the dependency from being pulled in externally.
-  exclude(module = extra["android-junit5.instrumentation.runner.artifactId"] as String)
+  exclude(module = Artifacts.Instrumentation.Runner.artifactId)
 }
 
 dependencies {
-  implementation(kotlin("stdlib", extra["versions.kotlin"] as String))
-  implementation(kotlin("reflect", extra["versions.kotlin"] as String))
-  implementation(extra["libs.junit4"] as String)
+  implementation(Libs.kotlin_stdlib)
+  implementation(Libs.kotlin_reflect)
+  implementation(Libs.junit)
 
   // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
   // since that would prematurely raise the minSdkVersion requirement for target applications,
   // even though not all product flavors might want to use JUnit 5.
   // Therefore, only compile against those APIs, and have them provided at runtime
   // by the "instrumentation" companion library instead.
-  compileOnly(extra["libs.junitJupiterApi"] as String)
-  compileOnly(extra["libs.junitJupiterParams"] as String)
-  compileOnly(extra["libs.junitPlatformRunner"] as String)
+  compileOnly(Libs.junit_jupiter_api)
+  compileOnly(Libs.junit_jupiter_params)
+  compileOnly(Libs.junit_platform_runner)
 
-  testImplementation(extra["libs.assertjCore"] as String)
-  testImplementation(extra["libs.mockito"] as String)
-  testImplementation(extra["libs.junitJupiterApi"] as String)
-  testImplementation(extra["libs.junitJupiterParams"] as String)
-  testImplementation(extra["libs.junitPlatformRunner"] as String)
+  testImplementation(Libs.assertj_core)
+  testImplementation(Libs.mockito_core)
+  testImplementation(Libs.junit_jupiter_api)
+  testImplementation(Libs.junit_jupiter_params)
+  testImplementation(Libs.junit_platform_runner)
 
-  testRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
+  testRuntimeOnly(Libs.junit_jupiter_engine)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -109,5 +107,5 @@ dependencies {
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 
-val deployConfig by extra<Artifact> { Artifacts.Instrumentation.Runner }
+val deployConfig by extra<Deployed> { Artifacts.Instrumentation.Runner }
 apply(from = "$rootDir/gradle/deployment.gradle")

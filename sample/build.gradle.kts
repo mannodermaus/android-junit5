@@ -2,8 +2,6 @@ import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 buildscript {
-  rootProject.apply { from(rootProject.file("gradle/dependencies.gradle.kts")) }
-
   repositories {
     google()
     jcenter()
@@ -11,7 +9,7 @@ buildscript {
   }
 
   dependencies {
-    val latest = extra["android-junit5.plugin.latestVersion"]
+    val latest = Artifacts.Plugin.latestStableVersion
     classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
   }
 }
@@ -27,16 +25,16 @@ apply {
 }
 
 android {
-  compileSdkVersion(extra["android.compileSdkVersion"] as String)
+  compileSdkVersion(Android.compileSdkVersion)
 
   dexOptions {
-    javaMaxHeapSize = extra["android.javaMaxHeapSize"] as String
+    javaMaxHeapSize = Android.javaMaxHeapSize
   }
 
   defaultConfig {
     applicationId = "de.mannodermaus.junit5.sample"
-    minSdkVersion(extra["android.sampleMinSdkVersion"] as Int)
-    targetSdkVersion(extra["android.targetSdkVersion"] as Int)
+    minSdkVersion(Android.sampleMinSdkVersion)
+    targetSdkVersion(Android.targetSdkVersion)
     versionCode = 1
     versionName = "1.0"
 
@@ -88,27 +86,24 @@ tasks.withType<Test> {
 }
 
 dependencies {
-  implementation(kotlin("stdlib", extra["versions.kotlin"] as String))
+  implementation(Libs.kotlin_stdlib)
 
-  testImplementation(extra["libs.junitJupiterApi"] as String)
-  testImplementation(extra["libs.junitJupiterParams"] as String)
-  testRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
+  testImplementation(Libs.junit_jupiter_api)
+  testImplementation(Libs.junit_jupiter_params)
+  testRuntimeOnly(Libs.junit_jupiter_engine)
 
-  androidTestImplementation(extra["libs.junit4"] as String)
-  androidTestImplementation(extra["libs.androidTestRunner"] as String)
+  androidTestImplementation(Libs.junit)
+  androidTestImplementation(Libs.com_android_support_test_runner)
 
   // Add the Android Instrumentation Test dependencies to the product flavor only
   // (with this, only the "experimental" flavor must have minSdkVersion 26)
-  val latestVersion = extra["android-junit5.instrumentation.latestVersion"]
   val androidTestExperimentalImplementation by configurations
-  androidTestExperimentalImplementation(extra["libs.junitJupiterApi"] as String)
-  androidTestExperimentalImplementation(
-      "de.mannodermaus.junit5:android-instrumentation-test:$latestVersion")
+  androidTestExperimentalImplementation(Libs.junit_jupiter_api)
+  androidTestExperimentalImplementation(Libs.android_instrumentation_test)
 
   // Runtime dependencies for Android Instrumentation Tests
   val androidTestExperimentalRuntimeOnly by configurations
-  androidTestExperimentalRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
-  androidTestExperimentalRuntimeOnly(extra["libs.junitPlatformRunner"] as String)
-  androidTestExperimentalRuntimeOnly(
-      "de.mannodermaus.junit5:android-instrumentation-test-runner:$latestVersion")
+  androidTestExperimentalRuntimeOnly(Libs.junit_jupiter_engine)
+  androidTestExperimentalRuntimeOnly(Libs.junit_platform_runner)
+  androidTestExperimentalRuntimeOnly(Libs.android_instrumentation_test_runner)
 }

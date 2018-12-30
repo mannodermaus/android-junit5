@@ -1,5 +1,3 @@
-import de.mannodermaus.gradle.plugins.junit5.Artifact
-import de.mannodermaus.gradle.plugins.junit5.Artifacts
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -8,15 +6,15 @@ plugins {
 }
 
 android {
-  compileSdkVersion(extra["android.compileSdkVersion"] as String)
+  compileSdkVersion(Android.compileSdkVersion)
 
   dexOptions {
-    javaMaxHeapSize = extra["android.javaMaxHeapSize"] as String
+    javaMaxHeapSize = Android.javaMaxHeapSize
   }
 
   defaultConfig {
-    minSdkVersion(extra["android.instrumentationMinSdkVersion"] as Int)
-    targetSdkVersion(extra["android.targetSdkVersion"] as Int)
+    minSdkVersion(Android.instrumentationMinSdkVersion)
+    targetSdkVersion(Android.targetSdkVersion)
     versionCode = 1
     versionName = "1.0"
     multiDexEnabled = true
@@ -66,32 +64,32 @@ configurations {
 }
 
 dependencies {
-  implementation(kotlin("stdlib", extra["versions.kotlin"] as String))
-  implementation(extra["libs.androidTestRunner"] as String)
-  implementation(extra["libs.junitJupiterApi"] as String)
+  implementation(Libs.kotlin_stdlib)
+  implementation(Libs.com_android_support_test_runner)
+  implementation(Libs.junit_jupiter_api)
 
   // This is required by the "instrumentation-runner" companion library,
   // since it can't provide any JUnit 5 runtime libraries itself
   // due to fear of prematurely incrementing the minSdkVersion requirement.
-  runtimeOnly(extra["libs.junitPlatformRunner"] as String)
+  runtimeOnly(Libs.junit_platform_runner)
 
-  commonTestImplementation(extra["libs.assertjCore"] as String)
-  commonTestImplementation(extra["libs.mockito"] as String)
-  commonTestImplementation(extra["libs.junitJupiterApi"] as String)
-  commonTestImplementation(extra["libs.junitJupiterEngine"] as String)
+  commonTestImplementation(Libs.assertj_core)
+  commonTestImplementation(Libs.mockito_core)
+  commonTestImplementation(Libs.junit_jupiter_api)
+  commonTestImplementation(Libs.junit_jupiter_engine)
 
-  androidTestImplementation(extra["libs.assertjAndroid"] as String)
-  androidTestImplementation(extra["libs.espresso"] as String)
+  androidTestImplementation(Libs.assertj_android)
+  androidTestImplementation(Libs.espresso_core)
 
   androidTestRuntimeOnly(project(":instrumentation-runner"))
 
   // Obviously, these dependencies should be mostly "runtimeOnly",
   // but we have to override bundled APIs from the IDE as much as possible for Android Studio.
-  testImplementation(extra["libs.junitPlatformEngine"] as String)
-  testImplementation(extra["libs.junitPlatformLauncher"] as String)
-  testImplementation(extra["libs.junitJupiterApi"] as String)
-  testImplementation(extra["libs.junitJupiterEngine"] as String)
-  testImplementation(extra["libs.junitVintageEngine"] as String)
+  testImplementation(Libs.junit_platform_engine)
+  testImplementation(Libs.junit_platform_launcher)
+  testImplementation(Libs.junit_jupiter_api)
+  testImplementation(Libs.junit_jupiter_engine)
+  testImplementation(Libs.junit_vintage_engine)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -101,5 +99,5 @@ dependencies {
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 
-val deployConfig by extra<Artifact> { Artifacts.Instrumentation.Library }
+val deployConfig by extra<Deployed> { Artifacts.Instrumentation.Library }
 apply(from = "$rootDir/gradle/deployment.gradle")

@@ -1,7 +1,8 @@
-package de.mannodermaus.gradle.plugins.junit5
-
-import de.mannodermaus.gradle.plugins.junit5.Platform.Android
-import de.mannodermaus.gradle.plugins.junit5.Platform.Java
+import Platform.Android
+import Platform.Java
+import org.gradle.api.Project
+import java.io.File
+import java.util.*
 
 sealed class Platform(val name: String) {
   object Java : Platform("java")
@@ -12,7 +13,7 @@ sealed class Platform(val name: String) {
  * Encapsulation for "deployable" library artifacts,
  * containing all sorts of configuration related to Maven coordinates, for instance.
  */
-open class Artifact internal constructor(
+class Deployed internal constructor(
     val platform: Platform,
     val groupId: String,
     val artifactId: String,
@@ -30,7 +31,7 @@ object Artifacts {
   /**
    * Gradle Plugin artifact
    */
-  val Plugin = Artifact(
+  val Plugin = Deployed(
       platform = Java,
       groupId = "de.mannodermaus.gradle.plugins",
       artifactId = "android-junit5",
@@ -48,7 +49,7 @@ object Artifacts {
     private val currentVersion = "0.2.3-SNAPSHOT"
     val latestStableVersion = "0.2.2"
 
-    val Library = Artifact(
+    val Library = Deployed(
         platform = Android(minSdk = 26),
         groupId = groupId,
         artifactId = "android-instrumentation-test",
@@ -58,7 +59,7 @@ object Artifacts {
         description = "Extensions for instrumented Android tests with JUnit 5."
     )
 
-    val Runner = Artifact(
+    val Runner = Deployed(
         platform = Android(minSdk = 14),
         groupId = groupId,
         artifactId = "android-instrumentation-test-runner",
@@ -67,5 +68,33 @@ object Artifacts {
         license = license,
         description = "Runner for integration of instrumented Android tests with JUnit 5."
     )
+  }
+}
+
+class DeployCredentials(private val project: Project) {
+
+  val bintrayUser: String?
+  val bintrayKey: String?
+  val sonatypeUser: String?
+  val sonatypePass: String?
+
+  init {
+    // Populate deployment credentials in an environment-aware fashion.
+    //
+    // * Local development:
+    //      Stored in local.properties file on the machine
+    // * CI Server:
+    //      Stored in environment variables before launch
+    val properties = Properties().apply {
+      val credentialsFile = File(project.rootDir, "local.properties")
+      if (credentialsFile.exists()) {
+        load(credentialsFile.inputStream())
+      }
+    }
+
+    this.bintrayUser = properties.getProperty("BINTRAY_USER", System.getenv("bintrayUser"))
+    this.bintrayKey = properties.getProperty("BINTRAY_KEY", System.getenv("bintrayKey"))
+    this.sonatypeUser = properties.getProperty("SONATYPE_USER", System.getenv("sonatypeUser"))
+    this.sonatypePass = properties.getProperty("SONATYPE_PASS", System.getenv("sonatypePass"))
   }
 }
