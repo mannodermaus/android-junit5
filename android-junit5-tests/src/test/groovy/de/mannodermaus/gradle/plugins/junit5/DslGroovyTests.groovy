@@ -1,36 +1,37 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
-import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
+import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment2
+import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory2
 import kotlin.io.FilesKt
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
+import org.junit.After
+import org.junit.Before
 
 import static org.assertj.core.api.Assertions.assertThat
 
 class DslGroovyTests {
 
-  private TestProjectFactory factory
+  private TestProjectFactory2 factory
   private Project testRoot
 
-  @BeforeEach
+  @Before
   void beforeEach() {
-    def environment = new TestEnvironment()
+    def environment = new TestEnvironment2()
 
-    this.factory = new TestProjectFactory(environment)
+    this.factory = new TestProjectFactory2(environment)
     this.testRoot = factory.newRootProject()
   }
 
-  @AfterEach
+  @After
   void afterEach() {
+    if (true) {
+      throw new IllegalAccessException()
+    }
     FilesKt.deleteRecursively(this.testRoot.rootDir)
   }
 
-  @org.junit.jupiter.api.Test
-  @DisplayName("dynamic filters methods can be called on existing build types")
+  @org.junit.Test
   void dynamicFiltersMethodsCanBeCalledOnExistingBuildTypes() {
     def project = factory.newProject(testRoot)
         .asAndroidApplication()
@@ -57,8 +58,7 @@ class DslGroovyTests {
     assertThat(releaseTask.testFramework.options.excludeTags).containsOnly("other-tag")
   }
 
-  @org.junit.jupiter.api.Test
-  @DisplayName("dynamic filters methods can be called on existing product flavors")
+  @org.junit.Test
   void dynamicFiltersMethodsCanBeCalledOnExistingProductFlavors() {
     def project = factory.newProject(testRoot)
         .asAndroidApplication()
@@ -114,8 +114,7 @@ class DslGroovyTests {
     assertThat(paidReleaseTask.testFramework.options.excludeTags).containsOnly("other-tag")
   }
 
-  @org.junit.jupiter.api.Test
-  @DisplayName("complex example with multiple flavor dimensions & build types")
+  @org.junit.Test
   void complexExampleWithMultipleFlavorDimensionsAndBuildTypes() {
     def project = factory.newProject(testRoot)
         .asAndroidApplication()

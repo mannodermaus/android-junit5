@@ -25,10 +25,9 @@ val compileTestGroovy = tasks.getByName("compileTestGroovy") as AbstractCompile
 val compileTestKotlin = tasks.getByName("compileTestKotlin") as AbstractCompile
 val testClassesTask = tasks.getByName("testClasses")
 
-compileTestGroovy.dependsOn.remove("compileTestJava")
-compileTestKotlin.dependsOn.add(compileTestGroovy)
-compileTestKotlin.classpath += project.files(compileTestGroovy.destinationDir)
-testClassesTask.dependsOn.add(compileTestKotlin)
+compileTestKotlin.dependsOn.remove("compileTestJava")
+compileTestGroovy.dependsOn.add(compileTestKotlin)
+compileTestGroovy.classpath += project.files(compileTestKotlin.destinationDir)
 
 // Add custom dependency configurations
 configurations {
@@ -97,6 +96,7 @@ dependencies {
   testImplementation(extra["libs.mockito"] as String)
 
   testRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
+  testRuntimeOnly(extra["libs.junitVintageEngine"] as String)
   testRuntimeOnly(extra["libs.spekEngine"] as String)
 
   // Compilation of local classpath for functional tests
