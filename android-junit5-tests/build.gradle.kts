@@ -55,8 +55,8 @@ processTestResources.apply {
   val tokens = mapOf(
       "COMPILE_SDK_VERSION" to Android.compileSdkVersion,
       "BUILD_TOOLS_VERSION" to Android.buildToolsVersion,
-      "MIN_SDK_VERSION" to Android.sampleMinSdkVersion,
-      "TARGET_SDK_VERSION" to Android.targetSdkVersion
+      "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
+      "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString()
   )
 
   inputs.properties(tokens)
