@@ -25,9 +25,6 @@ class DslGroovyTests {
 
   @After
   void afterEach() {
-    if (true) {
-      throw new IllegalAccessException()
-    }
     FilesKt.deleteRecursively(this.testRoot.rootDir)
   }
 
