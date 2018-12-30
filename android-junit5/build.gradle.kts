@@ -1,5 +1,3 @@
-import de.mannodermaus.gradle.plugins.junit5.Artifact
-import de.mannodermaus.gradle.plugins.junit5.Artifacts
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -55,18 +53,19 @@ gradlePlugin {
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
-  compileOnly(kotlin("gradle-plugin", extra["versions.kotlin"] as String))
-  implementation(kotlin("stdlib-jdk8", extra["versions.kotlin"] as String))
+  compileOnly(Libs.kotlin_gradle_plugin)
+
   implementation(gradleApi())
-  implementation(extra["libs.javaSemver"] as String)
-  implementation(extra["libs.annimonStream"] as String)
-  implementation(extra["libs.junitPlatformCommons"] as String)
-  implementation(extra["plugins.android"] as String)
+  implementation(Libs.kotlin_stdlib_jdk8)
+  implementation(Libs.java_semver)
+  implementation(Libs.stream)
+  implementation(Libs.junit_platform_commons)
+  implementation(Libs.com_android_tools_build_gradle)
 }
 
 // ------------------------------------------------------------------------------------------------
 // Deployment Setup
 // ------------------------------------------------------------------------------------------------
 
-val deployConfig by extra<Artifact> { Artifacts.Plugin }
+val deployConfig by extra<Deployed> { Artifacts.Plugin }
 apply(from = "$rootDir/gradle/deployment.gradle")

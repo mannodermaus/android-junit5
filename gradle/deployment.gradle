@@ -1,26 +1,15 @@
-import de.mannodermaus.gradle.plugins.junit5.Artifacts
-
 // Common logic shared across modules whose artifacts are provided to jCenter and Sonatype OSS.
 //
 // This script expects an extra named "deployConfig" to exist on the Project instance.
 // Its type is defined within the buildSrc module of this project.
-
-/** Obtains a required parameter from a Map, or throws an Exception if it's absent */
-private def required(Map config, String property) {
-  def value = config.get(property, null)
-  if (!value) {
-    throw new IllegalStateException(
-        "Deployment for module '$name' is missing required parameter '$property'")
-  }
-  return value
-}
 
 // Access Map properties
 if (!project.ext.has("deployConfig")) {
   throw new IllegalStateException("Deployed module '$name' requires a 'deployConfig'")
 }
 
-final de.mannodermaus.gradle.plugins.junit5.Artifact deployConfig = project.ext.deployConfig
+final def deployConfig = project.ext.deployConfig
+final def deployCredentials = project.ext.deployCredentials
 final String targetPlatform = deployConfig.platform.name
 final String groupId = deployConfig.groupId
 final String artifactId = deployConfig.artifactId
@@ -125,8 +114,8 @@ project.configure(project) {
         maven {
           name "snapshot"
           credentials {
-            username project.ext["deployment.sonatypeUser"]
-            password project.ext["deployment.sonatypePass"]
+            username deployCredentials.sonatypeUser
+            password deployCredentials.sonatypePass
           }
           url "https://oss.sonatype.org/content/repositories/snapshots"
         }
@@ -142,8 +131,8 @@ project.configure(project) {
     }
 
     project.bintray {
-      user = project.ext["deployment.bintrayUser"]
-      key = project.ext["deployment.bintrayKey"]
+      user = deployCredentials.bintrayUser
+      key = deployCredentials.bintrayKey
       configurations = ["archives"]
       dryRun = false
       publish = true

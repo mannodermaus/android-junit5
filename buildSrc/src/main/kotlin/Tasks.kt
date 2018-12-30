@@ -1,5 +1,3 @@
-package de.mannodermaus.gradle.plugins.junit5
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles

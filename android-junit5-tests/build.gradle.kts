@@ -1,11 +1,9 @@
-import de.mannodermaus.gradle.plugins.junit5.WriteClasspathResource
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
   id("groovy")
-  id("java-gradle-plugin")
   id("java-library")
   id("idea")
   id("jacoco")
@@ -55,10 +53,10 @@ configurations {
 val processTestResources = tasks.getByName("processTestResources") as Copy
 processTestResources.apply {
   val tokens = mapOf(
-      "COMPILE_SDK_VERSION" to project.extra["android.compileSdkVersion"] as String,
-      "BUILD_TOOLS_VERSION" to project.extra["android.buildToolsVersion"] as String,
-      "MIN_SDK_VERSION" to (project.extra["android.sampleMinSdkVersion"] as Int).toString(),
-      "TARGET_SDK_VERSION" to (project.extra["android.targetSdkVersion"] as Int).toString()
+      "COMPILE_SDK_VERSION" to Android.compileSdkVersion,
+      "BUILD_TOOLS_VERSION" to Android.buildToolsVersion,
+      "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
+      "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString()
   )
 
   inputs.properties(tokens)
@@ -76,44 +74,42 @@ tasks.withType<Test> {
     events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
     exceptionFormat = TestExceptionFormat.FULL
   }
-
-  // Uncomment this line to run disable running Functional Tests on the local device
-//  environment("CI", "true")
 }
 
 dependencies {
   testImplementation(project(":android-junit5"))
-  testImplementation(kotlin("gradle-plugin", extra["versions.kotlin"] as String))
-  testImplementation(extra["plugins.android"] as String)
-  testImplementation(extra["libs.commonsIO"] as String)
-  testImplementation(extra["libs.commonsLang"] as String)
-  testImplementation(extra["libs.junit4"] as String)
-  testImplementation(extra["libs.junitJupiterApi"] as String)
-  testImplementation(extra["libs.junitJupiterParams"] as String)
-  testImplementation(extra["libs.spekApi"] as String)
-  testImplementation(extra["libs.junitPioneer"] as String)
-  testImplementation(extra["libs.assertjCore"] as String)
-  testImplementation(extra["libs.mockito"] as String)
+  testImplementation(gradleTestKit())
+  testImplementation(Libs.kotlin_gradle_plugin)
+  testImplementation(Libs.com_android_tools_build_gradle)
+  testImplementation(Libs.commons_io)
+  testImplementation(Libs.commons_lang)
+  testImplementation(Libs.junit)
+  testImplementation(Libs.junit_jupiter_api)
+  testImplementation(Libs.junit_jupiter_params)
+  testImplementation(Libs.spek_api)
+  testImplementation(Libs.junit_pioneer)
+  testImplementation(Libs.assertj_core)
+  testImplementation(Libs.mockito_core)
 
-  testRuntimeOnly(extra["libs.junitJupiterEngine"] as String)
-  testRuntimeOnly(extra["libs.junitVintageEngine"] as String)
-  testRuntimeOnly(extra["libs.spekEngine"] as String)
+  testRuntimeOnly(Libs.junit_jupiter_engine)
+  testRuntimeOnly(Libs.junit_vintage_engine)
+  testRuntimeOnly(Libs.spek_junit_platform_engine)
 
   // Compilation of local classpath for functional tests
   val functionalTest by configurations
-  functionalTest(kotlin("compiler-embeddable", extra["versions.kotlin"] as String))
-  functionalTest(extra["libs.junit4"] as String)
-  functionalTest(extra["libs.junitJupiterApi"] as String)
-  functionalTest(extra["libs.junitJupiterEngine"] as String)
+  functionalTest(Libs.kotlin_compiler_embeddable)
+  functionalTest(Libs.junit)
+  functionalTest(Libs.junit_jupiter_api)
+  functionalTest(Libs.junit_jupiter_engine)
 
   val functionalTestAgp32X by configurations
-  functionalTestAgp32X(extra["plugins.android.32X"] as String)
+  functionalTestAgp32X("com.android.tools.build:gradle:3.2.1")
 
   val functionalTestAgp33X by configurations
-  functionalTestAgp33X(extra["plugins.android.33X"] as String)
+  functionalTestAgp33X("com.android.tools.build:gradle:3.3.0-rc03")
 
   val functionalTestAgp34X by configurations
-  functionalTestAgp34X(extra["plugins.android.34X"] as String)
+  functionalTestAgp34X("com.android.tools.build:gradle:3.4.0-alpha09")
 }
 
 // Resource Writers
