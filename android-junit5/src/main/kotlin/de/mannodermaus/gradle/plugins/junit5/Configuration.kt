@@ -81,7 +81,7 @@ private fun findType(project: Project): Type<BaseExtension> {
 
   if (type == null) {
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    throw ProjectConfigurationException("An Android plugin must be applied to this project", null)
+    throw ProjectConfigurationException("An Android plugin must be applied to this project", IllegalArgumentException())
   } else {
     return type as Type<BaseExtension>
   }

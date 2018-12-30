@@ -10,6 +10,7 @@ import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
@@ -40,22 +41,22 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   /*
    * Gradle 5.0 changed the return type of these methods from FileCollection to ConfigurableFileCollection.
-   * By explicitly re-declaring them here with the old return type, the binary incompatibility is bridged.
+   * By explicitly re-declaring them here with the old return type, the binary incompatibility to Gradle 4.x is bridged.
    */
 
-  @Suppress("RedundantOverride")
-  override fun getExecutionData(): FileCollection? {
-    return super.getExecutionData()
+  @Suppress("RedundantOverride", "USELESS_CAST")
+  override fun getExecutionData(): ConfigurableFileCollection? {
+    return super.getExecutionData() as? ConfigurableFileCollection
   }
 
-  @Suppress("RedundantOverride")
-  override fun getClassDirectories(): FileCollection? {
-    return super.getClassDirectories()
+  @Suppress("RedundantOverride", "USELESS_CAST")
+  override fun getClassDirectories(): ConfigurableFileCollection? {
+    return super.getClassDirectories() as? ConfigurableFileCollection
   }
 
-  @Suppress("RedundantOverride")
-  override fun getSourceDirectories(): FileCollection? {
-    return super.getSourceDirectories()
+  @Suppress("RedundantOverride", "USELESS_CAST")
+  override fun getSourceDirectories(): ConfigurableFileCollection? {
+    return super.getSourceDirectories() as? ConfigurableFileCollection
   }
 
   /**

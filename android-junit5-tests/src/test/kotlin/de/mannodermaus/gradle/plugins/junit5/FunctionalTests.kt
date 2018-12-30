@@ -3,8 +3,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.util.*
-import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Java
-import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Kotlin
+import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage2.Java
+import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage2.Kotlin
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -22,35 +22,53 @@ import java.nio.file.Paths
  * Created by Marcel Schnelle on 2018/06/19.
  * Copyright © 2018 TenTen Technologies Limited. All rights reserved.
  */
+
+// Data holder for an invocation of a functional test.
+// It encapsulates a Gradle/AGP combination used in each TestFactory located in this class.
+data class FunctionalTest(val name: String, val config: String, val gradleVersion: String)
+
 @OnlyOnLocalMachine
 @ExtendWith(TempDirectory::class)
 class FunctionalTests {
 
   companion object {
-    private val SUPPORTED_GRADLE_VERSIONS = listOf("4.7", "5.0")
-    private val SUPPORTED_LANGUAGES = FileLanguage.values().toList()
+    // Merge each tested Gradle/AGP combination with a File Language for these tests
+    private val SUPPORTED_VARIATIONS = listOf(
+        FunctionalTest(name = "3.2.x", config = "functionalTestAgp32X", gradleVersion = "4.10.1"),
+        FunctionalTest(name = "3.2.x", config = "functionalTestAgp32X", gradleVersion = "5.0"),
 
-    // Combine each tested Gradle version with a File Language for these tests
-    val ALL_VARIATIONS = (SUPPORTED_GRADLE_VERSIONS * SUPPORTED_LANGUAGES).toList()
+        FunctionalTest(name = "3.3.x", config = "functionalTestAgp33X", gradleVersion = "5.0"),
+
+        FunctionalTest(name = "3.4.x", config = "functionalTestAgp34X", gradleVersion = "5.1-milestone-1")
+    )
+    private val SUPPORTED_LANGUAGES = FileLanguage2.values().toList()
+
+    val ALL_VARIATIONS = (SUPPORTED_VARIATIONS * SUPPORTED_LANGUAGES).toList()
   }
 
   private lateinit var testProjectDir: File
   private lateinit var buildFile: File
-  private lateinit var pluginClasspath: List<File>
-  private lateinit var testCompileClasspath: List<File>
+  private lateinit var pluginFiles: List<File>
 
-  private val environment = TestEnvironment()
+  // Classpath of the main "functionalTest" configuration
+  private lateinit var functionalTestFiles: List<File>
+  // Classpath of the specialized "functionalTestAgpX" configuration
+  private lateinit var functionalTestSpecialFiles: List<File>
+
+  private val environment = TestEnvironment2()
 
   /* Lifecycle */
 
   // Sets up a fresh temporary folder containing a project structure.
   // This cannot be a @BeforeEach method, since this class uses dynamic tests
   // which require a distinct folder, and they don't partake in the lifecycle.
-  private fun setupNewProject(testProjectDir: File) {
+  private fun setupNewProject(testProjectDir: File, configName: String = "functionalTestAgp32X") {
     this.testProjectDir = testProjectDir
-    this.pluginClasspath = loadClassPathManifestResource("plugin-classpath.txt")
-    this.testCompileClasspath = loadClassPathManifestResource(
-        "functional-test-compile-classpath.txt")
+    this.pluginFiles = loadClassPathManifestResource("plugin-classpath.txt")
+    this.functionalTestFiles = loadClassPathManifestResource(
+        "functionalTest-compile-classpath.txt")
+    this.functionalTestSpecialFiles = loadClassPathManifestResource(
+        "$configName-compile-classpath.txt")
 
     // Write expected values to local.properties
     testProjectDir.newFile("local.properties").writeText("""
@@ -67,7 +85,7 @@ class FunctionalTests {
     this.buildFile.appendText("""
       buildscript {
         dependencies {
-          classpath files(${ClasspathSplitter.splitClasspath(pluginClasspath)})
+          classpath files(${pluginFiles.splitClasspath()})
         }
       }
       """)
@@ -93,11 +111,12 @@ class FunctionalTests {
   @TestFactory
   fun `Executes tests in default source set`(@TempDir testProjectDir: Path) =
       ALL_VARIATIONS
-          .map { (gradleVersion, language) ->
-            dynamicTest("Using $language & Gradle $gradleVersion") {
+          .map { (variation, language) ->
+            val (agpVersion, configName, gradleVersion) = variation
+            dynamicTest("Using AGP $agpVersion, Gradle $gradleVersion & $language tests") {
               // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
-              val folder = testProjectDir.newFile("$language-$gradleVersion")
-              setupNewProject(folder)
+              val folder = testProjectDir.newFile("$language-$gradleVersion-$agpVersion")
+              setupNewProject(folder, configName)
 
               given {
                 plugins {
@@ -127,11 +146,12 @@ class FunctionalTests {
   @TestFactory
   fun `Executes tests in build-type-specific source set`(@TempDir testProjectDir: Path) =
       ALL_VARIATIONS
-          .map { (gradleVersion, language) ->
-            dynamicTest("Using $language & Gradle $gradleVersion") {
+          .map { (variation, language) ->
+            val (agpVersion, configName, gradleVersion) = variation
+            dynamicTest("Using AGP $agpVersion, Gradle $gradleVersion & $language tests") {
               // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
-              val folder = testProjectDir.newFile("$language-$gradleVersion")
-              setupNewProject(folder)
+              val folder = testProjectDir.newFile("$language-$gradleVersion-$agpVersion")
+              setupNewProject(folder, configName)
 
               given {
                 plugins {
@@ -165,11 +185,12 @@ class FunctionalTests {
   @TestFactory
   fun `Executes tests in flavor-specific source set`(@TempDir testProjectDir: Path) =
       ALL_VARIATIONS
-          .map { (gradleVersion, language) ->
-            dynamicTest("Using $language & Gradle $gradleVersion") {
+          .map { (variation, language) ->
+            val (agpVersion, configName, gradleVersion) = variation
+            dynamicTest("Using AGP $agpVersion, Gradle $gradleVersion & $language tests") {
               // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
-              val folder = testProjectDir.newFile("$language-$gradleVersion")
-              setupNewProject(folder)
+              val folder = testProjectDir.newFile("$language-$gradleVersion-$agpVersion")
+              setupNewProject(folder, configName)
 
               given {
                 plugins {
@@ -198,11 +219,12 @@ class FunctionalTests {
   @TestFactory
   fun `Executes tests in build-type-and-flavor-specific source set`(@TempDir testProjectDir: Path) =
       ALL_VARIATIONS
-          .map { (gradleVersion, language) ->
-            dynamicTest("Using $language & Gradle $gradleVersion") {
+          .map { (variation, language) ->
+            val (agpVersion, configName, gradleVersion) = variation
+            dynamicTest("Using AGP $agpVersion, Gradle $gradleVersion & $language tests") {
               // Create a new folder per variation (@BeforeEach doesn't work in dynamic tests)
-              val folder = testProjectDir.newFile("$language-$gradleVersion")
-              setupNewProject(folder)
+              val folder = testProjectDir.newFile("$language-$gradleVersion-$agpVersion")
+              setupNewProject(folder, configName)
 
               given {
                 plugins {
@@ -348,7 +370,7 @@ class FunctionalTests {
                         assertions: (BuildResult) -> List<() -> Unit>) {
     val buildResult = GradleRunner.create()
         .withProjectDir(testProjectDir)
-        .withPluginClasspath(pluginClasspath)
+        .withPluginClasspath(pluginFiles)
         .withArguments(tasks)
         .apply {
           if (version != null) {
@@ -369,7 +391,7 @@ class FunctionalTests {
       configuration(Plugins())
     }
 
-    fun testSources(language: FileLanguage, configuration: TestSources.() -> Unit) {
+    fun testSources(language: FileLanguage2, configuration: TestSources.() -> Unit) {
       configuration(TestSources(language))
     }
 
@@ -430,7 +452,8 @@ class FunctionalTests {
         }
 
         dependencies {
-          testImplementation files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+          testImplementation files(${functionalTestFiles.splitClasspath()})
+          testImplementation files(${functionalTestSpecialFiles.splitClasspath()})
         }
         """)
       }
@@ -449,7 +472,7 @@ class FunctionalTests {
           dependencies {
             // Required since Kotlin 1.2.60;
             // will fail with "can't find kotlin-compiler-embeddable" if not overwritten
-            kotlinCompilerClasspath files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+            kotlinCompilerClasspath files(${functionalTestFiles.splitClasspath()})
           }
         """)
       }
@@ -475,13 +498,13 @@ class FunctionalTests {
 
           dependencies {
             // Use local dependencies so that defaultDependencies are not used
-            testImplementation files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+            testImplementation files(${functionalTestFiles.splitClasspath()})
           }
         """)
       }
     }
 
-    inner class TestSources(private val language: FileLanguage) {
+    inner class TestSources(private val language: FileLanguage2) {
 
       fun test(content: String? = null,
                flavorName: String = "",
@@ -494,7 +517,7 @@ class FunctionalTests {
 
       /* Private */
 
-      private fun createTestInternal(language: FileLanguage,
+      private fun createTestInternal(language: FileLanguage2,
                                      content: String,
                                      flavorName: String = "",
                                      buildType: String = "") {
