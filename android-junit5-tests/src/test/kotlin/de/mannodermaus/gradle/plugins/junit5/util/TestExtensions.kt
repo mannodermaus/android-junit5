@@ -89,6 +89,8 @@ fun Project.evaluate() {
   (this as ProjectInternal).evaluate()
 }
 
+inline fun Project.applyPlugin(pluginId: String) = apply { it.plugin(pluginId)}
+
 @Suppress("UNCHECKED_CAST")
 fun <T : Task> TaskContainer.get(name: String): T =
     this.getByName(name) as T
@@ -111,6 +113,10 @@ fun Path.newFile(path: String) = this.resolve(path).toFile()
 
 val Test.junitPlatformOptions: JUnitPlatformOptions
   get() = (this.testFramework as JUnitPlatformTestFramework).options
+
+fun List<File>.splitClasspath() = this
+    .map { it.absolutePath.replace("\\", "\\\\") }
+    .joinToString(", ") { "'$it'" }
 
 /* Operators */
 

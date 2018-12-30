@@ -3,8 +3,8 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.util.*
-import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Java
-import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage.Kotlin
+import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage2.Java
+import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage2.Kotlin
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -28,7 +28,7 @@ class FunctionalTests {
 
   companion object {
     private val SUPPORTED_GRADLE_VERSIONS = listOf("4.7", "5.0")
-    private val SUPPORTED_LANGUAGES = FileLanguage.values().toList()
+    private val SUPPORTED_LANGUAGES = FileLanguage2.values().toList()
 
     // Combine each tested Gradle version with a File Language for these tests
     val ALL_VARIATIONS = (SUPPORTED_GRADLE_VERSIONS * SUPPORTED_LANGUAGES).toList()
@@ -36,10 +36,10 @@ class FunctionalTests {
 
   private lateinit var testProjectDir: File
   private lateinit var buildFile: File
-  private lateinit var pluginClasspath: List<File>
-  private lateinit var testCompileClasspath: List<File>
+  private lateinit var pluginFiles: List<File>
+  private lateinit var testCompileFiles: List<File>
 
-  private val environment = TestEnvironment()
+  private val environment = TestEnvironment2()
 
   /* Lifecycle */
 
@@ -48,8 +48,8 @@ class FunctionalTests {
   // which require a distinct folder, and they don't partake in the lifecycle.
   private fun setupNewProject(testProjectDir: File) {
     this.testProjectDir = testProjectDir
-    this.pluginClasspath = loadClassPathManifestResource("plugin-classpath.txt")
-    this.testCompileClasspath = loadClassPathManifestResource(
+    this.pluginFiles = loadClassPathManifestResource("plugin-classpath.txt")
+    this.testCompileFiles = loadClassPathManifestResource(
         "functional-test-compile-classpath.txt")
 
     // Write expected values to local.properties
@@ -67,7 +67,7 @@ class FunctionalTests {
     this.buildFile.appendText("""
       buildscript {
         dependencies {
-          classpath files(${ClasspathSplitter.splitClasspath(pluginClasspath)})
+          classpath files(${pluginFiles.splitClasspath()})
         }
       }
       """)
@@ -348,7 +348,7 @@ class FunctionalTests {
                         assertions: (BuildResult) -> List<() -> Unit>) {
     val buildResult = GradleRunner.create()
         .withProjectDir(testProjectDir)
-        .withPluginClasspath(pluginClasspath)
+        .withPluginClasspath(pluginFiles)
         .withArguments(tasks)
         .apply {
           if (version != null) {
@@ -369,7 +369,7 @@ class FunctionalTests {
       configuration(Plugins())
     }
 
-    fun testSources(language: FileLanguage, configuration: TestSources.() -> Unit) {
+    fun testSources(language: FileLanguage2, configuration: TestSources.() -> Unit) {
       configuration(TestSources(language))
     }
 
@@ -430,7 +430,7 @@ class FunctionalTests {
         }
 
         dependencies {
-          testImplementation files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+          testImplementation files(${testCompileFiles.splitClasspath()})
         }
         """)
       }
@@ -449,7 +449,7 @@ class FunctionalTests {
           dependencies {
             // Required since Kotlin 1.2.60;
             // will fail with "can't find kotlin-compiler-embeddable" if not overwritten
-            kotlinCompilerClasspath files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+            kotlinCompilerClasspath files(${testCompileFiles.splitClasspath()})
           }
         """)
       }
@@ -475,13 +475,13 @@ class FunctionalTests {
 
           dependencies {
             // Use local dependencies so that defaultDependencies are not used
-            testImplementation files(${ClasspathSplitter.splitClasspath(testCompileClasspath)})
+            testImplementation files(${testCompileFiles.splitClasspath()})
           }
         """)
       }
     }
 
-    inner class TestSources(private val language: FileLanguage) {
+    inner class TestSources(private val language: FileLanguage2) {
 
       fun test(content: String? = null,
                flavorName: String = "",
@@ -494,7 +494,7 @@ class FunctionalTests {
 
       /* Private */
 
-      private fun createTestInternal(language: FileLanguage,
+      private fun createTestInternal(language: FileLanguage2,
                                      content: String,
                                      flavorName: String = "",
                                      buildType: String = "") {

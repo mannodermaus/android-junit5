@@ -5,15 +5,8 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
-import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
-import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory
-import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory.TestProjectBuilder
-import de.mannodermaus.gradle.plugins.junit5.util.assertAll
-import de.mannodermaus.gradle.plugins.junit5.util.evaluate
-import de.mannodermaus.gradle.plugins.junit5.util.get
-import de.mannodermaus.gradle.plugins.junit5.util.junitPlatformOptions
-import de.mannodermaus.gradle.plugins.junit5.util.throws
-import de.mannodermaus.gradle.plugins.junit5.util.times
+import de.mannodermaus.gradle.plugins.junit5.util.*
+import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory2.TestProjectBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.api.Action
 import org.gradle.api.ProjectConfigurationException
@@ -36,9 +29,9 @@ import org.junit.platform.commons.util.PreconditionViolationException
  */
 class PluginSpec : Spek({
   // Access to Android SDK properties
-  val environment by memoized(SCOPE) { TestEnvironment() }
+  val environment by memoized(SCOPE) { TestEnvironment2() }
   // Factory for temporary projects
-  val factory by memoized(SCOPE) { TestProjectFactory(environment) }
+  val factory by memoized(SCOPE) { TestProjectFactory2(environment) }
   // The root project of each temporary project
   val testRoot by memoized { factory.newRootProject() }
 
@@ -59,7 +52,7 @@ class PluginSpec : Spek({
     on("configuring unavailable DSL values") {
       val project = testProjectBuilder
           .asAndroidLibrary()
-          .applyJunit5Plugin(true)
+          .applyJUnit5Plugin(true)
           .build()
 
       project.android.testOptions.junitPlatform {
