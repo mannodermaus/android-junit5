@@ -78,6 +78,7 @@ tasks.withType<Test> {
 
 dependencies {
   testImplementation(project(":android-junit5"))
+  testImplementation(gradleTestKit())
   testImplementation(Libs.kotlin_gradle_plugin)
   testImplementation(Libs.com_android_tools_build_gradle)
   testImplementation(Libs.commons_io)
