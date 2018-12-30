@@ -33,7 +33,7 @@ class DslGroovyTests {
 
   @org.junit.Test
   void dynamicFiltersMethodsCanBeCalledOnExistingBuildTypes() {
-    def project = factory.newProject(testRoot)
+    def project = factory.newProject(testRoot, null)
         .asAndroidApplication()
         .build()
 
@@ -60,7 +60,7 @@ class DslGroovyTests {
 
   @org.junit.Test
   void dynamicFiltersMethodsCanBeCalledOnExistingProductFlavors() {
-    def project = factory.newProject(testRoot)
+    def project = factory.newProject(testRoot, null)
         .asAndroidApplication()
         .build()
 
@@ -116,7 +116,7 @@ class DslGroovyTests {
 
   @org.junit.Test
   void complexExampleWithMultipleFlavorDimensionsAndBuildTypes() {
-    def project = factory.newProject(testRoot)
+    def project = factory.newProject(testRoot, null)
         .asAndroidApplication()
         .build()
 
