@@ -4,15 +4,10 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.FeatureExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.TestExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.LibraryVariant
-import de.mannodermaus.gradle.plugins.junit5.Type.Application
-import de.mannodermaus.gradle.plugins.junit5.Type.DynamicFeature
-import de.mannodermaus.gradle.plugins.junit5.Type.Feature
-import de.mannodermaus.gradle.plugins.junit5.Type.Library
-import de.mannodermaus.gradle.plugins.junit5.Type.Test
+import de.mannodermaus.gradle.plugins.junit5.Type.*
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.hasPlugin
 import org.gradle.api.DomainObjectSet
@@ -45,11 +40,6 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
         extension.applicationVariants
   }
 
-  object Test : Type<TestExtension>("com.android.test") {
-    override fun variants(extension: TestExtension): DomainObjectSet<ApplicationVariant> =
-        extension.applicationVariants
-  }
-
   object Library : Type<LibraryExtension>("com.android.library") {
     override fun variants(extension: LibraryExtension): DomainObjectSet<LibraryVariant> {
       return extension.libraryVariants
@@ -66,12 +56,12 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
 
   object DynamicFeature : Type<AppExtension>("com.android.dynamic-feature") {
     override fun variants(extension: AppExtension): DomainObjectSet<ApplicationVariant> =
-            extension.applicationVariants
+        extension.applicationVariants
   }
 }
 
 private val allTypes: List<Type<*>> =
-    listOf(Application, Test, Library, Feature, DynamicFeature)
+    listOf(Application, Library, Feature, DynamicFeature)
 
 @Suppress("UNCHECKED_CAST")
 private fun findType(project: Project): Type<BaseExtension> {
@@ -80,8 +70,8 @@ private fun findType(project: Project): Type<BaseExtension> {
   }
 
   if (type == null) {
-    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    throw ProjectConfigurationException("An Android plugin must be applied to this project", IllegalArgumentException())
+    val supportedPluginNames = allTypes.map { it.pluginId }
+    throw ProjectConfigurationException("One of the following plugins must be applied to this project: $supportedPluginNames", IllegalArgumentException())
   } else {
     return type as Type<BaseExtension>
   }

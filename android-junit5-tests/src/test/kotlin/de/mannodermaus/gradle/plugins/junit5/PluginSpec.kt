@@ -40,12 +40,12 @@ class PluginSpec : Spek({
   describe("a misconfigured project") {
     val testProjectBuilder by memoized { factory.newProject(testRoot) }
 
-    on("not applying any Android plugin") {
+    on("not applying any supported Android plugin") {
       val expect = throws<PluginApplicationException> { testProjectBuilder.build() }
 
       it("throws an error") {
         assertThat(expect.cause?.message)
-            .isEqualTo("An Android plugin must be applied to this project")
+            .contains("One of the following plugins must be applied to this project")
       }
     }
 
@@ -99,7 +99,7 @@ class PluginSpec : Spek({
 
         it("adds a general-purpose filter to the JUnit 5 extension point") {
           val extension = ju5.extensionByName<FiltersExtension>("filters")
-          assertThat(extension).isNotNull()
+          assertThat(extension).isNotNull
           assertThat(ju5.filters).isEqualTo(extension)
           assertThat(ju5.findFilters()).isEqualTo(extension)
           assertThat(ju5.findFilters(qualifier = null)).isEqualTo(extension)
@@ -115,7 +115,7 @@ class PluginSpec : Spek({
 
           it("adds a $buildType-specific filter to the JUnit 5 extension point") {
             val extension = ju5.extensionByName<FiltersExtension>("${buildType}Filters")
-            assertThat(extension).isNotNull()
+            assertThat(extension).isNotNull
             assertThat(ju5.findFilters(qualifier = buildType)).isEqualTo(extension)
           }
         }
@@ -162,7 +162,7 @@ class PluginSpec : Spek({
         listOf("free", "paid").forEach { flavor ->
           it("adds a $flavor-specific filter to the JUnit 5 extension point") {
             val extension = ju5.extensionByName<FiltersExtension>("${flavor}Filters")
-            assertThat(extension).isNotNull()
+            assertThat(extension).isNotNull
             assertThat(ju5.findFilters(qualifier = flavor)).isEqualTo(extension)
           }
 
@@ -171,7 +171,7 @@ class PluginSpec : Spek({
 
             it("adds a $variantName-specific filter to the JUnit 5 extension point") {
               val extension = ju5.extensionByName<FiltersExtension>("${variantName}Filters")
-              assertThat(extension).isNotNull()
+              assertThat(extension).isNotNull
               assertThat(ju5.findFilters(qualifier = variantName)).isEqualTo(extension)
             }
           }
