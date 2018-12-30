@@ -73,13 +73,14 @@ class TestProjectFactory2(private val environment: TestEnvironment2) {
       }
 
       // Apply required plugins
-      project.applyPlugin(when (projectType) {
+      val pluginName = when (projectType) {
         Type.Application -> "com.android.application"
         Type.Feature -> "com.android.feature"
         Type.DynamicFeature -> "com.android.dynamic-feature"
         Type.Library -> "com.android.library"
-        else -> throw IllegalArgumentException("Project type must be set")
-      })
+        else -> null
+      }
+      pluginName?.let { project.applyPlugin(it) }
 
       if (applyJacocoPlugin) {
         project.applyPlugin("jacoco")

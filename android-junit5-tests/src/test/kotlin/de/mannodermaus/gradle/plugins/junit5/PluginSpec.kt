@@ -589,7 +589,7 @@ class PluginSpec : Spek({
 
           project.evaluate()
 
-          listOf(   
+          listOf(
               "filters",
 
               "debugFilters",
