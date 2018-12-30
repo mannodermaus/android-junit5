@@ -36,6 +36,21 @@ configurations {
     description = "Local dependencies used for compiling & running " +
         "tests source code in Gradle functional tests"
   }
+
+  create("functionalTestAgp32X") {
+    description = "Local dependencies used for compiling & running " +
+        "tests source code in Gradle functional tests against AGP 3.2.X"
+  }
+
+  create("functionalTestAgp33X") {
+    description = "Local dependencies used for compiling & running " +
+        "tests source code in Gradle functional tests against AGP 3.3.X"
+  }
+
+  create("functionalTestAgp34X") {
+    description = "Local dependencies used for compiling & running " +
+        "tests source code in Gradle functional tests against AGP 3.4.X"
+  }
 }
 
 val processTestResources = tasks.getByName("processTestResources") as Copy
@@ -88,9 +103,17 @@ dependencies {
   val functionalTest by configurations
   functionalTest(kotlin("compiler-embeddable", extra["versions.kotlin"] as String))
   functionalTest(extra["libs.junit4"] as String)
-  functionalTest(extra["plugins.android"] as String)
   functionalTest(extra["libs.junitJupiterApi"] as String)
   functionalTest(extra["libs.junitJupiterEngine"] as String)
+
+  val functionalTestAgp32X by configurations
+  functionalTestAgp32X(extra["plugins.android.32X"] as String)
+
+  val functionalTestAgp33X by configurations
+  functionalTestAgp33X(extra["plugins.android.33X"] as String)
+
+  val functionalTestAgp34X by configurations
+  functionalTestAgp34X(extra["plugins.android.34X"] as String)
 }
 
 // Resource Writers
@@ -100,10 +123,13 @@ tasks.create("writePluginClasspath", WriteClasspathResource::class) {
   resourceFileName = "plugin-classpath.txt"
 }
 
-tasks.create("writeFunctionalTestCompileClasspath", WriteClasspathResource::class) {
-  inputFiles = configurations["functionalTest"]
-  outputDir = File("$buildDir/resources/test")
-  resourceFileName = "functional-test-compile-classpath.txt"
+// Create a classpath-generating task for all functional test configurations
+listOf("functionalTest", "functionalTestAgp32X", "functionalTestAgp33X", "functionalTestAgp34X").forEach { config ->
+  tasks.create("write${config.capitalize()}CompileClasspath", WriteClasspathResource::class) {
+    inputFiles = configurations[config]
+    outputDir = File("$buildDir/resources/test")
+    resourceFileName = "$config-compile-classpath.txt"
+  }
 }
 
 val testTask = tasks.getByName("test")

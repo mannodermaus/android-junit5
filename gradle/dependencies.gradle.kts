@@ -30,7 +30,10 @@ val kotlinVersion = "1.3.11"
 val spekVersion = "1.2.1"
 
 // Dependencies: Plugins
-extra["plugins.android"] = "com.android.tools.build:gradle:3.4.0-alpha09"
+extra["plugins.android.32X"] = "com.android.tools.build:gradle:3.2.1"
+extra["plugins.android.33X"] = "com.android.tools.build:gradle:3.3.0-rc03"
+extra["plugins.android.34X"] = "com.android.tools.build:gradle:3.4.0-alpha09"
+extra["plugins.android"] = extra["plugins.android.34X"]
 extra["plugins.androidMaven"] = "digital.wup:android-maven-publish:3.6.2"
 extra["plugins.bintray"] = "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
 extra["plugins.dcendentsMaven"] = "com.github.dcendents:android-maven-gradle-plugin:2.1"
