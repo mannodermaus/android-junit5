@@ -108,13 +108,19 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
   
   ```groovy
   android {
-    deaultConfig {
+    defaultConfig {
       // (Required) Make sure to use the AndroidJUnitRunner, of a subclass of it
       testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
       // (Required) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
     }
+
+    compileOptions {
+      sourceCompatibility JavaVersion.VERSION_1_8
+      targetCompatibility JavaVersion.VERSION_1_8
+    }
   }
+
   dependencies {
     // (Required) Writing tests for JUnit Jupiter
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.3.2"
@@ -123,7 +129,7 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
 
     // (Required) Runtime dependencies to orchestrate the execution on-device
     androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.2"
-    androidTestRuntimeOnly "org.junit.platform:junit-platform-runner:1.3.1"
+    androidTestRuntimeOnly "org.junit.platform:junit-platform-runner:1.3.2"
     androidTestRuntimeOnly "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2"
   }
   ```
@@ -134,11 +140,16 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
   
   ```groovy
   android {
-    deaultConfig {
+    defaultConfig {
       // (Required) Make sure to use the AndroidJUnitRunner, of a subclass of it
       testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
       // (Required) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+    }
+
+    compileOptions {
+      setSourceCompatibility(JavaVersion.VERSION_1_8)
+      setTargetCompatibility(JavaVersion.VERSION_1_8)
     }
   }
   dependencies {
@@ -149,7 +160,7 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
 
     // (Required) Runtime dependencies to orchestrate the execution on-device
     androidTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.2")
-    androidTestRuntimeOnly("org.junit.platform:junit-platform-runner:1.3.1")
+    androidTestRuntimeOnly("org.junit.platform:junit-platform-runner:1.3.2")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2")
   }
   ```
