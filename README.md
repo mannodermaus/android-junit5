@@ -173,7 +173,7 @@ Since the move to utilize the native JUnit 5 support built into the build system
 ## License
 
 ```
-Copyright 2017-2018 Marcel Schnelle
+Copyright 2017-2019 Marcel Schnelle
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
