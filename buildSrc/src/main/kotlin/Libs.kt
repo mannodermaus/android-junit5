@@ -70,6 +70,14 @@ object Libs {
 
     const val android_junit5: String = "de.mannodermaus.gradle.plugins:android-junit5:" +
             Versions.android_junit5
+    /**
+     * https://mvnrepository.com/artifact/org.jacoco/org.jacoco.agent */
+    const val org_jacoco_agent: String = "org.jacoco:org.jacoco.agent:" + Versions.org_jacoco_agent
+
+    /**
+     * https://mvnrepository.com/artifact/org.jacoco/org.jacoco.ant */
+    const val org_jacoco_ant: String = "org.jacoco:org.jacoco.ant:" + Versions.org_jacoco_ant
+
 
     const val android_instrumentation_test_runner: String =
             "de.mannodermaus.junit5:android-instrumentation-test-runner:" +

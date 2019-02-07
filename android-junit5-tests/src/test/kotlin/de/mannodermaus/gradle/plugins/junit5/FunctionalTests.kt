@@ -7,6 +7,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage2.Java
 import de.mannodermaus.gradle.plugins.junit5.util.FileLanguage2.Kotlin
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -52,6 +53,10 @@ class FunctionalTests {
 
   // Classpath of the main "functionalTest" configuration
   private lateinit var functionalTestFiles: List<File>
+  // Classpath of the main "functionalTestJacocoAnt" configuration
+  private lateinit var functionalTestJacocoAntFiles: List<File>
+  // Classpath of the main "functionalTestJacocoAgent" configuration
+  private lateinit var functionalTestJacocoAgentFiles: List<File>
   // Classpath of the specialized "functionalTestAgpX" configuration
   private lateinit var functionalTestSpecialFiles: List<File>
 
@@ -67,6 +72,10 @@ class FunctionalTests {
     this.pluginFiles = loadClassPathManifestResource("plugin-classpath.txt")
     this.functionalTestFiles = loadClassPathManifestResource(
         "functionalTest-compile-classpath.txt")
+    this.functionalTestJacocoAntFiles = loadClassPathManifestResource(
+        "functionalTestJacocoAnt-compile-classpath.txt")
+    this.functionalTestJacocoAgentFiles = loadClassPathManifestResource(
+        "functionalTestJacocoAgent-compile-classpath.txt")
     this.functionalTestSpecialFiles = loadClassPathManifestResource(
         "$configName-compile-classpath.txt")
 
@@ -349,6 +358,33 @@ class FunctionalTests {
     }
   }
 
+  @TestFactory
+  fun `Configures Jacoco correctly`(@TempDir testProjectDir: Path) =
+      SUPPORTED_VARIATIONS
+          .map { variation ->
+            val (agpVersion, configName, gradleVersion) = variation
+            dynamicTest("Using AGP $agpVersion & Gradle $gradleVersion tests") {
+              val folder = testProjectDir.newFile("$gradleVersion-$agpVersion")
+              setupNewProject(folder, configName)
+              given {
+                plugins {
+                  android()
+                  jacoco()
+                  junit5()
+                }
+                testSources(Java) {
+                  test()
+                }
+              }
+
+              runGradle(version = gradleVersion, tasks = "jacocoTestReportDebug") { result ->
+                listOf(
+                    { assertThat(result).executedTaskWithOutcome(":testDebugUnitTest", TaskOutcome.SUCCESS) }
+                )
+              }
+            }
+          }
+
   /* Private */
 
   private fun loadClassPathManifestResource(name: String): List<File> {
@@ -371,7 +407,7 @@ class FunctionalTests {
     val buildResult = GradleRunner.create()
         .withProjectDir(testProjectDir)
         .withPluginClasspath(pluginFiles)
-        .withArguments(tasks)
+        .withArguments(tasks, "--stacktrace")
         .apply {
           if (version != null) {
             withGradleVersion(version)
@@ -501,6 +537,17 @@ class FunctionalTests {
             testImplementation files(${functionalTestFiles.splitClasspath()})
           }
         """)
+      }
+
+      fun jacoco() {
+        buildFile.appendText("""
+          apply plugin: "jacoco"
+
+          dependencies {
+            jacocoAnt files(${functionalTestJacocoAntFiles.splitClasspath()})
+            jacocoAgent files(${functionalTestJacocoAgentFiles.splitClasspath()})
+          }
+        """.trimIndent())
       }
     }
 

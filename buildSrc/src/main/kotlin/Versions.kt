@@ -47,7 +47,10 @@ object Versions {
 
     const val org_jetbrains_kotlin: String = "1.3.11" 
 
-    const val org_jetbrains_spek: String = "1.2.1" 
+    const val org_jetbrains_spek: String = "1.2.1"
+
+    const val org_jacoco_agent: String = "0.8.2"
+    const val org_jacoco_ant: String = "0.8.2"
 
     const val junit_pioneer: String = "0.2.2" // available: "0.3.0"
 

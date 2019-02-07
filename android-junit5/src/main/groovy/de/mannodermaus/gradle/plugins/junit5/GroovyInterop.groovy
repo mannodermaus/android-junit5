@@ -207,4 +207,52 @@ class GroovyInterop {
       report.sourceDirectories = project.files(paths)
     }
   }
+
+  /**
+   * Obtains the execution data of a Jacoco task.
+   *
+   * @because Gradle 5 changed the return type of this field to expose the ConfigurableFileCollection directly
+   * @param report Jacoco report task to operate on
+   * @return The execution data of the task
+   */
+  static ConfigurableFileCollection jacocoReportBase_getExecutionData(JacocoReportBase report) {
+    def val = report.executionData
+    if (val instanceof ConfigurableFileCollection) {
+      return val
+    } else {
+      return (ConfigurableFileCollection) val
+    }
+  }
+
+  /**
+   * Obtains the source directories of a Jacoco task.
+   *
+   * @because Gradle 5 changed the return type of this field to expose the ConfigurableFileCollection directly
+   * @param report Jacoco report task to operate on
+   * @return The source directories of the task
+   */
+  static ConfigurableFileCollection jacocoReportBase_getSourceDirectories(JacocoReportBase report) {
+    def val = report.sourceDirectories
+    if (val instanceof ConfigurableFileCollection) {
+      return val
+    } else {
+      return (ConfigurableFileCollection) val
+    }
+  }
+
+  /**
+   * Obtains the class directories of a Jacoco task.
+   *
+   * @because Gradle 5 changed the return type of this field to expose the ConfigurableFileCollection directly
+   * @param report Jacoco report task to operate on
+   * @return The class directories of the task
+   */
+  static ConfigurableFileCollection jacocoReportBase_getClassDirectories(JacocoReportBase report) {
+    def val = report.classDirectories
+    if (val instanceof ConfigurableFileCollection) {
+      return val
+    } else {
+      return (ConfigurableFileCollection) val
+    }
+  }
 }

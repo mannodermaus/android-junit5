@@ -46,6 +46,15 @@ fun JacocoReportBase.safeSourceDirectoriesSetFrom(project: Project, vararg paths
   GroovyInterop.jacocoReportBase_sourceDirectories_setFrom(this, project, paths)
 }
 
+val JacocoReportBase.safeGetExecutionData get() =
+  GroovyInterop.jacocoReportBase_getExecutionData(this)
+
+val JacocoReportBase.safeGetSourceDirectories get() =
+  GroovyInterop.jacocoReportBase_getSourceDirectories(this)
+
+val JacocoReportBase.safeGetClassDirectories get() =
+  GroovyInterop.jacocoReportBase_getClassDirectories(this)
+
 /* Types */
 
 class VariantTypeCompat {
