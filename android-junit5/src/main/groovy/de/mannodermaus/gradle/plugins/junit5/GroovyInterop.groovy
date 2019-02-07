@@ -163,9 +163,10 @@ class GroovyInterop {
    * @param paths Paths to apply
    */
   static void jacocoReportBase_executionData_setFrom(JacocoReportBase report, Project project, Object... paths) {
-    if (report.executionData instanceof ConfigurableFileCollection) {
+    def val = jacocoReportBase_getExecutionData(report)
+    if (val instanceof ConfigurableFileCollection) {
       // In Gradle 5.0+, executionData is a ConfigurableFileCollection
-      report.executionData.setFrom(paths)
+      val.setFrom(paths)
     } else {
       // Below, use the mutator method to configure the data
       report.executionData = project.files(paths)
@@ -181,9 +182,10 @@ class GroovyInterop {
    * @param paths Paths to apply
    */
   static void jacocoReportBase_classDirectories_setFrom(JacocoReportBase report, Project project, Object... paths) {
-    if (report.classDirectories instanceof ConfigurableFileCollection) {
+    def val = jacocoReportBase_getClassDirectories(report)
+    if (val instanceof ConfigurableFileCollection) {
       // In Gradle 5.0+, executionData is a ConfigurableFileCollection
-      report.classDirectories.setFrom(paths)
+      val.setFrom(paths)
     } else {
       // Below, use the mutator method to configure the data
       report.classDirectories = project.files(paths)
@@ -199,9 +201,10 @@ class GroovyInterop {
    * @param paths Paths to apply
    */
   static void jacocoReportBase_sourceDirectories_setFrom(JacocoReportBase report, Project project, Object... paths) {
-    if (report.sourceDirectories instanceof ConfigurableFileCollection) {
+    def val = jacocoReportBase_getSourceDirectories(report)
+    if (val instanceof ConfigurableFileCollection) {
       // In Gradle 5.0+, executionData is a ConfigurableFileCollection
-      report.sourceDirectories.setFrom(paths)
+      val.setFrom(paths)
     } else {
       // Below, use the mutator method to configure the data
       report.sourceDirectories = project.files(paths)
