@@ -56,8 +56,13 @@ fun assertThat(buildResult: BuildResult) = AssertBuildResult(buildResult)
 class AssertBuildResult(buildResult: BuildResult) : AbstractAssert<AssertBuildResult, BuildResult>(
     buildResult, AssertBuildResult::class.java) {
   fun executedTaskSuccessfully(name: String) {
+    executedTaskWithOutcome(name, TaskOutcome.SUCCESS)
+  }
+
+  fun executedTaskWithOutcome(name: String, outcome: TaskOutcome) {
     val task = actual.task(name) ?: throw AssertionError("didn't execute task $name")
     org.assertj.core.api.Assertions.assertThat(task.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    org.assertj.core.api.Assertions.assertThat(task.outcome).isEqualTo(outcome)
   }
 
   fun hasOutputContaining(substring: String, times: Int = 1) {

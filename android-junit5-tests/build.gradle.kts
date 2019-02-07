@@ -48,6 +48,14 @@ configurations {
     description = "Local dependencies used for compiling & running " +
         "tests source code in Gradle functional tests against AGP 3.4.X"
   }
+
+  create("functionalTestJacocoAgent") {
+    description = "Local dependencies used for using Jacoco Agent during Gradle functional tests"
+  }
+
+  create("functionalTestJacocoAnt") {
+    description = "Local dependencies used for using Jacoco Ant during Gradle functional tests"
+  }
 }
 
 val processTestResources = tasks.getByName("processTestResources") as Copy
@@ -102,6 +110,12 @@ dependencies {
   functionalTest(Libs.junit_jupiter_api)
   functionalTest(Libs.junit_jupiter_engine)
 
+  val functionalTestJacocoAgent by configurations
+  functionalTestJacocoAgent(Libs.org_jacoco_agent)
+
+  val functionalTestJacocoAnt by configurations
+  functionalTestJacocoAnt(Libs.org_jacoco_ant)
+
   val functionalTestAgp32X by configurations
   functionalTestAgp32X("com.android.tools.build:gradle:3.2.1")
 
@@ -120,7 +134,13 @@ tasks.create("writePluginClasspath", WriteClasspathResource::class) {
 }
 
 // Create a classpath-generating task for all functional test configurations
-listOf("functionalTest", "functionalTestAgp32X", "functionalTestAgp33X", "functionalTestAgp34X").forEach { config ->
+listOf(
+        "functionalTest",
+        "functionalTestJacocoAnt",
+        "functionalTestJacocoAgent",
+        "functionalTestAgp32X",
+        "functionalTestAgp33X",
+        "functionalTestAgp34X").forEach { config ->
   tasks.create("write${config.capitalize()}CompileClasspath", WriteClasspathResource::class) {
     inputFiles = configurations[config]
     outputDir = File("$buildDir/resources/test")
