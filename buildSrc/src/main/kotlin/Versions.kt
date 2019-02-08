@@ -54,11 +54,11 @@ object Versions {
 
     const val junit_pioneer: String = "0.2.2" // available: "0.3.0"
 
-    const val org_junit_jupiter: String = "5.3.2" 
+    const val org_junit_jupiter: String = "5.4.0"
 
-    const val org_junit_platform: String = "1.3.2" 
+    const val org_junit_platform: String = "1.4.0"
 
-    const val junit_vintage_engine: String = "5.3.2" 
+    const val junit_vintage_engine: String = "5.4.0"
 
     const val mockito_core: String = "2.19.0" // available: "2.23.4"
 
