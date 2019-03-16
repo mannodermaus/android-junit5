@@ -77,12 +77,12 @@ dependencies {
   testRuntimeOnly(Libs.junit_jupiter_engine)
 
   androidTestImplementation(Libs.junit)
-  androidTestImplementation(Libs.com_android_support_test_runner)
+  androidTestImplementation(Libs.androidx_test_runner)
 
   // Android Instrumentation Tests wth JUnit 5
   androidTestImplementation(Libs.junit_jupiter_api)
   androidTestRuntimeOnly(Libs.junit_jupiter_engine)
   androidTestRuntimeOnly(Libs.junit_platform_runner)
-  androidTestImplementation(Libs.android_instrumentation_test)
-  androidTestRuntimeOnly(Libs.android_instrumentation_test_runner)
+  androidTestImplementation(project(":api"))
+  androidTestRuntimeOnly(project(":runner"))
 }

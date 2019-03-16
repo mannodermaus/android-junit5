@@ -8,7 +8,6 @@ import org.jetbrains.spek.api.dsl.on
 
 /**
  * Created by Marcel Schnelle on 2018/06/19.
- * Copyright © 2018 TenTen Technologies Limited. All rights reserved.
  *
  * Sanity checks for the external Semver library, used to determine compatibility of the AGP.
  */

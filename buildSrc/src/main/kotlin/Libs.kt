@@ -8,13 +8,13 @@ import kotlin.String
 object Libs {
     /**
      * https://developer.android.com/testing */
-    const val espresso_core: String = "com.android.support.test.espresso:espresso-core:" +
+    const val espresso_core: String = "androidx.test.espresso:espresso-core:" +
             Versions.espresso_core
 
     /**
      * https://developer.android.com/testing */
-    const val com_android_support_test_runner: String = "com.android.support.test:runner:" +
-            Versions.com_android_support_test_runner
+    const val androidx_test_runner: String = "androidx.test:runner:" +
+            Versions.androidx_test_runner
 
     /**
      * https://developer.android.com/studio */
@@ -52,9 +52,14 @@ object Libs {
             Versions.gradle_bintray_plugin
 
     /**
-     * http://github.com/square/assertj-android/ */
-    const val assertj_android: String = "com.squareup.assertj:assertj-android:" +
-            Versions.assertj_android
+     * https://github.com/google/truth */
+    const val truth: String = "com.google.truth:truth:" +
+            Versions.truth
+
+    /**
+     * https://dl.google.com/dl/android/maven2 */
+    const val truth_android: String = "androidx.test.ext:truth:" +
+            Versions.truth_android
 
     /**
      * http://commons.apache.org/proper/commons-io/ */

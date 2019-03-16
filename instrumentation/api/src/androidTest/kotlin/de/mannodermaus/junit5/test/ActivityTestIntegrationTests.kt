@@ -1,17 +1,17 @@
 package de.mannodermaus.junit5.test
 
 import android.content.Intent
-import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.assertion.ViewAssertions.matches
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.ext.truth.content.IntentSubject.assertThat
 import de.mannodermaus.junit5.ActivityAlreadyLaunchedException
 import de.mannodermaus.junit5.ActivityNotLaunchedException
 import de.mannodermaus.junit5.ActivityTest
 import de.mannodermaus.junit5.Tested
 import de.mannodermaus.junit5.test.activities.FirstActivity
 import de.mannodermaus.junit5.test.activities.OtherActivity
-import org.assertj.android.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -67,7 +67,7 @@ class ActivityTestIntegrationTests {
   @Test
   @ActivityTest(
       FirstActivity::class,
-      launchFlags = Intent.FLAG_ACTIVITY_NO_HISTORY)
+      launchFlags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY)
   @DisplayName("Launch Flags are properly applied")
   fun launchFlagsAreProperlyApplied(activity: FirstActivity) {
     assertIntentHasFlag(activity.intent, Intent.FLAG_ACTIVITY_NO_HISTORY)
@@ -102,14 +102,15 @@ class ActivityTestIntegrationTests {
       action = "custom.intent.action"
       putExtra("extraArgument", "YOLO")
       putExtra("intArgument", 1337)
-      addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
     }
 
     val activity = tested.launchActivity(intent)
-    assertThat(activity.intent)
-        .hasAction("custom.intent.action")
-        .hasExtra("extraArgument", "YOLO")
-        .hasExtra("intArgument", 1337)
+    assertThat(activity.intent).apply {
+      hasAction("custom.intent.action")
+      extras().string("extraArgument").isEqualTo("YOLO")
+      extras().integer("intArgument").isEqualTo(1337)
+    }
 
     assertIntentHasFlag(activity.intent, Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
   }

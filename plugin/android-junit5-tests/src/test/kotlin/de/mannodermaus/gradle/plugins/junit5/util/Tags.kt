@@ -6,7 +6,6 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 
 /**
  * Created by Marcel Schnelle on 2018/06/20.
- * Copyright © 2018 TenTen Technologies Limited. All rights reserved.
  */
 @Retention
 @Target(CLASS, FUNCTION)
