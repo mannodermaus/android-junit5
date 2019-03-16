@@ -39,24 +39,8 @@ android {
     versionName = "1.0"
 
     // Make sure to use the AndroidJUnitRunner (or a sub-class) in order to hook in the JUnit 5 Test Builder
-    testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArgument("runnerBuilder",
-        "de.mannodermaus.junit5.AndroidJUnit5Builder")
-  }
-
-  // Since the minSdkVersion requirement for JUnit 5 Instrumentation Tests is quite high,
-  // we introduce a product flavor that uses an elevated version other than the application's default.
-  // With this, we are able to try JUnit 5 tests without sacrificing the minSdkVersion completely.
-  flavorDimensions("kind")
-  productFlavors {
-    create("experimental") {
-      dimension = "kind"
-      minSdkVersion(26)
-    }
-
-    create("normal") {
-      dimension = "kind"
-    }
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
   }
 
   // Add Kotlin source directory to all source sets
@@ -95,15 +79,10 @@ dependencies {
   androidTestImplementation(Libs.junit)
   androidTestImplementation(Libs.com_android_support_test_runner)
 
-  // Add the Android Instrumentation Test dependencies to the product flavor only
-  // (with this, only the "experimental" flavor must have minSdkVersion 26)
-  val androidTestExperimentalImplementation by configurations
-  androidTestExperimentalImplementation(Libs.junit_jupiter_api)
-  androidTestExperimentalImplementation(Libs.android_instrumentation_test)
-
-  // Runtime dependencies for Android Instrumentation Tests
-  val androidTestExperimentalRuntimeOnly by configurations
-  androidTestExperimentalRuntimeOnly(Libs.junit_jupiter_engine)
-  androidTestExperimentalRuntimeOnly(Libs.junit_platform_runner)
-  androidTestExperimentalRuntimeOnly(Libs.android_instrumentation_test_runner)
+  // Android Instrumentation Tests wth JUnit 5
+  androidTestImplementation(Libs.junit_jupiter_api)
+  androidTestRuntimeOnly(Libs.junit_jupiter_engine)
+  androidTestRuntimeOnly(Libs.junit_platform_runner)
+  androidTestImplementation(Libs.android_instrumentation_test)
+  androidTestRuntimeOnly(Libs.android_instrumentation_test_runner)
 }

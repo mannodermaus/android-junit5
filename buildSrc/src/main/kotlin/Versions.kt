@@ -13,7 +13,7 @@ object Versions {
 
     const val aapt2: String = "3.2.1-4818971" 
 
-    const val com_android_tools_build_gradle: String = "3.2.1" 
+    const val com_android_tools_build_gradle: String = "3.4.0-rc02"
 
     const val lint_gradle: String = "26.2.1" 
 
@@ -45,7 +45,7 @@ object Versions {
 
     const val assertj_core: String = "3.11.1" 
 
-    const val org_jetbrains_kotlin: String = "1.3.11" 
+    const val org_jetbrains_kotlin: String = "1.3.21"
 
     const val org_jetbrains_spek: String = "1.2.1"
 

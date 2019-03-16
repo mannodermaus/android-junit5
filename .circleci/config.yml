@@ -7,7 +7,7 @@ defaults: &defaults
         GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"'
 
 cache_key: &cache_key
-  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "android-junit5/build.gradle.kts" }}-{{ checksum "android-junit5-tests/build.gradle.kts" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation-runner/build.gradle.kts" }}-{{ checksum "sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/android-junit5-tests/build.gradle.kts" }}-{{ checksum "instrumentation/api/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
 version: 2
 jobs:
@@ -17,23 +17,24 @@ jobs:
       - checkout
       - restore_cache:
           <<: *cache_key
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies --no-daemon
 
       - run:
-          name: Build Plugin
-          command: ./gradlew :android-junit5:assemble --stacktrace --no-daemon
+          name: (Plugin) Build
+          command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace --no-daemon
       - run:
-          name: Test Plugin
-          command: ./gradlew :android-junit5-tests:check --stacktrace --no-daemon
+          name: (Plugin) Test
+          command: cd plugin && ./gradlew :android-junit5-tests:check --stacktrace --no-daemon
+      
+      - run:
+          name: (Instrumentation) Download Dependencies
+          command: cd instrumentation && ./gradlew androidDependencies --no-daemon
+      - run:
+          name: (Instrumentation) Build
+          command: cd instrumentation && ./gradlew :api:assemble :runner:assemble --stacktrace --no-daemon
+      - run:
+          name: (Instrumentation) Test
+          command: cd instrumentation && ./gradlew :api:check :runner:check --stacktrace --no-daemon
 
-      - run:
-          name: Build Instrumentation
-          command: ./gradlew :instrumentation:assemble :instrumentation-runner:assemble --stacktrace --no-daemon
-      - run:
-          name: Test Instrumentation
-          command: ./gradlew :instrumentation:check :instrumentation-runner:check --stacktrace --no-daemon
       - save_cache:
           <<: *cache_key
           paths:
@@ -44,13 +45,13 @@ jobs:
           paths:
             - project
       - store_artifacts:
-          path: android-junit5-tests/build/reports/tests/test
+          path: plugin/android-junit5-tests/build/reports/tests/test
           destination: plugin
       - store_artifacts:
-          path: instrumentation/build/reports
-          destination: instrumentation
+          path: instrumentation/api/build/reports
+          destination: instrumentation-api
       - store_artifacts:
-          path: instrumentation-runner/build/reports
+          path: instrumentation/runner/build/reports
           destination: instrumentation-runner
 
   deploy_snapshots:
@@ -61,8 +62,11 @@ jobs:
       - restore_cache:
           <<: *cache_key
       - run:
-          name: Deploy SNAPSHOTs
-          command: ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
+          name: (Plugin) Deploy SNAPSHOTs
+          command: cd plugin && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
+      - run:
+          name: (Instrumentation) Deploy SNAPSHOTs
+          command: cd instrumentation && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
 
   deploy_plugin_release:
     <<: *defaults
@@ -72,8 +76,8 @@ jobs:
       - restore_cache:
           <<: *cache_key
       - run:
-          name: Deploy plugin
-          command: ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
+          name: (Plugin) Deploy
+          command: cd plugin && ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
 
 #  deploy_instrumentation_release:
 #    <<: *defaults
@@ -83,8 +87,8 @@ jobs:
 #      - restore_cache:
 #          <<: *cache_key
 #      - run:
-#          name: Deploy instrumentation
-#          command: ./gradlew generatePomFileForLibraryPublication publish :instrumentation:bintrayUpload :instrumentation-runner:bintrayUpload --stacktrace --no-daemon
+#          name: (Instrumentation) Deploy
+#          command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
 
 workflows:
   version: 2
