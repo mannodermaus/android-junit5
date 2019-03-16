@@ -192,6 +192,13 @@ Currently, Google hasn't shared any immediate plans to bring first-party support
 - [Add support for JUnit 5 (issuetracker.google.com)](https://issuetracker.google.com/issues/127100532)
 - [JUnit 5 support (github.com/android/android-test)](https://github.com/android/android-test/issues/224)
 
+# Building Locally
+
+This repository contains multiple modules, divided into two sub-projects. The repository's root directory contains build logic shared across the sub-projects, which in turn use symlinks to connect to the common build scripts in their parent folder.
+
+- `instrumentation`: The root folder for Android-based modules, namely the instrumentation libraries & a sample application. After cloning, open this project in Android Studio.
+- `plugin`: The root folder for Java-based modules, namely the Gradle plugin for JUnit 5 on Android, as well as its test module. After cloning, open this project in IntelliJ IDEA.
+
 ## License
 
 ```
@@ -216,7 +223,7 @@ See also the [full License text](LICENSE).
  [junit5ug]: https://junit.org/junit5/docs/current/user-guide
  [circleci]: https://circleci.com/gh/mannodermaus/android-junit5
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
- [sampletests]: sample/src/test
+ [sampletests]: instrumentation/sample
  [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration-DSL
  [wiki-migration]: https://github.com/mannodermaus/android-junit5/wiki/Migrating-from-1.0.x
  [wiki-gettingstarted]: https://github.com/mannodermaus/android-junit5/wiki/Getting-Started
