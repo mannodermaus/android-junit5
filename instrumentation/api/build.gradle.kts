@@ -83,12 +83,13 @@ dependencies {
   // due to fear of prematurely incrementing the minSdkVersion requirement.
   runtimeOnly(Libs.junit_platform_runner)
 
+  commonTestImplementation(Libs.truth)
   commonTestImplementation(Libs.assertj_core)
   commonTestImplementation(Libs.mockito_core)
   commonTestImplementation(Libs.junit_jupiter_api)
   commonTestImplementation(Libs.junit_jupiter_engine)
 
-  androidTestImplementation(Libs.assertj_android)
+  androidTestImplementation(Libs.truth_android)
   androidTestImplementation(Libs.espresso_core)
 
   androidTestRuntimeOnly(project(":runner"))

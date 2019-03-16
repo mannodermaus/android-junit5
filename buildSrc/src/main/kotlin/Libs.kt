@@ -52,9 +52,14 @@ object Libs {
             Versions.gradle_bintray_plugin
 
     /**
-     * http://github.com/square/assertj-android/ */
-    const val assertj_android: String = "com.squareup.assertj:assertj-android:" +
-            Versions.assertj_android
+     * https://github.com/google/truth */
+    const val truth: String = "com.google.truth:truth:" +
+            Versions.truth
+
+    /**
+     * https://dl.google.com/dl/android/maven2 */
+    const val truth_android: String = "androidx.test.ext:truth:" +
+            Versions.truth_android
 
     /**
      * http://commons.apache.org/proper/commons-io/ */

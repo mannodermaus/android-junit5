@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.assertj.android.api.Assertions.assertThat;
+import static androidx.test.ext.truth.content.IntentSubject.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -46,7 +46,7 @@ class JavaInteropVerificationTests {
 
     Instrumentation.ActivityResult result = tested.getActivityResult();
     assertThat(result.getResultCode()).isEqualTo(Activity.RESULT_OK);
-    assertThat(result.getResultData()).hasExtra("returnValue", 1337);
+    assertThat(result.getResultData()).extras().integer("returnValue").isEqualTo(1337);
 
     FirstActivity retrieved = tested.getActivity();
     assertThat(launched).isEqualTo(retrieved);

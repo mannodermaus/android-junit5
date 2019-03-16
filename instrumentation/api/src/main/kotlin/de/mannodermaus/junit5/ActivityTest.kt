@@ -57,7 +57,7 @@ private const val LOG_TAG = "ActivityTest"
 annotation class ActivityTest(
     val value: KClass<out Activity>,
     val targetPackage: String = ABSENT_TARGET_PACKAGE,
-    val launchFlags: Int = NO_FLAGS_SET,
+    val launchFlags: Int = Intent.FLAG_ACTIVITY_NEW_TASK,
     val initialTouchMode: Boolean = DEFAULT_INITIAL_TOUCH_MODE,
     val launchActivity: Boolean = DEFAULT_LAUNCH_ACTIVITY)
 

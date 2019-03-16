@@ -27,7 +27,9 @@ object Versions {
 
     const val gradle_bintray_plugin: String = "1.8.4" 
 
-    const val assertj_android: String = "1.2.0" 
+    const val truth: String = "0.43"
+
+    const val truth_android: String = "1.1.0"
 
     const val commons_io: String = "2.6" 
 
@@ -54,9 +56,9 @@ object Versions {
 
     const val junit_pioneer: String = "0.2.2" // available: "0.3.0"
 
-    const val org_junit_jupiter: String = "5.4.0"
+    const val org_junit_jupiter: String = "5.5.0-SNAPSHOT"
 
-    const val org_junit_platform: String = "1.4.0"
+    const val org_junit_platform: String = "1.5.0-SNAPSHOT"
 
     const val junit_vintage_engine: String = "5.4.0"
 
