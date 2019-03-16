@@ -109,27 +109,33 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
   ```groovy
   android {
     defaultConfig {
-      // (Required) Make sure to use the AndroidJUnitRunner, of a subclass of it
-      testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-      // (Required) Connect JUnit 5 to the runner
+      // 1) Make sure to use the AndroidJUnitRunner, of a subclass of it
+      testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+      // 2) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
     }
 
+    // 3) Java 8 is required
     compileOptions {
       sourceCompatibility JavaVersion.VERSION_1_8
       targetCompatibility JavaVersion.VERSION_1_8
     }
+    
+    // 4) JUnit 5 will bundle in files with identical paths; exclude them
+    packagingOptions {
+      exclude "META-INF/LICENSE.md"
+      exclude "META-INF/LICENSE-notice.md"
+    }
   }
 
   dependencies {
-    // (Required) Writing tests for JUnit Jupiter
+    // 5) Jupiter API & Platform runner
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.4.0"
-    // (Required) The instrumentation test companion library
-    androidTestImplementation "de.mannodermaus.junit5:android-instrumentation-test:0.2.2"
-
-    // (Required) Runtime dependencies to orchestrate the execution on-device
     androidTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
     androidTestRuntimeOnly "org.junit.platform:junit-platform-runner:1.4.0"
+    
+    // 6) The instrumentation test companion libraries
+    androidTestImplementation "de.mannodermaus.junit5:android-instrumentation-test:0.2.2"
     androidTestRuntimeOnly "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2"
   }
   ```
@@ -141,26 +147,32 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
   ```groovy
   android {
     defaultConfig {
-      // (Required) Make sure to use the AndroidJUnitRunner, of a subclass of it
-      testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
-      // (Required) Connect JUnit 5 to the runner
+      // 1) Make sure to use the AndroidJUnitRunner, of a subclass of it
+      testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+      // 2) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
     }
 
+    // 3) Java 8 is required
     compileOptions {
       setSourceCompatibility(JavaVersion.VERSION_1_8)
       setTargetCompatibility(JavaVersion.VERSION_1_8)
     }
+    
+    // 4) JUnit 5 will bundle in files with identical paths; exclude them
+    packagingOptions {
+      exclude("META-INF/LICENSE.md")
+      exclude("META-INF/LICENSE-notice.md")
+    }
   }
   dependencies {
-    // (Required) Writing tests for JUnit Jupiter
+    // 5) Jupiter API & Platform runner
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.4.0")
-    // (Required) The instrumentation test companion library
-    androidTestImplementation("de.mannodermaus.junit5:android-instrumentation-test:0.2.2")
-
-    // (Required) Runtime dependencies to orchestrate the execution on-device
     androidTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.0")
     androidTestRuntimeOnly("org.junit.platform:junit-platform-runner:1.4.0")
+
+    // 6) The instrumentation test companion libraries
+    androidTestImplementation("de.mannodermaus.junit5:android-instrumentation-test:0.2.2")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2")
   }
   ```
