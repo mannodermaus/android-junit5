@@ -178,9 +178,19 @@ To start writing instrumentation tests with JUnit Jupiter, add the following to 
   ```
 </details>
 
+The instrumentation test library also provides a replacement for `ActivityTestRule`; more information on that can be found in the wiki.
+
 # Migration from 1.0.x
 
 Since the move to utilize the native JUnit 5 support built into the build system, a lot has changed from the previous version of the plugin. Users seeking to migrate to the new version are encouraged to check out the migration guide located [on the wiki][wiki-migration].
+
+# Official Support
+
+Currently, Google hasn't shared any immediate plans to bring first-party support for JUnit 5 to Android. The following list is an aggregation of pending feature requests:
+
+- [InstantTaskExecutorRule uses @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) -- why? (issuetracker.google.com)](https://issuetracker.google.com/u/0/issues/79189568)
+- [Add support for JUnit 5 (issuetracker.google.com)](https://issuetracker.google.com/issues/127100532)
+- [JUnit 5 support (github.com/android/android-test)](https://github.com/android/android-test/issues/224)
 
 ## License
 
