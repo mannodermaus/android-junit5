@@ -1,9 +1,9 @@
 *.iml
 .gradle
 local.properties
-.idea/*
-!.idea/runConfigurations
-!.idea/codeStyleSettings.xml
+*/.idea/*
+!*/.idea/runConfigurations
+!*/.idea/codeStyleSettings.xml
 .DS_Store
 build/
 out/

@@ -120,10 +120,10 @@ dependencies {
   functionalTestAgp32X("com.android.tools.build:gradle:3.2.1")
 
   val functionalTestAgp33X by configurations
-  functionalTestAgp33X("com.android.tools.build:gradle:3.3.0-rc03")
+  functionalTestAgp33X("com.android.tools.build:gradle:3.3.2")
 
   val functionalTestAgp34X by configurations
-  functionalTestAgp34X("com.android.tools.build:gradle:3.4.0-alpha09")
+  functionalTestAgp34X("com.android.tools.build:gradle:3.4.0-rc02")
 }
 
 // Resource Writers
