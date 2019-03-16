@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 
 /**
  * Created by Marcel Schnelle on 2018/06/28.
- * Copyright © 2018 TenTen Technologies Limited. All rights reserved.
  */
 class IncludeExcludeContainerTests {
 

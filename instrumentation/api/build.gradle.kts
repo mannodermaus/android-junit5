@@ -22,7 +22,7 @@ android {
     multiDexEnabled = true
 
     // Usually, this is automatically applied through the Gradle Plugin
-    testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArgument("runnerBuilder",
         "de.mannodermaus.junit5.AndroidJUnit5Builder")
   }
@@ -75,7 +75,7 @@ configurations {
 
 dependencies {
   implementation(Libs.kotlin_stdlib)
-  implementation(Libs.com_android_support_test_runner)
+  implementation(Libs.androidx_test_runner)
   implementation(Libs.junit_jupiter_api)
 
   // This is required by the "instrumentation-runner" companion library,

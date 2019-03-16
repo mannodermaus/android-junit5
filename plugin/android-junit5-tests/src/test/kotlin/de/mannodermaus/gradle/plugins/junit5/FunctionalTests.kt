@@ -21,7 +21,6 @@ import java.nio.file.Paths
 
 /**
  * Created by Marcel Schnelle on 2018/06/19.
- * Copyright © 2018 TenTen Technologies Limited. All rights reserved.
  */
 
 // Data holder for an invocation of a functional test.

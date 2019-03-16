@@ -7,9 +7,9 @@ import kotlin.String
  *
  * YOU are responsible for updating manually the dependency version. */
 object Versions {
-    const val espresso_core: String = "3.0.1" // available: "3.0.2"
+    const val espresso_core: String = "3.1.1"
 
-    const val com_android_support_test_runner: String = "1.0.2" 
+    const val androidx_test_runner: String = "1.1.1"
 
     const val aapt2: String = "3.2.1-4818971" 
 

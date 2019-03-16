@@ -1,10 +1,10 @@
 package de.mannodermaus.junit5.test
 
 import android.content.Intent
-import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.assertion.ViewAssertions.matches
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import de.mannodermaus.junit5.ActivityAlreadyLaunchedException
 import de.mannodermaus.junit5.ActivityNotLaunchedException
 import de.mannodermaus.junit5.ActivityTest

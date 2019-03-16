@@ -8,13 +8,13 @@ import kotlin.String
 object Libs {
     /**
      * https://developer.android.com/testing */
-    const val espresso_core: String = "com.android.support.test.espresso:espresso-core:" +
+    const val espresso_core: String = "androidx.test.espresso:espresso-core:" +
             Versions.espresso_core
 
     /**
      * https://developer.android.com/testing */
-    const val com_android_support_test_runner: String = "com.android.support.test:runner:" +
-            Versions.com_android_support_test_runner
+    const val androidx_test_runner: String = "androidx.test:runner:" +
+            Versions.androidx_test_runner
 
     /**
      * https://developer.android.com/studio */

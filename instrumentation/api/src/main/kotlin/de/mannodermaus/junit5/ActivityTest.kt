@@ -5,17 +5,12 @@ import android.app.Instrumentation
 import android.app.Instrumentation.ActivityResult
 import android.content.Intent
 import android.os.Bundle
-import android.support.annotation.VisibleForTesting
-import android.support.test.InstrumentationRegistry
-import android.support.test.runner.MonitoringInstrumentation
 import android.util.Log
+import androidx.annotation.VisibleForTesting
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.MonitoringInstrumentation
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.AfterTestExecutionCallback
-import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
-import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.ParameterContext
-import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.extension.*
 import org.junit.platform.commons.support.AnnotationSupport
 import java.lang.reflect.Parameter
 import java.lang.reflect.ParameterizedType
@@ -181,7 +176,8 @@ internal class TestedImpl<out T : Activity>(
   // Used to override the default Instrumentation, obtained from the registry
   // (primary application: Unit Testing)
   private var _instrumentation: Instrumentation? = null
-  private val instrumentation get() = _instrumentation ?: InstrumentationRegistry.getInstrumentation()
+  private val instrumentation
+    get() = _instrumentation ?: InstrumentationRegistry.getInstrumentation()
 
   private var _activity: T? = null
   override val activity get() = _activity
@@ -200,7 +196,7 @@ internal class TestedImpl<out T : Activity>(
     if (startIntent.component == null) {
       // Fall back to the default Target Context's package name if none is set
       val targetPackage = if (this.targetPackage == ABSENT_TARGET_PACKAGE) {
-        InstrumentationRegistry.getTargetContext().packageName
+        InstrumentationRegistry.getInstrumentation().targetContext.packageName
       } else {
         this.targetPackage
       }
@@ -285,12 +281,12 @@ internal class TestedImpl<out T : Activity>(
     val type = parameterTypes[index]
 
     return when (type) {
-    // Possibly a developer error; throw a descriptive exception
+      // Possibly a developer error; throw a descriptive exception
       is ParameterType.InvalidTestedWrapper -> throw UnexpectedActivityException(
           expected = this.activityClass,
           actual = type.actual)
 
-    // Otherwise, communicate only valid parameter types
+      // Otherwise, communicate only valid parameter types
       else -> type.valid
     }
   }
@@ -366,22 +362,22 @@ internal class ActivityTestExtension : BeforeTestExecutionCallback, ParameterRes
   /* ParameterResolver */
 
   override fun supportsParameter(parameterContext: ParameterContext,
-      extensionContext: ExtensionContext): Boolean {
+                                 extensionContext: ExtensionContext): Boolean {
     return delegate.validateParameterAt(parameterContext.index)
   }
 
   override fun resolveParameter(parameterContext: ParameterContext,
-      extensionContext: ExtensionContext): Any? {
+                                extensionContext: ExtensionContext): Any? {
     val parameterType = delegate.parameterTypeAt(parameterContext.index)
 
     return when (parameterType) {
-    // val parameter: Activity
+      // val parameter: Activity
       ParameterType.Activity -> delegate.activity
 
-    // val parameter: Tested<Activity>
+      // val parameter: Tested<Activity>
       ParameterType.ValidTestedWrapper -> delegate
 
-    // Otherwise, library error (supportsParameter() should filter it)
+      // Otherwise, library error (supportsParameter() should filter it)
       else -> throw IllegalArgumentException(
           "Unexpected ParameterType resolution requested for '$parameterType'")
     }
