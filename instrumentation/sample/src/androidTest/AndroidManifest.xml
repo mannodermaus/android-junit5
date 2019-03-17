@@ -1,0 +1,5 @@
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="de.mannodermaus.junit5.test">
+
+    <uses-sdk tools:overrideLibrary="de.mannodermaus.junit5" />
+</manifest>

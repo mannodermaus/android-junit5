@@ -101,7 +101,7 @@ dependencies {
   compileOnly(Libs.junit_jupiter_params)
   compileOnly(Libs.junit_platform_runner)
 
-  testImplementation(Libs.assertj_core)
+  testImplementation(Libs.truth)
   testImplementation(Libs.mockito_core)
   testImplementation(Libs.junit_jupiter_api)
   testImplementation(Libs.junit_jupiter_params)
