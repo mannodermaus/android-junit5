@@ -56,9 +56,9 @@ object Versions {
 
     const val junit_pioneer: String = "0.2.2" // available: "0.3.0"
 
-    const val org_junit_jupiter: String = "5.5.0-SNAPSHOT"
+    const val org_junit_jupiter: String = "5.4.0"
 
-    const val org_junit_platform: String = "1.5.0-SNAPSHOT"
+    const val org_junit_platform: String = "1.4.0"
 
     const val junit_vintage_engine: String = "5.4.0"
 

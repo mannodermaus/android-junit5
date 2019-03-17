@@ -11,6 +11,8 @@ const val LOG_TAG = "AndroidJUnit5"
 private val jupiterTestAnnotations = listOf(
         "org.junit.jupiter.api.Test",
         "org.junit.jupiter.api.TestFactory",
+        "org.junit.jupiter.api.RepeatedTest",
+        "org.junit.jupiter.api.TestTemplate",
         "org.junit.jupiter.params.ParameterizedTest")
 
 fun Class<*>.jupiterTestMethods(): List<Method> {
