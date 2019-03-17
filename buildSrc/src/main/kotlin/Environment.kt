@@ -5,6 +5,7 @@ object Android {
 
   const val targetSdkVersion = 28
   const val sampleMinSdkVersion = 14
-  val runnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Platform.Android).minSdk
+  val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Platform.Android).minSdk
+  val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Platform.Android).minSdk
   val instrumentationMinSdkVersion = (Artifacts.Instrumentation.Library.platform as Platform.Android).minSdk
 }

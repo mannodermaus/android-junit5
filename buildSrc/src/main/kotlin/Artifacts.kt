@@ -46,13 +46,23 @@ object Artifacts {
    */
   object Instrumentation {
     private val groupId = "de.mannodermaus.junit5"
-    private val currentVersion = "0.3.0-SNAPSHOT"
+    private val currentVersion = "1.0.0-SNAPSHOT"
     val latestStableVersion = "0.2.2"
 
     val Library = Deployed(
         platform = Android(minSdk = 26),
         groupId = groupId,
         artifactId = "android-instrumentation-test",
+        currentVersion = "0.3.0-SNAPSHOT",
+        latestStableVersion = "0.2.2",
+        license = license,
+        description = "(DEPRECATED) Extensions for instrumented Android tests with JUnit 5."
+    )
+
+    val Core = Deployed(
+        platform = Android(minSdk = 14),
+        groupId = groupId,
+        artifactId = "android-test-core",
         currentVersion = currentVersion,
         latestStableVersion = latestStableVersion,
         license = license,

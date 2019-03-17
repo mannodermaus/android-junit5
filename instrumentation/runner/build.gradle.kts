@@ -32,10 +32,8 @@ android {
   }
 
   defaultConfig {
-    minSdkVersion(Android.runnerMinSdkVersion)
+    minSdkVersion(Android.testRunnerMinSdkVersion)
     targetSdkVersion(Android.targetSdkVersion)
-    versionCode = 1
-    versionName = "1.0"
   }
 
   sourceSets {
