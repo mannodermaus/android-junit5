@@ -30,10 +30,10 @@ jobs:
           command: cd instrumentation && ./gradlew androidDependencies --no-daemon
       - run:
           name: (Instrumentation) Build
-          command: cd instrumentation && ./gradlew :api:assemble :runner:assemble --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew :api:assemble :core:assemble :runner:assemble --stacktrace --no-daemon
       - run:
           name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :api:check :runner:check --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew :api:check :core:check :runner:check --stacktrace --no-daemon
 
       - save_cache:
           <<: *cache_key
@@ -50,6 +50,9 @@ jobs:
       - store_artifacts:
           path: instrumentation/api/build/reports
           destination: instrumentation-api
+      - store_artifacts:
+          path: instrumentation/core/build/reports
+          destination: instrumentation-core
       - store_artifacts:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
@@ -88,7 +91,7 @@ jobs:
 #          <<: *cache_key
 #      - run:
 #          name: (Instrumentation) Deploy
-#          command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
+#          command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :core:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
 
 workflows:
   version: 2
