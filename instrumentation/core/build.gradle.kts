@@ -80,41 +80,21 @@ tasks.withType<Test> {
   }
 }
 
-val commonTestImplementation = configurations.create("commonTestImplementation")
-configurations {
-  getByName("androidTestImplementation").extendsFrom(commonTestImplementation)
-  getByName("testImplementation").extendsFrom(commonTestImplementation)
-}
-
 dependencies {
-  api(Libs.junit_jupiter_api)
-
+  implementation(Libs.junit_jupiter_api)
   implementation(Libs.kotlin_stdlib)
   implementation(Libs.androidx_test_core)
-  implementation(Libs.androidx_test_runner)
 
   // This is required by the "instrumentation-runner" companion library,
   // since it can't provide any JUnit 5 runtime libraries itself
   // due to fear of prematurely incrementing the minSdkVersion requirement.
   runtimeOnly(Libs.junit_platform_runner)
 
-  commonTestImplementation(Libs.truth)
-  commonTestImplementation(Libs.mockito_core)
-  commonTestImplementation(Libs.junit_jupiter_api)
-  commonTestImplementation(Libs.junit_jupiter_engine)
-
-  androidTestImplementation(Libs.truth_android)
+  androidTestImplementation(Libs.junit_jupiter_api)
   androidTestImplementation(Libs.espresso_core)
 
   androidTestRuntimeOnly(project(":runner"))
-
-  // Obviously, these dependencies should be mostly "runtimeOnly",
-  // but we have to override bundled APIs from the IDE as much as possible for Android Studio.
-  testImplementation(Libs.junit_platform_engine)
-  testImplementation(Libs.junit_platform_launcher)
-  testImplementation(Libs.junit_jupiter_api)
-  testImplementation(Libs.junit_jupiter_engine)
-  testImplementation(Libs.junit_vintage_engine)
+  androidTestRuntimeOnly(Libs.junit_jupiter_engine)
 }
 
 // ------------------------------------------------------------------------------------------------
