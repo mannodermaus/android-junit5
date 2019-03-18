@@ -75,7 +75,6 @@ jobs:
               --test instrumentation/core/build/outputs/apk/androidTest/debug/android-test-core-debug-androidTest.apk \
               --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
               --test-runner-class androidx.test.runner.AndroidJUnitRunner \
-              --device model=Nexus6,version=21,locale=en_US,orientation=portrait \
               --device model=sailfish,version=28,locale=en_US,orientation=portrait \
               --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
               --timeout 15m
