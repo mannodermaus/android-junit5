@@ -13,8 +13,13 @@ object Libs {
 
     /**
      * https://developer.android.com/testing */
+    const val androidx_test_core: String = "androidx.test:core:" +
+        Versions.androidx_test_core
+
+    /**
+     * https://developer.android.com/testing */
     const val androidx_test_runner: String = "androidx.test:runner:" +
-            Versions.androidx_test_runner
+        Versions.androidx_test_runner
 
     /**
      * https://developer.android.com/studio */

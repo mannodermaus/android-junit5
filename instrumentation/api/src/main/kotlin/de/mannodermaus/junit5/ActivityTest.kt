@@ -21,6 +21,13 @@ import kotlin.reflect.KClass
 
 /* Constants */
 
+private const val DEPRECATION_MESSAGE = """
+  Please consider moving to "de.mannodermaus.junit5:test-core" instead,
+  which provides a new API to connect JUnit 5 tests to Android,
+  based on AndroidX's ActivityScenario.
+  More info can be found on the android-junit5 repository at https://github.com/mannodermaus/android-junit5.
+"""
+
 private const val ABSENT_TARGET_PACKAGE = "-"
 private const val NO_FLAGS_SET = 0
 private const val DEFAULT_LAUNCH_ACTIVITY = true
@@ -51,6 +58,7 @@ private const val LOG_TAG = "ActivityTest"
  * @param launchFlags [Intent] flags to start the Activity under test with
  * @param launchActivity Whether or not to automatically launch the Activity before the test execution
  */
+@Deprecated(message = DEPRECATION_MESSAGE)
 @Retention(RUNTIME)
 @Target(CLASS, FUNCTION)
 @ExtendWith(ActivityTestExtension::class)
@@ -69,6 +77,7 @@ annotation class ActivityTest(
  * To obtain an instance, add a parameter of type [Tested] to your test method
  * and assign it the generic type of the Activity described in the scope's [ActivityTest].
  */
+@Deprecated(message = DEPRECATION_MESSAGE)
 interface Tested<out T : Activity> {
 
   /**

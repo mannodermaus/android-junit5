@@ -11,9 +11,17 @@ import org.junit.runners.model.RunnerBuilder
  * the default JUnit 4-based Runner for Android instrumented tests is,
  * in a way, tricked into detecting JUnit Jupiter tests as well.
  *
- * Applying the android-junit5 Gradle Plugin will hook this RunnerBuilder
- * into the instrumentation runner's lifecycle through a custom
- * "testInstrumentationRunnerArgument".
+ * The RunnerBuilder is added to the instrumentation runner
+ * through a custom "testInstrumentationRunnerArgument" in the build.gradle script:
+ *
+ * <pre>
+ *   android {
+ *     defaultConfig {
+ *       testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+ *       testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
+ *     }
+ *   }
+ * </pre>
  *
  * (Suppressing unused, since this is hooked into the
  * project configuration via a Test Instrumentation Runner Argument.)

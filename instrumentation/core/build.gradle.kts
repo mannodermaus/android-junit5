@@ -32,8 +32,12 @@ android {
   }
 
   defaultConfig {
-    minSdkVersion(Android.testRunnerMinSdkVersion)
+    minSdkVersion(Android.testCoreMinSdkVersion)
     targetSdkVersion(Android.targetSdkVersion)
+    multiDexEnabled = true
+
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
   }
 
   sourceSets {
@@ -76,36 +80,21 @@ tasks.withType<Test> {
   }
 }
 
-configurations.all {
-  // The Instrumentation Test Runner uses the plugin,
-  // which in turn provides the Instrumentation Test Runner again -
-  // that's kind of deep.
-  // To avoid conflicts, prefer using the local classes
-  // and exclude the dependency from being pulled in externally.
-  exclude(module = Artifacts.Instrumentation.Runner.artifactId)
-}
-
 dependencies {
+  implementation(Libs.junit_jupiter_api)
   implementation(Libs.kotlin_stdlib)
-  implementation(Libs.kotlin_reflect)
-  implementation(Libs.junit)
+  implementation(Libs.androidx_test_core)
 
-  // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
-  // since that would prematurely raise the minSdkVersion requirement for target applications,
-  // even though not all product flavors might want to use JUnit 5.
-  // Therefore, only compile against those APIs, and have them provided at runtime
-  // by the "instrumentation" companion library instead.
-  compileOnly(Libs.junit_jupiter_api)
-  compileOnly(Libs.junit_jupiter_params)
-  compileOnly(Libs.junit_platform_runner)
+  // This is required by the "instrumentation-runner" companion library,
+  // since it can't provide any JUnit 5 runtime libraries itself
+  // due to fear of prematurely incrementing the minSdkVersion requirement.
+  runtimeOnly(Libs.junit_platform_runner)
 
-  testImplementation(Libs.truth)
-  testImplementation(Libs.mockito_core)
-  testImplementation(Libs.junit_jupiter_api)
-  testImplementation(Libs.junit_jupiter_params)
-  testImplementation(Libs.junit_platform_runner)
+  androidTestImplementation(Libs.junit_jupiter_api)
+  androidTestImplementation(Libs.espresso_core)
 
-  testRuntimeOnly(Libs.junit_jupiter_engine)
+  androidTestRuntimeOnly(project(":runner"))
+  androidTestRuntimeOnly(Libs.junit_jupiter_engine)
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -115,5 +104,5 @@ dependencies {
 // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
 // ------------------------------------------------------------------------------------------------
 
-val deployConfig by extra<Deployed> { Artifacts.Instrumentation.Runner }
+val deployConfig by extra<Deployed> { Artifacts.Instrumentation.Core }
 apply(from = "$rootDir/gradle/deployment.gradle")

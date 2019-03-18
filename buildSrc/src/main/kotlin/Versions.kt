@@ -9,6 +9,8 @@ import kotlin.String
 object Versions {
     const val espresso_core: String = "3.1.1"
 
+    const val androidx_test_core: String = "1.1.0"
+
     const val androidx_test_runner: String = "1.1.1"
 
     const val aapt2: String = "3.2.1-4818971" 
