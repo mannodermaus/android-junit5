@@ -17,12 +17,15 @@ class JavaInstrumentationTests {
   @Test
   void testUsingGetScenario() {
     ActivityScenario<TestActivity> scenario = scenarioExtension.getScenario();
-
-    scenario.onActivity(it -> onView(withText("TestActivity")).check(matches(isDisplayed())));
+    onView(withText("TestActivity")).check(matches(isDisplayed()));
+    scenario.onActivity(it -> it.changeText("New Text"));
+    onView(withText("New Text")).check(matches(isDisplayed()));
   }
 
   @Test
   void testUsingMethodParameter(ActivityScenario<TestActivity> scenario) {
-    scenario.onActivity(it -> onView(withText("TestActivity")).check(matches(isDisplayed())));
+    onView(withText("TestActivity")).check(matches(isDisplayed()));
+    scenario.onActivity(it -> it.changeText("New Text"));
+    onView(withText("New Text")).check(matches(isDisplayed()));
   }
 }

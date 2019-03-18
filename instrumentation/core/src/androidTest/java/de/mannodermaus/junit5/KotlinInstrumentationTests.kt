@@ -17,12 +17,15 @@ class KotlinInstrumentationTests {
   @Test
   fun testUsingGetScenario() {
     val scenario = scenarioExtension.scenario
-
-    scenario.onActivity { onView(withText("TestActivity")).check(matches(isDisplayed())) }
+    onView(withText("TestActivity")).check(matches(isDisplayed()))
+    scenario.onActivity { it.changeText("New Text") }
+    onView(withText("New Text")).check(matches(isDisplayed()))
   }
 
   @Test
   fun testUsingMethodParameter(scenario: ActivityScenario<TestActivity>) {
-    scenario.onActivity { onView(withText("TestActivity")).check(matches(isDisplayed())) }
+    onView(withText("TestActivity")).check(matches(isDisplayed()))
+    scenario.onActivity { it.changeText("New Text") }
+    onView(withText("New Text")).check(matches(isDisplayed()))
   }
 }
