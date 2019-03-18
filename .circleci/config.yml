@@ -11,7 +11,7 @@ cache_key: &cache_key
 
 version: 2
 jobs:
-  build:
+  build_plugin:
     <<: *defaults
     steps:
       - checkout
@@ -25,21 +25,6 @@ jobs:
           name: (Plugin) Test
           command: cd plugin && ./gradlew :android-junit5-tests:check --stacktrace --no-daemon
       
-      - run:
-          name: (Instrumentation) Download Dependencies
-          command: cd instrumentation && ./gradlew androidDependencies --no-daemon
-      - run:
-          name: (Instrumentation) Build
-          command: cd instrumentation && ./gradlew :api:assemble :core:assemble :runner:assemble --stacktrace --no-daemon
-      - run:
-          name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :api:check :core:check :runner:check --stacktrace --no-daemon
-
-      - save_cache:
-          <<: *cache_key
-          paths:
-            - ~/.gradle/caches
-            - ~/.gradle/wrapper
       - persist_to_workspace:
           root: ~/root
           paths:
@@ -47,6 +32,63 @@ jobs:
       - store_artifacts:
           path: plugin/android-junit5-tests/build/reports/tests/test
           destination: plugin
+
+  build_instrumentation:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: (Instrumentation) Download Dependencies
+          command: cd instrumentation && ./gradlew androidDependencies --no-daemon
+      - save_cache:
+          <<: *cache_key
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+      - run:
+          name: (Instrumentation) Build
+          command: |
+            cd instrumentation
+            ./gradlew :api:assembleDebug \
+            :core:assembleDebug :core:assembleDebugAndroidTest \
+            :runner:assembleDebug \
+            :sample:assembleDebug --stacktrace --no-daemon
+      - run:
+          name: (Instrumentation) Test
+          command: cd instrumentation && ./gradlew :api:check :core:check :runner:check --stacktrace --no-daemon
+      - run:
+          name: Store Google Service Account
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Authorize gcloud and set config defaults
+          command: |
+            sudo gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            sudo gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+      - run:
+          name: Test with Firebase Test Lab
+          command: >
+            sudo gcloud firebase test android run \
+              --type instrumentation \
+              --app instrumentation/sample/build/outputs/apk/debug/sample-debug.apk \
+              --test instrumentation/core/build/outputs/apk/androidTest/debug/android-test-core-debug-androidTest.apk \
+              --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
+              --test-runner-class androidx.test.runner.AndroidJUnitRunner \
+              --device model=Nexus6,version=21,locale=en_US,orientation=portrait \
+              --device model=sailfish,version=28,locale=en_US,orientation=portrait \
+              --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
+              --timeout 15m
+      - run:
+          name: Install gsutil dependency and copy test results data
+          command: |
+            sudo pip install -U crcmod
+            sudo gsutil -m cp -r -U `sudo gsutil ls gs://android-junit5-instrumentation/ | tail -1` ${CIRCLE_ARTIFACTS}/ | true
+
+      - persist_to_workspace:
+          root: ~/root
+          paths:
+            - project
       - store_artifacts:
           path: instrumentation/api/build/reports
           destination: instrumentation-api
@@ -57,7 +99,7 @@ jobs:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
 
-  deploy_snapshots:
+  deploy_plugin_snapshots:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -67,6 +109,14 @@ jobs:
       - run:
           name: (Plugin) Deploy SNAPSHOTs
           command: cd plugin && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
+
+  deploy_instrumentation_snapshots:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/root
+      - restore_cache:
+          <<: *cache_key
       - run:
           name: (Instrumentation) Deploy SNAPSHOTs
           command: cd instrumentation && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
@@ -98,16 +148,23 @@ workflows:
 
   build_deploy:
     jobs:
-      - build
-      - deploy_snapshots:
+      - build_plugin
+      - build_instrumentation
+      - deploy_plugin_snapshots:
           requires:
-            - build
+            - build_plugin
+          filters:
+            branches:
+              only: master
+      - deploy_instrumentation_snapshots:
+          requires:
+            - build_instrumentation
           filters:
             branches:
               only: master
       - deploy_plugin_release:
           requires:
-            - build
+            - build_plugin
           filters:
             branches:
               only: master
@@ -115,7 +172,7 @@ workflows:
               only: plugin-*
       - deploy_instrumentation_release:
           requires:
-            - build
+            - build_instrumentation
           filters:
             branches:
               only: master
