@@ -2,7 +2,7 @@
 defaults: &defaults
   working_directory: ~/root/project
   docker:
-    - image: circleci/android:api-28-alpha
+    - image: circleci/android:api-28
       environment:
         GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"'
 
@@ -82,16 +82,16 @@ jobs:
           name: (Plugin) Deploy
           command: cd plugin && ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
 
-#  deploy_instrumentation_release:
-#    <<: *defaults
-#    steps:
-#      - attach_workspace:
-#          at: ~/root
-#      - restore_cache:
-#          <<: *cache_key
-#      - run:
-#          name: (Instrumentation) Deploy
-#          command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :core:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
+  deploy_instrumentation_release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/root
+      - restore_cache:
+          <<: *cache_key
+      - run:
+          name: (Instrumentation) Deploy
+          command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :core:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
 
 workflows:
   version: 2
@@ -113,11 +113,11 @@ workflows:
               only: master
             tags:
               only: plugin-*
-#      - deploy_instrumentation_release:
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              only: master
-#            tags:
-#              only: instrumentation-*
+      - deploy_instrumentation_release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: instrumentation-*
