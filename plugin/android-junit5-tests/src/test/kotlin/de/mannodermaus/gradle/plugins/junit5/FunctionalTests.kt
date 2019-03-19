@@ -12,8 +12,7 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junitpioneer.jupiter.TempDirectory
-import org.junitpioneer.jupiter.TempDirectory.TempDir
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -28,7 +27,6 @@ import java.nio.file.Paths
 data class FunctionalTest(val name: String, val config: String, val gradleVersion: String)
 
 @OnlyOnLocalMachine
-@ExtendWith(TempDirectory::class)
 class FunctionalTests {
 
   companion object {
@@ -39,7 +37,7 @@ class FunctionalTests {
 
         FunctionalTest(name = "3.3.x", config = "functionalTestAgp33X", gradleVersion = "5.0"),
 
-        FunctionalTest(name = "3.4.x", config = "functionalTestAgp34X", gradleVersion = "5.1-milestone-1")
+        FunctionalTest(name = "3.4.x", config = "functionalTestAgp34X", gradleVersion = "5.2.1")
     )
     private val SUPPORTED_LANGUAGES = FileLanguage2.values().toList()
 
@@ -48,6 +46,7 @@ class FunctionalTests {
 
   private lateinit var testProjectDir: File
   private lateinit var buildFile: File
+  // Main classpath for plugins
   private lateinit var pluginFiles: List<File>
 
   // Classpath of the main "functionalTest" configuration
@@ -94,6 +93,7 @@ class FunctionalTests {
       buildscript {
         dependencies {
           classpath files(${pluginFiles.splitClasspath()})
+          classpath files(${functionalTestSpecialFiles.splitClasspath()})
         }
       }
       """)

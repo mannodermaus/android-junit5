@@ -16,7 +16,7 @@ import java.io.File
 open class WriteClasspathResource : DefaultTask() {
 
   @InputFiles
-  lateinit var inputFiles: FileCollection
+  lateinit var inputFiles: Iterable<File>
   @OutputDirectory
   lateinit var outputDir: File
   lateinit var resourceFileName: String
