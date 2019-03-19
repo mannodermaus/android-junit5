@@ -88,7 +88,6 @@ dependencies {
   testImplementation(project(":android-junit5"))
   testImplementation(gradleTestKit())
   testImplementation(Libs.kotlin_gradle_plugin)
-  testImplementation(Libs.com_android_tools_build_gradle)
   testImplementation(Libs.commons_io)
   testImplementation(Libs.commons_lang)
   testImplementation(Libs.junit)
@@ -98,6 +97,8 @@ dependencies {
   testImplementation(Libs.junit_pioneer)
   testImplementation(Libs.assertj_core)
   testImplementation(Libs.mockito_core)
+
+  testCompileOnly(Libs.com_android_tools_build_gradle)
 
   testRuntimeOnly(Libs.junit_jupiter_engine)
   testRuntimeOnly(Libs.junit_vintage_engine)
@@ -128,7 +129,25 @@ dependencies {
 
 // Resource Writers
 tasks.create("writePluginClasspath", WriteClasspathResource::class) {
-  inputFiles = sourceSets["test"].runtimeClasspath
+  // Exclude "current AGP" dependencies from being packages;
+  // those are added again explicitly, through the functionalTestAgpXXX configurations.
+  val targetVersions = listOf(
+      // Android Gradle Plugin itself
+      Versions.com_android_tools_build_gradle,
+      // Dependent artifacts in the Android space which use major version 26, for some reason
+      // (e.g. com.android.tools.analytics).
+      // TODO This will need updating when AGP 4 comes out at some point
+      Versions.com_android_tools_build_gradle.replaceFirst("3.", "26.")
+  )
+  val targetGroups = listOf(
+      "com.android",
+      "androidx"
+  )
+
+  inputFiles = sourceSets["test"].runtimeClasspath.filterNot { file ->
+    // If a dependency file matches any of the blacklisted artifacts, filter it out
+    targetVersions.any { it in file.absolutePath } && targetGroups.any { it in file.absolutePath }
+  }
   outputDir = File("$buildDir/resources/test")
   resourceFileName = "plugin-classpath.txt"
 }
