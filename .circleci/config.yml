@@ -82,7 +82,8 @@ jobs:
           name: Install gsutil dependency and copy test results data
           command: |
             sudo pip install -U crcmod
-            sudo gsutil -m cp -r -U `sudo gsutil ls gs://cloud-test-${GOOGLE_PROJECT_ID} | tail -1` ${CIRCLE_ARTIFACTS}/ | true
+            mkdir test-lab-results
+            sudo gsutil -m cp -r -U `sudo gsutil ls gs://cloud-test-${GOOGLE_PROJECT_ID} | tail -1` test-lab-results/ | true
 
       - persist_to_workspace:
           root: ~/root
@@ -94,6 +95,9 @@ jobs:
       - store_artifacts:
           path: instrumentation/core/build/reports
           destination: instrumentation-core
+      - store_artifacts:
+          path: test-lab-results
+          destination: instrumentation-core/test-lab-results
       - store_artifacts:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
