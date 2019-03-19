@@ -26,7 +26,7 @@ import java.nio.file.Paths
 // It encapsulates a Gradle/AGP combination used in each TestFactory located in this class.
 data class FunctionalTest(val name: String, val config: String, val gradleVersion: String)
 
-//@OnlyOnLocalMachine
+@OnlyOnLocalMachine
 class FunctionalTests {
 
   companion object {
