@@ -142,6 +142,13 @@ fun Logger.junit5Info(text: String) {
 }
 
 /**
+ * Log the provided warning message using the plugin's Log Tag.
+ */
+fun Logger.junit5Warn(text: String) {
+  warn("[android-junit5]: $text")
+}
+
+/**
  * Shorthand function to check for the existence of a plugin on a Project.
  */
 fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null

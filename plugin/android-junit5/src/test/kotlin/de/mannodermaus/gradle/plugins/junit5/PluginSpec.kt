@@ -13,6 +13,7 @@ import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.api.tasks.testing.Test
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
@@ -236,6 +237,18 @@ class PluginSpec : Spek({
 
               assertThat(classDirs).doesNotContain("classes/test")
             }
+          }
+        }
+
+        on("having a Jacoco task already") {
+          val project = testProjectBuilder.build()
+          project.tasks.create("jacocoTestReportDebug", JacocoReport::class.java)
+          project.evaluate()
+
+          it("doesn't cause a conflict") {
+            assertThat(project.tasks.findByName("jacocoTestReport")).isNotNull()
+            assertThat(project.tasks.findByName("jacocoTestReportDebug")).isInstanceOf(JacocoReport::class.java)
+            assertThat(project.tasks.findByName("jacocoTestReportRelease")).isInstanceOf(AndroidJUnit5JacocoReport::class.java)
           }
         }
 
