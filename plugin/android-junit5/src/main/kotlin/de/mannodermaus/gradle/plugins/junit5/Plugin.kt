@@ -2,11 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
-import de.mannodermaus.gradle.plugins.junit5.internal.android
-import de.mannodermaus.gradle.plugins.junit5.internal.createJUnit5ConfigurationFor
-import de.mannodermaus.gradle.plugins.junit5.internal.requireGradle
-import de.mannodermaus.gradle.plugins.junit5.internal.requireVersion
-import de.mannodermaus.gradle.plugins.junit5.internal.testTaskOf
+import de.mannodermaus.gradle.plugins.junit5.internal.*
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
@@ -94,7 +90,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         // Create a Jacoco friend task
         val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
         if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
-          AndroidJUnit5JacocoReport.create(this, variant, testTask, directoryProviders)
+          val jacocoTask = AndroidJUnit5JacocoReport.create(this, variant, testTask, directoryProviders)
+          if (jacocoTask == null) {
+            project.logger.junit5Warn("Jacoco task for variant '${variant.name}' already exists. Disabling customization for JUnit 5...")
+          }
         }
       }
     }

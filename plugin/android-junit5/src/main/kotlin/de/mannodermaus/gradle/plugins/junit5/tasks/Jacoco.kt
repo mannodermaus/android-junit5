@@ -11,6 +11,7 @@ import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -24,16 +25,21 @@ private const val GROUP_REPORTING = "reporting"
  * Required to be "open" in order for Groovy's proxy magic to do its thing.
  */
 @Suppress("MemberVisibilityCanPrivate")
+@CacheableTask
 open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
     fun create(project: Project,
                variant: BaseVariant,
                testTask: Test,
-               directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport {
+               directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport? {
       val configAction = ConfigAction(project, variant, testTask, directoryProviders)
-      return project.tasks.create(configAction.name, configAction.type) {
-        configAction.execute(it)
+      return if (project.tasks.findByName(configAction.name) == null) {
+        project.tasks.create(configAction.name, configAction.type) {
+          configAction.execute(it)
+        }
+      } else {
+        null
       }
     }
   }
