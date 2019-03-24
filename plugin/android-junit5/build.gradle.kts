@@ -70,6 +70,7 @@ tasks.named("processTestResources", Copy::class.java).configure {
       "AGP_32X" to Versions.com_android_tools_build_gradle_32x,
       "AGP_33X" to Versions.com_android_tools_build_gradle_33x,
       "AGP_34X" to Versions.com_android_tools_build_gradle_34x,
+      "AGP_35X" to Versions.com_android_tools_build_gradle_35x,
       "KOTLIN" to Versions.org_jetbrains_kotlin,
 
       "JUPITER_API" to Libs.junit_jupiter_api,
@@ -120,6 +121,12 @@ configurations {
         "tests source code in Gradle functional tests against AGP 3.4.X"
     extendsFrom(configurations.getByName("implementation"))
     resolutionStrategy.force(Libs.com_android_tools_build_gradle_34x)
+  }
+  create("testAgp35x") {
+    description = "Local dependencies used for compiling & running " +
+        "tests source code in Gradle functional tests against AGP 3.5.X"
+    extendsFrom(configurations.getByName("implementation"))
+    resolutionStrategy.force(Libs.com_android_tools_build_gradle_35x)
   }
 }
 
