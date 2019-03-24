@@ -201,33 +201,3 @@ fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
     new
   }
 }
-
-/**
- * Obtains a configuration using version-agnostic identifiers and an optional BaseVariant.
- * For instance, using ConfigurationKind.ANDROID_TEST and ConfigurationScope.RUNTIME_ONLY,
- * this would resolve the "androidTestApk" configuration on AGP 2,
- * and the "androidTestRuntimeOnly" configuration on AGP 3.
- */
-fun Set<Configuration>.find(
-    variant: BaseVariant? = null,
-    kind: ConfigurationKind = APP,
-    scope: ConfigurationScope): Configuration {
-  val stemName = if (variant != null) {
-    "${variant.name}${kind.value.capitalize()}"
-  } else {
-    kind.value
-  }
-
-  // Compose the configuration's name,
-  // attempting all candidates before failing
-  return scope.values
-      .map { scopeName ->
-        if (stemName.isEmpty()) {
-          scopeName
-        } else {
-          "$stemName${scopeName.capitalize()}"
-        }
-      }
-      .mapNotNull { configName -> this.firstOrNull { it.name == configName } }
-      .first()
-}
