@@ -7,7 +7,7 @@ defaults: &defaults
         GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"'
 
 cache_key: &cache_key
-  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/android-junit5-tests/build.gradle.kts" }}-{{ checksum "instrumentation/api/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Libs.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Versions.kt" }}
+  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "instrumentation/api/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Libs.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Versions.kt" }}
 
 version: 2
 jobs:
@@ -23,14 +23,14 @@ jobs:
           command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace --no-daemon
       - run:
           name: (Plugin) Test
-          command: cd plugin && ./gradlew :android-junit5-tests:check --stacktrace --no-daemon
+          command: cd plugin && ./gradlew :android-junit5:check --stacktrace --no-daemon
       
       - persist_to_workspace:
           root: ~/root
           paths:
             - project
       - store_artifacts:
-          path: plugin/android-junit5-tests/build/reports/tests/test
+          path: plugin/android-junit5/build/reports/tests/test
           destination: plugin
 
   build_instrumentation:
