@@ -1,0 +1,33 @@
+buildscript {
+  repositories {
+    google()
+    jcenter()
+  }
+}
+
+plugins {
+  id "com.android.application"
+  id "de.mannodermaus.android-junit5"
+}
+
+repositories {
+  google()
+  jcenter()
+}
+
+android {
+  compileSdkVersion COMPILE_SDK_VERSION
+  
+  testOptions.unitTests {
+    returnDefaultValues = true
+
+    all {
+      testLogging.events = ["passed", "skipped", "failed"]
+    }
+  }
+}
+
+dependencies {
+  testImplementation JUPITER_API
+  testRuntimeOnly JUPITER_ENGINE
+}
