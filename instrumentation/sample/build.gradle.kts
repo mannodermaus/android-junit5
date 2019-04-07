@@ -1,6 +1,6 @@
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 buildscript {
   repositories {
@@ -50,8 +50,13 @@ android {
   }
 
   compileOptions {
-    setSourceCompatibility(JavaVersion.VERSION_1_8)
-    setTargetCompatibility(JavaVersion.VERSION_1_8)
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+  }
+
+  kotlinOptions {
+    val options = this as KotlinJvmOptions
+    options.jvmTarget = JavaVersion.VERSION_1_8.toString()
   }
 
   testOptions {
@@ -63,12 +68,6 @@ android {
   packagingOptions {
     exclude("META-INF/LICENSE.md")
     exclude("META-INF/LICENSE-notice.md")
-  }
-}
-
-tasks.withType<KotlinCompile> {
-  kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_1_8.toString()
   }
 }
 
