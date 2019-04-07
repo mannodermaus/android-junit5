@@ -72,7 +72,7 @@ object Artifacts {
     val Runner = Deployed(
         platform = Android(minSdk = 14),
         groupId = groupId,
-        artifactId = "android-instrumentation-test-runner",
+        artifactId = "android-test-runner",
         currentVersion = currentVersion,
         latestStableVersion = latestStableVersion,
         license = license,
