@@ -81,14 +81,15 @@ tasks.withType<Test> {
 }
 
 dependencies {
-  implementation(Libs.junit_jupiter_api)
   implementation(Libs.kotlin_stdlib)
-  implementation(Libs.androidx_test_core)
+  implementation(Libs.junit_jupiter_api)
+  api(Libs.androidx_test_core)
 
   // This is required by the "instrumentation-runner" companion library,
   // since it can't provide any JUnit 5 runtime libraries itself
   // due to fear of prematurely incrementing the minSdkVersion requirement.
   runtimeOnly(Libs.junit_platform_runner)
+  runtimeOnly(Libs.junit_jupiter_engine)
 
   androidTestImplementation(Libs.junit_jupiter_api)
   androidTestImplementation(Libs.espresso_core)

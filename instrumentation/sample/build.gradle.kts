@@ -1,5 +1,6 @@
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
   repositories {
@@ -65,6 +66,12 @@ android {
   }
 }
 
+tasks.withType<KotlinCompile> {
+  kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_1_8.toString()
+  }
+}
+
 tasks.withType<Test> {
   testLogging.events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
 }
@@ -81,8 +88,8 @@ dependencies {
 
   // Android Instrumentation Tests wth JUnit 5
   androidTestImplementation(Libs.junit_jupiter_api)
-  androidTestRuntimeOnly(Libs.junit_jupiter_engine)
-  androidTestRuntimeOnly(Libs.junit_platform_runner)
-  androidTestImplementation(project(":api"))
+  androidTestImplementation(Libs.junit_jupiter_params)
+  androidTestImplementation(Libs.espresso_core)
+  androidTestImplementation(project(":core"))
   androidTestRuntimeOnly(project(":runner"))
 }
