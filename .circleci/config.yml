@@ -112,6 +112,9 @@ jobs:
       - run:
           name: (Plugin) Deploy SNAPSHOTs
           command: cd plugin && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
+      - store_artifacts:
+          path: plugin/android-junit5/build/publications
+          destination: plugin/publications/snapshots
 
   deploy_instrumentation_snapshots:
     <<: *defaults
@@ -123,6 +126,12 @@ jobs:
       - run:
           name: (Instrumentation) Deploy SNAPSHOTs
           command: cd instrumentation && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
+      - store_artifacts:
+          path: instrumentation/core/build/publications
+          destination: instrumentation-core/publications/snapshots
+      - store_artifacts:
+          path: instrumentation/runner/build/publications
+          destination: instrumentation-runner/publications/snapshots
 
   deploy_plugin_release:
     <<: *defaults
@@ -134,6 +143,9 @@ jobs:
       - run:
           name: (Plugin) Deploy
           command: cd plugin && ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
+      - store_artifacts:
+          path: plugin/android-junit5/build/publications
+          destination: plugin/publications/releases
 
   deploy_instrumentation_release:
     <<: *defaults
@@ -145,6 +157,12 @@ jobs:
       - run:
           name: (Instrumentation) Deploy
           command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :core:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
+      - store_artifacts:
+          path: instrumentation/core/build/publications
+          destination: instrumentation-core/publications/releases
+      - store_artifacts:
+          path: instrumentation/runner/build/publications
+          destination: instrumentation-runner/publications/releases
 
 workflows:
   version: 2
