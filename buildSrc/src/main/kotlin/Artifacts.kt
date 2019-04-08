@@ -46,7 +46,7 @@ object Artifacts {
    */
   object Instrumentation {
     private val groupId = "de.mannodermaus.junit5"
-    private val currentVersion = "1.0.0"
+    private val currentVersion = "1.0.1-SNAPSHOT"
     val latestStableVersion = "1.0.0"
 
     val Library = Deployed(
