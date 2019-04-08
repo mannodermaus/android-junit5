@@ -102,38 +102,7 @@ jobs:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
 
-  deploy_plugin_snapshots:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/root
-      - restore_cache:
-          <<: *cache_key
-      - run:
-          name: (Plugin) Deploy SNAPSHOTs
-          command: cd plugin && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
-      - store_artifacts:
-          path: plugin/android-junit5/build/publications
-          destination: plugin/publications/snapshots
-
-  deploy_instrumentation_snapshots:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/root
-      - restore_cache:
-          <<: *cache_key
-      - run:
-          name: (Instrumentation) Deploy SNAPSHOTs
-          command: cd instrumentation && ./gradlew publishLibraryPublicationToSnapshotRepository --stacktrace --no-daemon
-      - store_artifacts:
-          path: instrumentation/core/build/publications
-          destination: instrumentation-core/publications/snapshots
-      - store_artifacts:
-          path: instrumentation/runner/build/publications
-          destination: instrumentation-runner/publications/snapshots
-
-  deploy_plugin_release:
+  deploy_plugin:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -142,12 +111,12 @@ jobs:
           <<: *cache_key
       - run:
           name: (Plugin) Deploy
-          command: cd plugin && ./gradlew generatePomFileForLibraryPublication publish :android-junit5:bintrayUpload --stacktrace --no-daemon
+          command: cd plugin && ./gradlew deploy --stacktrace --no-daemon
       - store_artifacts:
           path: plugin/android-junit5/build/publications
-          destination: plugin/publications/releases
+          destination: plugin/publications/snapshots
 
-  deploy_instrumentation_release:
+  deploy_instrumentation:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -156,13 +125,13 @@ jobs:
           <<: *cache_key
       - run:
           name: (Instrumentation) Deploy
-          command: cd instrumentation && ./gradlew generatePomFileForLibraryPublication publish :api:bintrayUpload :core:bintrayUpload :runner:bintrayUpload --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew deploy --stacktrace --no-daemon
       - store_artifacts:
           path: instrumentation/core/build/publications
-          destination: instrumentation-core/publications/releases
+          destination: instrumentation-core/publications/snapshots
       - store_artifacts:
           path: instrumentation/runner/build/publications
-          destination: instrumentation-runner/publications/releases
+          destination: instrumentation-runner/publications/snapshots
 
 workflows:
   version: 2
@@ -171,31 +140,15 @@ workflows:
     jobs:
       - build_plugin
       - build_instrumentation
-      - deploy_plugin_snapshots:
+      - deploy_plugin:
           requires:
             - build_plugin
           filters:
             branches:
               only: master
-      - deploy_instrumentation_snapshots:
+      - deploy_instrumentation:
           requires:
             - build_instrumentation
           filters:
             branches:
               only: master
-      - deploy_plugin_release:
-          requires:
-            - build_plugin
-          filters:
-            branches:
-              only: master
-            tags:
-              only: plugin-*
-      - deploy_instrumentation_release:
-          requires:
-            - build_instrumentation
-          filters:
-            branches:
-              only: master
-            tags:
-              only: instrumentation-*

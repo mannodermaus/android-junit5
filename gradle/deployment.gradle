@@ -100,11 +100,13 @@ task copyPom(type: Copy) {
   include "pom-default.xml"
 }
 
-publish.dependsOn copyPom
-
 // ------------------------------------------------------------------------------------------------
 // Target Configuration
 // ------------------------------------------------------------------------------------------------
+
+// Unified task for snapshots & releases
+task deploy() {
+}
 
 project.configure(project) {
   if (project.version.endsWith("-SNAPSHOT")) {
@@ -122,6 +124,8 @@ project.configure(project) {
       }
     }
     project.tasks.getByName("bintrayUpload").enabled = false
+    publish.dependsOn copyPom
+    deploy.finalizedBy "publishLibraryPublicationToSnapshotRepository"
 
   } else {
     // Configure deployment of release versions to Bintray
@@ -152,5 +156,8 @@ project.configure(project) {
         }
       }
     }
+    // Very important! Otherwise, the POM will be overwritten & have missing dependencies
+    project.tasks.getByName("install").finalizedBy copyPom
+    deploy.finalizedBy "generatePomFileForLibraryPublication", "publish", "bintrayUpload"
   }
 }
