@@ -15,7 +15,7 @@ object Versions {
 
     const val aapt2: String = "3.2.1-4818971" 
 
-    const val com_android_tools_build_gradle: String = "3.4.0-rc03"
+    const val com_android_tools_build_gradle: String = "3.4.0"
     const val com_android_tools_build_gradle_32x: String = "3.2.1"
     const val com_android_tools_build_gradle_33x: String = "3.3.2"
     const val com_android_tools_build_gradle_34x: String = "3.4.0-rc03"
