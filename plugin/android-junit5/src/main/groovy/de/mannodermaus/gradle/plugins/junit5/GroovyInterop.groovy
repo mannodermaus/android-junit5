@@ -5,7 +5,7 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
-import com.annimon.stream.Optional
+import com.android.builder.core.VariantTypeImpl
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.testing.jacoco.tasks.JacocoReportBase
@@ -17,26 +17,8 @@ import org.gradle.testing.jacoco.tasks.JacocoReportBase
  * across all supported versions of the Android Gradle Plugin.*/
 class GroovyInterop {
 
-  //   Access to UNIT_TEST was moved from VariantType to VariantTypeImpl in AGP 3.2.0-alpha06
-  private static final def VariantType =
-      reflectiveClass("com.android.builder.core.VariantTypeImpl")
-          .or { reflectiveClass("com.android.builder.core.VariantType") }
-
   // No instances
   private GroovyInterop() { throw new AssertionError() }
-
-  /**
-   * Attempts to look up a Class based on its FQCN, returns an empty Optional if this fails
-   * @param fqcn Fully qualified class name
-   * @return The class, or an empty Optional
-   */
-  private static Optional<Class> reflectiveClass(String fqcn) {
-    try {
-      return Optional.of(Class.forName(fqcn))
-    } catch (ignored) {
-      return Optional.empty()
-    }
-  }
 
   /**
    * Obtains the VariantData of the provided Variant.
@@ -70,29 +52,23 @@ class GroovyInterop {
   /**
    * Obtains the task name prefix for Unit Test variants.
    *
-   * @because In Android Gradle Plugin 3.2.0-alpha06, the underlying constants on VariantType were renamed
-   * @return The unit test prefix
+   * @because Kotlin cannot see the VariantTypeImpl class
+   * @return The unit test task prefix
    */
   @NonNull
   static String variantType_unitTestPrefix() {
-    return VariantType
-        .map { it.getDeclaredField("UNIT_TEST").get(null) }
-        .map { it.prefix }
-        .orElseThrow { new IllegalArgumentException("can't get VariantType.UNIT_TEST.prefix") }
+    return VariantTypeImpl.UNIT_TEST.prefix
   }
 
   /**
    * Obtains the task name suffix for Unit Test variants.
    *
-   * @because In Android Gradle Plugin 3.2.0-alpha06, the underlying constants on VariantType were renamed
-   * @return The unit test prefix
+   * @because Kotlin cannot see the VariantTypeImpl class
+   * @return The unit test task prefix
    */
   @NonNull
   static String variantType_unitTestSuffix() {
-    return VariantType
-        .map { it.getDeclaredField("UNIT_TEST").get(null) }
-        .map { it.suffix }
-        .orElseThrow { new IllegalArgumentException("can't get VariantType.UNIT_TEST.suffix") }
+    return VariantTypeImpl.UNIT_TEST.suffix
   }
 
   /**
