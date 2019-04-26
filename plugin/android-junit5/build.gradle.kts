@@ -102,31 +102,34 @@ tasks.named("processTestResources", Copy::class.java).configure {
   }
 }
 
-// Add custom dependency configurations
+// Add custom dependency configurations for Functional Tests.
+// Different versions of the Android Gradle Plugin should be testable in the same project;
+// to do this, create a custom configuration for each version & assign the correct dependency to it.
+// At runtime, the functional tests will look up a file listing of all dependencies, making it the
+// plugin classpath for the respective test.
+data class AgpConfiguration(val version: String, val dependency: String) {
+  // Example: version = "3.2" --> configurationName = "testAgp32x"
+  val configurationName = "testAgp${version.replace(".", "")}x"
+}
+
+private val agpConfigurations = listOf(
+    AgpConfiguration("3.2", Libs.com_android_tools_build_gradle_32x),
+    AgpConfiguration("3.3", Libs.com_android_tools_build_gradle_33x),
+    AgpConfiguration("3.4", Libs.com_android_tools_build_gradle_34x),
+    AgpConfiguration("3.5", Libs.com_android_tools_build_gradle_35x)
+)
+
 configurations {
-  create("testAgp32x") {
-    description = "Local dependencies used for compiling & running " +
-        "tests source code in Gradle functional tests against AGP 3.2.X"
-    extendsFrom(configurations.getByName("implementation"))
-    resolutionStrategy.force(Libs.com_android_tools_build_gradle_32x)
-  }
-  create("testAgp33x") {
-    description = "Local dependencies used for compiling & running " +
-        "tests source code in Gradle functional tests against AGP 3.3.X"
-    extendsFrom(configurations.getByName("implementation"))
-    resolutionStrategy.force(Libs.com_android_tools_build_gradle_33x)
-  }
-  create("testAgp34x") {
-    description = "Local dependencies used for compiling & running " +
-        "tests source code in Gradle functional tests against AGP 3.4.X"
-    extendsFrom(configurations.getByName("implementation"))
-    resolutionStrategy.force(Libs.com_android_tools_build_gradle_34x)
-  }
-  create("testAgp35x") {
-    description = "Local dependencies used for compiling & running " +
-        "tests source code in Gradle functional tests against AGP 3.5.X"
-    extendsFrom(configurations.getByName("implementation"))
-    resolutionStrategy.force(Libs.com_android_tools_build_gradle_35x)
+  // Create a custom configuration for each version
+  agpConfigurations.forEach { agpConfig ->
+    create(agpConfig.configurationName) {
+      description = "Local dependencies used for compiling & running " +
+          "tests source code in Gradle functional tests against AGP ${agpConfig.version}"
+      extendsFrom(configurations.getByName("implementation"))
+      dependencies {
+        this@create(agpConfig.dependency)
+      }
+    }
   }
 }
 
@@ -179,8 +182,8 @@ tasks.withType<WriteClasspathResource> {
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
+  compileOnly(Libs.com_android_tools_build_gradle)
   implementation(gradleApi())
-  implementation(Libs.com_android_tools_build_gradle)
   implementation(Libs.kotlin_gradle_plugin)
   implementation(Libs.kotlin_stdlib_jdk8)
   implementation(Libs.java_semver)
@@ -188,6 +191,7 @@ dependencies {
   implementation(Libs.junit_platform_commons)
 
   testImplementation(gradleTestKit())
+  testImplementation(Libs.com_android_tools_build_gradle)
   testImplementation(Libs.commons_io)
   testImplementation(Libs.commons_lang)
   testImplementation(Libs.mockito_core)
