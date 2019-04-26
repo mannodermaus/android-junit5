@@ -333,38 +333,16 @@ class PluginSpec : Spek({
 
             // Create some fake files to verify the Jacoco tree
             beforeEachTest {
-              // Since the location of intermediate class files changed in different
-              // versions of the Android Gradle Plugin,
-              // create each class file in multiple directories to remain compatible with all approaches
-              // TODO Clean this mess up once the Android Gradle Plugin 3.2.0 finally decides on something. :|
-              listOf(
-                  // AGP 3.2.0-alpha07 and above
-                  "build/intermediates/javac/debug/compileDebugJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha06
-                  "build/intermediates/artifact_transform/compileDebugJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha04 and above
-                  "build/intermediates/artifact_transform/javac/debug/classes",
-                  // Everything below
-                  "build/intermediates/classes/debug").forEach { folder ->
-                project.file(folder).mkdirs()
-                project.file("$folder/R.class").createNewFile()
-                project.file("$folder/FirstFile.class").createNewFile()
-                project.file("$folder/SecondFile.class").createNewFile()
-              }
+              val debugFolder = "build/intermediates/classes/debug"
+              project.file(debugFolder).mkdirs()
+              project.file("$debugFolder/R.class").createNewFile()
+              project.file("$debugFolder/FirstFile.class").createNewFile()
+              project.file("$debugFolder/SecondFile.class").createNewFile()
 
-              listOf(
-                  // AGP 3.2.0-alpha07 and above
-                  "build/intermediates/javac/release/compileReleaseJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha06
-                  "build/intermediates/artifact_transform/compileReleaseJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha04 and above
-                  "build/intermediates/artifact_transform/javac/release/classes",
-                  // Everything below
-                  "build/intermediates/classes/release").forEach { folder ->
-                project.file(folder).mkdirs()
-                project.file("$folder/R.class").createNewFile()
-                project.file("$folder/SecondFile.class").createNewFile()
-              }
+              val releaseFolder = "build/intermediates/classes/release"
+              project.file(releaseFolder).mkdirs()
+              project.file("$releaseFolder/R.class").createNewFile()
+              project.file("$releaseFolder/SecondFile.class").createNewFile()
 
               project.file("src/main/java").mkdirs()
               project.file("src/main/java/OkFile.java").createNewFile()
