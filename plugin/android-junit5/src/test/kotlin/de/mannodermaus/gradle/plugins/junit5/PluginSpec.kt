@@ -338,13 +338,7 @@ class PluginSpec : Spek({
               // create each class file in multiple directories to remain compatible with all approaches
               // TODO Clean this mess up once the Android Gradle Plugin 3.2.0 finally decides on something. :|
               listOf(
-                  // AGP 3.2.0-alpha07 and above
                   "build/intermediates/javac/debug/compileDebugJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha06
-                  "build/intermediates/artifact_transform/compileDebugJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha04 and above
-                  "build/intermediates/artifact_transform/javac/debug/classes",
-                  // Everything below
                   "build/intermediates/classes/debug").forEach { folder ->
                 project.file(folder).mkdirs()
                 project.file("$folder/R.class").createNewFile()
@@ -353,13 +347,7 @@ class PluginSpec : Spek({
               }
 
               listOf(
-                  // AGP 3.2.0-alpha07 and above
                   "build/intermediates/javac/release/compileReleaseJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha06
-                  "build/intermediates/artifact_transform/compileReleaseJavaWithJavac/classes",
-                  // AGP 3.2.0-alpha04 and above
-                  "build/intermediates/artifact_transform/javac/release/classes",
-                  // Everything below
                   "build/intermediates/classes/release").forEach { folder ->
                 project.file(folder).mkdirs()
                 project.file("$folder/R.class").createNewFile()
