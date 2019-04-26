@@ -18,8 +18,8 @@ import java.io.File
 val BaseVariant.variantData: BaseVariantData
   get() = GroovyInterop.baseVariant_variantData(this)
 
-val VariantScope.safeJavaOutputDirs: Set<File>
-  get() = GroovyInterop.variantScope_javaOutputDirs(this)
+val VariantScope.safeJavacArtifactFiles: Set<File>
+  get() = GroovyInterop.variantScope_getJavacArtifactFiles(this)
 
 val AndroidUnitTest.safeResCollection: Set<File>?
   get() = GroovyInterop.androidUnitTest_resCollection(this)
