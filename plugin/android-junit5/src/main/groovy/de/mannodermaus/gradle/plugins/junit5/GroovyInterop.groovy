@@ -5,13 +5,10 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
-import com.android.build.gradle.tasks.factory.AndroidUnitTest
 import com.annimon.stream.Optional
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.testing.jacoco.tasks.JacocoReportBase
-
-import javax.annotation.Nullable
 
 /**
  * Utility functions exposed to Kotlin consumers
@@ -68,45 +65,6 @@ class GroovyInterop {
       return [new File(scope.globalScope.intermediatesDir,
             "/classes/" + scope.variantConfiguration.dirName)]
     }
-  }
-
-  /**
-   * Obtains the Assets Collection of the given AndroidUnitTest.
-   *
-   * @because 'assetsCollection' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha07
-   * @param test The Android JUnit 4 test to access
-   * @return Its assets collection
-   */
-  @Nullable
-  static Set<File> androidUnitTest_assetsCollection(AndroidUnitTest test) {
-    def collection = test.assetsCollection
-    return collection == null ? null : collection.files
-  }
-
-  /**
-   * Obtains the Res Collection of the given AndroidUnitTest.
-   *
-   * @because 'resCollection' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha11
-   * @param test The Android JUnit 4 test to access
-   * @return Its assets collection
-   */
-  @Nullable
-  static Set<File> androidUnitTest_resCollection(AndroidUnitTest test) {
-    def collection = test.resCollection
-    return collection == null ? null : collection.files
-  }
-
-  /**
-   * Obtains the Merged Manifest of the given AndroidUnitTest.
-   *
-   * @because 'mergedManifest' type changed from FileCollection to BuildArtifact in Android Gradle Plugin 3.2.0-alpha07
-   * @param test The Android JUnit 4 test to access
-   * @return Its merged manifest
-   */
-  @Nullable
-  static Set<File> androidUnitTest_mergedManifest(AndroidUnitTest test) {
-    def collection = test.mergedManifest
-    return collection == null ? null : collection.files
   }
 
   /**
