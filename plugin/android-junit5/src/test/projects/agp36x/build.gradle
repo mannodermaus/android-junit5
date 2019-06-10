@@ -1,0 +1,46 @@
+buildscript {
+  repositories {
+    google()
+    jcenter()
+  }
+}
+
+plugins {
+  id "com.android.application"
+  id "org.jetbrains.kotlin.android"
+  id "de.mannodermaus.android-junit5"
+  id "jacoco"
+}
+
+def version = com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+if (version != AGP_36X) {
+  throw new IllegalStateException("Incorrect AGP version. Expected $AGP_36X, got $version")
+}
+
+repositories {
+  google()
+  jcenter()
+}
+
+android {
+  compileSdkVersion COMPILE_SDK_VERSION
+
+  flavorDimensions "environment"
+  productFlavors {
+    free {
+      dimension "environment"
+    }
+    paid {
+      dimension "environment"
+    }
+  }
+
+  testOptions.unitTests.all {
+    testLogging.events = ["passed", "skipped", "failed"]
+  }
+}
+
+dependencies {
+  testImplementation JUPITER_API
+  testRuntimeOnly JUPITER_ENGINE
+}

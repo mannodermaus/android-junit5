@@ -125,6 +125,40 @@ class FunctionalTests {
   }
 
   @Test
+  @DisplayName("Android Gradle Plugin 3.6.x, with Flavors and Build Types")
+  fun agp36x() {
+    val fixtureRoot = File("src/test/projects/agp36x")
+    File(fixtureRoot, "build").deleteRecursively()
+
+    val result = runGradle(AgpVersion.AGP_36X)
+        .withProjectDir(fixtureRoot)
+        .build()
+
+    assertThat(result).task(":test")
+        .hasOutcome(TaskOutcome.SUCCESS)
+    assertThat(result).output().ofTask(":testFreeDebugUnitTest").apply {
+      contains("de.mannodermaus.app.JavaTest > test() PASSED")
+      executedTestCount().isEqualTo(1)
+    }
+    assertThat(result).output().ofTask(":testFreeReleaseUnitTest").apply {
+      contains("de.mannodermaus.app.JavaTest > test() PASSED")
+      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
+      contains("de.mannodermaus.app.JavaFreeReleaseTest > test() PASSED")
+      executedTestCount().isEqualTo(3)
+    }
+    assertThat(result).output().ofTask(":testPaidDebugUnitTest").apply {
+      contains("de.mannodermaus.app.JavaTest > test() PASSED")
+      contains("de.mannodermaus.app.KotlinPaidDebugTest > test() PASSED")
+      executedTestCount().isEqualTo(2)
+    }
+    assertThat(result).output().ofTask(":testPaidReleaseUnitTest").apply {
+      contains("de.mannodermaus.app.JavaTest > test() PASSED")
+      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
+      executedTestCount().isEqualTo(2)
+    }
+  }
+
+  @Test
   @DisplayName("Return Android default values")
   fun androidDefaultValues() {
     val fixtureRoot = File("src/test/projects/default-values")
