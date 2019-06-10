@@ -71,6 +71,7 @@ tasks.named("processTestResources", Copy::class.java).configure {
       "AGP_33X" to Versions.com_android_tools_build_gradle_33x,
       "AGP_34X" to Versions.com_android_tools_build_gradle_34x,
       "AGP_35X" to Versions.com_android_tools_build_gradle_35x,
+      "AGP_36X" to Versions.com_android_tools_build_gradle_36x,
       "KOTLIN" to Versions.org_jetbrains_kotlin,
 
       "JUPITER_API" to Libs.junit_jupiter_api,
@@ -116,7 +117,8 @@ private val agpConfigurations = listOf(
     AgpConfiguration("3.2", Libs.com_android_tools_build_gradle_32x),
     AgpConfiguration("3.3", Libs.com_android_tools_build_gradle_33x),
     AgpConfiguration("3.4", Libs.com_android_tools_build_gradle_34x),
-    AgpConfiguration("3.5", Libs.com_android_tools_build_gradle_35x)
+    AgpConfiguration("3.5", Libs.com_android_tools_build_gradle_35x),
+    AgpConfiguration("3.6", Libs.com_android_tools_build_gradle_36x)
 )
 
 configurations {
