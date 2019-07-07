@@ -73,3 +73,11 @@ class HasInnerClassWithTest {
     }
   }
 }
+
+class HasTaggedTest {
+  @Tag("slow")
+  @Test
+  fun method() {
+
+  }
+}

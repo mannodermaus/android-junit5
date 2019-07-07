@@ -15,7 +15,7 @@ private const val INSTRUMENTATION_FILTER_RES_FILE_NAME = "de_mannodermaus_junit5
 class ParsedFilters(private val filters: List<Filter<*>>) {
 
   companion object {
-    private val EMPTY = ParsedFilters(emptyList())
+    val EMPTY = ParsedFilters(emptyList())
 
     @Suppress("FoldInitializerAndIfToElvis")
     fun fromContext(context: Context): ParsedFilters {
