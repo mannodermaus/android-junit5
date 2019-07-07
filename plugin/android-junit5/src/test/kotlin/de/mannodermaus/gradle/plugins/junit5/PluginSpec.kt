@@ -869,8 +869,6 @@ class PluginSpec : Spek({
             assertThat(task).isNotNull()
             assertThat(task.includeTags).containsExactly("global-include-tag")
             assertThat(task.excludeTags).containsExactly("debug-exclude-tag")
-            assertThat(task.includePatterns).isEmpty()
-            assertThat(task.excludePatterns).containsExactly("pattern123", "debug-pattern")
           }
 
           it("doesn't have a task for writing the release filters DSL to a resource file") {
@@ -934,8 +932,6 @@ class PluginSpec : Spek({
             assertThat(task).isNotNull()
             assertThat(task.includeTags).containsExactly("global-include-tag", "freeDebug-include-tag")
             assertThat(task.excludeTags).containsExactly("global-exclude-tag")
-            assertThat(task.includePatterns).containsExactly("com.example.package1")
-            assertThat(task.excludePatterns).isEmpty()
           }
 
           it("has a task for writing the paidDebug filters DSL to a resource file") {
@@ -943,8 +939,6 @@ class PluginSpec : Spek({
             assertThat(task).isNotNull()
             assertThat(task.includeTags).containsExactly("global-include-tag")
             assertThat(task.excludeTags).containsExactly("global-exclude-tag")
-            assertThat(task.includePatterns).containsExactly("com.example.paid")
-            assertThat(task.excludePatterns).containsExactly("com.example.package1")
           }
 
           it("doesn't have tasks for writing the release filters DSL to a resource file") {

@@ -12,6 +12,7 @@ import de.mannodermaus.junit5.sample.R
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.RepetitionInfo
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
@@ -25,6 +26,14 @@ class ActivityOneTest {
 
   @Test
   fun testExample(scenario: ActivityScenario<ActivityOne>) {
+    onView(withId(R.id.textView)).check(matches(withText("0")))
+  }
+
+  // This test is disabled by default, because the sample module
+  // defines an excludeTags() clause for this tag in its build.gradle file
+  @Tag("slow")
+  @Test
+  fun disabledTest(scenario: ActivityScenario<ActivityOne>) {
     onView(withId(R.id.textView)).check(matches(withText("0")))
   }
 

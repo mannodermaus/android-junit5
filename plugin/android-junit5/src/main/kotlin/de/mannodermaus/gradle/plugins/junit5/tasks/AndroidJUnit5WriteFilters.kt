@@ -14,6 +14,18 @@ import java.io.File
 
 private const val TASK_NAME_DEFAULT = "writeFilters"
 
+/**
+ * Helper task for instrumentation tests.
+ * It writes out the filters configured through the Gradle plugin's DSL
+ * into a resource file, used at runtime to set up the execution of the JUnit Platform.
+ *
+ * Note:
+ * This only allows tests to be filtered with @Tag annotations even in the instrumentation test realm.
+ * Other plugin DSL settings, like includeEngines/excludeEngines or includePattern/excludePattern
+ * are not copied out to file. This has to do with limitations of the backport implementation
+ * of the JUnit Platform Runner, as well as some incompatibilities between Gradle and Java with regards to
+ * how class name patterns are formatted.
+ */
 @CacheableTask
 open class AndroidJUnit5WriteFilters : DefaultTask() {
 
@@ -33,10 +45,6 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
   var includeTags = emptyList<String>()
   @Input
   var excludeTags = emptyList<String>()
-  @Input
-  var includePatterns = emptyList<String>()
-  @Input
-  var excludePatterns = emptyList<String>()
 
   @OutputDirectory
   var outputFolder: File? = null
@@ -46,23 +54,26 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
     this.outputFolder?.let { folder ->
       // Clear out current contents of the generated folder
       folder.deleteRecursively()
-      folder.mkdirs()
 
-      // Re-write the new file structure into it;
-      // the generated file will have a fixed name & is located
-      // as a "raw" resource inside the output folder
-      val rawFolder = File(folder, "raw").apply { mkdirs() }
-      File(rawFolder, INSTRUMENTATION_FILTER_RES_FILE_NAME)
-          .bufferedWriter()
-          .use { writer ->
-            // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
-            includeTags.forEach { tag -> writer.write("-t $tag") }
-            excludeTags.forEach { tag -> writer.write("-T $tag") }
-            includePatterns.forEach { pattern -> writer.write("-n $pattern") }
-            excludePatterns.forEach { pattern -> writer.write("-N $pattern") }
-          }
+      if (this.hasFilters()) {
+        folder.mkdirs()
+
+        // Re-write the new file structure into it;
+        // the generated file will have a fixed name & is located
+        // as a "raw" resource inside the output folder
+        val rawFolder = File(folder, "raw").apply { mkdirs() }
+        File(rawFolder, INSTRUMENTATION_FILTER_RES_FILE_NAME)
+            .bufferedWriter()
+            .use { writer ->
+              // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
+              includeTags.forEach { tag -> writer.write("-t $tag") }
+              excludeTags.forEach { tag -> writer.write("-T $tag") }
+            }
+      }
     }
   }
+
+  private fun hasFilters() = includeTags.isNotEmpty() || excludeTags.isNotEmpty()
 
   private class ConfigAction(
       private val project: Project,
@@ -83,8 +94,6 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
       val configuration = project.junit5ConfigurationOf(instrumentationTestVariant.testedVariant)
       task.includeTags = configuration.combinedIncludeTags.toList()
       task.excludeTags = configuration.combinedExcludeTags.toList()
-      task.includePatterns = configuration.combinedIncludePatterns.toList()
-      task.excludePatterns = configuration.combinedExcludePatterns.toList()
     }
   }
 }
