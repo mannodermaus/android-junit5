@@ -7,6 +7,8 @@ import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -36,7 +38,8 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       it.evaluateDsl()
-      it.configureTestTasks()
+      it.configureUnitTests()
+      it.configureInstrumentationTests()
       it.configureJacocoTasks()
     }
   }
@@ -46,15 +49,17 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     attachDsl(this, projectConfig)
   }
 
+  /* After evaluate */
+
   private fun Project.evaluateDsl() {
     evaluateDsl(this)
   }
 
-  private fun Project.configureTestTasks() {
-    // Configure JUnit 5 for each variant-specific test task
-    projectConfig.unitTestVariants.all { variant ->
+  private fun Project.configureUnitTests() {
+    // Configure JUnit 5 for each variant-specific unit test task
+    projectConfig.variants.all { variant ->
       val testTask = tasks.testTaskOf(variant)
-      val configuration = createJUnit5ConfigurationFor(variant)
+      val configuration = junit5ConfigurationOf(variant)
 
       testTask.useJUnitPlatform { options ->
         options.includeTags(*configuration.combinedIncludeTags)
@@ -75,7 +80,45 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     }
   }
 
-  /* After evaluate */
+  private fun Project.configureInstrumentationTests() {
+    // Validate configuration of instrumentation tests.
+    // Both of the following statements must be fulfilled for this to work:
+    // 1) A special test instrumentation runner argument is applied
+    // 2) The test runner library is added
+    val hasRunnerBuilder = android.defaultConfig
+        .testInstrumentationRunnerArguments
+        .getAsList("runnerBuilder")
+        .contains(ANDROID_JUNIT5_RUNNER_BUILDER_CLASS)
+
+    val hasDependency = configurations
+        .getByName("androidTestRuntimeOnly")
+        .dependencies
+        .any { it.group == INSTRUMENTATION_RUNNER_LIBRARY_GROUP && it.name == INSTRUMENTATION_RUNNER_LIBRARY_ARTIFACT }
+
+    if (hasRunnerBuilder xor hasDependency) {
+      val missingStep = if (hasRunnerBuilder) {
+        "Add the android-test-runner library to the androidTestRuntimeOnly configuration's dependencies"
+      } else {
+        "Add the JUnit 5 RunnerBuilder to the application's defaultConfig"
+      }
+      throw GradleException("""Incomplete configuration for JUnit 5 instrumentation tests: $missingStep.
+        |Find more information at: https://bit.ly/junit5-instrumentation-tests""".trimMargin())
+    }
+
+    if (hasRunnerBuilder && hasDependency) {
+      // For each instrumentation test variant,
+      // write out an asset file containing the filters applied through the DSL
+      projectConfig.variants.all { variant ->
+        val instrumentationTestVariant = variant.instrumentationTestVariant
+        if (instrumentationTestVariant != null) {
+          // Register a resource generator for the androidTest variant
+          val writerTask = AndroidJUnit5WriteFilters.create(this, instrumentationTestVariant)
+          val outputFolder = files(writerTask.outputFolder).builtBy(writerTask)
+          instrumentationTestVariant.registerGeneratedResFolders(outputFolder)
+        }
+      }
+    }
+  }
 
   private fun Project.configureJacocoTasks() {
     // Connect a Code Coverage report to it if Jacoco is enabled.
@@ -83,7 +126,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     val jacocoOptions = this.android.testOptions.junitPlatform.jacocoOptions
 
     if (isJacocoApplied && jacocoOptions.taskGenerationEnabled) {
-      projectConfig.unitTestVariants.all { variant ->
+      projectConfig.variants.all { variant ->
         val directoryProviders = collectDirectoryProviders(variant)
         val testTask = tasks.testTaskOf(variant)
 

@@ -2,10 +2,12 @@
 
 package de.mannodermaus.gradle.plugins.junit5
 
+import com.android.build.gradle.TestedExtension
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
+import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import de.mannodermaus.gradle.plugins.junit5.util.*
 import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory2.TestProjectBuilder
 import org.gradle.api.Action
@@ -65,8 +67,44 @@ class PluginSpec : Spek({
       it("doesn't have a filters extension point for an unknown build type") {
         val expected = throws<ProjectConfigurationException> { project.evaluate() }
         assertAll(
-            { assertThat(expected.message?.contains("Extension with name")) },
-            { assertThat(expected.message?.contains("does not exist")) }
+            { assertThat(expected.cause!!.message).contains("Extension with name") },
+            { assertThat(expected.cause!!.message).contains("does not exist") }
+        )
+      }
+    }
+
+    on("configuring instrumentation test support only partially (1)") {
+      val project = testProjectBuilder
+          .asAndroidApplication()
+          .applyJUnit5Plugin(true)
+          .build()
+
+      project.android.defaultConfig {
+        it.testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+      }
+
+      it("fails because the library dependency is missing") {
+        val expected = throws<ProjectConfigurationException> { project.evaluate() }
+        assertAll(
+            { assertThat(expected.cause!!.message).contains("Incomplete configuration for JUnit 5 instrumentation tests") },
+            { assertThat(expected.cause!!.message).contains("Add the android-test-runner library") }
+        )
+      }
+    }
+
+    on("configuring instrumentation test support only partially (2)") {
+      val project = testProjectBuilder
+          .asAndroidApplication()
+          .applyJUnit5Plugin(true)
+          .build()
+
+      project.dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
+
+      it("fails because the library dependency is missing") {
+        val expected = throws<ProjectConfigurationException> { project.evaluate() }
+        assertAll(
+            { assertThat(expected.cause!!.message).contains("Incomplete configuration for JUnit 5 instrumentation tests") },
+            { assertThat(expected.cause!!.message).contains("Add the JUnit 5 RunnerBuilder") }
         )
       }
     }
@@ -791,6 +829,127 @@ class PluginSpec : Spek({
 
             assertThat(task.includes).containsAllOf("pattern123", "release-pattern")
             assertThat(task.excludes).doesNotContain("pattern123")
+          }
+        }
+      }
+
+      context("instrumentation test support") {
+        val project by memoized { testProjectBuilder.build() }
+
+        on("generation of filters resources (no product flavors)") {
+          project.android.defaultConfig {
+            it.testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+          }
+          project.dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
+
+          project.android.testOptions.junitPlatform {
+            filters {
+              includeTags("global-include-tag")
+              includeEngines("global-include-engine")
+              includePattern("pattern123")
+            }
+            filters("debug", Action {
+              it.excludeTags("debug-exclude-tag")
+              it.excludeEngines("debug-exclude-engine")
+              it.excludePattern("pattern123")
+              it.excludePattern("debug-pattern")
+            })
+            filters("release", Action {
+              it.includeTags("rel-include-tag")
+              it.includeEngines("rel-include-engine")
+              it.excludeEngines("global-include-engine")
+              it.includePattern("release-pattern")
+            })
+          }
+
+          project.evaluate()
+
+          it("has a task for writing the debug filters DSL to a resource file") {
+            val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersDebugAndroidTest")
+            assertThat(task).isNotNull()
+            assertThat(task.includeTags).containsExactly("global-include-tag")
+            assertThat(task.excludeTags).containsExactly("debug-exclude-tag")
+            assertThat(task.includePatterns).isEmpty()
+            assertThat(task.excludePatterns).containsExactly("pattern123", "debug-pattern")
+          }
+
+          it("doesn't have a task for writing the release filters DSL to a resource file") {
+            val task = project.tasks.findByName("writeFiltersReleaseAndroidTest")
+            assertThat(task).isNull()
+          }
+        }
+
+        on("generation of filters resources (non-standard testBuildType)") {
+          project.android.defaultConfig {
+            it.testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+          }
+          project.dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
+
+          (project.android as TestedExtension).testBuildType = "release"
+
+          project.evaluate()
+
+          it("has a task for writing the release filters DSL to a resource file") {
+            val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersReleaseAndroidTest")
+            assertThat(task).isNotNull()
+          }
+        }
+
+        on("generation of filters resources (with product flavors)") {
+          project.android.flavorDimensions("tier")
+          project.android.productFlavors.apply {
+            create("free").dimension = "tier"
+            create("paid").dimension = "tier"
+          }
+          project.android.defaultConfig {
+            it.testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+          }
+          project.dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
+
+          project.android.testOptions.junitPlatform {
+            filters {
+              includeTags("global-include-tag")
+              excludeTags("global-exclude-tag")
+              includePattern("com.example.package1")
+            }
+            filters("paid", Action {
+              it.includeEngines("paid-include-engine")
+              it.includePattern("com.example.paid")
+              it.excludePattern("com.example.package1")
+            })
+            filters("freeDebug", Action {
+              it.includeTags("freeDebug-include-tag")
+            })
+            filters("paidRelease", Action {
+              it.includeTags("paidRelease-include-tag")
+              it.includeTags("global-exclude-tag")
+              it.includePattern("com.example.paid.release")
+            })
+          }
+
+          project.evaluate()
+
+          it("has a task for writing the freeDebug filters DSL to a resource file") {
+            val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersFreeDebugAndroidTest")
+            assertThat(task).isNotNull()
+            assertThat(task.includeTags).containsExactly("global-include-tag", "freeDebug-include-tag")
+            assertThat(task.excludeTags).containsExactly("global-exclude-tag")
+            assertThat(task.includePatterns).containsExactly("com.example.package1")
+            assertThat(task.excludePatterns).isEmpty()
+          }
+
+          it("has a task for writing the paidDebug filters DSL to a resource file") {
+            val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersPaidDebugAndroidTest")
+            assertThat(task).isNotNull()
+            assertThat(task.includeTags).containsExactly("global-include-tag")
+            assertThat(task.excludeTags).containsExactly("global-exclude-tag")
+            assertThat(task.includePatterns).containsExactly("com.example.paid")
+            assertThat(task.excludePatterns).containsExactly("com.example.package1")
+          }
+
+          it("doesn't have tasks for writing the release filters DSL to a resource file") {
+            assertThat(project.tasks.findByName("writeFiltersFreeReleaseAndroidTest")).isNull()
+            assertThat(project.tasks.findByName("writeFiltersPaidReleaseAndroidTest")).isNull()
           }
         }
       }

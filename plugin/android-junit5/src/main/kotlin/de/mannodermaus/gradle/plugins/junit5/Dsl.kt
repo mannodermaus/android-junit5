@@ -42,7 +42,7 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
         // 1) brandADevelopmentDebugFilters
         // 2) brandAFilters
         // 3) developmentFilters
-        projectConfig.unitTestVariants.all { variant ->
+        projectConfig.variants.all { variant ->
           // 1) Fully-specialized name ("brandADevelopmentDebugFilters")
           ju5.attachFiltersDsl(qualifier = variant.name)
 

@@ -27,7 +27,7 @@ import org.gradle.api.ProjectConfigurationException
 class ProjectConfig(val project: Project) {
   private val type: Type<BaseExtension> = findType(project)
 
-  val unitTestVariants get() = type.variants(project.android)
+  val variants get() = type.variants(project.android)
   val jacocoPluginApplied get() = project.hasPlugin("jacoco")
   val kotlinPluginApplied get() = project.hasPlugin("kotlin-android")
 }
