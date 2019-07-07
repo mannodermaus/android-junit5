@@ -88,7 +88,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
 
     fun execute(task: AndroidJUnit5WriteFilters) {
       task.variant = instrumentationTestVariant
-      task.outputFolder = File("${project.buildDir}/generated/res/android-junit5/androidTest/${instrumentationTestVariant.name})")
+      task.outputFolder = File("${project.buildDir}/generated/res/android-junit5/${instrumentationTestVariant.name}")
 
       // Access filters for this particular variant & provide them to the task, too
       val configuration = project.junit5ConfigurationOf(instrumentationTestVariant.testedVariant)
