@@ -18,6 +18,11 @@ object Libs {
 
     /**
      * https://developer.android.com/testing */
+    const val androidx_test_monitor: String = "androidx.test:monitor:" +
+        Versions.androidx_test_monitor
+
+    /**
+     * https://developer.android.com/testing */
     const val androidx_test_runner: String = "androidx.test:runner:" +
         Versions.androidx_test_runner
 

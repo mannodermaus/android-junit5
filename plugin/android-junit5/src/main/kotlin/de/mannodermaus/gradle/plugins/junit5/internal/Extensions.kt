@@ -2,6 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.internal
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.api.TestVariant
 import com.android.build.gradle.api.UnitTestVariant
 import com.android.build.gradle.internal.api.TestedVariant
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
@@ -58,6 +59,14 @@ internal fun loadProperties(resource: String): Properties {
   stream.use { properties.load(it) }
   return properties
 }
+
+/**
+ * Obtains the value with the provided key from the Map,
+ * and splits it into a list using the delimiter.
+ * Returns an empty List if the key doesn't exist in the Map.
+ */
+fun Map<String, String>.getAsList(key: String, delimiter: String = ","): List<String> =
+    this[key]?.split(delimiter) ?: emptyList()
 
 /**
  * Adds the provided key-value pair to the Map.
@@ -160,7 +169,7 @@ fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null
 val Project.android: BaseExtension
   get() = this.extensions.getByName("android") as BaseExtension
 
-internal fun Project.createJUnit5ConfigurationFor(variant: BaseVariant) =
+internal fun Project.junit5ConfigurationOf(variant: BaseVariant) =
     JUnit5TaskConfig(variant, this)
 
 /**
@@ -181,6 +190,15 @@ val BaseVariant.unitTestVariant: UnitTestVariant
     }
 
     return this.unitTestVariant
+  }
+
+val BaseVariant.instrumentationTestVariant: TestVariant?
+  get() {
+    if (this !is TestedVariant) {
+      throw IllegalArgumentException("Argument is not TestedVariant: $this")
+    }
+
+    return this.testVariant
   }
 
 /**

@@ -86,6 +86,7 @@ configurations.all {
 }
 
 dependencies {
+  implementation(Libs.androidx_test_monitor)
   implementation(Libs.kotlin_stdlib)
   implementation(Libs.kotlin_reflect)
   implementation(Libs.junit)

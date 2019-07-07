@@ -62,6 +62,9 @@ android {
   testOptions {
     junitPlatform {
       // Configure JUnit 5 tests here
+      filters("debug") {
+        excludeTags("slow")
+      }
     }
   }
 

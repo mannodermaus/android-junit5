@@ -6,7 +6,8 @@ import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
 
 /**
- * Created by Marcel Schnelle on 2019-03-16.
+ * Fake Runner that marks all JUnit 5 methods as ignored,
+ * used for old devices without Java 8 capabilities.
  */
 class DummyJUnit5(private val testClass: Class<*>) : Runner() {
 

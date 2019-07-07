@@ -1,6 +1,7 @@
 package de.mannodermaus.junit5
 
 import android.util.Log
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
 
@@ -54,6 +55,16 @@ class AndroidJUnit5Builder : RunnerBuilder() {
     }
   }
 
+  private val parsedFilters by lazy {
+    // The user may apply test filters to their instrumentation tests through the Gradle plugin's DSL,
+    // which aren't subject to the filtering imposed through adb.
+    // A special resource file may be looked up at runtime, containing
+    // the filters to apply by the AndroidJUnit5 runner.
+    // This is initialized at most once, when the first eligible test class
+    // is checked. See ParsedFilters.kt for more
+    ParsedFilters.fromContext(InstrumentationRegistry.getInstrumentation().context)
+  }
+
   @Throws(Throwable::class)
   override fun runnerForClass(testClass: Class<*>): Runner? {
     try {
@@ -65,7 +76,7 @@ class AndroidJUnit5Builder : RunnerBuilder() {
         return null
       }
 
-      return createJUnit5Runner(testClass)
+      return createJUnit5Runner(testClass, parsedFilters)
 
     } catch (e: NoClassDefFoundError) {
       Log.e(LOG_TAG, "JUnitPlatform not found on runtime classpath")
