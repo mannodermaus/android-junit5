@@ -65,6 +65,18 @@ object Libs {
             Versions.android_maven_gradle_plugin
 
     /**
+     * https://github.com/Kotlin/dokka */
+    const val dokka_core_plugin: String =
+        "org.jetbrains.dokka:dokka-gradle-plugin:" +
+            Versions.dokka
+
+    /**
+     * https://github.com/Kotlin/dokka */
+    const val dokka_android_plugin: String =
+        "org.jetbrains.dokka:dokka-android-gradle-plugin:" +
+            Versions.dokka
+
+    /**
      * https://github.com/zafarkhaja/jsemver */
     const val java_semver: String = "com.github.zafarkhaja:java-semver:" + Versions.java_semver
 
