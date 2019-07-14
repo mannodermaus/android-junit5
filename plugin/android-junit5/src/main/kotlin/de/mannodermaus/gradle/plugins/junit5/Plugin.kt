@@ -81,8 +81,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   }
 
   private fun Project.configureInstrumentationTests() {
-    // Validate configuration of instrumentation tests.
-    // Both of the following statements must be fulfilled for this to work:
+    // Validate configuration of instrumentation tests, unless this
+    // step is deactivated through the DSL.
+    //
+    // Normally, both of the following statements must be fulfilled for this to work:
     // 1) A special test instrumentation runner argument is applied
     // 2) The test runner library is added
     val hasRunnerBuilder = android.defaultConfig
@@ -95,7 +97,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         .dependencies
         .any { it.group == INSTRUMENTATION_RUNNER_LIBRARY_GROUP && it.name == INSTRUMENTATION_RUNNER_LIBRARY_ARTIFACT }
 
-    if (hasRunnerBuilder xor hasDependency) {
+    val extension = project.android.testOptions.junitPlatform
+    val checkEnabled = extension.instrumentationTests.integrityCheckEnabled
+
+    if (checkEnabled && hasRunnerBuilder xor hasDependency) {
       val missingStep = if (hasRunnerBuilder) {
         "Add the android-test-runner library to the androidTestRuntimeOnly configuration's dependencies"
       } else {
