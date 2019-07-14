@@ -1,3 +1,4 @@
+import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -62,6 +63,11 @@ android {
   }
 
   testOptions {
+    junitPlatform {
+      // Using local dependency instead of Maven coordinates
+      instrumentationTests.integrityCheckEnabled = false
+    }
+
     unitTests.apply {
       isReturnDefaultValues = true
     }

@@ -65,6 +65,9 @@ android {
       filters("debug") {
         excludeTags("slow")
       }
+
+      // Using local dependency instead of Maven coordinates
+      instrumentationTests.integrityCheckEnabled = false
     }
   }
 
