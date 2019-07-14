@@ -13,6 +13,8 @@ buildscript {
     classpath(Libs.gradle_bintray_plugin)
     classpath(Libs.android_maven_gradle_plugin)
     classpath(Libs.gradle_versions_plugin)
+    classpath(Libs.dokka_core_plugin)
+    classpath(Libs.dokka_android_plugin)
   }
 }
 

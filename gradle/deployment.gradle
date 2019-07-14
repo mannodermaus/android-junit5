@@ -53,18 +53,15 @@ if (targetPlatform == "java") {
 
 // Include javadoc.jar archive in each release
 if (targetPlatform == "android") {
-  task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    excludes = ["**/*.kt"]
-    failOnError = false
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-  }
+  apply plugin: "org.jetbrains.dokka-android"
+} else {
+  apply plugin: "org.jetbrains.dokka"
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: dokka) {
   baseName = artifactId
   classifier = "javadoc"
-  from javadoc.destinationDir
+  from dokka.outputDirectory
 }
 
 // ------------------------------------------------------------------------------------------------

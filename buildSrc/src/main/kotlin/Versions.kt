@@ -28,7 +28,9 @@ object Versions {
 
     const val gradle_versions_plugin: String = "0.20.0" 
 
-    const val android_maven_gradle_plugin: String = "2.1" 
+    const val android_maven_gradle_plugin: String = "2.1"
+
+    const val dokka: String = "0.9.18"
 
     const val java_semver: String = "0.9.0" 
 
