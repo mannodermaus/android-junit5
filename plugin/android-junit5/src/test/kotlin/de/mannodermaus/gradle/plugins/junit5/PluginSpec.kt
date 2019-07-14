@@ -90,6 +90,11 @@ class PluginSpec : Spek({
             { assertThat(expected.cause!!.message).contains("Add the android-test-runner library") }
         )
       }
+
+      it("does actually work when the check is explicitly disabled") {
+        project.android.testOptions.junitPlatform.instrumentationTests.integrityCheckEnabled = false
+        project.evaluate()
+      }
     }
 
     on("configuring instrumentation test support only partially (2)") {
@@ -106,6 +111,11 @@ class PluginSpec : Spek({
             { assertThat(expected.cause!!.message).contains("Incomplete configuration for JUnit 5 instrumentation tests") },
             { assertThat(expected.cause!!.message).contains("Add the JUnit 5 RunnerBuilder") }
         )
+      }
+
+      it("does actually work when the check is explicitly disabled") {
+        project.android.testOptions.junitPlatform.instrumentationTests.integrityCheckEnabled = false
+        project.evaluate()
       }
     }
   }

@@ -455,19 +455,35 @@ class InstrumentationTestOptions {
   }
 
   /**
-   * Whether or not to enable support for JUnit 5 instrumentation tests
+   * Whether or not to check if the instrumentation tests
+   * are correctly set up. If this is disabled, the plugin
+   * won't raise an error during evaluation if the instrumentation
+   * libraries or the test runner are missing.
    */
+  var integrityCheckEnabled = true
+
+  /**
+   * Whether or not to check if the instrumentation tests
+   * are correctly set up. If this is disabled, the plugin
+   * won't raise an error during evaluation if the instrumentation
+   * libraries or the test runner are missing.
+   */
+  fun integrityCheckEnabled(state: Boolean) {
+    this.integrityCheckEnabled = state
+  }
+
+  @Deprecated(message = "This does not do anything anymore and can be safely removed")
   var enabled: Boolean = true
 
+  @Deprecated(message = "This does not do anything anymore and can be safely removed")
   fun enabled(state: Boolean) {
     this.enabled = state
   }
 
-  /**
-   * The version of the instrumentation companion library to use
-   */
+  @Deprecated(message = "This does not do anything anymore and can be safely removed")
   var version: String? = null
 
+  @Deprecated(message = "This does not do anything anymore and can be safely removed")
   fun version(version: String?) {
     this.version = version
   }
