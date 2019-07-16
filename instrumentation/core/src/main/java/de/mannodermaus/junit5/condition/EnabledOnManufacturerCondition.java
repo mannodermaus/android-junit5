@@ -10,19 +10,20 @@ import org.junit.platform.commons.util.Preconditions;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 class EnabledOnManufacturerCondition implements ExecutionCondition {
 
-  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = enabled("@EnabledOnManufacturer is not present");
+  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
+      ConditionEvaluationResult.enabled("@EnabledOnManufacturer is not present");
 
-  static final ConditionEvaluationResult ENABLED_ON_CURRENT_MANUFACTURER =
-      enabled("Enabled on Manufacturer: " + Build.MANUFACTURER);
+  static ConditionEvaluationResult enabled() {
+    return ConditionEvaluationResult.enabled("Enabled on Manufacturer: " + Build.MANUFACTURER);
+  }
 
-  static final ConditionEvaluationResult DISABLED_ON_CURRENT_MANUFACTURER =
-      disabled("Disabled on Manufacturer: " + Build.MANUFACTURER);
+  static ConditionEvaluationResult disabled() {
+    return ConditionEvaluationResult.disabled("Disabled on Manufacturer: " + Build.MANUFACTURER);
+  }
 
   @TargetApi(24)
   @Override
@@ -36,8 +37,8 @@ class EnabledOnManufacturerCondition implements ExecutionCondition {
       Preconditions.condition(patterns.length > 0, "You must declare at least one Manufacturer in @EnabledOnManufacturer");
 
       return Arrays.stream(patterns).anyMatch(value -> matchesCurrentManufacturer(value, ignoreCase))
-          ? ENABLED_ON_CURRENT_MANUFACTURER
-          : DISABLED_ON_CURRENT_MANUFACTURER;
+          ? enabled()
+          : disabled();
     }
 
     return ENABLED_BY_DEFAULT;

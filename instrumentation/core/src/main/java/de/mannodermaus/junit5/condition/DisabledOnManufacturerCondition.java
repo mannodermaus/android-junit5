@@ -10,14 +10,14 @@ import org.junit.platform.commons.util.Preconditions;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static de.mannodermaus.junit5.condition.EnabledOnManufacturerCondition.DISABLED_ON_CURRENT_MANUFACTURER;
-import static de.mannodermaus.junit5.condition.EnabledOnManufacturerCondition.ENABLED_ON_CURRENT_MANUFACTURER;
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
+import static de.mannodermaus.junit5.condition.EnabledOnManufacturerCondition.disabled;
+import static de.mannodermaus.junit5.condition.EnabledOnManufacturerCondition.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 class DisabledOnManufacturerCondition implements ExecutionCondition {
 
-  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = enabled("@DisabledOnManufacturer is not present");
+  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
+      ConditionEvaluationResult.enabled("@DisabledOnManufacturer is not present");
 
   @TargetApi(24)
   @Override
@@ -31,8 +31,8 @@ class DisabledOnManufacturerCondition implements ExecutionCondition {
       Preconditions.condition(patterns.length > 0, "You must declare at least one Manufacturer in @DisabledOnManufacturer");
 
       return Arrays.stream(patterns).anyMatch(value -> matchesCurrentManufacturer(value, ignoreCase))
-          ? DISABLED_ON_CURRENT_MANUFACTURER
-          : ENABLED_ON_CURRENT_MANUFACTURER;
+          ? disabled()
+          : enabled();
     }
 
     return ENABLED_BY_DEFAULT;

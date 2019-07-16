@@ -9,21 +9,22 @@ import org.junit.platform.commons.util.Preconditions;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 class EnabledOnApiCondition implements ExecutionCondition {
 
-  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = enabled("@EnabledOnApi is not present");
+  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
+      ConditionEvaluationResult.enabled("@EnabledOnApi is not present");
 
   static final int NOT_SET = -1;
 
-  static final ConditionEvaluationResult ENABLED_ON_CURRENT_API =
-      enabled("Enabled on API " + Build.VERSION.SDK_INT);
+  static ConditionEvaluationResult enabled() {
+    return ConditionEvaluationResult.enabled("Enabled on API " + Build.VERSION.SDK_INT);
+  }
 
-  static final ConditionEvaluationResult DISABLED_ON_CURRENT_API =
-      disabled("Disabled on API " + Build.VERSION.SDK_INT);
+  static ConditionEvaluationResult disabled() {
+    return ConditionEvaluationResult.disabled("Disabled on API " + Build.VERSION.SDK_INT);
+  }
 
   @TargetApi(24)
   @Override
@@ -42,8 +43,8 @@ class EnabledOnApiCondition implements ExecutionCondition {
       // Constrain the current API Level based on the presence of "minApi" & "maxApi":
       // If either one is not set at all, that part of the conditional becomes true automatically
       return (!hasLowerBound || Build.VERSION.SDK_INT >= minApi) && (!hasUpperBound || Build.VERSION.SDK_INT <= maxApi)
-          ? ENABLED_ON_CURRENT_API
-          : DISABLED_ON_CURRENT_API;
+          ? enabled()
+          : disabled();
     }
 
     return ENABLED_BY_DEFAULT;

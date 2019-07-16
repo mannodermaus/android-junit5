@@ -74,13 +74,15 @@ object Versions {
 
   const val mockito_core: String = "2.19.0" // available: "2.23.4"
 
-  /**
-   *
-   *   To update Gradle, edit the wrapper file at path:
-   *      ./gradle/wrapper/gradle-wrapper.properties
-   */
-  object Gradle {
-    const val runningVersion: String = "5.0"
+    const val mockito_kotlin: String = "2.1.0"
+
+    /**
+     *
+     *   To update Gradle, edit the wrapper file at path:
+     *      ./gradle/wrapper/gradle-wrapper.properties
+     */
+    object Gradle {
+        const val runningVersion: String = "5.0"
 
     const val currentVersion: String = "5.0"
 

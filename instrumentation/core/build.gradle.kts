@@ -103,6 +103,12 @@ dependencies {
 
   androidTestRuntimeOnly(project(":runner"))
   androidTestRuntimeOnly(Libs.junit_jupiter_engine)
+
+  testImplementation(Libs.junit_jupiter_api)
+  testImplementation(Libs.mockito_core)
+  testImplementation(Libs.mockito_kotlin)
+  testImplementation(Libs.truth)
+  testImplementation(Libs.truth_java8)
 }
 
 // ------------------------------------------------------------------------------------------------

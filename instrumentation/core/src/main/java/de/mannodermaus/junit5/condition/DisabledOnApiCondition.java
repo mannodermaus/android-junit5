@@ -10,12 +10,12 @@ import org.junit.platform.commons.util.Preconditions;
 import java.util.Optional;
 
 import static de.mannodermaus.junit5.condition.EnabledOnApiCondition.*;
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 class DisabledOnApiCondition implements ExecutionCondition {
 
-  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = enabled("@DisabledOnApi is not present");
+  private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
+      ConditionEvaluationResult.enabled("@DisabledOnApi is not present");
 
   @TargetApi(24)
   @Override
@@ -34,8 +34,8 @@ class DisabledOnApiCondition implements ExecutionCondition {
       // Constrain the current API Level based on the presence of "minApi" & "maxApi":
       // If either one is not set at all, that part of the conditional becomes true automatically
       return (!hasLowerBound || Build.VERSION.SDK_INT >= minApi) && (!hasUpperBound || Build.VERSION.SDK_INT <= maxApi)
-          ? DISABLED_ON_CURRENT_API
-          : ENABLED_ON_CURRENT_API;
+          ? disabled()
+          : enabled();
     }
 
     return ENABLED_BY_DEFAULT;
