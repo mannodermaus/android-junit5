@@ -1,7 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import org.gradle.api.Project
 import org.gradle.testing.jacoco.tasks.JacocoReportBase
@@ -17,8 +16,8 @@ import java.io.File
 val BaseVariant.variantData: BaseVariantData
   get() = GroovyInterop.baseVariant_variantData(this)
 
-val VariantScope.safeJavacArtifactFiles: Set<File>
-  get() = GroovyInterop.variantScope_getJavacArtifactFiles(this)
+val BaseVariant.safeJavaCompileDestinationDir: File
+get() = GroovyInterop.baseVariant_javaCompileDestinationDir(this)
 
 /*
  * Compatibility methods for multiple Gradle versions.
