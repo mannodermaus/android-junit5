@@ -2,8 +2,6 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.annotations.NonNull
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.builder.core.VariantTypeImpl
 import org.gradle.api.Project
@@ -33,19 +31,18 @@ class GroovyInterop {
   }
 
   /**
-   * Obtains the Java artifact files of the provided VariantScope in a safe manner.
+   * Obtains the Java class directory for the provided variant in a safe manner.
    *
-   * @because Some scopes, especially for Jacoco, don't have the files at hand through this API
-   * @param variant VariantScope to retrieve the Java artifact files from
+   * @because Recent versions of the Android Gradle Plugin have moved to a Provider-based architecture, deprecating the old direct accessors for tasks.
+   * @param variant Variant to retrieve the destination directory for class files from
    * @return That file
    */
   @NonNull
-  static Set<File> variantScope_getJavacArtifactFiles(VariantScope scope) {
-    if (scope.artifacts.hasArtifact(InternalArtifactType.JAVAC)) {
-      return scope.artifacts.getArtifactFiles(InternalArtifactType.JAVAC).files
+  static File baseVariant_javaCompileDestinationDir(BaseVariant variant) {
+    if (variant.hasProperty("javaCompileProvider")) {
+      return variant.javaCompileProvider.get().destinationDir
     } else {
-      return [new File(scope.globalScope.intermediatesDir,
-            "/classes/" + scope.variantConfiguration.dirName)]
+      return variant.javaCompile.destinationDir
     }
   }
 

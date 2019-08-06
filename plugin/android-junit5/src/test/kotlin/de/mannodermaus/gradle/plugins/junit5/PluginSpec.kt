@@ -387,7 +387,8 @@ class PluginSpec : Spek({
               // TODO Clean this mess up once the Android Gradle Plugin 3.2.0 finally decides on something. :|
               listOf(
                   "build/intermediates/javac/debug/compileDebugJavaWithJavac/classes",
-                  "build/intermediates/classes/debug").forEach { folder ->
+                  "build/intermediates/classes/debug",
+                  "build/intermediates/javac/debug/classes").forEach { folder ->
                 project.file(folder).mkdirs()
                 project.file("$folder/R.class").createNewFile()
                 project.file("$folder/FirstFile.class").createNewFile()
@@ -396,7 +397,8 @@ class PluginSpec : Spek({
 
               listOf(
                   "build/intermediates/javac/release/compileReleaseJavaWithJavac/classes",
-                  "build/intermediates/classes/release").forEach { folder ->
+                  "build/intermediates/classes/release",
+                  "build/intermediates/javac/release/classes").forEach { folder ->
                 project.file(folder).mkdirs()
                 project.file("$folder/R.class").createNewFile()
                 project.file("$folder/SecondFile.class").createNewFile()

@@ -2,8 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.providers
 
 import com.android.build.gradle.api.BaseVariant
 import de.mannodermaus.gradle.plugins.junit5.internal.unitTestVariant
-import de.mannodermaus.gradle.plugins.junit5.safeJavacArtifactFiles
-import de.mannodermaus.gradle.plugins.junit5.variantData
+import de.mannodermaus.gradle.plugins.junit5.safeJavaCompileDestinationDir
 
 /**
  * Default Provider implementation for Java-based test root directories.
@@ -25,5 +24,5 @@ class JavaDirectoryProvider(private val variant: BaseVariant) : DirectoryProvide
           .toSet()
 
   private fun classFoldersOf(variant: BaseVariant) =
-      variant.variantData.scope.safeJavacArtifactFiles
+      setOf(variant.safeJavaCompileDestinationDir)
 }
