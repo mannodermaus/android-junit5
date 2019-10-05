@@ -18,8 +18,8 @@ object Versions {
   const val com_android_tools_build_gradle_32x: String = "3.2.1"
   const val com_android_tools_build_gradle_33x: String = "3.3.2"
   const val com_android_tools_build_gradle_34x: String = "3.4.2"
-  const val com_android_tools_build_gradle_35x: String = "3.5.0-rc01"
-  const val com_android_tools_build_gradle_36x: String = "3.6.0-alpha05"
+  const val com_android_tools_build_gradle_35x: String = "3.5.1"
+  const val com_android_tools_build_gradle_36x: String = "3.6.0-alpha12"
   const val com_android_tools_build_gradle: String = "3.4.2"
 
   const val lint_gradle: String = "26.2.1"
@@ -65,11 +65,11 @@ object Versions {
 
   const val junit_pioneer: String = "0.2.2" // available: "0.3.0"
 
-  const val org_junit_jupiter: String = "5.5.1"
+  const val org_junit_jupiter: String = "5.5.2"
 
-  const val org_junit_platform: String = "1.5.1"
+  const val org_junit_platform: String = "1.5.2"
 
-  const val junit_vintage_engine: String = "5.5.1"
+  const val junit_vintage_engine: String = "5.5.2"
 
   const val mockito_core: String = "2.19.0" // available: "2.23.4"
 
