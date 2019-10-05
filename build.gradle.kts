@@ -32,3 +32,8 @@ allprojects {
   // Store deployment credentials (used in deployment.gradle)
   extra["deployCredentials"] = DeployCredentials(project)
 }
+
+tasks.create<GenerateReadme>("generateReadme") {
+  inputTemplateFile = project.file("README.md.template")
+  outputFile = project.file("README.md")
+}
