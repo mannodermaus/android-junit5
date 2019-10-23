@@ -5,6 +5,7 @@ buildscript {
     google()
     jcenter()
     maven("https://jitpack.io")
+    maven("https://dl.bintray.com/kotlin/kotlin-eap") // Workaround for bug in AGP 4.0.0-alpha01
   }
   dependencies {
     classpath(Libs.kotlin_gradle_plugin)
@@ -27,6 +28,7 @@ allprojects {
     google()
     jcenter()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
+    maven("https://dl.bintray.com/kotlin/kotlin-eap") // Workaround for bug in AGP 4.0.0-alpha01
   }
 
   // Store deployment credentials (used in deployment.gradle)

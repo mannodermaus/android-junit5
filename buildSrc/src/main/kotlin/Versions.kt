@@ -19,7 +19,8 @@ object Versions {
   const val com_android_tools_build_gradle_33x: String = "3.3.2"
   const val com_android_tools_build_gradle_34x: String = "3.4.2"
   const val com_android_tools_build_gradle_35x: String = "3.5.1"
-  const val com_android_tools_build_gradle_36x: String = "3.6.0-alpha12"
+  const val com_android_tools_build_gradle_36x: String = "3.6.0-beta01"
+  const val com_android_tools_build_gradle_40x: String = "4.0.0-alpha01"
   const val com_android_tools_build_gradle: String = "3.4.2"
 
   const val lint_gradle: String = "26.2.1"
