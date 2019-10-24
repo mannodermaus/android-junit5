@@ -3,160 +3,111 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.util.AgpVersion
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.DynamicTest.dynamicTest
 import java.io.File
 
 class FunctionalTests {
 
-  @Test
-  @DisplayName("Android Gradle Plugin 3.2.x, with Build Types")
-  fun agp32x() {
-    val fixtureRoot = File("src/test/projects/agp32x")
-    File(fixtureRoot, "build").deleteRecursively()
+  // Iterate over all values in the AgpVersion enum and,
+  // using the project with that name located in the test resource folder,
+  // run a basic integration test with the JUnit 5 plugin
+  @DisplayName("Integration Tests with Android Gradle Plugin")
+  @TestFactory
+  fun agpIntegrationTests(): List<DynamicTest> =
+      AgpVersion.values()
+          .map { agpVersion ->
+            dynamicTest("Version ${agpVersion.prettyName}") {
+              // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
+              println("Testing AGP ${agpVersion.prettyName}")
 
-    val result = runGradle(AgpVersion.AGP_32X)
-        .withProjectDir(fixtureRoot)
-        .build()
+              // Validate presence of test project
+              val projectName = agpVersion.fileKey
+              val fixtureRoot = File("src/test/projects/$projectName")
+              require(fixtureRoot.exists()) { "Make sure that there is a project folder at: '$fixtureRoot'" }
+              File(fixtureRoot, "build").deleteRecursively()
 
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-    assertThat(result).output().ofTask(":testReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-  }
+              // Run virtual Gradle
+              val result = runGradle(agpVersion)
+                  .withProjectDir(fixtureRoot)
+                  .build()
 
-  @Test
-  @DisplayName("Android Gradle Plugin 3.3.x, simple")
-  fun agp33x() {
-    val fixtureRoot = File("src/test/projects/agp33x")
-    File(fixtureRoot, "build").deleteRecursively()
+              // Assert outputs;
+              assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
 
-    val result = runGradle(AgpVersion.AGP_33X)
-        .withProjectDir(fixtureRoot)
-        .build()
-
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-    assertThat(result).output().ofTask(":testReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-  }
-
-  @Test
-  @DisplayName("Android Gradle Plugin 3.4.x, with Flavors and Build Types")
-  fun agp34x() {
-    val fixtureRoot = File("src/test/projects/agp34x")
-    File(fixtureRoot, "build").deleteRecursively()
-
-    val result = runGradle(AgpVersion.AGP_34X)
-        .withProjectDir(fixtureRoot)
-        .build()
-
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testFreeDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-    assertThat(result).output().ofTask(":testFreeReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      contains("de.mannodermaus.app.JavaFreeReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(3)
-    }
-    assertThat(result).output().ofTask(":testPaidDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinPaidDebugTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-    assertThat(result).output().ofTask(":testPaidReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-  }
-
-  @Test
-  @DisplayName("Android Gradle Plugin 3.5.x, with Flavors and Build Types")
-  fun agp35x() {
-    val fixtureRoot = File("src/test/projects/agp35x")
-    File(fixtureRoot, "build").deleteRecursively()
-
-    val result = runGradle(AgpVersion.AGP_35X)
-        .withProjectDir(fixtureRoot)
-        .build()
-
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testFreeDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-    assertThat(result).output().ofTask(":testFreeReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      contains("de.mannodermaus.app.JavaFreeReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(3)
-    }
-    assertThat(result).output().ofTask(":testPaidDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinPaidDebugTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-    assertThat(result).output().ofTask(":testPaidReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-  }
-
-  @Test
-  @DisplayName("Android Gradle Plugin 3.6.x, with Flavors and Build Types")
-  fun agp36x() {
-    val fixtureRoot = File("src/test/projects/agp36x")
-    File(fixtureRoot, "build").deleteRecursively()
-
-    val result = runGradle(AgpVersion.AGP_36X)
-        .withProjectDir(fixtureRoot)
-        .build()
-
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testFreeDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-    assertThat(result).output().ofTask(":testFreeReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      contains("de.mannodermaus.app.JavaFreeReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(3)
-    }
-    assertThat(result).output().ofTask(":testPaidDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinPaidDebugTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-    assertThat(result).output().ofTask(":testPaidReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.KotlinReleaseTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-  }
+              // based on the project setup, assert different things.
+              // The assignment to the variable is unused, but required in order to enforce
+              // a case for each version
+              with(result) {
+                @Suppress("UNUSED_VARIABLE")
+                val u: Any = when (agpVersion) {
+                  // ------------------------------------------------------------------------------------------------
+                  // AGP 3.2
+                  // - Build Types
+                  // ------------------------------------------------------------------------------------------------
+                  AgpVersion.AGP_32X -> {
+                    assertAgpTests(buildType = "debug", tests = listOf("JavaTest"))
+                    assertAgpTests(buildType = "release", tests = listOf("JavaTest", "KotlinReleaseTest"))
+                  }
+                  // ------------------------------------------------------------------------------------------------
+                  // AGP 3.3
+                  // - Simple
+                  // ------------------------------------------------------------------------------------------------
+                  AgpVersion.AGP_33X -> {
+                    assertAgpTests(buildType = "debug", tests = listOf("JavaTest"))
+                    assertAgpTests(buildType = "release", tests = listOf("JavaTest"))
+                  }
+                  // ------------------------------------------------------------------------------------------------
+                  // AGP 3.4
+                  // - Product Flavors
+                  // - Build Types
+                  // ------------------------------------------------------------------------------------------------
+                  AgpVersion.AGP_34X -> {
+                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
+                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
+                  }
+                  // ------------------------------------------------------------------------------------------------
+                  // AGP 3.5
+                  // - Product Flavors
+                  // - Build Types
+                  // ------------------------------------------------------------------------------------------------
+                  AgpVersion.AGP_35X -> {
+                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
+                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
+                  }
+                  // ------------------------------------------------------------------------------------------------
+                  // AGP 3.6
+                  // - Product Flavors
+                  // - Build Types
+                  // ------------------------------------------------------------------------------------------------
+                  AgpVersion.AGP_36X -> {
+                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
+                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
+                  }
+                  // ------------------------------------------------------------------------------------------------
+                  // AGP 4.0
+                  // - Product Flavors
+                  // - Build Types
+                  // ------------------------------------------------------------------------------------------------
+                  AgpVersion.AGP_40X -> {
+                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
+                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
+                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
+                  }
+                }
+              }
+            }
+          }
 
   @Test
   @DisplayName("Return Android default values")
@@ -168,18 +119,9 @@ class FunctionalTests {
         .withProjectDir(fixtureRoot)
         .build()
 
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testDebugUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.AndroidTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
-    assertThat(result).output().ofTask(":testReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.JavaTest > test() PASSED")
-      contains("de.mannodermaus.app.AndroidTest > test() PASSED")
-      executedTestCount().isEqualTo(2)
-    }
+    assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
+    result.assertAgpTests(buildType = "debug", tests = listOf("JavaTest", "AndroidTest"))
+    result.assertAgpTests(buildType = "release", tests = listOf("JavaTest", "AndroidTest"))
   }
 
   @Test
@@ -192,16 +134,9 @@ class FunctionalTests {
         .withProjectDir(fixtureRoot)
         .build()
 
-    assertThat(result).task(":test")
-        .hasOutcome(TaskOutcome.SUCCESS)
-    assertThat(result).output().ofTask(":testDebugUnitTest").apply {
-      contains("de.mannodermaus.app.AndroidTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
-    assertThat(result).output().ofTask(":testReleaseUnitTest").apply {
-      contains("de.mannodermaus.app.AndroidTest > test() PASSED")
-      executedTestCount().isEqualTo(1)
-    }
+    assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
+    result.assertAgpTests(buildType = "debug", tests = listOf("AndroidTest"))
+    result.assertAgpTests(buildType = "release", tests = listOf("AndroidTest"))
   }
 
   /* Private */
@@ -210,4 +145,25 @@ class FunctionalTests {
       GradleRunner.create()
           .withArguments("test", "--stacktrace")
           .withPrunedPluginClasspath(agpVersion)
+
+  // Helper DSL to assert AGP-specific results of the virtual Gradle executions.
+  // This asserts the output of the build against the given criteria
+  private fun BuildResult.assertAgpTests(
+      buildType: String,
+      productFlavor: String? = null,
+      tests: List<String>) {
+    // Construct task name from given build type and/or product flavor
+    // Examples:
+    // - buildType="debug", productFlavor=null --> ":testDebugUnitTest"
+    // - buildType="debug", productFlavor="free" --> ":testFreeDebugUnitTest"
+    val taskName = ":test${productFlavor?.capitalize() ?: ""}${buildType.capitalize()}UnitTest"
+
+    // Perform assertions
+    assertThat(this).output().ofTask(taskName).apply {
+      tests.forEach { expectedClass ->
+        contains("de.mannodermaus.app.$expectedClass > test() PASSED")
+      }
+      executedTestCount().isEqualTo(tests.size)
+    }
+  }
 }
