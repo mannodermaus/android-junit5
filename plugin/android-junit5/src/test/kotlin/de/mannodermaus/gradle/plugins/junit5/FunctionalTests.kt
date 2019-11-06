@@ -141,8 +141,13 @@ class FunctionalTests {
 
   /* Private */
 
-  private fun runGradle(agpVersion: AgpVersion? = null) =
+  private fun runGradle(agpVersion: AgpVersion = AgpVersion.latest()) =
       GradleRunner.create()
+          .apply {
+            if (agpVersion.requiresGradle != null) {
+              withGradleVersion(agpVersion.requiresGradle)
+            }
+          }
           .withArguments("test", "--stacktrace")
           .withPrunedPluginClasspath(agpVersion)
 

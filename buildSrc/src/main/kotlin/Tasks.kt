@@ -14,12 +14,10 @@ open class WriteClasspathResource : DefaultTask() {
 
   @InputFiles
   lateinit var inputFiles: Iterable<File>
+  @Input
+  lateinit var resourceFileName: String
   @OutputDirectory
   lateinit var outputDir: File
-  lateinit var resourceFileName: String
-
-  override fun getDescription() = "Generates a local classpath resource for functional tests"
-  override fun getGroup() = "build"
 
   @TaskAction
   fun doWork() {
@@ -59,9 +57,6 @@ open class GenerateReadme : DefaultTask() {
   lateinit var inputTemplateFile: File
   @OutputFile
   lateinit var outputFile: File
-
-  override fun getDescription() = "Generates the README.md file from a template"
-  override fun getGroup() = "documentation"
 
   @TaskAction
   fun doWork() {

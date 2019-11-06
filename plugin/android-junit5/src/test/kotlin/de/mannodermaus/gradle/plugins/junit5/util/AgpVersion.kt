@@ -1,8 +1,10 @@
 package de.mannodermaus.gradle.plugins.junit5.util
 
-enum class AgpVersion(val fileKey: String) {
-  AGP_32X("agp32x"),
-  AGP_33X("agp33x"),
+enum class AgpVersion(val fileKey: String,
+                      val requiresGradle: String? = null) {
+
+  AGP_32X("agp32x", requiresGradle = "4.7"),
+  AGP_33X("agp33x", requiresGradle = "5.0"),
   AGP_34X("agp34x"),
   AGP_35X("agp35x"),
   AGP_36X("agp36x"),
