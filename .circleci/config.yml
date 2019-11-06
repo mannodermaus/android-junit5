@@ -4,8 +4,7 @@ defaults: &defaults
   docker:
     - image: circleci/android:api-28
       environment:
-        JAVA_OPTS: -Xmx1536m
-        GRADLE_OPTS: '-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs="-Xmx1536m -XX:+HeapDumpOnOutOfMemoryError"'
+        GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx10248m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError"'
 
 cache_key: &cache_key
   key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "instrumentation/api/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Libs.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Versions.kt" }}
