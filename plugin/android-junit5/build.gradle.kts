@@ -1,9 +1,6 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-import com.google.common.io.Files
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("groovy")

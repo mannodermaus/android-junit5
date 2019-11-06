@@ -9,8 +9,8 @@ fun Project.fixCompileTaskChain() {
       classesTaskName = "classes")
 
   setupCompileChain(
-      sourceCompileName = "compileTestGroovy",
-      targetCompileName = "compileTestKotlin",
+      sourceCompileName = "compileTestKotlin",
+      targetCompileName = "compileTestGroovy",
       javaCompileName = "compileTestJava",
       classesTaskName = "testClasses")
 }
@@ -29,12 +29,8 @@ private fun Project.setupCompileChain(sourceCompileName: String,
   val sourceCompile = tasks.getByName(sourceCompileName) as AbstractCompile
   val classesTask = tasks.getByName(classesTaskName)
 
-  logger.info("Remove dependency '$targetCompile' -> '$javaCompileName'")
-  targetCompile.dependsOn.remove(javaCompileName)
-
-  logger.info("Add dependency '$sourceCompile' -> '$targetCompile' (can call from left into right)")
-  sourceCompile.dependsOn.add(targetCompile)
-
-  sourceCompile.classpath += project.files(targetCompile.destinationDir)
-  classesTask.dependsOn.add(sourceCompile)
+  // Allow calling the source language's classes from the target language.
+  // In this case, we allow calling Kotlin from Groovy - it has to be noted however,
+  // that the other way does not work!
+  targetCompile.classpath += project.files(sourceCompile.destinationDir)
 }
