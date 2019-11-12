@@ -4,13 +4,14 @@ package de.mannodermaus.junit5.test
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.AndroidJUnit5
-import de.mannodermaus.junit5.ParsedFilters
+import de.mannodermaus.junit5.AndroidJUnit5RunnerParams
 import de.mannodermaus.junit5.jupiterTestMethods
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.TagFilter
 import org.junit.runner.notification.RunNotifier
 
@@ -30,7 +31,12 @@ class ExtensionsTests {
       val notifier = RunNotifier()
       val listener = CountingRunListener()
       notifier.addListener(listener)
-      AndroidJUnit5(klass, ParsedFilters.EMPTY).run(notifier)
+
+      val params = AndroidJUnit5RunnerParams(
+          selectors = listOf(DiscoverySelectors.selectClass(klass)),
+          filters = emptyList()
+      )
+      AndroidJUnit5(klass, params).run(notifier)
 
       assertThat(listener.count())
           .named("Executed ${listener.count()} instead of $expectExecutedTests tests: '${listener.methodNames()}'")
@@ -49,8 +55,11 @@ class ExtensionsTests {
     val listener = CountingRunListener()
     notifier.addListener(listener)
 
-    val filters = listOf(TagFilter.excludeTags("slow"))
-    AndroidJUnit5(klass, ParsedFilters(filters)).run(notifier)
+    val params = AndroidJUnit5RunnerParams(
+        selectors = listOf(DiscoverySelectors.selectClass(klass)),
+        filters = listOf(TagFilter.excludeTags("slow"))
+    )
+    AndroidJUnit5(klass, params).run(notifier)
 
     assertThat(listener.count())
         .named("Executed ${listener.count()} instead of 0 tests: '${listener.methodNames()}'")
