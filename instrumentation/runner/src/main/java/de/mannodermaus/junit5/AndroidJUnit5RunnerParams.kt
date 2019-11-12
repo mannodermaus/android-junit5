@@ -6,8 +6,8 @@ import org.junit.platform.launcher.LauncherDiscoveryRequest
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 
 data class AndroidJUnit5RunnerParams(
-    private val selectors: List<DiscoverySelector>,
-    private val filters: List<Filter<*>>
+    private val selectors: List<DiscoverySelector> = emptyList(),
+    private val filters: List<Filter<*>> = emptyList()
 ) {
 
   fun createDiscoveryRequest(): LauncherDiscoveryRequest =
