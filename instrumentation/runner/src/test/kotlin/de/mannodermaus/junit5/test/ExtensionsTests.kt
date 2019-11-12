@@ -4,7 +4,7 @@ package de.mannodermaus.junit5.test
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.AndroidJUnit5
-import de.mannodermaus.junit5.ParsedFilters
+import de.mannodermaus.junit5.discovery.GeneratedFilters
 import de.mannodermaus.junit5.jupiterTestMethods
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ class ExtensionsTests {
       val notifier = RunNotifier()
       val listener = CountingRunListener()
       notifier.addListener(listener)
-      AndroidJUnit5(klass, ParsedFilters.EMPTY).run(notifier)
+      AndroidJUnit5(klass, GeneratedFilters.EMPTY).run(notifier)
 
       assertThat(listener.count())
           .named("Executed ${listener.count()} instead of $expectExecutedTests tests: '${listener.methodNames()}'")
@@ -50,7 +50,7 @@ class ExtensionsTests {
     notifier.addListener(listener)
 
     val filters = listOf(TagFilter.excludeTags("slow"))
-    AndroidJUnit5(klass, ParsedFilters(filters)).run(notifier)
+    AndroidJUnit5(klass, GeneratedFilters(filters)).run(notifier)
 
     assertThat(listener.count())
         .named("Executed ${listener.count()} instead of 0 tests: '${listener.methodNames()}'")
