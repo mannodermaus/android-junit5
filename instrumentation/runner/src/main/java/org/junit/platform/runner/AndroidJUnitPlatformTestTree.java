@@ -14,7 +14,6 @@ import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.suite.api.SuiteDisplayName;
 import org.junit.platform.suite.api.UseTechnicalNames;
 import org.junit.runner.Description;
-import org.junit.runner.manipulation.Filter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +27,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toSet;
 import static org.junit.platform.runner.AndroidJUnit5Utils.isDynamicTest;
 
 /**
@@ -43,16 +41,18 @@ public final class AndroidJUnitPlatformTestTree {
   private final ModifiedTestPlan testPlan;
   private final Function<TestIdentifier, String> nameExtractor;
   private final Description suiteDescription;
-  private final Class<?> testClass;
 
   public AndroidJUnitPlatformTestTree(TestPlan testPlan, Class<?> testClass) {
     this.testPlan = new ModifiedTestPlan(testPlan);
-    this.testClass = testClass;
     this.nameExtractor = this::getTestName;
     this.suiteDescription = generateSuiteDescription(testPlan, testClass);
   }
 
   private String getTestName(TestIdentifier identifier) {
+    if (identifier.isContainer()) {
+      return getTechnicalName(identifier);
+    }
+
     if (isDynamicTest(identifier)) {
       // Collect all dynamic tests' IDs from this identifier,
       // all the way up to the first non-dynamic test.
@@ -75,9 +75,7 @@ public final class AndroidJUnitPlatformTestTree {
   }
 
   private String formatTestName(TestIdentifier identifier) {
-    return useTechnicalNames(testClass)
-        ? getTechnicalName(identifier)
-        : identifier.getDisplayName().replace("()", "");
+    return identifier.getDisplayName().replace("()", "");
   }
 
   public TestPlan getTestPlan() {
@@ -165,32 +163,6 @@ public final class AndroidJUnitPlatformTestTree {
     return testPlan.getDescendants(ancestor).stream()
         .filter(TestIdentifier::isTest)
         .collect(toCollection(LinkedHashSet::new));
-    // @formatter:on
-  }
-
-  Set<TestIdentifier> getFilteredLeaves(Filter filter) {
-    Set<TestIdentifier> identifiers = applyFilterToDescriptions(filter);
-    return removeNonLeafIdentifiers(identifiers);
-  }
-
-  private Set<TestIdentifier> removeNonLeafIdentifiers(Set<TestIdentifier> identifiers) {
-    return identifiers.stream().filter(isALeaf(identifiers)).collect(toSet());
-  }
-
-  private Predicate<? super TestIdentifier> isALeaf(Set<TestIdentifier> identifiers) {
-    return testIdentifier -> {
-      Set<TestIdentifier> descendants = testPlan.getDescendants(testIdentifier);
-      return identifiers.stream().noneMatch(descendants::contains);
-    };
-  }
-
-  private Set<TestIdentifier> applyFilterToDescriptions(Filter filter) {
-    // @formatter:off
-    return descriptions.entrySet()
-        .stream()
-        .filter(entry -> filter.shouldRun(entry.getValue()))
-        .map(Map.Entry::getKey)
-        .collect(toSet());
     // @formatter:on
   }
 
