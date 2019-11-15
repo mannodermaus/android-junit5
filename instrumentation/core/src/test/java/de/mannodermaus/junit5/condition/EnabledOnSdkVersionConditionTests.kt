@@ -8,19 +8,19 @@ import org.junit.jupiter.api.extension.ExecutionCondition
 import org.junit.platform.commons.PreconditionViolationException
 
 /**
- * Unit tests for [EnabledOnApiCondition].
+ * Unit tests for [EnabledOnSdkVersionCondition].
  *
- * This works together with [EnabledOnApiIntegrationTests]: The test methods
+ * This works together with [EnabledOnSdkVersionIntegrationTests]: The test methods
  * in both classes MUST be named identical.
  */
-class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
+class EnabledOnSdkVersionConditionTests : AbstractExecutionConditionTests() {
 
-  override fun getExecutionCondition(): ExecutionCondition = EnabledOnApiCondition()
+  override fun getExecutionCondition(): ExecutionCondition = EnabledOnSdkVersionCondition()
 
-  override fun getTestClass(): Class<*> = EnabledOnApiIntegrationTests::class.java
+  override fun getTestClass(): Class<*> = EnabledOnSdkVersionIntegrationTests::class.java
 
   /**
-   * @see [EnabledOnApiIntegrationTests.invalidBecauseNoValueGiven]
+   * @see [EnabledOnSdkVersionIntegrationTests.invalidBecauseNoValueGiven]
    */
   @Test
   fun invalidBecauseNoValueGiven() {
@@ -28,11 +28,11 @@ class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
       evaluateCondition()
     }
 
-    assertThat(expected).hasMessageThat().contains("At least one value must be provided in @EnabledOnApi")
+    assertThat(expected).hasMessageThat().contains("At least one value must be provided in @EnabledOnSdkVersion")
   }
 
   /**
-   * @see [EnabledOnApiIntegrationTests.enabledBecauseMinApiIsMatched]
+   * @see [EnabledOnSdkVersionIntegrationTests.enabledBecauseMinApiIsMatched]
    */
   @Test
   fun enabledBecauseMinApiIsMatched() {
@@ -44,7 +44,7 @@ class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
   }
 
   /**
-   * @see [EnabledOnApiIntegrationTests.enabledBecauseMaxApiIsMatched]
+   * @see [EnabledOnSdkVersionIntegrationTests.enabledBecauseMaxApiIsMatched]
    */
   @Test
   fun enabledBecauseMaxApiIsMatched() {
@@ -56,7 +56,7 @@ class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
   }
 
   /**
-   * @see [EnabledOnApiIntegrationTests.enabledBecauseApiIsInValidRange]
+   * @see [EnabledOnSdkVersionIntegrationTests.enabledBecauseApiIsInValidRange]
    */
   @Test
   fun enabledBecauseApiIsInValidRange() {
@@ -68,7 +68,7 @@ class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
   }
 
   /**
-   * @see [EnabledOnApiIntegrationTests.disabledBecauseMinApiTooLow]
+   * @see [EnabledOnSdkVersionIntegrationTests.disabledBecauseMinApiTooLow]
    */
   @Test
   fun disabledBecauseMinApiTooLow() {
@@ -80,7 +80,7 @@ class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
   }
 
   /**
-   * @see [EnabledOnApiIntegrationTests.disabledBecauseMaxApiTooHigh]
+   * @see [EnabledOnSdkVersionIntegrationTests.disabledBecauseMaxApiTooHigh]
    */
   @Test
   fun disabledBecauseMaxApiTooHigh() {
@@ -92,7 +92,7 @@ class EnabledOnApiConditionTests : AbstractExecutionConditionTests() {
   }
 
   /**
-   * @see [EnabledOnApiIntegrationTests.disabledBecauseApiIsOutsideValidRange]
+   * @see [EnabledOnSdkVersionIntegrationTests.disabledBecauseApiIsOutsideValidRange]
    */
   @Test
   fun disabledBecauseApiIsOutsideValidRange() {
