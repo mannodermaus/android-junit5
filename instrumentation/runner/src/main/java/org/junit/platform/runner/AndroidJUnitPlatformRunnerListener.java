@@ -1,6 +1,7 @@
 package org.junit.platform.runner;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -9,6 +10,7 @@ import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
+import static de.mannodermaus.junit5.ExtensionsKt.LOG_TAG;
 import static org.junit.platform.engine.TestExecutionResult.Status.ABORTED;
 import static org.junit.platform.engine.TestExecutionResult.Status.FAILED;
 
@@ -43,15 +45,16 @@ public final class AndroidJUnitPlatformRunnerListener implements TestExecutionLi
   @Override
   public void executionSkipped(TestIdentifier testIdentifier, String reason) {
     if (testIdentifier.isTest()) {
-      fireTestIgnored(testIdentifier);
+      fireTestIgnored(testIdentifier, reason);
     } else {
-      testTree.getTestsInSubtree(testIdentifier).forEach(this::fireTestIgnored);
+      testTree.getTestsInSubtree(testIdentifier).forEach(identifier -> fireTestIgnored(identifier, reason));
     }
   }
 
-  private void fireTestIgnored(TestIdentifier testIdentifier) {
+  private void fireTestIgnored(TestIdentifier testIdentifier, String reason) {
     Description description = testTree.getDescription(testIdentifier);
     this.notifier.fireTestIgnored(description);
+    Log.w(LOG_TAG, testTree.getTestName(testIdentifier) + " is ignored. " + reason);
   }
 
   @Override

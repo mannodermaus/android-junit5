@@ -48,7 +48,7 @@ public final class AndroidJUnitPlatformTestTree {
     this.suiteDescription = generateSuiteDescription(testPlan, testClass);
   }
 
-  private String getTestName(TestIdentifier identifier) {
+  String getTestName(TestIdentifier identifier) {
     if (identifier.isContainer()) {
       return getTechnicalName(identifier);
     }
