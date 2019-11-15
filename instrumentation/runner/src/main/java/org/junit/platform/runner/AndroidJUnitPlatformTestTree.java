@@ -16,8 +16,11 @@ import org.junit.platform.suite.api.UseTechnicalNames;
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,7 +29,7 @@ import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.platform.runner.AndroidJUnit5Utils.isTestTemplateInvocation;
+import static org.junit.platform.runner.AndroidJUnit5Utils.isDynamicTest;
 
 /**
  * Required, public extension to allow access to package-private TestTree class.
@@ -50,20 +53,31 @@ public final class AndroidJUnitPlatformTestTree {
   }
 
   private String getTestName(TestIdentifier identifier) {
-    String baseName = useTechnicalNames(testClass) ? getTechnicalName(identifier) : identifier.getDisplayName();
-    if (isTestTemplateInvocation(identifier)) {
-      // Fold surrounding test template name into a distinct format
-      String reportName = identifier.getLegacyReportingName();
+    if (isDynamicTest(identifier)) {
+      // Collect all dynamic tests' IDs from this identifier,
+      // all the way up to the first non-dynamic test.
+      // Collect the name of all these into a list, then finally
+      // compose the final name from this list. Note that, because we
+      // move upwards the test plan, the elements must be reversed
+      // before the final name can be composed.
+      List<String> nameComponents = new ArrayList<>();
+      TestIdentifier currentNode = identifier;
+      do {
+        nameComponents.add(formatTestName(currentNode));
+        currentNode = testPlan.getRealParent(currentNode).orElse(null);
+      } while (currentNode != null && isDynamicTest(currentNode));
 
-      int bracketIndex = baseName.indexOf("] ");
-      if (bracketIndex > -1 && baseName.length() + 2 >= bracketIndex) {
-        baseName = baseName.substring(bracketIndex + 2);
-      }
-
-      return reportName + ": " + baseName;
+      Collections.reverse(nameComponents);
+      return String.join(": ", nameComponents);
     }
 
-    return baseName;
+    return formatTestName(identifier);
+  }
+
+  private String formatTestName(TestIdentifier identifier) {
+    return useTechnicalNames(testClass)
+        ? getTechnicalName(identifier)
+        : identifier.getDisplayName().replace("()", "");
   }
 
   public TestPlan getTestPlan() {
@@ -192,17 +206,33 @@ public final class AndroidJUnitPlatformTestTree {
       this.delegate = delegate;
     }
 
+    Optional<TestIdentifier> getRealParent(TestIdentifier child) {
+      // Because the overridden "getParent()" from the superclass is modified,
+      // expose this additional method to access the actual parent identifier of the given child.
+      // This is needed when composing the display name of a dynamic test.
+      return delegate.getParent(child);
+    }
+
     @Override
     public Optional<TestIdentifier> getParent(TestIdentifier child) {
       // Since parameterized tests are interpreted incorrectly by Android,
       // they access their grandparent identifier, instead of the parent like usual.
       // This causes each invocation to be grouped under the class, rather than next to it
       // using a butchered container name.
-      if (isTestTemplateInvocation(child)) {
-        return delegate.getParent(child).flatMap(delegate::getParent);
+      if (isDynamicTest(child)) {
+        return findEligibleParentOfDynamicTest(child);
       }
 
-      return delegate.getParent(child);
+      return getRealParent(child);
+    }
+
+    private Optional<TestIdentifier> findEligibleParentOfDynamicTest(TestIdentifier child) {
+      Optional<TestIdentifier> node = delegate.getParent(child);
+      while (node.isPresent() && isDynamicTest(node.get())) {
+        node = node.flatMap(delegate::getParent);
+      }
+
+      return node;
     }
 
     /* Unchanged */

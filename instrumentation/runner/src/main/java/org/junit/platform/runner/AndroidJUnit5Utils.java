@@ -1,8 +1,22 @@
 package org.junit.platform.runner;
 
+import android.annotation.SuppressLint;
+
 import org.junit.platform.launcher.TestIdentifier;
 
+import java.util.Arrays;
+import java.util.List;
+
+@SuppressLint("NewApi")
 class AndroidJUnit5Utils {
+
+  private static final List<String> DYNAMIC_TEST_PREFIXES = Arrays.asList(
+      "[test-template-invocation",
+      "[dynamic-test",
+      "[dynamic-container",
+      "[test-factory",
+      "[test-template"
+  );
 
   private AndroidJUnit5Utils() {
   }
@@ -30,7 +44,8 @@ class AndroidJUnit5Utils {
    * @param identifier Identifier to check
    * @return True if the TestIdentifier is a test template invocation, false otherwise
    */
-  static boolean isTestTemplateInvocation(TestIdentifier identifier) {
-    return getShortId(identifier).startsWith("[test-template-invocation");
+  static boolean isDynamicTest(TestIdentifier identifier) {
+    String shortId = getShortId(identifier);
+    return DYNAMIC_TEST_PREFIXES.stream().anyMatch(shortId::startsWith);
   }
 }
