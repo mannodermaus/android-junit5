@@ -33,16 +33,16 @@ class EnabledOnSdkVersionCondition implements ExecutionCondition {
 
     if (optional.isPresent()) {
       EnabledOnSdkVersion annotation = optional.get();
-      int minApi = annotation.min();
-      int maxApi = annotation.max();
+      int fromApi = annotation.from();
+      int untilApi = annotation.until();
 
-      boolean hasLowerBound = minApi != NOT_SET;
-      boolean hasUpperBound = maxApi != NOT_SET;
+      boolean hasLowerBound = fromApi != NOT_SET;
+      boolean hasUpperBound = untilApi != NOT_SET;
       Preconditions.condition(hasLowerBound || hasUpperBound, "At least one value must be provided in @EnabledOnSdkVersion");
 
-      // Constrain the current API Level based on the presence of "minApi" & "maxApi":
+      // Constrain the current API Level based on the presence of "fromApi" & "untilApi":
       // If either one is not set at all, that part of the conditional becomes true automatically
-      return (!hasLowerBound || Build.VERSION.SDK_INT >= minApi) && (!hasUpperBound || Build.VERSION.SDK_INT <= maxApi)
+      return (!hasLowerBound || Build.VERSION.SDK_INT >= fromApi) && (!hasUpperBound || Build.VERSION.SDK_INT <= untilApi)
           ? enabled()
           : disabled();
     }

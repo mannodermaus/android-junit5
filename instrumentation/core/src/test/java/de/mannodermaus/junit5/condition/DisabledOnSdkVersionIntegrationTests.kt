@@ -17,37 +17,37 @@ class DisabledOnSdkVersionIntegrationTests {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(min = 24)
+  @DisabledOnSdkVersion(from = 24)
   @Test
   fun disabledBecauseMinApiIsMatched() {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(max = 26)
+  @DisabledOnSdkVersion(until = 26)
   @Test
   fun disabledBecauseMaxApiIsMatched() {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(min = 24, max = 29)
+  @DisabledOnSdkVersion(from = 24, until = 29)
   @Test
   fun disabledBecauseApiIsInValidRange() {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(min = 27)
+  @DisabledOnSdkVersion(from = 27)
   @Test
   fun enabledBecauseMinApiLowEnough() {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(max = 27)
+  @DisabledOnSdkVersion(until = 27)
   @Test
   fun disabledBecauseMaxApiHighEnough() {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(min = 27, max = 29)
+  @DisabledOnSdkVersion(from = 27, until = 29)
   @Test
   fun disabledBecauseApiIsInsideValidRange() {
   }
