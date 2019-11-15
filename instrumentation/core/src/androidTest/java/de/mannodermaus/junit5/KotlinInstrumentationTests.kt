@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import de.mannodermaus.junit5.condition.EnabledOnManufacturer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
@@ -34,6 +35,12 @@ class KotlinInstrumentationTests {
   @ParameterizedTest
   @ValueSource(ints = [1, 4, 6, 7])
   fun kotlinTestWithParameters(value: Int) {
+
+  }
+
+  @EnabledOnManufacturer(["Samsung"])
+  @Test
+  fun onlyOnSamsung() {
 
   }
 }

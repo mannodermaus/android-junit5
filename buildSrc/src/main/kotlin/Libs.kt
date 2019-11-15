@@ -88,7 +88,12 @@ object Libs {
     /**
      * https://github.com/google/truth */
     const val truth: String = "com.google.truth:truth:" +
-            Versions.truth
+        Versions.truth
+
+    /**
+     * https://github.com/google/truth */
+    const val truth_java8: String = "com.google.truth.extensions:truth-java8-extension:" +
+        Versions.truth
 
     /**
      * https://dl.google.com/dl/android/maven2 */
@@ -225,4 +230,8 @@ object Libs {
     /**
      * https://github.com/mockito/mockito */
     const val mockito_core: String = "org.mockito:mockito-core:" + Versions.mockito_core
+
+    /**
+     * https://github.com/nhaarman/mockito-kotlin */
+    const val mockito_kotlin: String = "com.nhaarman.mockitokotlin2:mockito-kotlin:" + Versions.mockito_kotlin
 }
