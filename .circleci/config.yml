@@ -51,13 +51,12 @@ jobs:
           name: (Instrumentation) Build
           command: |
             cd instrumentation
-            ./gradlew :api:assembleDebug \
-            :core:assembleDebug :core:assembleDebugAndroidTest \
+            ./gradlew :core:assembleDebug :core:assembleDebugAndroidTest \
             :runner:assembleDebug \
             :sample:assembleDebug --stacktrace --no-daemon
       - run:
           name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :api:check :core:check :runner:check --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew :core:check :runner:check --stacktrace --no-daemon
       - run:
           name: Store Google Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
