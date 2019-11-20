@@ -7,7 +7,7 @@ defaults: &defaults
         GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx10248m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError"'
 
 cache_key: &cache_key
-  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "instrumentation/api/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Libs.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Versions.kt" }}
+  key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Libs.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Versions.kt" }}
 
 version: 2
 jobs:
@@ -89,9 +89,6 @@ jobs:
           root: ~/root
           paths:
             - project
-      - store_artifacts:
-          path: instrumentation/api/build/reports
-          destination: instrumentation-api
       - store_artifacts:
           path: instrumentation/core/build/reports
           destination: instrumentation-core
