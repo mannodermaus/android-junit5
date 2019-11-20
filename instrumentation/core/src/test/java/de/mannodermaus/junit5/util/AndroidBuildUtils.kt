@@ -1,6 +1,8 @@
 package de.mannodermaus.junit5.util
 
 import android.os.Build
+import android.os.Bundle
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
@@ -23,6 +25,24 @@ object AndroidBuildUtils {
       block()
     } finally {
       resetManufacturer()
+    }
+  }
+
+  fun withMockedInstrumentation(block: () -> Unit) {
+    val (oldInstrumentation, oldArguments) = try {
+      InstrumentationRegistry.getInstrumentation() to InstrumentationRegistry.getArguments()
+    } catch (ignored: Throwable) {
+      null to null
+    }
+
+    try {
+      val instrumentation = StubInstrumentation()
+      InstrumentationRegistry.registerInstance(instrumentation, Bundle())
+      block()
+    } finally {
+      if (oldInstrumentation != null) {
+        InstrumentationRegistry.registerInstance(oldInstrumentation, oldArguments)
+      }
     }
   }
 

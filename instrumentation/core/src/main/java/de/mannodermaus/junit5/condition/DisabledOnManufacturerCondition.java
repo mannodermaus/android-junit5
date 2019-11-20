@@ -38,7 +38,7 @@ class DisabledOnManufacturerCondition implements ExecutionCondition {
     return ENABLED_BY_DEFAULT;
   }
 
-  private boolean matchesCurrentManufacturer(String value, boolean ignoreCase) {
+  protected boolean matchesCurrentManufacturer(String value, boolean ignoreCase) {
     if (ignoreCase) {
       return Build.MANUFACTURER.equalsIgnoreCase(value);
     } else {
