@@ -7,6 +7,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import de.mannodermaus.junit5.ActivityScenarioExtension
+import de.mannodermaus.junit5.condition.EnabledIfBuildConfigValue
 import de.mannodermaus.junit5.sample.ActivityOne
 import de.mannodermaus.junit5.sample.R
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,6 +25,7 @@ class ActivityOneTest {
   @RegisterExtension
   val scenarioExtension = ActivityScenarioExtension.launch<ActivityOne>()
 
+  @EnabledIfBuildConfigValue(named = "MY_VALUE", matches = "true")
   @Test
   fun testExample(scenario: ActivityScenario<ActivityOne>) {
     onView(withId(R.id.textView)).check(matches(withText("0")))

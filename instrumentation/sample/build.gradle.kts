@@ -42,6 +42,8 @@ android {
     // Make sure to use the AndroidJUnitRunner (or a sub-class) in order to hook in the JUnit 5 Test Builder
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+
+    buildConfigField("boolean", "MY_VALUE", "true")
   }
 
   // Add Kotlin source directory to all source sets
