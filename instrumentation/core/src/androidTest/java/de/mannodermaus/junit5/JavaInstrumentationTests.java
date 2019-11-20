@@ -11,6 +11,10 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -26,6 +30,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
+import de.mannodermaus.junit5.condition.DisabledOnManufacturer;
+import de.mannodermaus.junit5.condition.DisabledOnSdkVersion;
+import de.mannodermaus.junit5.condition.EnabledOnManufacturer;
+import de.mannodermaus.junit5.condition.EnabledOnSdkVersion;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
@@ -66,7 +75,7 @@ class JavaInstrumentationTests {
   }
 
   @TestFactory
-  List<DynamicNode> testTemplate() {
+  List<DynamicNode> testFactory() {
     return Arrays.asList(
         DynamicContainer.dynamicContainer("Container 1",
             Arrays.asList(
@@ -100,6 +109,27 @@ class JavaInstrumentationTests {
     if (!fruits.contains(fruit)) {
       fail();
     }
+  }
+
+
+  @EnabledOnSdkVersion(from = 28)
+  @Test
+  void testOnPieAndNewer() {
+  }
+
+  @DisabledOnSdkVersion(until = 28)
+  @Test
+  void testNotOnPieOrOlder() {
+  }
+
+  @EnabledOnManufacturer("imaginary")
+  @Test
+  void testForImaginaryDevicesOnly() {
+  }
+
+  @DisabledOnManufacturer("google")
+  @Test
+  void testNotForGoogleDevices() {
   }
 
   public static class CustomTestProvider implements TestTemplateInvocationContextProvider {
