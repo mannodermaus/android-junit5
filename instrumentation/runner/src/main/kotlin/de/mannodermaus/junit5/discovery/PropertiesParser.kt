@@ -1,6 +1,6 @@
 package de.mannodermaus.junit5.discovery
 
-object EnvironmentVariablesParser {
+object PropertiesParser {
 
   @JvmStatic
   fun fromString(string: String) =

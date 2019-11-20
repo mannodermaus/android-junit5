@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import de.mannodermaus.junit5.discovery.EnvironmentVariablesParser;
 import de.mannodermaus.junit5.discovery.GeneratedFilters;
 import de.mannodermaus.junit5.discovery.ParsedSelectors;
+import de.mannodermaus.junit5.discovery.PropertiesParser;
 
 import static de.mannodermaus.junit5.ExtensionsKt.LOG_TAG;
 import static org.junit.platform.runner.AndroidJUnit5Utils.libcore_os_setenv;
@@ -45,6 +45,7 @@ import static org.junit.platform.runner.AndroidJUnit5Utils.libcore_os_setenv;
 public final class AndroidJUnit5 extends Runner {
 
   private static final String ARG_ENVIRONMENT_VARIABLES = "environmentVariables";
+  private static final String ARG_SYSTEM_PROPERTIES = "systemProperties";
 
   private final Class<?> testClass;
   private final Launcher launcher = LauncherFactory.create();
@@ -69,9 +70,18 @@ public final class AndroidJUnit5 extends Runner {
     Map<String, String> environmentVariables;
     String environmentVariablesArgument = arguments.getString(ARG_ENVIRONMENT_VARIABLES);
     if (environmentVariablesArgument != null) {
-      environmentVariables = EnvironmentVariablesParser.fromString(environmentVariablesArgument);
+      environmentVariables = PropertiesParser.fromString(environmentVariablesArgument);
     } else {
       environmentVariables = Collections.emptyMap();
+    }
+
+    // Parse system properties & pass them to the JVM
+    Map<String, String> systemProperties;
+    String systemPropertiesArgument = arguments.getString(ARG_SYSTEM_PROPERTIES);
+    if (systemPropertiesArgument != null) {
+      systemProperties = PropertiesParser.fromString(systemPropertiesArgument);
+    } else {
+      systemProperties = Collections.emptyMap();
     }
 
     // Parse the selectors to use from what's handed to the runner.
@@ -83,7 +93,7 @@ public final class AndroidJUnit5 extends Runner {
     // the filters to apply by the AndroidJUnit5 runner.
     List<Filter<?>> filters = GeneratedFilters.fromContext(instrumentation.getContext());
 
-    return new AndroidJUnit5RunnerParams(selectors, filters, environmentVariables);
+    return new AndroidJUnit5RunnerParams(selectors, filters, environmentVariables, systemProperties);
   }
 
   @Override
@@ -93,7 +103,17 @@ public final class AndroidJUnit5 extends Runner {
 
   @Override
   public void run(RunNotifier notifier) {
-    // Apply all environment variables to the running process
+    // Apply all environment variables & system properties to the running process
+    registerEnvironmentVariables();
+    registerSystemProperties();
+
+    // Finally, launch the test plan on the JUnit Platform
+    launcher.execute(testTree.getTestPlan(), new AndroidJUnitPlatformRunnerListener(testTree, notifier));
+  }
+
+  /* Private */
+
+  private void registerEnvironmentVariables() {
     runnerParams.getEnvironmentVariables().forEach((key, value) -> {
       try {
         libcore_os_setenv(key, value);
@@ -101,12 +121,17 @@ public final class AndroidJUnit5 extends Runner {
         Log.w(LOG_TAG, "Error while setting up environment variables.", t);
       }
     });
-
-    // Finally, launch the test plan on the JUnit Platform
-    launcher.execute(testTree.getTestPlan(), new AndroidJUnitPlatformRunnerListener(testTree, notifier));
   }
 
-  /* Private */
+  private void registerSystemProperties() {
+    runnerParams.getSystemProperties().forEach((key, value) -> {
+      try {
+        System.setProperty(key, value);
+      } catch (Throwable t) {
+        Log.w(LOG_TAG, "Error while setting up system properties.", t);
+      }
+    });
+  }
 
   private AndroidJUnitPlatformTestTree generateTestTree(LauncherDiscoveryRequest discoveryRequest) {
     TestPlan testPlan = launcher.discover(discoveryRequest);
