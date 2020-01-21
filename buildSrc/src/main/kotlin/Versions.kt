@@ -53,7 +53,7 @@ object Versions {
 
   const val android_maven_publish: String = "3.6.2"
 
-  const val junit: String = "4.12"
+  const val junit: String = "4.13"
 
   const val assertj_core: String = "3.11.1"
 
