@@ -53,7 +53,7 @@ object Versions {
 
   const val android_maven_publish: String = "3.6.2"
 
-  const val junit: String = "4.12"
+  const val junit: String = "4.13"
 
   const val assertj_core: String = "3.11.1"
 
@@ -64,25 +64,20 @@ object Versions {
   const val org_jacoco_agent: String = "0.8.2"
   const val org_jacoco_ant: String = "0.8.2"
 
-  const val junit_pioneer: String = "0.2.2" // available: "0.3.0"
+  const val junit_pioneer: String = "0.2.2"
 
-  const val org_junit_jupiter: String = "5.5.2"
+  const val org_junit_jupiter: String = "5.6.0"
 
-  const val org_junit_platform: String = "1.5.2"
+  const val org_junit_platform: String = "1.6.0"
 
-  const val junit_vintage_engine: String = "5.5.2"
+  const val junit_vintage_engine: String = "5.6.0"
 
-  const val mockito_core: String = "2.19.0" // available: "2.23.4"
+  const val mockito_core: String = "2.19.0"
 
-    const val mockito_kotlin: String = "2.1.0"
+  const val mockito_kotlin: String = "2.1.0"
 
-    /**
-     *
-     *   To update Gradle, edit the wrapper file at path:
-     *      ./gradle/wrapper/gradle-wrapper.properties
-     */
-    object Gradle {
-        const val runningVersion: String = "5.0"
+  object Gradle {
+    const val runningVersion: String = "5.0"
 
     const val currentVersion: String = "5.0"
 
