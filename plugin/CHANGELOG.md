@@ -4,6 +4,8 @@ Change Log
 ## Unreleased
 
 #### Added
+- Compatibility with Android Gradle Plugin 4.x versions
+- Compatibility with Gradle 6
 #### Changed
 #### Fixed
 #### Removed
