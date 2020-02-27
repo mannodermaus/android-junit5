@@ -20,10 +20,10 @@ class VersionCheckerSpec : Spek({
       "3.2.0-alpha01" to false,
       "3.2.0-alpha14" to false,
       MIN_REQUIRED_AGP_VERSION to true,
-      "3.3.0" to true,
-      "3.4.0" to true,
-      "3.5.0-alpha13" to true,
-      "3.3.0" to true,
+      "3.3.0" to false,
+      "3.4.0" to false,
+      "3.5.0-alpha13" to false,
+      "3.3.0" to false,
       "4.0.0-alpha01" to true
   ).forEach { (actual, expected) ->
     on("checking against AGP $actual") {

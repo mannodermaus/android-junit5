@@ -45,33 +45,6 @@ class FunctionalTests {
                 @Suppress("UNUSED_VARIABLE")
                 val u: Any = when (agpVersion) {
                   // ------------------------------------------------------------------------------------------------
-                  // AGP 3.2
-                  // - Build Types
-                  // ------------------------------------------------------------------------------------------------
-                  AgpVersion.AGP_32X -> {
-                    assertAgpTests(buildType = "debug", tests = listOf("JavaTest"))
-                    assertAgpTests(buildType = "release", tests = listOf("JavaTest", "KotlinReleaseTest"))
-                  }
-                  // ------------------------------------------------------------------------------------------------
-                  // AGP 3.3
-                  // - Simple
-                  // ------------------------------------------------------------------------------------------------
-                  AgpVersion.AGP_33X -> {
-                    assertAgpTests(buildType = "debug", tests = listOf("JavaTest"))
-                    assertAgpTests(buildType = "release", tests = listOf("JavaTest"))
-                  }
-                  // ------------------------------------------------------------------------------------------------
-                  // AGP 3.4
-                  // - Product Flavors
-                  // - Build Types
-                  // ------------------------------------------------------------------------------------------------
-                  AgpVersion.AGP_34X -> {
-                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
-                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
-                  }
-                  // ------------------------------------------------------------------------------------------------
                   // AGP 3.5
                   // - Product Flavors
                   // - Build Types
@@ -166,7 +139,7 @@ class FunctionalTests {
     // Perform assertions
     assertThat(this).output().ofTask(taskName).apply {
       tests.forEach { expectedClass ->
-        contains("de.mannodermaus.app.$expectedClass > test() PASSED")
+        contains("$expectedClass > test() PASSED")
       }
       executedTestCount().isEqualTo(tests.size)
     }

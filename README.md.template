@@ -2,7 +2,7 @@
 
 ![Logo](.images/logo.png)
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.2.0 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.5.0 or later.**
 
 ## How?
 
@@ -94,8 +94,8 @@ More information on Getting Started can be found [on the wiki][wiki-gettingstart
 ## Requirements
 
 The latest version of this plugin requires:
-* Android Gradle Plugin `3.2.0` or above
-* Gradle `4.7` or above
+* Android Gradle Plugin `3.5.0` or above
+* Gradle `6.1.1` or above
 
 ## Instrumentation Test Support
 
