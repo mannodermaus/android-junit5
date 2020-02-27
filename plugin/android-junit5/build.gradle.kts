@@ -64,14 +64,12 @@ tasks.named("processTestResources", Copy::class.java).configure {
       "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
       "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
-      "AGP_32X" to Versions.com_android_tools_build_gradle_32x,
-      "AGP_33X" to Versions.com_android_tools_build_gradle_33x,
-      "AGP_34X" to Versions.com_android_tools_build_gradle_34x,
       "AGP_35X" to Versions.com_android_tools_build_gradle_35x,
       "AGP_36X" to Versions.com_android_tools_build_gradle_36x,
       "AGP_40X" to Versions.com_android_tools_build_gradle_40x,
       "KOTLIN" to Versions.org_jetbrains_kotlin,
 
+      "KOTLIN_STD_LIB" to Libs.kotlin_stdlib,
       "JUPITER_API" to Libs.junit_jupiter_api,
       "JUPITER_ENGINE" to Libs.junit_jupiter_engine
   )
@@ -112,9 +110,6 @@ data class AgpConfiguration(val version: String, val dependency: String) {
 }
 
 private val agpConfigurations = listOf(
-    AgpConfiguration("3.2", Libs.com_android_tools_build_gradle_32x),
-    AgpConfiguration("3.3", Libs.com_android_tools_build_gradle_33x),
-    AgpConfiguration("3.4", Libs.com_android_tools_build_gradle_34x),
     AgpConfiguration("3.5", Libs.com_android_tools_build_gradle_35x),
     AgpConfiguration("3.6", Libs.com_android_tools_build_gradle_36x),
     AgpConfiguration("4.0", Libs.com_android_tools_build_gradle_40x)

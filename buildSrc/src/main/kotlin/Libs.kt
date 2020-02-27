@@ -34,12 +34,6 @@ object Libs {
      * https://developer.android.com/studio */
     const val com_android_tools_build_gradle: String = "com.android.tools.build:gradle:" +
             Versions.com_android_tools_build_gradle
-    const val com_android_tools_build_gradle_32x: String = "com.android.tools.build:gradle:" +
-        Versions.com_android_tools_build_gradle_32x
-    const val com_android_tools_build_gradle_33x: String = "com.android.tools.build:gradle:" +
-        Versions.com_android_tools_build_gradle_33x
-    const val com_android_tools_build_gradle_34x: String = "com.android.tools.build:gradle:" +
-    Versions.com_android_tools_build_gradle_34x
     const val com_android_tools_build_gradle_35x: String = "com.android.tools.build:gradle:" +
         Versions.com_android_tools_build_gradle_35x
     const val com_android_tools_build_gradle_36x: String = "com.android.tools.build:gradle:" +

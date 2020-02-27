@@ -7,7 +7,7 @@
 
 ![Logo](.images/logo.png)
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.2.0 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 3.5.0 or later.**
 
 ## How?
 
@@ -56,15 +56,15 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.0"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.5.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.0"
 
     // (Optional) If you also have JUnit 4-based tests
-    testImplementation "junit:junit:4.12"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.5.2"
+    testImplementation "junit:junit:4.13"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.6.0"
   }
   ```
 </details>
@@ -79,15 +79,15 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.0")
 
     // (Optional) If you also have JUnit 4-based tests
-    testImplementation("junit:junit:4.12")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.5.2")
+    testImplementation("junit:junit:4.13")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.0")
   }
   ```
 </details>
@@ -99,8 +99,8 @@ More information on Getting Started can be found [on the wiki][wiki-gettingstart
 ## Requirements
 
 The latest version of this plugin requires:
-* Android Gradle Plugin `3.2.0` or above
-* Gradle `4.7` or above
+* Android Gradle Plugin `3.5.0` or above
+* Gradle `6.1.1` or above
 
 ## Instrumentation Test Support
 
@@ -135,7 +135,7 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
     androidTestImplementation "androidx.test:runner:1.2.0"
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
     
     // 6) The instrumentation test companion libraries
     androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.0"
@@ -170,7 +170,7 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
     androidTestImplementation("androidx.test:runner:1.2.0")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
 
     // 6) The instrumentation test companion libraries
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.0")
@@ -199,7 +199,7 @@ This repository contains multiple modules, divided into two sub-projects. The re
 ## License
 
 ```
-Copyright 2017-2019 Marcel Schnelle
+Copyright 2017-2020 Marcel Schnelle
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
