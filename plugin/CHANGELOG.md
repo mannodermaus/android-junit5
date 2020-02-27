@@ -4,12 +4,18 @@ Change Log
 ## Unreleased
 
 #### Added
-- JUnit 5.6.0
-- Compatibility with Android Gradle Plugin 4.x versions
-- Compatibility with Gradle 6; also raised minimum supported version to Gradle 6.1.1
 #### Changed
 #### Fixed
 #### Removed
+
+## 1.6.0.0 (2020-02-27)
+
+#### Added
+- JUnit 5.6.0
+- Compatibility with Android Gradle Plugin 4.x versions
+- Compatibility with Gradle 6
+#### Changed
+- Raised minimum supported version to Gradle 6.1.1
 
 ## 1.5.2.0 (2019-10-09)
 
