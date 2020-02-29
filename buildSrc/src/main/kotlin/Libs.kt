@@ -40,6 +40,8 @@ object Libs {
         Versions.com_android_tools_build_gradle_36x
     const val com_android_tools_build_gradle_40x: String = "com.android.tools.build:gradle:" +
         Versions.com_android_tools_build_gradle_40x
+    const val com_android_tools_build_gradle_41x: String = "com.android.tools.build:gradle:" +
+        Versions.com_android_tools_build_gradle_41x
 
     /**
      * https://developer.android.com/studio */

@@ -1,5 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.AgpVersion
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
@@ -14,9 +15,13 @@ class FunctionalTests {
 
   // Iterate over all values in the AgpVersion enum and,
   // using the project with that name located in the test resource folder,
-  // run a basic integration test with the JUnit 5 plugin
+  // run a basic integration test with the JUnit 5 plugin.
+  //
+  // The CI server does not have enough memory to run multiple nested virtual Gradle builds.
+  // Restrict execution of this test method to the local machine only
   @DisplayName("Integration Tests with Android Gradle Plugin")
   @TestFactory
+  @DisabledOnCI
   fun agpIntegrationTests(): List<DynamicTest> =
       AgpVersion.values()
           .map { agpVersion ->
@@ -38,46 +43,11 @@ class FunctionalTests {
               // Assert outputs;
               assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
 
-              // based on the project setup, assert different things.
-              // The assignment to the variable is unused, but required in order to enforce
-              // a case for each version
               with(result) {
-                @Suppress("UNUSED_VARIABLE")
-                val u: Any = when (agpVersion) {
-                  // ------------------------------------------------------------------------------------------------
-                  // AGP 3.5
-                  // - Product Flavors
-                  // - Build Types
-                  // ------------------------------------------------------------------------------------------------
-                  AgpVersion.AGP_35X -> {
-                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
-                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
-                  }
-                  // ------------------------------------------------------------------------------------------------
-                  // AGP 3.6
-                  // - Product Flavors
-                  // - Build Types
-                  // ------------------------------------------------------------------------------------------------
-                  AgpVersion.AGP_36X -> {
-                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
-                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
-                  }
-                  // ------------------------------------------------------------------------------------------------
-                  // AGP 4.0
-                  // - Product Flavors
-                  // - Build Types
-                  // ------------------------------------------------------------------------------------------------
-                  AgpVersion.AGP_40X -> {
-                    assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
-                    assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
-                    assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
-                  }
-                }
+                assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
+                assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
+                assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
+                assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
               }
             }
           }

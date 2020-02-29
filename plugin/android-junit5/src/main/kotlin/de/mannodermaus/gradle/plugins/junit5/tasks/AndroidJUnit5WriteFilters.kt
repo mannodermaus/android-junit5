@@ -2,8 +2,8 @@ package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.TestVariant
 import de.mannodermaus.gradle.plugins.junit5.INSTRUMENTATION_FILTER_RES_FILE_NAME
+import de.mannodermaus.gradle.plugins.junit5.internal.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.junit5ConfigurationOf
-import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
@@ -80,9 +80,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
       private val instrumentationTestVariant: TestVariant
   ) {
 
-    private val scope = instrumentationTestVariant.variantData.scope
-
-    val name: String = scope.getTaskName(TASK_NAME_DEFAULT)
+    val name: String = instrumentationTestVariant.getTaskName(prefix = TASK_NAME_DEFAULT)
 
     val type = AndroidJUnit5WriteFilters::class.java
 

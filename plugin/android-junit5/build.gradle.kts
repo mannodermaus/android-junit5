@@ -50,6 +50,7 @@ gradlePlugin {
 // Use JUnit 5
 tasks.withType<Test> {
   useJUnitPlatform()
+  failFast = true
   testLogging {
     events = setOf(TestLogEvent.STARTED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
     exceptionFormat = TestExceptionFormat.FULL
@@ -67,6 +68,7 @@ tasks.named("processTestResources", Copy::class.java).configure {
       "AGP_35X" to Versions.com_android_tools_build_gradle_35x,
       "AGP_36X" to Versions.com_android_tools_build_gradle_36x,
       "AGP_40X" to Versions.com_android_tools_build_gradle_40x,
+      "AGP_41X" to Versions.com_android_tools_build_gradle_41x,
       "KOTLIN" to Versions.org_jetbrains_kotlin,
 
       "KOTLIN_STD_LIB" to Libs.kotlin_stdlib,
@@ -112,7 +114,8 @@ data class AgpConfiguration(val version: String, val dependency: String) {
 private val agpConfigurations = listOf(
     AgpConfiguration("3.5", Libs.com_android_tools_build_gradle_35x),
     AgpConfiguration("3.6", Libs.com_android_tools_build_gradle_36x),
-    AgpConfiguration("4.0", Libs.com_android_tools_build_gradle_40x)
+    AgpConfiguration("4.0", Libs.com_android_tools_build_gradle_40x),
+    AgpConfiguration("4.1", Libs.com_android_tools_build_gradle_41x)
 )
 
 configurations {

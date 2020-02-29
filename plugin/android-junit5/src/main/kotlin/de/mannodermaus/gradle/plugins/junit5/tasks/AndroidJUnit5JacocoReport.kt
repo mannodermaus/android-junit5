@@ -2,10 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.BaseVariant
 import de.mannodermaus.gradle.plugins.junit5.*
-import de.mannodermaus.gradle.plugins.junit5.internal.android
-import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
-import de.mannodermaus.gradle.plugins.junit5.internal.junit5Info
-import de.mannodermaus.gradle.plugins.junit5.internal.maybeCreate
+import de.mannodermaus.gradle.plugins.junit5.internal.*
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
@@ -54,9 +51,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       private val directoryProviders: Collection<DirectoryProvider>
   ) {
 
-    private val scope = variant.variantData.scope
-
-    val name: String = scope.getTaskName(TASK_NAME_DEFAULT)
+    val name: String = variant.getTaskName(prefix = TASK_NAME_DEFAULT)
 
     val type = AndroidJUnit5JacocoReport::class.java
 

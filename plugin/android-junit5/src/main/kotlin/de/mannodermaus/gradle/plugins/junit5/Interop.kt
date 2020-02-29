@@ -1,7 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.variant.BaseVariantData
 import de.mannodermaus.gradle.plugins.junit5.internal.invokeTyped
 import de.mannodermaus.gradle.plugins.junit5.internal.reflectiveMethod
 import org.gradle.api.Project
@@ -22,17 +21,6 @@ import java.io.File
  * BaseVariant
  * =====================================================================================================================
  */
-
-/**
- * Obtains the VariantData of the provided Variant.
- *
- * @because 'BaseVariant.variantData' is protected and can't be accessed through Kotlin directly
- * @return The variant data
- */
-val BaseVariant.variantData: BaseVariantData
-  get() = this.reflectiveMethod("getVariantData")
-      ?.invokeTyped<BaseVariantData>(this)
-      ?: throw IllegalArgumentException("BaseVariant.variantData not available")
 
 /**
  * Obtains the Java class directory for the provided variant in a safe manner.
