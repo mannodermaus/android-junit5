@@ -10,14 +10,10 @@ import com.github.zafarkhaja.semver.Version
 import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin
 import de.mannodermaus.gradle.plugins.junit5.JUnit5TaskConfig
 import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
-import de.mannodermaus.gradle.plugins.junit5.internal.ConfigurationKind.APP
-import de.mannodermaus.gradle.plugins.junit5.variantData
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.LogLevel.ERROR
 import org.gradle.api.logging.LogLevel.INFO
@@ -26,8 +22,6 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.testing.Test
-import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions
 import org.gradle.util.GradleVersion
 import java.util.Properties
 
@@ -45,7 +39,7 @@ internal fun requireGradle(version: String, message: () -> String) {
   }
 }
 
-fun requireVersion(actual: String, required: String, message: () -> String) {
+internal fun requireVersion(actual: String, required: String, message: () -> String) {
   val actualVersion = Version.valueOf(actual)
   val requiredVersion = Version.valueOf(required)
   require(actualVersion.greaterThanOrEqualTo(requiredVersion)) {
@@ -65,7 +59,7 @@ internal fun loadProperties(resource: String): Properties {
  * and splits it into a list using the delimiter.
  * Returns an empty List if the key doesn't exist in the Map.
  */
-fun Map<String, String>.getAsList(key: String, delimiter: String = ","): List<String> =
+internal fun Map<String, String>.getAsList(key: String, delimiter: String = ","): List<String> =
     this[key]?.split(delimiter) ?: emptyList()
 
 /**
@@ -74,7 +68,7 @@ fun Map<String, String>.getAsList(key: String, delimiter: String = ","): List<St
  * the value is appended to the end of the current value
  * using the given delimiter.
  */
-fun MutableMap<String, String>.append(
+internal fun MutableMap<String, String>.append(
     key: String, value: String, delimiter: String = ","): String? {
   val insertedValue = if (containsKey(key)) {
     "${this[key]}$delimiter$value"
@@ -91,7 +85,7 @@ fun MutableMap<String, String>.append(
  * Log a message with the Android Gradle Plugin style syntax,
  * which will cause Android Studio to pick it up & display it inside the Messages window.
  */
-fun Logger.agpLog(level: LogLevel, message: String) {
+internal fun Logger.agpLog(level: LogLevel, message: String) {
   val pair: Pair<String, (String) -> Unit> = when (level) {
     ERROR -> "error" to { s -> error(s) }
     WARN -> "warning" to { s -> warn(s) }
@@ -107,7 +101,7 @@ fun Logger.agpLog(level: LogLevel, message: String) {
 /**
  * Create & add an Extension to the given container by name.
  */
-inline fun <reified T> Any.extend(
+internal inline fun <reified T> Any.extend(
     name: String,
     args: Array<Any> = emptyArray(),
     noinline init: ((T) -> Unit)? = null): T {
@@ -119,11 +113,11 @@ inline fun <reified T> Any.extend(
 
   // Create & Configure the new extension
   val created: T = this.extensions.create(name, T::class.java, *args)
-  init?.let { init(created) }
+  init?.let { it(created) }
   return created
 }
 
-fun Any.extensionExists(name: String): Boolean {
+internal fun Any.extensionExists(name: String): Boolean {
   if (this !is ExtensionAware) {
     throw IllegalArgumentException("Argument is not ExtensionAware: $this")
   }
@@ -135,7 +129,7 @@ fun Any.extensionExists(name: String): Boolean {
  * Obtain an Extension by name & directly cast it to the expected type.
  */
 @Suppress("UNCHECKED_CAST")
-fun <T> Any.extensionByName(name: String): T {
+internal fun <T> Any.extensionByName(name: String): T {
   if (this !is ExtensionAware) {
     throw IllegalArgumentException("Argument is not ExtensionAware: $this")
   }
@@ -146,27 +140,27 @@ fun <T> Any.extensionByName(name: String): T {
 /**
  * Log the provided info message using the plugin's Log Tag.
  */
-fun Logger.junit5Info(text: String) {
+internal fun Logger.junit5Info(text: String) {
   info("[android-junit5]: $text")
 }
 
 /**
  * Log the provided warning message using the plugin's Log Tag.
  */
-fun Logger.junit5Warn(text: String) {
+internal fun Logger.junit5Warn(text: String) {
   warn("[android-junit5]: $text")
 }
 
 /**
  * Shorthand function to check for the existence of a plugin on a Project.
  */
-fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null
+internal fun Project.hasPlugin(name: String) = this.plugins.findPlugin(name) != null
 
 /**
  * Access the Android extension applied by a respective plugin.
  * Equivalent to "Project#android" in Groovy.
  */
-val Project.android: BaseExtension
+internal val Project.android: BaseExtension
   get() = this.extensions.getByName("android") as BaseExtension
 
 internal fun Project.junit5ConfigurationOf(variant: BaseVariant) =
@@ -176,14 +170,14 @@ internal fun Project.junit5ConfigurationOf(variant: BaseVariant) =
  * Access the extra properties of a DependencyHandler.
  * Equivalent to "DependencyHandler#ext" in Groovy.
  */
-val DependencyHandler.ext: ExtraPropertiesExtension
+internal val DependencyHandler.ext: ExtraPropertiesExtension
   get() {
     val aware = this as ExtensionAware
     return aware.extensions.getByName(
         ExtraPropertiesExtension.EXTENSION_NAME) as ExtraPropertiesExtension
   }
 
-val BaseVariant.unitTestVariant: UnitTestVariant
+internal val BaseVariant.unitTestVariant: UnitTestVariant
   get() {
     if (this !is TestedVariant) {
       throw IllegalArgumentException("Argument is not TestedVariant: $this")
@@ -192,7 +186,7 @@ val BaseVariant.unitTestVariant: UnitTestVariant
     return this.unitTestVariant
   }
 
-val BaseVariant.instrumentationTestVariant: TestVariant?
+internal val BaseVariant.instrumentationTestVariant: TestVariant?
   get() {
     if (this !is TestedVariant) {
       throw IllegalArgumentException("Argument is not TestedVariant: $this")
@@ -238,7 +232,7 @@ internal fun TaskContainer.testTaskOf(variant: BaseVariant): AndroidUnitTest {
  * in which case the existing task is returned.
  */
 @Suppress("UNCHECKED_CAST")
-fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
+internal fun TaskContainer.maybeCreate(name: String, group: String? = null): Task {
   val existing = findByName(name)
   return if (existing != null) {
     existing

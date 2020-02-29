@@ -13,7 +13,7 @@ import java.lang.reflect.Method
  * @param paramTypes Parameter types of the method's signature
  * @return A reference to the method with that signature, or null if it doesn't exist
  */
-fun Any.reflectiveMethod(named: String, vararg paramTypes: Class<*>): Method? =
+internal fun Any.reflectiveMethod(named: String, vararg paramTypes: Class<*>): Method? =
     try {
       val targetClass = if (this is Class<*>) {
         this
@@ -34,6 +34,6 @@ fun Any.reflectiveMethod(named: String, vararg paramTypes: Class<*>): Method? =
  * @param params Parameters to call the method with
  * @return Result, cast to the desired type
  */
-fun <T> Method.invokeTyped(target: Any? = null, vararg params: Any?): T? {
+internal fun <T> Method.invokeTyped(target: Any? = null, vararg params: Any?): T? {
   return this.invoke(target, *params) as? T?
 }
