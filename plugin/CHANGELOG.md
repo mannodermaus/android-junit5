@@ -4,7 +4,9 @@ Change Log
 ## Unreleased
 
 #### Added
+- Compatibility with Android Gradle Plugin 4.1.x
 #### Changed
+- Restricted visibility of internal APIs to prevent them from leaking into consumer code
 #### Fixed
 #### Removed
 
