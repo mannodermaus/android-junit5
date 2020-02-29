@@ -202,11 +202,33 @@ val BaseVariant.instrumentationTestVariant: TestVariant?
   }
 
 /**
+ * Composes the name of the variant-specific Gradle task with the given [prefix] and [suffix].
+ * For example, to obtain the "free" variant's assemble task name, call `variant.getTaskName(prefix = "assemble")`.
+ */
+internal fun BaseVariant.getTaskName(prefix: String = "", suffix: String = ""): String {
+  // At least one value must be provided
+  require(prefix.isNotEmpty() || suffix.isNotEmpty())
+
+  return StringBuilder().apply {
+    append(prefix)
+    append(if (isEmpty()) {
+      name
+    } else {
+      name.capitalize()
+    })
+    append(suffix.capitalize())
+  }.toString()
+}
+
+/**
  * Obtains the {AndroidUnitTest} for the provided variant.
  */
-fun TaskContainer.testTaskOf(variant: BaseVariant): AndroidUnitTest {
-  val taskName = variant.variantData.scope.getTaskName(VariantTypeCompat.UNIT_TEST_PREFIX,
-      VariantTypeCompat.UNIT_TEST_SUFFIX)
+internal fun TaskContainer.testTaskOf(variant: BaseVariant): AndroidUnitTest {
+  // From AGP 4.1 onwards, there is no Scope API on VariantData anymore.
+  // Task names must be constructed manually
+  val taskName = variant.getTaskName(
+      prefix = VariantTypeCompat.UNIT_TEST_PREFIX,
+      suffix = VariantTypeCompat.UNIT_TEST_SUFFIX)
   return getByName(taskName) as AndroidUnitTest
 }
 
