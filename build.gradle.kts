@@ -23,8 +23,8 @@ allprojects {
     sonatypeSnapshots()
   }
 
-  // Store deployment credentials (used in deployment.gradle)
-  extra["deployCredentials"] = DeployCredentials(project)
+  // Configure publishing (if the project is eligible for publication)
+  configurePublishing()
 }
 
 tasks.create<GenerateReadme>("generateReadme") {
@@ -42,5 +42,20 @@ tasks.create<GenerateReadme>("generateReadme") {
     }
     
     rootFolder = rootFolder.parentFile
+  }
+}
+
+fun Project.configurePublishing() {
+  // ------------------------------------------------------------------------------------------------
+  // Deployment Setup
+  //
+  // Releases are pushed to JCenter via Bintray, while snapshots are pushed to Sonatype OSS.
+  // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
+  // ------------------------------------------------------------------------------------------------
+  val configuration = Artifacts.from(this) ?: return
+  ext["deployConfig"] = configuration
+  ext["deployCredentials"] = DeployedCredentials(this)
+  afterEvaluate {
+    apply(from = "$rootDir/gradle/deployment.gradle")
   }
 }

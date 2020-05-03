@@ -191,10 +191,3 @@ dependencies {
   testImplementation(Libs.spekApi)
   testRuntimeOnly(Libs.spekEngine)
 }
-
-// ------------------------------------------------------------------------------------------------
-// Deployment Setup
-// ------------------------------------------------------------------------------------------------
-
-val deployConfig by extra<Deployed> { Artifacts.Plugin }
-apply(from = "$rootDir/gradle/deployment.gradle")

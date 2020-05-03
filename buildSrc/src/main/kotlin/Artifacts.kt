@@ -29,6 +29,18 @@ object Artifacts {
   val license = "Apache-2.0"
 
   /**
+   * Retrieve the artifact configuration based on a Gradle project reference.
+   * Return null if none can be found
+   */
+  fun from(project: Project) =
+      when (project.name) {
+        "core" -> Instrumentation.Core
+        "runner" -> Instrumentation.Runner
+        "plugin" -> Plugin
+        else -> null
+      }
+
+  /**
    * Gradle Plugin artifact
    */
   val Plugin = Deployed(
@@ -71,7 +83,7 @@ object Artifacts {
   }
 }
 
-class DeployCredentials(private val project: Project) {
+class DeployedCredentials(private val project: Project) {
 
   val bintrayUser: String?
   val bintrayKey: String?

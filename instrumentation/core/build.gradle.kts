@@ -108,13 +108,3 @@ dependencies {
   testImplementation(Libs.truth)
   testImplementation(Libs.truthJava8Extensions)
 }
-
-// ------------------------------------------------------------------------------------------------
-// Deployment Setup
-//
-// Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
-// This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
-// ------------------------------------------------------------------------------------------------
-
-val deployConfig by extra<Deployed> { Artifacts.Instrumentation.Core }
-apply(from = "$rootDir/gradle/deployment.gradle")
