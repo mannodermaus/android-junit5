@@ -8,6 +8,11 @@ Change Log
 #### Fixed
 #### Removed
 
+## 1.6.2.0 (2020-05-03)
+
+#### Added
+- JUnit 5.6.2
+
 ## 1.6.1.0 (2020-05-03)
 
 #### Added
