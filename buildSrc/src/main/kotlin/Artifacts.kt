@@ -36,7 +36,7 @@ object Artifacts {
       when (project.name) {
         "core" -> Instrumentation.Core
         "runner" -> Instrumentation.Runner
-        "plugin" -> Plugin
+        "android-junit5" -> Plugin
         else -> null
       }
 
