@@ -4,11 +4,17 @@ Change Log
 ## Unreleased
 
 #### Added
-- Compatibility with Android Gradle Plugin 4.1.x
 #### Changed
-- Restricted visibility of internal APIs to prevent them from leaking into consumer code
 #### Fixed
 #### Removed
+
+## 1.6.1.0 (2020-05-03)
+
+#### Added
+- Compatibility with Android Gradle Plugin 4.1.x
+- JUnit 5.6.1
+#### Changed
+- Restricted visibility of internal APIs to prevent them from leaking into consumer code
 
 ## 1.6.0.0 (2020-02-27)
 
