@@ -24,7 +24,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```groovy
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.6.1.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.6.2.0"
     }
   }
   ```
@@ -36,7 +36,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```kotlin
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.6.1.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.6.2.0")
     }
   }
   ```
@@ -56,15 +56,15 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.1"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.1"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.1"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.2"
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "junit:junit:4.13"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.6.1"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.6.2"
   }
   ```
 </details>
@@ -79,15 +79,15 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.2")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.1")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.2")
   }
   ```
 </details>
@@ -135,7 +135,7 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
     androidTestImplementation "androidx.test:runner:1.2.0"
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.6.1"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
     
     // 6) The instrumentation test companion libraries
     androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.0"
@@ -170,7 +170,7 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
     androidTestImplementation("androidx.test:runner:1.2.0")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.6.1")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
 
     // 6) The instrumentation test companion libraries
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.0")
