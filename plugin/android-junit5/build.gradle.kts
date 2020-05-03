@@ -59,22 +59,24 @@ tasks.withType<Test> {
 
 // Setup environment & versions in test projects
 tasks.named("processTestResources", Copy::class.java).configure {
-  val tokens = mapOf(
+  val tokens = mutableMapOf(
       "COMPILE_SDK_VERSION" to Android.compileSdkVersion,
       "BUILD_TOOLS_VERSION" to Android.buildToolsVersion,
       "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
       "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
-      "AGP_35X" to Versions.com_android_tools_build_gradle_35x,
-      "AGP_36X" to Versions.com_android_tools_build_gradle_36x,
-      "AGP_40X" to Versions.com_android_tools_build_gradle_40x,
-      "AGP_41X" to Versions.com_android_tools_build_gradle_41x,
-      "KOTLIN" to Versions.org_jetbrains_kotlin,
+      "KOTLIN" to Plugins.kotlin.version,
 
-      "KOTLIN_STD_LIB" to Libs.kotlin_stdlib,
-      "JUPITER_API" to Libs.junit_jupiter_api,
-      "JUPITER_ENGINE" to Libs.junit_jupiter_engine
-  )
+      "KOTLIN_STD_LIB" to Libs.kotlinStdLib,
+      "JUPITER_API" to Libs.junitJupiterApi,
+      "JUPITER_ENGINE" to Libs.junitJupiterEngine
+  ).also { map ->
+    // Add an entry for each of the supported Android Gradle Plugin values
+    // (e.g. "3.5.3" -> "AGP_35X")
+    Plugins.supportedAndroidPlugins.forEach { plugin ->
+      map["AGP_${plugin.shortVersion}X"] = plugin.version
+    }
+  }
 
   inputs.properties(tokens)
 
@@ -101,32 +103,16 @@ tasks.named("processTestResources", Copy::class.java).configure {
   }
 }
 
-// Add custom dependency configurations for Functional Tests.
-// Different versions of the Android Gradle Plugin should be testable in the same project;
-// to do this, create a custom configuration for each version & assign the correct dependency to it.
-// At runtime, the functional tests will look up a file listing of all dependencies, making it the
-// plugin classpath for the respective test.
-data class AgpConfiguration(val version: String, val dependency: String) {
-  // Example: version = "3.2" --> configurationName = "testAgp32x"
-  val configurationName = "testAgp${version.replace(".", "")}x"
-}
-
-private val agpConfigurations = listOf(
-    AgpConfiguration("3.5", Libs.com_android_tools_build_gradle_35x),
-    AgpConfiguration("3.6", Libs.com_android_tools_build_gradle_36x),
-    AgpConfiguration("4.0", Libs.com_android_tools_build_gradle_40x),
-    AgpConfiguration("4.1", Libs.com_android_tools_build_gradle_41x)
-)
 
 configurations {
   // Create a custom configuration for each version
-  agpConfigurations.forEach { agpConfig ->
-    create(agpConfig.configurationName) {
+  Plugins.supportedAndroidPlugins.forEach { plugin ->
+    create(plugin.configurationName) {
       description = "Local dependencies used for compiling & running " +
-          "tests source code in Gradle functional tests against AGP ${agpConfig.version}"
+          "tests source code in Gradle functional tests against AGP ${plugin.version}"
       extendsFrom(configurations.getByName("implementation"))
       dependencies {
-        this@create(agpConfig.dependency)
+        this@create(plugin)
       }
     }
   }
@@ -181,35 +167,27 @@ tasks.withType<WriteClasspathResource> {
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
-  compileOnly(Libs.com_android_tools_build_gradle)
+  compileOnly(Plugins.android)
   implementation(gradleApi())
-  implementation(Libs.kotlin_gradle_plugin)
-  implementation(Libs.kotlin_stdlib_jdk8)
-  implementation(Libs.java_semver)
-  implementation(Libs.stream)
-  implementation(Libs.junit_platform_commons)
+  implementation(Plugins.kotlin)
+  implementation(Libs.kotlinStdLib)
+  implementation(Libs.javaSemver)
+  implementation(Libs.annimonStream)
+  implementation(Libs.junitPlatformCommons)
 
   testImplementation(gradleTestKit())
-  testImplementation(Libs.com_android_tools_build_gradle)
-  testImplementation(Libs.commons_io)
-  testImplementation(Libs.commons_lang)
-  testImplementation(Libs.mockito_core)
+  testImplementation(Plugins.android)
+  testImplementation(Libs.commonsIO)
+  testImplementation(Libs.commonsLang)
+  testImplementation(Libs.mockitoCore)
   testImplementation(Libs.truth) {
     // Incompatibility with AGP pulling in older version
     exclude(group = "com.google.guava", module = "guava")
   }
+  testImplementation(Libs.junitJupiterApi)
+  testImplementation(Libs.junitJupiterParams)
+  testRuntimeOnly(Libs.junitJupiterEngine)
 
-  testImplementation(Libs.spek_api)
-  testRuntimeOnly(Libs.spek_junit_platform_engine)
-
-  testImplementation(Libs.junit_jupiter_api)
-  testImplementation(Libs.junit_jupiter_params)
-  testRuntimeOnly(Libs.junit_jupiter_engine)
+  testImplementation(Libs.spekApi)
+  testRuntimeOnly(Libs.spekEngine)
 }
-
-// ------------------------------------------------------------------------------------------------
-// Deployment Setup
-// ------------------------------------------------------------------------------------------------
-
-val deployConfig by extra<Deployed> { Artifacts.Plugin }
-apply(from = "$rootDir/gradle/deployment.gradle")

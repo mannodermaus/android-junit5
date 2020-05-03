@@ -6,7 +6,7 @@ buildscript {
   repositories {
     google()
     jcenter()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    sonatypeSnapshots()
   }
 
   dependencies {
@@ -86,35 +86,25 @@ configurations.all {
 }
 
 dependencies {
-  implementation(Libs.androidx_test_monitor)
-  implementation(Libs.kotlin_stdlib)
-  implementation(Libs.kotlin_reflect)
-  implementation(Libs.junit)
+  implementation(Libs.androidxTestMonitor)
+  implementation(Libs.kotlinStdLib)
+  implementation(Libs.kotlinReflect)
+  implementation(Libs.junit4)
 
   // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
   // since that would prematurely raise the minSdkVersion requirement for target applications,
   // even though not all product flavors might want to use JUnit 5.
   // Therefore, only compile against those APIs, and have them provided at runtime
   // by the "instrumentation" companion library instead.
-  compileOnly(Libs.junit_jupiter_api)
-  compileOnly(Libs.junit_jupiter_params)
-  compileOnly(Libs.junit_platform_runner)
+  compileOnly(Libs.junitJupiterApi)
+  compileOnly(Libs.junitJupiterParams)
+  compileOnly(Libs.junitPlatformRunner)
 
   testImplementation(Libs.truth)
-  testImplementation(Libs.mockito_core)
-  testImplementation(Libs.junit_jupiter_api)
-  testImplementation(Libs.junit_jupiter_params)
-  testImplementation(Libs.junit_platform_runner)
+  testImplementation(Libs.mockitoCore)
+  testImplementation(Libs.junitJupiterApi)
+  testImplementation(Libs.junitJupiterParams)
+  testImplementation(Libs.junitPlatformRunner)
 
-  testRuntimeOnly(Libs.junit_jupiter_engine)
+  testRuntimeOnly(Libs.junitJupiterEngine)
 }
-
-// ------------------------------------------------------------------------------------------------
-// Deployment Setup
-//
-// Releases are pushed to jcenter via Bintray, while snapshots are pushed to Sonatype OSS.
-// This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
-// ------------------------------------------------------------------------------------------------
-
-val deployConfig by extra<Deployed> { Artifacts.Instrumentation.Runner }
-apply(from = "$rootDir/gradle/deployment.gradle")

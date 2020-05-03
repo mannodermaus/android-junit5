@@ -84,19 +84,19 @@ tasks.withType<Test> {
 }
 
 dependencies {
-  implementation(Libs.kotlin_stdlib)
+  implementation(Libs.kotlinStdLib)
 
-  testImplementation(Libs.junit_jupiter_api)
-  testImplementation(Libs.junit_jupiter_params)
-  testRuntimeOnly(Libs.junit_jupiter_engine)
+  testImplementation(Libs.junitJupiterApi)
+  testImplementation(Libs.junitJupiterParams)
+  testRuntimeOnly(Libs.junitJupiterEngine)
 
-  androidTestImplementation(Libs.junit)
-  androidTestImplementation(Libs.androidx_test_runner)
+  androidTestImplementation(Libs.junit4)
+  androidTestImplementation(Libs.androidxTestRunner)
 
   // Android Instrumentation Tests wth JUnit 5
-  androidTestImplementation(Libs.junit_jupiter_api)
-  androidTestImplementation(Libs.junit_jupiter_params)
-  androidTestImplementation(Libs.espresso_core)
+  androidTestImplementation(Libs.junitJupiterApi)
+  androidTestImplementation(Libs.junitJupiterParams)
+  androidTestImplementation(Libs.espressoCore)
   androidTestImplementation(project(":core"))
   androidTestRuntimeOnly(project(":runner"))
 }

@@ -29,14 +29,26 @@ object Artifacts {
   val license = "Apache-2.0"
 
   /**
+   * Retrieve the artifact configuration based on a Gradle project reference.
+   * Return null if none can be found
+   */
+  fun from(project: Project) =
+      when (project.name) {
+        "core" -> Instrumentation.Core
+        "runner" -> Instrumentation.Runner
+        "android-junit5" -> Plugin
+        else -> null
+      }
+
+  /**
    * Gradle Plugin artifact
    */
   val Plugin = Deployed(
       platform = Java,
       groupId = "de.mannodermaus.gradle.plugins",
       artifactId = "android-junit5",
-      currentVersion = "1.6.1.0",
-      latestStableVersion = "1.6.0.0",
+      currentVersion = "1.6.2.0-SNAPSHOT",
+      latestStableVersion = "1.6.1.0",
       license = license,
       description = "Unit Testing with JUnit 5 for Android."
   )
@@ -71,7 +83,7 @@ object Artifacts {
   }
 }
 
-class DeployCredentials(private val project: Project) {
+class DeployedCredentials(private val project: Project) {
 
   val bintrayUser: String?
   val bintrayKey: String?

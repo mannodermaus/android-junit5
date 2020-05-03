@@ -1,5 +1,26 @@
+import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.tasks.compile.AbstractCompile
+
+/* RepositoryHandler */
+
+fun RepositoryHandler.jitpack() =
+    this.maven(object: Action<MavenArtifactRepository> {
+      override fun execute(repo: MavenArtifactRepository) {
+        repo.setUrl("https://jitpack.io")
+      }
+    })
+
+fun RepositoryHandler.sonatypeSnapshots() =
+    this.maven(object: Action<MavenArtifactRepository> {
+      override fun execute(repo: MavenArtifactRepository) {
+        repo.setUrl("https://oss.sonatype.org/content/repositories/snapshots")
+      }
+    })
+
+/* Project */
 
 fun Project.fixCompileTaskChain() {
   setupCompileChain(

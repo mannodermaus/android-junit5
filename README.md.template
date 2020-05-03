@@ -51,15 +51,15 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${Versions.org_junit_jupiter}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${Versions.org_junit_jupiter}"
+    testImplementation "${Libs.junitJupiterApi}"
+    testRuntimeOnly "${Libs.junitJupiterEngine}"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:${Versions.org_junit_jupiter}"
+    testImplementation "${Libs.junitJupiterParams}"
 
     // (Optional) If you also have JUnit 4-based tests
-    testImplementation "junit:junit:${Versions.junit}"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${Versions.junit_vintage_engine}"
+    testImplementation "${Libs.junit4}"
+    testRuntimeOnly "${Libs.junitVintageEngine}"
   }
   ```
 </details>
@@ -74,15 +74,15 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.org_junit_jupiter}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.org_junit_jupiter}")
+    testImplementation("${Libs.junitJupiterApi}")
+    testRuntimeOnly("${Libs.junitJupiterEngine}")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${Versions.org_junit_jupiter}")
+    testImplementation("${Libs.junitJupiterParams}")
 
     // (Optional) If you also have JUnit 4-based tests
-    testImplementation("junit:junit:${Versions.junit}")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:${Versions.junit_vintage_engine}")
+    testImplementation("${Libs.junit4}")
+    testRuntimeOnly("${Libs.junitVintageEngine}")
   }
   ```
 </details>
@@ -129,8 +129,8 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
 
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
-    androidTestImplementation "androidx.test:runner:${Versions.androidx_test_runner}"
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:${Versions.org_junit_jupiter}"
+    androidTestImplementation "${Libs.androidxTestRunner}"
+    androidTestImplementation "${Libs.junitJupiterApi}"
     
     // 6) The instrumentation test companion libraries
     androidTestImplementation "de.mannodermaus.junit5:android-test-core:${instrumentationVersion}"
@@ -164,8 +164,8 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   }
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
-    androidTestImplementation("androidx.test:runner:${Versions.androidx_test_runner}")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.org_junit_jupiter}")
+    androidTestImplementation("${Libs.androidxTestRunner}")
+    androidTestImplementation("${Libs.junitJupiterApi}")
 
     // 6) The instrumentation test companion libraries
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:${instrumentationVersion}")
