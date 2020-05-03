@@ -6,7 +6,7 @@ enum class AgpVersion(val fileKey: String,
   AGP_35X("agp35x"),
   AGP_36X("agp36x"),
   AGP_40X("agp40x"),
-  AGP_41X("agp41x", requiresGradle = "6.2");
+  AGP_41X("agp41x", requiresGradle = "6.3");
 
   // Create a pretty string from the fileKey property.
   // Example:
