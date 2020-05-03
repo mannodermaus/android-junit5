@@ -13,12 +13,12 @@ object Versions {
   const val androidx_test_monitor: String = "1.2.0"
   const val androidx_test_runner: String = "1.2.0"
 
-  const val aapt2: String = "3.5.0-5435860"
+  const val aapt2: String = "3.5.3-5435860"
 
-  const val com_android_tools_build_gradle_35x: String = "3.5.0"
-  const val com_android_tools_build_gradle_36x: String = "3.6.0"
-  const val com_android_tools_build_gradle_40x: String = "4.0.0-beta01"
-  const val com_android_tools_build_gradle_41x: String = "4.1.0-alpha01"
+  const val com_android_tools_build_gradle_35x: String = "3.5.3"
+  const val com_android_tools_build_gradle_36x: String = "3.6.3"
+  const val com_android_tools_build_gradle_40x: String = "4.0.0-beta05"
+  const val com_android_tools_build_gradle_41x: String = "4.1.0-alpha08"
   const val com_android_tools_build_gradle: String = com_android_tools_build_gradle_35x
 
   const val lint_gradle: String = "26.5.0"
@@ -64,11 +64,11 @@ object Versions {
 
   const val junit_pioneer: String = "0.2.2"
 
-  const val org_junit_jupiter: String = "5.6.0"
+  const val org_junit_jupiter: String = "5.6.1"
 
-  const val org_junit_platform: String = "1.6.0"
+  const val org_junit_platform: String = "1.6.1"
 
-  const val junit_vintage_engine: String = "5.6.0"
+  const val junit_vintage_engine: String = "5.6.1"
 
   const val mockito_core: String = "2.19.0"
 
