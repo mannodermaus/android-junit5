@@ -108,3 +108,5 @@ dependencies {
 
   testRuntimeOnly(Libs.junitJupiterEngine)
 }
+
+apply(from = "$rootDir/gradle/deployment.gradle")

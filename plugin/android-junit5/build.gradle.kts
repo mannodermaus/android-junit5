@@ -191,3 +191,5 @@ dependencies {
   testImplementation(Libs.spekApi)
   testRuntimeOnly(Libs.spekEngine)
 }
+
+apply(from = "$rootDir/gradle/deployment.gradle")

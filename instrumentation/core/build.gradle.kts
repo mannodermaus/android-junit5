@@ -108,3 +108,5 @@ dependencies {
   testImplementation(Libs.truth)
   testImplementation(Libs.truthJava8Extensions)
 }
+
+apply(from = "$rootDir/gradle/deployment.gradle")

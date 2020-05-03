@@ -24,7 +24,7 @@ subprojects {
   }
 
   // Configure publishing (if the project is eligible for publication)
-  configurePublishing()
+  configureDeployConfig()
 }
 
 tasks.create<GenerateReadme>("generateReadme") {
@@ -45,7 +45,7 @@ tasks.create<GenerateReadme>("generateReadme") {
   }
 }
 
-fun Project.configurePublishing() {
+fun Project.configureDeployConfig() {
   // ------------------------------------------------------------------------------------------------
   // Deployment Setup
   //
@@ -55,7 +55,4 @@ fun Project.configurePublishing() {
   val configuration = Artifacts.from(this) ?: return
   ext["deployConfig"] = configuration
   ext["deployCredentials"] = DeployedCredentials(this)
-  afterEvaluate {
-    apply(from = "$rootDir/gradle/deployment.gradle")
-  }
 }

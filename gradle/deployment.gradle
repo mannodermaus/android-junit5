@@ -156,6 +156,6 @@ project.configure(project) {
     }
     // Very important! Otherwise, the POM will be overwritten & have missing dependencies
     project.tasks.getByName("install").finalizedBy copyPom
-    deploy.finalizedBy "generatePomFileForLibraryPublication", "publish", "bintrayUpload"
+    deploy.finalizedBy "generatePomFileForLibraryPublication", "publish", "install", "bintrayUpload"
   }
 }
