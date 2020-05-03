@@ -2,7 +2,7 @@ import kotlin.String
 
 // Shared versions
 
-private const val kotlinVersion = "1.3.61"
+private const val kotlinVersion = "1.3.72"
 
 /**
  * Gradle plugins used throughout the repository.
@@ -43,6 +43,7 @@ object Plugins {
 object Libs {
   // Environment & Helpers
   const val kotlinStdLib: Lib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  const val kotlinReflect: Lib = "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   const val javaSemver: Lib = "com.github.zafarkhaja:java-semver:0.9.0"
   const val annimonStream: Lib = "com.annimon:stream:1.2.1"
   const val commonsIO: Lib = "commons-io:commons-io:2.6"
@@ -79,44 +80,7 @@ object Libs {
   const val spekApi: Lib = "org.jetbrains.spek:spek-api:$spekVersion"
   const val spekEngine: Lib = "org.jetbrains.spek:spek-junit-platform-engine:$spekVersion"
 
-
-
-//  const val aapt2: Lib = "com.android.tools.build:aapt2:" + Versions.aapt2
-//
-//  const val lint_gradle: Lib = "com.android.tools.lint:lint-gradle:" + Versions.lint_gradle
-//
-//
-//  const val android_junit5: Lib = "de.mannodermaus.gradle.plugins:android-junit5:" + Versions.android_junit5
-//
-//  const val org_jacoco_agent: Lib = "org.jacoco:org.jacoco.agent:" + Versions.org_jacoco_agent
-//  const val org_jacoco_ant: Lib = "org.jacoco:org.jacoco.ant:" + Versions.org_jacoco_ant
-//
-//  const val android_instrumentation_test_runner: Lib =
-//      "de.mannodermaus.junit5:android-instrumentation-test-runner:" + Versions.de_mannodermaus_junit5
-//
-//  const val android_instrumentation_test: Lib =
-//      "de.mannodermaus.junit5:android-instrumentation-test:" + Versions.de_mannodermaus_junit5
-//
-//  const val android_maven_publish: Lib = "digital.wup:android-maven-publish:" +
-//      Versions.android_maven_publish
-//
-//  const val junit: Lib = "junit:junit:" + Versions.junit
-//  const val assertj_core: Lib = "org.assertj:assertj-core:" + Versions.assertj_core
-//  const val kotlin_compiler_embeddable: Lib =
-//      "org.jetbrains.kotlin:kotlin-compiler-embeddable:" + Versions.org_jetbrains_kotlin
-//  const val kotlin_gradle_plugin: Lib = "org.jetbrains.kotlin:kotlin-gradle-plugin:" +
-//      Versions.org_jetbrains_kotlin
-//  const val kotlin_reflect: Lib = "org.jetbrains.kotlin:kotlin-reflect:" +
-//      Versions.org_jetbrains_kotlin
-//  const val kotlin_scripting_compiler_embeddable: Lib =
-//      "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:" +
-//          Versions.org_jetbrains_kotlin
-//  const val kotlin_stdlib_jdk8: Lib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:" +
-//      Versions.org_jetbrains_kotlin
-//  const val kotlin_stdlib: Lib = "org.jetbrains.kotlin:kotlin-stdlib:" +
-//      Versions.org_jetbrains_kotlin
-//
-//  const val junit_pioneer: Lib = "org.junit-pioneer:junit-pioneer:" + Versions.junit_pioneer
+  const val junit4: Lib = "junit:junit:4.13"
 }
 
 /* Helpers & Extensions */

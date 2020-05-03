@@ -38,7 +38,7 @@ open class GenerateReadme : DefaultTask() {
 
   companion object {
     private val PLACEHOLDER_REGEX = Regex("\\\$\\{(.+)}")
-    private val EXTERNAL_DEP_REGEX = Regex("Versions\\.(.+)")
+    private val EXTERNAL_DEP_REGEX = Regex("Libs\\.(.+)")
 
     private const val PLUGIN_VERSION = "pluginVersion"
     private const val INSTRUMENTATION_VERSION = "instrumentationVersion"
@@ -71,7 +71,7 @@ open class GenerateReadme : DefaultTask() {
     // Apply placeholders in the template with data from Versions.kt & Artifacts.kt:
     // ${pluginVersion}             Artifacts.Plugin.currentVersion
     // ${instrumentationVersion}    Artifacts.Instrumentation.Core.currentVersion
-    // ${Versions.<xxx>}            (A constant value taken from Versions.kt)
+    // ${Libs.<xxx>}                (A constant value taken from Dependencies.kt)
     val allPlaceholders = mutableMapOf<String, String>()
 
     PLACEHOLDER_REGEX.findAll(templateText).forEach { match ->
@@ -88,7 +88,7 @@ open class GenerateReadme : DefaultTask() {
           val externalDependency = match2.groups.last()?.value
               ?: throw InvalidPlaceholder(match2)
 
-          val field = Versions.javaClass.getField(externalDependency)
+          val field = Libs.javaClass.getField(externalDependency)
           field.get(null) as String
         }
       }

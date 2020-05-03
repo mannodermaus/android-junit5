@@ -7,7 +7,7 @@ buildscript {
   repositories {
     google()
     jcenter()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    sonatypeSnapshots()
   }
 
   dependencies {
@@ -87,28 +87,26 @@ tasks.withType<Test> {
 }
 
 dependencies {
-  implementation(Libs.kotlin_stdlib)
-  implementation(Libs.junit_jupiter_api)
-  api(Libs.androidx_test_core)
-
+  implementation(Libs.kotlinStdLib)
+  implementation(Libs.junitJupiterApi)
+  api(Libs.androidxTestCore)
   // This is required by the "instrumentation-runner" companion library,
   // since it can't provide any JUnit 5 runtime libraries itself
   // due to fear of prematurely incrementing the minSdkVersion requirement.
-  runtimeOnly(Libs.junit_platform_runner)
-  runtimeOnly(Libs.junit_jupiter_engine)
+  runtimeOnly(Libs.junitPlatformRunner)
+  runtimeOnly(Libs.junitJupiterEngine)
 
-  androidTestImplementation(Libs.junit_jupiter_api)
-  androidTestImplementation(Libs.junit_jupiter_params)
-  androidTestImplementation(Libs.espresso_core)
-
+  androidTestImplementation(Libs.junitJupiterApi)
+  androidTestImplementation(Libs.junitJupiterParams)
+  androidTestImplementation(Libs.espressoCore)
   androidTestRuntimeOnly(project(":runner"))
-  androidTestRuntimeOnly(Libs.junit_jupiter_engine)
+  androidTestRuntimeOnly(Libs.junitJupiterEngine)
 
-  testImplementation(Libs.junit_jupiter_api)
-  testImplementation(Libs.mockito_core)
-  testImplementation(Libs.mockito_kotlin)
+  testImplementation(Libs.junitJupiterApi)
+  testImplementation(Libs.mockitoCore)
+  testImplementation(Libs.mockitoKotlin)
   testImplementation(Libs.truth)
-  testImplementation(Libs.truth_java8)
+  testImplementation(Libs.truthJava8Extensions)
 }
 
 // ------------------------------------------------------------------------------------------------
