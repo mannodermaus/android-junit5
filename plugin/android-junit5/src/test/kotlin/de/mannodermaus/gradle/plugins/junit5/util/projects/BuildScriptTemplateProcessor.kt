@@ -11,7 +11,7 @@ private val END_MATCHER = Regex("//\\\$END")
 
 /**
  * Processor class for virtual build script files, used by Functional Tests.
- * It utilizes a very, very crude token API for placeholders, which are dynamically
+ * It utilizes a very, VERY crude token API for placeholders, which are dynamically
  * injected into the virtual projects, based around template files located within src/test/resources.
  */
 class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
@@ -41,10 +41,9 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
 
       if (ignoredBlockCount == 0 && ifMatch != null) {
         val ifKey = ifMatch.groupValues.last()
-        val conditionEnabled = replacements[ifKey]
-            ?.toString()
-            ?.toBoolean()
-            ?: false
+        val conditionValue = replacements[ifKey]?.toString()
+        val conditionEnabled = conditionValue != "false"
+            && (conditionValue == "true" || conditionValue != null)
 
         if (!conditionEnabled) {
           // Ignore this block

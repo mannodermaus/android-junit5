@@ -1,0 +1,14 @@
+[settings]
+useCustomBuildType = "staging"
+
+[[expectations]]
+buildType = "debug"
+tests = "JavaTest"
+
+[[expectations]]
+buildType = "release"
+tests = "JavaTest,JavaReleaseTest"
+
+[[expectations]]
+buildType = "staging"
+tests = "JavaTest,JavaStagingTest"

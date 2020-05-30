@@ -68,6 +68,12 @@ android {
   defaultConfig {
     minSdkVersion(minSdk)
     targetSdkVersion(targetSdk)
+
+    //$IF{USE_CUSTOM_BUILD_TYPE}
+      buildTypes {
+        register(//$GET{USE_CUSTOM_BUILD_TYPE})
+      }
+    //$END
   }
 
   //$IF{USE_FLAVORS}
