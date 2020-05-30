@@ -28,10 +28,10 @@ private const val PLUGIN_CLASSPATH_RESOURCE_PATH = "/plugin-classpath.txt"
  * Typically, test cases don't need to instantiate this themselves,
  * as its creation is hooked into the lifecycle of the enclosing test class.
  */
-class TestEnvironment2 {
+class TestEnvironment {
 
   val androidSdkFolder = loadAndroidSdkFolder()
-  val envProps: Properties
+  val envProps: Properties = loadAndroidEnvironment()
 
   val compileSdkVersion: String
   val buildToolsVersion: String
@@ -41,12 +41,11 @@ class TestEnvironment2 {
   val kotlinVersion: String
   val junitJupiterVersion: String
 
-  val supportedAgpVersions: List<AgpUnderTest>
+  val supportedAgpVersions: List<TestedAgp>
 
   val pluginClasspathFiles = loadPluginClasspathFiles()
 
   init {
-    envProps = loadAndroidEnvironment()
     compileSdkVersion = envProps.getProperty(COMPILE_SDK_PROP_NAME)
     buildToolsVersion = envProps.getProperty(BUILD_TOOLS_PROP_NAME)
     minSdkVersion = envProps.getProperty(MIN_SDK_PROP_NAME).toInt()
@@ -60,7 +59,7 @@ class TestEnvironment2 {
     supportedAgpVersions = agpVersionsString.split(";")
         .map { entry -> entry.split("|") }
         .map { values ->
-          AgpUnderTest(
+          TestedAgp(
               shortVersion = values[0],
               version = values[1],
               requiresGradle = values[2].run { if (isEmpty()) null else this }
@@ -119,13 +118,13 @@ private fun loadAndroidSdkFromEnvVar() =
 
 private fun loadAndroidEnvironment() =
     Properties().apply {
-      TestEnvironment2::class.java.getResourceAsStream(ENVIRONMENT_RESOURCE_NAME)
+      TestEnvironment::class.java.getResourceAsStream(ENVIRONMENT_RESOURCE_NAME)
           .reader()
           .use { this.load(it) }
     }
 
 private fun loadPluginClasspathFiles() =
-    TestEnvironment2::class.java.getResource(PLUGIN_CLASSPATH_RESOURCE_PATH)
+    TestEnvironment::class.java.getResource(PLUGIN_CLASSPATH_RESOURCE_PATH)
         ?.openStream()
         ?.reader()
         ?.readLines()

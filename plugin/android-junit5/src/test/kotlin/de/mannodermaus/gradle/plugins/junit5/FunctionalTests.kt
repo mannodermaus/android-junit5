@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.*
+import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -16,8 +17,8 @@ import java.io.File
 @DisabledOnCI
 class FunctionalTests {
 
-  private val environment = TestEnvironment2()
-  private lateinit var projectProvider: FunctionalProjectProvider
+  private val environment = TestEnvironment()
+  private lateinit var projectCreator: FunctionalTestProjectCreator
 
   @BeforeAll
   fun beforeAll() {
@@ -26,7 +27,7 @@ class FunctionalTests {
     // the project's test resources.
     val folder = File("build/tmp/virtualProjectsRoot")
     folder.mkdirs()
-    projectProvider = FunctionalProjectProvider(folder, environment)
+    projectCreator = FunctionalTestProjectCreator(folder, environment)
   }
 
   @TestFactory
@@ -34,13 +35,13 @@ class FunctionalTests {
       environment.supportedAgpVersions.map { agp ->
         dynamicContainer(
             "AGP ${agp.shortVersion}",
-            projectProvider.allSpecs.map { spec ->
+            projectCreator.allSpecs.map { spec ->
               dynamicTest(spec.name) {
                 // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
                 println("AGP: ${agp.version}, Project: ${spec.name}, Forced Gradle: ${agp.requiresGradle ?: "no"}")
 
                 // Create a virtual project with the given settings & AGP version
-                val project = projectProvider.createProject(spec, agp)
+                val project = projectCreator.createProject(spec, agp)
 
                 // Execute the tests of the virtual project with Gradle
                 val result = runGradle(agp)
@@ -78,7 +79,7 @@ class FunctionalTests {
 
   /* Private */
 
-  private fun runGradle(agpVersion: AgpUnderTest) =
+  private fun runGradle(agpVersion: TestedAgp) =
       GradleRunner.create()
           .apply {
             if (agpVersion.requiresGradle != null) {

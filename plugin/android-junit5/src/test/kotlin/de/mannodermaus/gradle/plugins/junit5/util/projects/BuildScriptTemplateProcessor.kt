@@ -1,4 +1,4 @@
-package de.mannodermaus.gradle.plugins.junit5.util
+package de.mannodermaus.gradle.plugins.junit5.util.projects
 
 import kotlin.math.max
 

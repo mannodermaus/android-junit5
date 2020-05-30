@@ -1,8 +1,10 @@
-package de.mannodermaus.gradle.plugins.junit5.util
+package de.mannodermaus.gradle.plugins.junit5.util.projects
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.toml
+import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
+import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import java.io.File
 
 private const val TEST_PROJECTS_RESOURCE = "/test-projects"
@@ -13,8 +15,8 @@ private const val SETTINGS_GRADLE_NAME = "settings.gradle.kts"
 private const val PROJECT_CONFIG_FILE_NAME = "config.toml"
 private const val SRC_FOLDER_NAME = "src"
 
-class FunctionalProjectProvider(private val rootFolder: File,
-                                private val environment: TestEnvironment2) {
+class FunctionalTestProjectCreator(private val rootFolder: File,
+                                   private val environment: TestEnvironment) {
 
   private val rawBuildGradle: String
   private val rawSettingsGradle: String
@@ -23,7 +25,7 @@ class FunctionalProjectProvider(private val rootFolder: File,
 
   init {
     // Obtain access to the root folder for all test projects
-    val rootUrl = FunctionalProjectProvider::class.java.getResource(TEST_PROJECTS_RESOURCE)
+    val rootUrl = FunctionalTestProjectCreator::class.java.getResource(TEST_PROJECTS_RESOURCE)
     val rootFolder = File(rootUrl.toURI())
 
     // Read in the raw template texts
@@ -47,7 +49,7 @@ class FunctionalProjectProvider(private val rootFolder: File,
         ?: emptyList()
   }
 
-  fun createProject(spec: Spec, agp: AgpUnderTest): File {
+  fun createProject(spec: Spec, agp: TestedAgp): File {
     // Construct the project folder, cleaning it if necessary.
     // If any Gradle or build caches already exist, we keep those around.
     // That's the reason for not doing "projectFolder.deleteRecursively()"

@@ -84,7 +84,7 @@ fun List<File>.splitClasspath() = this
     .map { it.absolutePath.replace("\\", "\\\\") }
     .joinToString(", ") { "'$it'" }
 
-fun GradleRunner.withPrunedPluginClasspath(agpVersion: AgpUnderTest) = also {
+fun GradleRunner.withPrunedPluginClasspath(agpVersion: TestedAgp) = also {
   val fileKey = agpVersion.fileKey
   val cl = Thread.currentThread().contextClassLoader
   val url = cl.getResource("pruned-plugin-metadata-$fileKey.properties")

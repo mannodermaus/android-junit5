@@ -1,6 +1,9 @@
-package de.mannodermaus.gradle.plugins.junit5.util
+package de.mannodermaus.gradle.plugins.junit5.util.projects
 
 import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
+import de.mannodermaus.gradle.plugins.junit5.util.applyPlugin
+import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -8,7 +11,12 @@ enum class Type {
   Unset, Application, Library, Feature, DynamicFeature
 }
 
-class TestProjectFactory2(private val environment: TestEnvironment2) {
+/**
+ * Creator class for test projects used specifically in the plugin-verification checks
+ * described by PluginSpec. This is different to the FunctionalTestProjectCreator,
+ * which utilizes actual source code located as a test resource.
+ */
+class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
   fun newRootProject(): Project {
     // Pre-configure a "local.properties" file
@@ -22,9 +30,9 @@ class TestProjectFactory2(private val environment: TestEnvironment2) {
     return rootProject
   }
 
-  fun newProject(parent: Project, name: String? = null) = TestProjectBuilder(parent, name)
+  fun newProject(parent: Project, name: String? = null) = Builder(parent, name)
 
-  inner class TestProjectBuilder(parent: Project, name: String?) {
+  inner class Builder(parent: Project, name: String?) {
 
     private var projectType = Type.Unset
     private var appId = "com.example.android"

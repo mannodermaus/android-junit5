@@ -1,7 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment2
-import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory2
+import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
+import de.mannodermaus.gradle.plugins.junit5.util.project.PluginSpecProjectCreator
 import kotlin.io.FilesKt
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
@@ -12,14 +12,14 @@ import static com.google.common.truth.Truth.assertThat
 
 class DslGroovyTests {
 
-  private TestProjectFactory2 factory
+  private PluginSpecProjectCreator factory
   private Project testRoot
 
   @Before
   void beforeEach() {
-    def environment = new TestEnvironment2()
+    def environment = new TestEnvironment()
 
-    this.factory = new TestProjectFactory2(environment)
+    this.factory = new PluginSpecProjectCreator(environment)
     this.testRoot = factory.newRootProject()
   }
 
