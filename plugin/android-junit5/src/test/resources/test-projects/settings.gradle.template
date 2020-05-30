@@ -1,0 +1,35 @@
+// This template is the baseline for
+// all functional tests executed against the android-junit5 plugin.
+// It is based on the Gradle Kotlin DSL (.kts) and provides several additional
+// placeholder markers, which are substituted upon creating virtual projects
+// in which the test code is being executed for every supported Android Gradle Plugin.
+//
+// The individual configuration of each test depends on the config.toml file,
+// located in the sub-folder next to its source code.
+//
+// Placeholder markers:
+// $GET{value}
+//      Retrieve the placeholder named "value" from the input map
+// $IF{placeholder}
+//      Evaluate the boolean condition "placeholder". If it's false, remove everything until the next $ENDIF marker
+// $ENDIF
+//      End marker for a prior $IF marker
+
+pluginManagement {
+  repositories {
+    google()
+  }
+  resolutionStrategy {
+    eachPlugin {
+      val androidGradlePluginVersion = //$GET{AGP_VERSION}
+      val kotlinVersion = //$GET{KOTLIN_VERSION}
+
+      if (requested.id.id == "com.android.application") {
+        useModule("com.android.tools.build:gradle:${androidGradlePluginVersion}")
+      }
+      if (requested.id.id == "org.jetbrains.kotlin.android") {
+        useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+      }
+    }
+  }
+}

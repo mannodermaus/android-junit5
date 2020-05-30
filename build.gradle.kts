@@ -6,7 +6,7 @@ buildscript {
   }
   dependencies {
     classpath(Plugins.kotlin)
-    classpath(Plugins.android)
+    classpath(Plugins.android.dependency)
     classpath(Plugins.androidMavenPublish)
     classpath(Plugins.bintray)
     classpath(Plugins.androidMavenGradle)

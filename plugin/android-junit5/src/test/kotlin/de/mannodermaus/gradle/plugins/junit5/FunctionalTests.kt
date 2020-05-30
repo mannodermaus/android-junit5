@@ -1,90 +1,84 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
-import de.mannodermaus.gradle.plugins.junit5.util.AgpVersion
-import de.mannodermaus.gradle.plugins.junit5.util.assertThat
-import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
+import de.mannodermaus.gradle.plugins.junit5.util.*
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.io.File
 
+@TestInstance(PER_CLASS)
+@DisabledOnCI
 class FunctionalTests {
 
-  // Iterate over all values in the AgpVersion enum and,
-  // using the project with that name located in the test resource folder,
-  // run a basic integration test with the JUnit 5 plugin.
-  //
-  // The CI server does not have enough memory to run multiple nested virtual Gradle builds.
-  // Restrict execution of this test method to the local machine only
-  @DisplayName("Integration Tests with Android Gradle Plugin")
+  private val environment = TestEnvironment2()
+  private lateinit var projectProvider: FunctionalProjectProvider
+
+  @BeforeAll
+  fun beforeAll() {
+    // The "project provider" is responsible for the construction
+    // of all virtual Gradle projects, using a template file located in
+    // the project's test resources.
+    val folder = File("build/tmp/virtualProjectsRoot")
+    folder.mkdirs()
+    projectProvider = FunctionalProjectProvider(folder, environment)
+  }
+
   @TestFactory
-  @DisabledOnCI
-  fun agpIntegrationTests(): List<DynamicTest> =
-      AgpVersion.values()
-          .map { agpVersion ->
-            dynamicTest("Version ${agpVersion.prettyName}") {
-              // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
-              println("Testing AGP ${agpVersion.prettyName}")
+  fun execute(): List<DynamicNode> =
+      environment.supportedAgpVersions.map { agp ->
+        dynamicContainer(
+            "AGP ${agp.shortVersion}",
+            projectProvider.allSpecs.map { spec ->
+              dynamicTest(spec.name) {
+                // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
+                println("AGP: ${agp.version}, Project: ${spec.name}, Forced Gradle: ${agp.requiresGradle ?: "no"}")
 
-              // Validate presence of test project
-              val projectName = agpVersion.fileKey
-              val fixtureRoot = File("src/test/projects/$projectName")
-              require(fixtureRoot.exists()) { "Make sure that there is a project folder at: '$fixtureRoot'" }
-              File(fixtureRoot, "build").deleteRecursively()
+                // Create a virtual project with the given settings & AGP version
+                val project = projectProvider.createProject(spec, agp)
 
-              // Run virtual Gradle
-              val result = runGradle(agpVersion)
-                  .withProjectDir(fixtureRoot)
-                  .build()
+                // Execute the tests of the virtual project with Gradle
+                val result = runGradle(agp)
+                    .withProjectDir(project)
+                    .build()
 
-              // Assert outputs;
-              assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
+                // Check that the task execution was successful in general
+                when (val outcome = result.task(":test")?.outcome) {
+                  TaskOutcome.UP_TO_DATE -> {
+                    // Nothing to do, a previous build already checked this
+                    println("Test task up-to-date; skipping assertions.")
+                  }
 
-              with(result) {
-                assertAgpTests(buildType = "debug", productFlavor = "free", tests = listOf("JavaTest"))
-                assertAgpTests(buildType = "debug", productFlavor = "paid", tests = listOf("JavaTest", "KotlinPaidDebugTest"))
-                assertAgpTests(buildType = "release", productFlavor = "free", tests = listOf("JavaTest", "KotlinReleaseTest", "JavaFreeReleaseTest"))
-                assertAgpTests(buildType = "release", productFlavor = "paid", tests = listOf("JavaTest", "KotlinReleaseTest"))
+                  TaskOutcome.SUCCESS -> {
+                    // Based on the spec's configuration in the test project,
+                    // assert that all test classes have been executed as expected
+                    for (expectation in spec.expectedTests) {
+                      result.assertAgpTests(
+                          buildType = expectation.buildType,
+                          productFlavor = expectation.productFlavor,
+                          tests = expectation.testsList
+                      )
+                    }
+                  }
+
+                  else -> {
+                    // Unexpected result; fail
+                    fail { "Unexpected task outcome: $outcome" }
+                  }
+                }
               }
             }
-          }
-
-  @Test
-  @DisplayName("Return Android default values")
-  fun androidDefaultValues() {
-    val fixtureRoot = File("src/test/projects/default-values")
-    File(fixtureRoot, "build").deleteRecursively()
-
-    val result = runGradle()
-        .withProjectDir(fixtureRoot)
-        .build()
-
-    assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
-    result.assertAgpTests(buildType = "debug", tests = listOf("JavaTest", "AndroidTest"))
-    result.assertAgpTests(buildType = "release", tests = listOf("JavaTest", "AndroidTest"))
-  }
-
-  @Test
-  @DisplayName("Include Android resources")
-  fun includeAndroidResources() {
-    val fixtureRoot = File("src/test/projects/include-android-resources")
-    File(fixtureRoot, "build").deleteRecursively()
-
-    val result = runGradle()
-        .withProjectDir(fixtureRoot)
-        .build()
-
-    assertThat(result).task(":test").hasOutcome(TaskOutcome.SUCCESS)
-    result.assertAgpTests(buildType = "debug", tests = listOf("AndroidTest"))
-    result.assertAgpTests(buildType = "release", tests = listOf("AndroidTest"))
-  }
+        )
+      }
 
   /* Private */
 
-  private fun runGradle(agpVersion: AgpVersion = AgpVersion.latest()) =
+  private fun runGradle(agpVersion: AgpUnderTest) =
       GradleRunner.create()
           .apply {
             if (agpVersion.requiresGradle != null) {
@@ -107,11 +101,16 @@ class FunctionalTests {
     val taskName = ":test${productFlavor?.capitalize() ?: ""}${buildType.capitalize()}UnitTest"
 
     // Perform assertions
-    assertThat(this).output().ofTask(taskName).apply {
-      tests.forEach { expectedClass ->
-        contains("$expectedClass > test() PASSED")
-      }
-      executedTestCount().isEqualTo(tests.size)
-    }
+    assertWithMessage("AGP Tests for '$taskName' did not match expectations")
+        .about(::BuildResultSubject)
+        .that(this)
+        .output()
+        .ofTask(taskName)
+        .apply {
+          tests.forEach { expectedClass ->
+            contains("$expectedClass > test() PASSED")
+          }
+          executedTestCount().isEqualTo(tests.size)
+        }
   }
 }

@@ -9,10 +9,13 @@ private const val ANDROID_SDK_PROP_NAME = "sdk.dir"
 private const val ANDROID_HOME_ENVVAR_NAME = "ANDROID_HOME"
 
 private const val ENVIRONMENT_RESOURCE_NAME = "/de/mannodermaus/gradle/plugins/junit5/testenv.properties"
-private const val COMPILE_SDK_PROP_NAME = "compileSdkVersion"
+private const val COMPILE_SDK_PROP_NAME = "COMPILE_SDK_VERSION"
 private const val BUILD_TOOLS_PROP_NAME = "buildToolsVersion"
-private const val MIN_SDK_PROP_NAME = "minSdkVersion"
-private const val TARGET_SDK_PROP_NAME = "targetSdkVersion"
+private const val MIN_SDK_PROP_NAME = "MIN_SDK_VERSION"
+private const val TARGET_SDK_PROP_NAME = "TARGET_SDK_VERSION"
+private const val KOTLIN_VERSION_PROP_NAME = "KOTLIN_VERSION"
+private const val JUNIT_JUPITER_PROP_NAME = "JUNIT_JUPITER_VERSION"
+private const val AGP_VERSIONS_PROP_NAME = "AGP_VERSIONS"
 
 private const val USER_DIR_PROP_NAME = "user.dir"
 private const val BUILD_SRC_FOLDER_NAME = "buildSrc"
@@ -28,20 +31,41 @@ private const val PLUGIN_CLASSPATH_RESOURCE_PATH = "/plugin-classpath.txt"
 class TestEnvironment2 {
 
   val androidSdkFolder = loadAndroidSdkFolder()
+  val envProps: Properties
 
   val compileSdkVersion: String
   val buildToolsVersion: String
   val minSdkVersion: Int
   val targetSdkVersion: Int
 
+  val kotlinVersion: String
+  val junitJupiterVersion: String
+
+  val supportedAgpVersions: List<AgpUnderTest>
+
   val pluginClasspathFiles = loadPluginClasspathFiles()
 
   init {
-    val envProps = loadAndroidEnvironment()
+    envProps = loadAndroidEnvironment()
     compileSdkVersion = envProps.getProperty(COMPILE_SDK_PROP_NAME)
     buildToolsVersion = envProps.getProperty(BUILD_TOOLS_PROP_NAME)
     minSdkVersion = envProps.getProperty(MIN_SDK_PROP_NAME).toInt()
     targetSdkVersion = envProps.getProperty(TARGET_SDK_PROP_NAME).toInt()
+    kotlinVersion = envProps.getProperty(KOTLIN_VERSION_PROP_NAME)
+    junitJupiterVersion = envProps.getProperty(JUNIT_JUPITER_PROP_NAME)
+
+    // Each entry in this string is separated by semicolon.
+    // Within each entry, the pipe ("|") divides it into three properties
+    val agpVersionsString = envProps.getProperty(AGP_VERSIONS_PROP_NAME)
+    supportedAgpVersions = agpVersionsString.split(";")
+        .map { entry -> entry.split("|") }
+        .map { values ->
+          AgpUnderTest(
+              shortVersion = values[0],
+              version = values[1],
+              requiresGradle = values[2].run { if (isEmpty()) null else this }
+          )
+        }
   }
 }
 

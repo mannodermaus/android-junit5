@@ -1,12 +1,22 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("groovy")
   id("kotlin")
   id("java-gradle-plugin")
   id("jacoco")
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+  jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+  jvmTarget = "1.8"
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -65,6 +75,28 @@ tasks.named("processTestResources", Copy::class.java).configure {
       "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
       "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
+      "KOTLIN_VERSION" to Plugins.kotlin.version,
+      "JUNIT_JUPITER_VERSION" to Libs.junitJupiterApi.version,
+
+      // Collect all supported AGP versions into a single string.
+      // This string is delimited with semicolons, and each of the separated values itself is a 3-tuple.
+      //
+      // Example:
+      // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4
+      //
+      // Can be parsed into this list of values:
+      // |___> Short: "3.5"
+      //       Full: "3.5.3"
+      //       Gradle Requirement: null
+      //
+      // |___> Short: "3.6"
+      //       Full: "3.6.3"
+      //       Gradle Requirement: "6.4"
+      "AGP_VERSIONS" to Plugins.supportedAndroidPlugins.joinToString(separator=";") { plugin ->
+        "${plugin.shortVersion}|${plugin.version}|${plugin.requiresGradle ?: ""}"
+      },
+
+      // Unused TODO Remove
       "KOTLIN" to Plugins.kotlin.version,
 
       "KOTLIN_STD_LIB" to Libs.kotlinStdLib,
@@ -74,7 +106,14 @@ tasks.named("processTestResources", Copy::class.java).configure {
     // Add an entry for each of the supported Android Gradle Plugin values
     // (e.g. "3.5.3" -> "AGP_35X")
     Plugins.supportedAndroidPlugins.forEach { plugin ->
-      map["AGP_${plugin.shortVersion}X"] = plugin.version
+      val shortVersion = plugin.shortVersion.replace(".", "")
+      map["AGP_${shortVersion}X"] = plugin.version
+
+      // For additional Gradle requirements, add another value
+      val requiresGradle = plugin.requiresGradle
+      if (requiresGradle != null) {
+        map["AGP_${shortVersion}X_GRADLE"] = requiresGradle
+      }
     }
   }
 
@@ -112,7 +151,7 @@ configurations {
           "tests source code in Gradle functional tests against AGP ${plugin.version}"
       extendsFrom(configurations.getByName("implementation"))
       dependencies {
-        this@create(plugin)
+        this@create(plugin.dependency)
       }
     }
   }
@@ -167,7 +206,7 @@ tasks.withType<WriteClasspathResource> {
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
-  compileOnly(Plugins.android)
+  compileOnly(Plugins.android.dependency)
   implementation(gradleApi())
   implementation(Plugins.kotlin)
   implementation(Libs.kotlinStdLib)
@@ -176,9 +215,10 @@ dependencies {
   implementation(Libs.junitPlatformCommons)
 
   testImplementation(gradleTestKit())
-  testImplementation(Plugins.android)
+  testImplementation(Plugins.android.dependency)
   testImplementation(Libs.commonsIO)
   testImplementation(Libs.commonsLang)
+  testImplementation(Libs.konfToml)
   testImplementation(Libs.mockitoCore)
   testImplementation(Libs.truth) {
     // Incompatibility with AGP pulling in older version
