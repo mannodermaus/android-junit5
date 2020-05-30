@@ -103,10 +103,7 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
       }
 
       // Add default configuration
-      project.android.apply {
-        compileSdkVersion(environment.compileSdkVersion)
-        buildToolsVersion(environment.buildToolsVersion)
-      }
+      project.android.compileSdkVersion(environment.compileSdkVersion)
 
       if (projectType == Type.Application) {
         project.android.defaultConfig.apply {

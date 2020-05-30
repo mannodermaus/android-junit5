@@ -10,7 +10,6 @@ private const val ANDROID_HOME_ENVVAR_NAME = "ANDROID_HOME"
 
 private const val ENVIRONMENT_RESOURCE_NAME = "/de/mannodermaus/gradle/plugins/junit5/testenv.properties"
 private const val COMPILE_SDK_PROP_NAME = "COMPILE_SDK_VERSION"
-private const val BUILD_TOOLS_PROP_NAME = "buildToolsVersion"
 private const val MIN_SDK_PROP_NAME = "MIN_SDK_VERSION"
 private const val TARGET_SDK_PROP_NAME = "TARGET_SDK_VERSION"
 private const val KOTLIN_VERSION_PROP_NAME = "KOTLIN_VERSION"
@@ -19,7 +18,6 @@ private const val AGP_VERSIONS_PROP_NAME = "AGP_VERSIONS"
 
 private const val USER_DIR_PROP_NAME = "user.dir"
 private const val BUILD_SRC_FOLDER_NAME = "buildSrc"
-private const val PLUGIN_CLASSPATH_RESOURCE_PATH = "/plugin-classpath.txt"
 
 /**
  * Encapsulates environment properties related to running
@@ -34,7 +32,6 @@ class TestEnvironment {
   val envProps: Properties = loadAndroidEnvironment()
 
   val compileSdkVersion: String
-  val buildToolsVersion: String
   val minSdkVersion: Int
   val targetSdkVersion: Int
 
@@ -43,11 +40,8 @@ class TestEnvironment {
 
   val supportedAgpVersions: List<TestedAgp>
 
-  val pluginClasspathFiles = loadPluginClasspathFiles()
-
   init {
     compileSdkVersion = envProps.getProperty(COMPILE_SDK_PROP_NAME)
-    buildToolsVersion = envProps.getProperty(BUILD_TOOLS_PROP_NAME)
     minSdkVersion = envProps.getProperty(MIN_SDK_PROP_NAME).toInt()
     targetSdkVersion = envProps.getProperty(TARGET_SDK_PROP_NAME).toInt()
     kotlinVersion = envProps.getProperty(KOTLIN_VERSION_PROP_NAME)
@@ -122,11 +116,3 @@ private fun loadAndroidEnvironment() =
           .reader()
           .use { this.load(it) }
     }
-
-private fun loadPluginClasspathFiles() =
-    TestEnvironment::class.java.getResource(PLUGIN_CLASSPATH_RESOURCE_PATH)
-        ?.openStream()
-        ?.reader()
-        ?.readLines()
-        ?.map { File(it) }
-        ?: throw IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")

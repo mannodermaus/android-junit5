@@ -54,7 +54,7 @@ gradlePlugin {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Test Setup
+// Task Setup
 // ------------------------------------------------------------------------------------------------
 
 // Use JUnit 5
@@ -67,11 +67,10 @@ tasks.withType<Test> {
   }
 }
 
-// Setup environment & versions in test projects
+// Setup environment & versions for test projects
 tasks.named("processTestResources", Copy::class.java).configure {
-  val tokens = mutableMapOf(
+  val tokens = mapOf(
       "COMPILE_SDK_VERSION" to Android.compileSdkVersion,
-      "BUILD_TOOLS_VERSION" to Android.buildToolsVersion,
       "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
       "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
@@ -94,46 +93,10 @@ tasks.named("processTestResources", Copy::class.java).configure {
       //       Gradle Requirement: "6.4"
       "AGP_VERSIONS" to Plugins.supportedAndroidPlugins.joinToString(separator=";") { plugin ->
         "${plugin.shortVersion}|${plugin.version}|${plugin.requiresGradle ?: ""}"
-      },
-
-      // Unused TODO Remove
-      "KOTLIN" to Plugins.kotlin.version,
-
-      "KOTLIN_STD_LIB" to Libs.kotlinStdLib,
-      "JUPITER_API" to Libs.junitJupiterApi,
-      "JUPITER_ENGINE" to Libs.junitJupiterEngine
-  ).also { map ->
-    // Add an entry for each of the supported Android Gradle Plugin values
-    // (e.g. "3.5.3" -> "AGP_35X")
-    Plugins.supportedAndroidPlugins.forEach { plugin ->
-      val shortVersion = plugin.shortVersion.replace(".", "")
-      map["AGP_${shortVersion}X"] = plugin.version
-
-      // For additional Gradle requirements, add another value
-      val requiresGradle = plugin.requiresGradle
-      if (requiresGradle != null) {
-        map["AGP_${shortVersion}X_GRADLE"] = requiresGradle
       }
-    }
-  }
+  )
 
   inputs.properties(tokens)
-
-  // Write a gradle.properties file into each test project
-  file("src/test/projects")
-      .listFiles()
-      .filter { it.isDirectory }
-      .forEach {
-        val propertiesFile = File(it, "gradle.properties")
-        if (propertiesFile.exists()) {
-          propertiesFile.delete()
-        }
-        propertiesFile.writer().use { writer ->
-          writer.write(tokens
-              .map { t -> "${t.key}=${t.value}" }
-              .joinToString(separator = System.lineSeparator()))
-        }
-      }
 
   // Apply test environment to a resource file
   from(sourceSets["test"].resources.srcDirs) {
@@ -141,7 +104,6 @@ tasks.named("processTestResources", Copy::class.java).configure {
     filter(ReplaceTokens::class, mapOf("tokens" to tokens))
   }
 }
-
 
 configurations {
   // Create a custom configuration for each version
@@ -173,11 +135,13 @@ tasks.named("pluginUnderTestMetadata").configure {
         // 2) Use resources from the plugin (i.e. plugin IDs etc.)
         // 3) Use AGP-specific dependencies
         val classesDirs = file("$buildDir/classes").listFiles()
-            .filter { it.isDirectory }
-            .map { File(it, "main") }
-            .filter { it.exists() && it.isDirectory && it.list().isNotEmpty() }
+            ?.filter { it.isDirectory }
+            ?.map { File(it, "main") }
+            ?.filter { it.exists() && it.isDirectory && it.list()?.isEmpty() == false }
+            ?: emptyList()
         val resourcesDirs = file("$buildDir/resources").listFiles()
-            .filter { it.isDirectory }
+            ?.filter { it.isDirectory }
+            ?: emptyList()
 
         writer.write("implementation-classpath=")
         writer.write((classesDirs + resourcesDirs + configuration)
@@ -185,20 +149,6 @@ tasks.named("pluginUnderTestMetadata").configure {
       }
     }
   }
-}
-
-// Resource Writers
-tasks.create("writePluginClasspath", WriteClasspathResource::class) {
-  inputFiles = sourceSets["test"].runtimeClasspath
-  outputDir = File("$buildDir/resources/test")
-  resourceFileName = "plugin-classpath.txt"
-}
-
-val testTask = tasks.getByName("test")
-val processTestResources = tasks.getByName("processTestResources")
-tasks.withType<WriteClasspathResource> {
-  processTestResources.finalizedBy(this)
-  testTask.mustRunAfter(this)
 }
 
 // ------------------------------------------------------------------------------------------------

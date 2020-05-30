@@ -3,33 +3,6 @@ import org.gradle.api.tasks.*
 import java.io.File
 
 /**
- * Helper Task class writing a classpath into a file.
- * Used for tests that verify the plugin's behavior
- * using locally built dependencies.
- *
- * More info:
- * https://docs.gradle.org/current/userguide/test_kit.html#sub:test-kit-classpath-injection
- */
-open class WriteClasspathResource : DefaultTask() {
-
-  @InputFiles
-  lateinit var inputFiles: Iterable<File>
-  @Input
-  lateinit var resourceFileName: String
-  @OutputDirectory
-  lateinit var outputDir: File
-
-  @TaskAction
-  fun doWork() {
-    outputDir.mkdirs()
-    val outputFile = File(outputDir, resourceFileName)
-    outputFile.writer(Charsets.UTF_8).use {
-      it.write(inputFiles.joinToString(separator = System.lineSeparator()))
-    }
-  }
-}
-
-/**
  * Helper Task class for generating an up-to-date version of the project's README.md.
  * Using a template file, the plugin's version constants & other dependency versions
  * are automatically injected into the README.

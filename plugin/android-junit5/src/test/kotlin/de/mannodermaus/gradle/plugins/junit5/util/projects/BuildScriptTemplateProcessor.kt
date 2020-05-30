@@ -54,7 +54,6 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
 
       if (ignoredBlockCount == 0 && ifgradleMatch != null) {
         val ifgradleExpression = ifgradleMatch.groupValues.last()
-        println("Ifgradle($ifgradleExpression) found. target=$targetGradleVersion")
 
         // When the given Gradle requirement is null, or if the requirement
         // is not matched by the block, ignore it
