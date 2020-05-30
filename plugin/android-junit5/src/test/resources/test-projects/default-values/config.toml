@@ -1,0 +1,10 @@
+[settings]
+returnDefaultValues = true
+
+[[expectations]]
+buildType = "debug"
+tests = "JavaTest,AndroidTest"
+
+[[expectations]]
+buildType = "release"
+tests = "JavaTest,AndroidTest"

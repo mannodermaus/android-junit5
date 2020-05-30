@@ -72,6 +72,8 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     replacements["AGP_VERSION"] = agp.version
     replacements["USE_KOTLIN"] = spec.useKotlin
     replacements["USE_FLAVORS"] = spec.useFlavors
+    replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
+    replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
     val processor = BuildScriptTemplateProcessor(agp.requiresGradle, replacements)
 
     val processedBuildGradle = processor.process(rawBuildGradle)
@@ -90,6 +92,8 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
 
     val useKotlin = config[TomlSpec.Settings.useKotlin]
     val useFlavors = config[TomlSpec.Settings.useFlavors]
+    val returnDefaultValues = config[TomlSpec.Settings.returnDefaultValues]
+    val includeAndroidResources = config[TomlSpec.Settings.includeAndroidResources]
     val expectedTests = config[TomlSpec.expectations]
 
     companion object {
@@ -121,6 +125,8 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     object Settings : ConfigSpec() {
       val useFlavors by optional(default = false)
       val useKotlin by optional(default = false)
+      val returnDefaultValues by optional(default = false)
+      val includeAndroidResources by optional(default = false)
     }
   }
 

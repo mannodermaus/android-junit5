@@ -83,6 +83,14 @@ android {
   //$END
 
   testOptions {
+    //$IF{RETURN_DEFAULT_VALUES}
+      unitTests.isReturnDefaultValues = true
+    //$END
+
+    //$IF{INCLUDE_ANDROID_RESOURCES}
+      unitTests.isIncludeAndroidResources = true
+    //$END
+
     // Gradle 6.5 fixed the syntax for UnitTestOptions' DSL
     //$IFGRADLE{6.5}
       unitTests.all { test ->
