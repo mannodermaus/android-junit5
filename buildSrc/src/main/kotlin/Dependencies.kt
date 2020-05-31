@@ -14,11 +14,11 @@ object Plugins {
   const val kotlin: Lib = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
   // Android Gradle Plugin
-  const val android35x: Agp = "com.android.tools.build:gradle:3.5.3"
-  const val android36x: Agp = "com.android.tools.build:gradle:3.6.3"
-  const val android40x: Agp = "com.android.tools.build:gradle:4.0.0-beta05"
-  const val android41x: Agp = "com.android.tools.build:gradle:4.1.0-alpha08"
-  const val android: Agp = android35x
+  val android35x: Agp = Agp("com.android.tools.build:gradle:3.5.3")
+  val android36x: Agp = Agp("com.android.tools.build:gradle:3.6.3")
+  val android40x: Agp = Agp("com.android.tools.build:gradle:4.0.0")
+  val android41x: Agp = Agp("com.android.tools.build:gradle:4.1.0-alpha10", requiresGradle = "6.5-milestone-1")
+  val android: Agp = android35x
 
   val supportedAndroidPlugins = listOf(
       android35x,
@@ -48,6 +48,7 @@ object Libs {
   const val annimonStream: Lib = "com.annimon:stream:1.2.1"
   const val commonsIO: Lib = "commons-io:commons-io:2.6"
   const val commonsLang: Lib = "commons-lang:commons-lang:2.6"
+  const val konfToml: Lib = "com.uchuhimo:konf-toml:0.22.1"
 
   // JUnit 5
   private const val junitJupiterVersion = "5.6.2"
@@ -61,7 +62,7 @@ object Libs {
   const val junitPlatformLauncher: Lib = "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
   const val junitPlatformRunner: Lib = "org.junit.platform:junit-platform-runner:$junitPlatformVersion"
   const val junitVintageEngine: Lib = "org.junit.vintage:junit-vintage-engine:$junitVintageVersion"
-  
+
   // Assertions & Testing
   private const val truthVersion = "0.43"
   const val truth: Lib = "com.google.truth:truth:$truthVersion"
@@ -86,20 +87,26 @@ object Libs {
 /* Helpers & Extensions */
 
 typealias Lib = String
+
 val Lib.version get() = substringAfterLast(":")
 
-typealias Agp = Lib
-val Agp.shortVersion: String get() {
-  // Extract first two components of the Maven dependency's version string.
-  val components = substringAfterLast(":").split('.')
-  if (components.size < 2) {
-    throw IllegalArgumentException("Cannot derive AGP configuration name from: $this")
+class Agp(val dependency: Lib, val requiresGradle: String? = null) {
+
+  val version = dependency.version
+
+  val shortVersion: String = run {
+    // Extract first two components of the Maven dependency's version string.
+    val components = dependency.substringAfterLast(":").split('.')
+    if (components.size < 2) {
+      throw IllegalArgumentException("Cannot derive AGP configuration name from: $this")
+    }
+
+    "${components[0]}.${components[1]}"
   }
 
-  return "${components[0]}${components[1]}"
-}
-val Agp.configurationName: String get() {
   // Derive the Gradle configuration name from that
   // (Example: version = "3.2.0" --> configurationName = "testAgp32x")
-  return "testAgp${shortVersion}x"
+  val configurationName = "testAgp${shortVersion.replace(".", "")}x"
+
+  override fun toString() = dependency
 }

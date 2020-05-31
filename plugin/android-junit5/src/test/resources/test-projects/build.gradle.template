@@ -1,0 +1,127 @@
+// This template is the baseline for
+// all functional tests executed against the android-junit5 plugin.
+// It is based on the Gradle Kotlin DSL (.kts) and provides several additional
+// placeholder markers, which are substituted upon creating virtual projects
+// in which the test code is being executed for every supported Android Gradle Plugin.
+//
+// The individual configuration of each test depends on the config.toml file,
+// located in the sub-folder next to its source code.
+//
+// Placeholder markers:
+// $GET{value}
+//      Retrieve the placeholder named "value" from the input map
+// $IF{placeholder}
+//      Evaluate the boolean condition "placeholder". If it's false, remove everything until the next $END marker
+// $IFGRADLE{versionmarker}
+//      Evaluate the running Gradle version against the "versionmarker", excluding the block if it doesn't match.
+//      The "versionmarker" is an expression in the form 'x.y', where x.y is a Gradle version.
+//      An AGP version without a fixed Gradle requirement will always evaluate these blocks to false, skipping them
+// $ELSE
+//      Alternative case for $IF or $GRADLE markers.
+//      Inverts the status of excluding/including blocks based on the condition.
+//      If the associated $IF was true, the $ELSE block is excluded, and vice-versa.
+// $END
+//      End marker for a prior $IF or $GRADLE marker
+
+import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+val androidGradlePluginVersion: String = //$GET{AGP_VERSION}
+val kotlinVersion: String = //$GET{KOTLIN_VERSION}
+val junitJupiterVersion: String = //$GET{JUNIT_JUPITER_VERSION}
+
+buildscript {
+  repositories {
+    google()
+    jcenter()
+  }
+}
+
+plugins {
+  id("com.android.application")
+
+  //$IF{USE_KOTLIN}
+    id("org.jetbrains.kotlin.android")
+  //$END
+
+  id("de.mannodermaus.android-junit5")
+}
+
+// Double-checking the integrity of the AGP version under test
+val version = com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+if (version != "${androidGradlePluginVersion}") {
+  throw IllegalStateException("Incorrect AGP version. Expected ${androidGradlePluginVersion}, got $version")
+}
+
+repositories {
+  google()
+  jcenter()
+}
+
+android {
+  val compileSdk: String = //$GET{COMPILE_SDK_VERSION}
+  val minSdk: Int = //$GET{MIN_SDK_VERSION}.toInt()
+  val targetSdk: Int = //$GET{TARGET_SDK_VERSION}.toInt()
+
+  compileSdkVersion("${compileSdk}")
+
+  defaultConfig {
+    minSdkVersion(minSdk)
+    targetSdkVersion(targetSdk)
+
+    //$IF{USE_CUSTOM_BUILD_TYPE}
+      buildTypes {
+        register(//$GET{USE_CUSTOM_BUILD_TYPE})
+      }
+    //$END
+  }
+
+  //$IF{USE_FLAVORS}
+    flavorDimensions("environment")
+    productFlavors {
+      register("free") {
+        setDimension("environment")
+      }
+      register("paid") {
+        setDimension("environment")
+      }
+    }
+  //$END
+
+  testOptions {
+    //$IF{RETURN_DEFAULT_VALUES}
+      unitTests.isReturnDefaultValues = true
+    //$END
+
+    //$IF{INCLUDE_ANDROID_RESOURCES}
+      unitTests.isIncludeAndroidResources = true
+    //$END
+
+    // Gradle 6.5 fixed the syntax for UnitTestOptions' DSL
+    //$IFGRADLE{6.5}
+      unitTests.all { test ->
+        test.testLogging {
+          events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        }
+      }
+    //$ELSE
+      // Lower versions of Gradle require more ceremony for UnitTestOptions
+      unitTests.all(KotlinClosure1<Any, Test>({
+        (this as Test).also {
+          testLogging {
+            events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+          }
+        }
+      }, unitTests))
+    //$END
+  }
+}
+
+dependencies {
+  //$IF{USE_KOTLIN}
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
+  //$END
+
+  testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+}

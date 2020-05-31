@@ -9,7 +9,8 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import de.mannodermaus.gradle.plugins.junit5.util.*
-import de.mannodermaus.gradle.plugins.junit5.util.TestProjectFactory2.TestProjectBuilder
+import de.mannodermaus.gradle.plugins.junit5.util.projects.PluginSpecProjectCreator
+import de.mannodermaus.gradle.plugins.junit5.util.projects.PluginSpecProjectCreator.Builder
 import org.gradle.api.Action
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.Task
@@ -32,9 +33,9 @@ import org.junit.platform.commons.util.PreconditionViolationException
  */
 class PluginSpec : Spek({
   // Access to Android SDK properties
-  val environment by memoized(SCOPE) { TestEnvironment2() }
+  val environment by memoized(SCOPE) { TestEnvironment() }
   // Factory for temporary projects
-  val factory by memoized(SCOPE) { TestProjectFactory2(environment) }
+  val factory by memoized(SCOPE) { PluginSpecProjectCreator(environment) }
   // The root project of each temporary project
   val testRoot by memoized { factory.newRootProject() }
 
@@ -121,7 +122,7 @@ class PluginSpec : Spek({
   }
 
   // Perform most tests with all different Android plugins that apply for JUnit 5
-  val differentPlugins = mutableMapOf<String, TestProjectBuilder.() -> TestProjectBuilder>()
+  val differentPlugins = mutableMapOf<String, Builder.() -> Builder>()
   differentPlugins["application"] = { this.asAndroidApplication() }
   differentPlugins["library"] = { this.asAndroidLibrary() }
   differentPlugins["feature"] = { this.asAndroidFeature() }

@@ -1,12 +1,22 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("groovy")
   id("kotlin")
   id("java-gradle-plugin")
   id("jacoco")
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+  jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+  jvmTarget = "1.8"
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -44,7 +54,7 @@ gradlePlugin {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Test Setup
+// Task Setup
 // ------------------------------------------------------------------------------------------------
 
 // Use JUnit 5
@@ -57,44 +67,36 @@ tasks.withType<Test> {
   }
 }
 
-// Setup environment & versions in test projects
+// Setup environment & versions for test projects
 tasks.named("processTestResources", Copy::class.java).configure {
-  val tokens = mutableMapOf(
+  val tokens = mapOf(
       "COMPILE_SDK_VERSION" to Android.compileSdkVersion,
-      "BUILD_TOOLS_VERSION" to Android.buildToolsVersion,
       "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
       "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
-      "KOTLIN" to Plugins.kotlin.version,
+      "KOTLIN_VERSION" to Plugins.kotlin.version,
+      "JUNIT_JUPITER_VERSION" to Libs.junitJupiterApi.version,
 
-      "KOTLIN_STD_LIB" to Libs.kotlinStdLib,
-      "JUPITER_API" to Libs.junitJupiterApi,
-      "JUPITER_ENGINE" to Libs.junitJupiterEngine
-  ).also { map ->
-    // Add an entry for each of the supported Android Gradle Plugin values
-    // (e.g. "3.5.3" -> "AGP_35X")
-    Plugins.supportedAndroidPlugins.forEach { plugin ->
-      map["AGP_${plugin.shortVersion}X"] = plugin.version
-    }
-  }
+      // Collect all supported AGP versions into a single string.
+      // This string is delimited with semicolons, and each of the separated values itself is a 3-tuple.
+      //
+      // Example:
+      // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4
+      //
+      // Can be parsed into this list of values:
+      // |___> Short: "3.5"
+      //       Full: "3.5.3"
+      //       Gradle Requirement: null
+      //
+      // |___> Short: "3.6"
+      //       Full: "3.6.3"
+      //       Gradle Requirement: "6.4"
+      "AGP_VERSIONS" to Plugins.supportedAndroidPlugins.joinToString(separator=";") { plugin ->
+        "${plugin.shortVersion}|${plugin.version}|${plugin.requiresGradle ?: ""}"
+      }
+  )
 
   inputs.properties(tokens)
-
-  // Write a gradle.properties file into each test project
-  file("src/test/projects")
-      .listFiles()
-      .filter { it.isDirectory }
-      .forEach {
-        val propertiesFile = File(it, "gradle.properties")
-        if (propertiesFile.exists()) {
-          propertiesFile.delete()
-        }
-        propertiesFile.writer().use { writer ->
-          writer.write(tokens
-              .map { t -> "${t.key}=${t.value}" }
-              .joinToString(separator = System.lineSeparator()))
-        }
-      }
 
   // Apply test environment to a resource file
   from(sourceSets["test"].resources.srcDirs) {
@@ -102,7 +104,6 @@ tasks.named("processTestResources", Copy::class.java).configure {
     filter(ReplaceTokens::class, mapOf("tokens" to tokens))
   }
 }
-
 
 configurations {
   // Create a custom configuration for each version
@@ -112,7 +113,7 @@ configurations {
           "tests source code in Gradle functional tests against AGP ${plugin.version}"
       extendsFrom(configurations.getByName("implementation"))
       dependencies {
-        this@create(plugin)
+        this@create(plugin.dependency)
       }
     }
   }
@@ -134,11 +135,13 @@ tasks.named("pluginUnderTestMetadata").configure {
         // 2) Use resources from the plugin (i.e. plugin IDs etc.)
         // 3) Use AGP-specific dependencies
         val classesDirs = file("$buildDir/classes").listFiles()
-            .filter { it.isDirectory }
-            .map { File(it, "main") }
-            .filter { it.exists() && it.isDirectory && it.list().isNotEmpty() }
+            ?.filter { it.isDirectory }
+            ?.map { File(it, "main") }
+            ?.filter { it.exists() && it.isDirectory && it.list()?.isEmpty() == false }
+            ?: emptyList()
         val resourcesDirs = file("$buildDir/resources").listFiles()
-            .filter { it.isDirectory }
+            ?.filter { it.isDirectory }
+            ?: emptyList()
 
         writer.write("implementation-classpath=")
         writer.write((classesDirs + resourcesDirs + configuration)
@@ -148,26 +151,12 @@ tasks.named("pluginUnderTestMetadata").configure {
   }
 }
 
-// Resource Writers
-tasks.create("writePluginClasspath", WriteClasspathResource::class) {
-  inputFiles = sourceSets["test"].runtimeClasspath
-  outputDir = File("$buildDir/resources/test")
-  resourceFileName = "plugin-classpath.txt"
-}
-
-val testTask = tasks.getByName("test")
-val processTestResources = tasks.getByName("processTestResources")
-tasks.withType<WriteClasspathResource> {
-  processTestResources.finalizedBy(this)
-  testTask.mustRunAfter(this)
-}
-
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
-  compileOnly(Plugins.android)
+  compileOnly(Plugins.android.dependency)
   implementation(gradleApi())
   implementation(Plugins.kotlin)
   implementation(Libs.kotlinStdLib)
@@ -176,9 +165,10 @@ dependencies {
   implementation(Libs.junitPlatformCommons)
 
   testImplementation(gradleTestKit())
-  testImplementation(Plugins.android)
+  testImplementation(Plugins.android.dependency)
   testImplementation(Libs.commonsIO)
   testImplementation(Libs.commonsLang)
+  testImplementation(Libs.konfToml)
   testImplementation(Libs.mockitoCore)
   testImplementation(Libs.truth) {
     // Incompatibility with AGP pulling in older version

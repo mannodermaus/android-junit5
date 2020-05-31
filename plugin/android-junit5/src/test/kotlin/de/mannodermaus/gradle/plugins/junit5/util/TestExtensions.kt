@@ -1,6 +1,5 @@
 package de.mannodermaus.gradle.plugins.junit5.util
 
-import de.mannodermaus.gradle.plugins.junit5.FunctionalTests
 import org.apache.commons.lang.StringUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -50,16 +49,6 @@ fun assertAll(heading: String, vararg assertions: () -> Unit) {
   Assertions.assertAll(heading, *assertions.map { Executable { it() } }.toTypedArray())
 }
 
-fun loadClassPathManifestResource(name: String): List<File> {
-  val classpathResource = FunctionalTests::class.java.classLoader.getResourceAsStream(name)
-      ?: throw IllegalStateException("Did not find required resource with name $name")
-
-  return classpathResource.bufferedReader()
-      .lineSequence()
-      .map { File(it) }
-      .toList()
-}
-
 /* Extensions */
 
 fun Project.evaluate() {
@@ -95,8 +84,8 @@ fun List<File>.splitClasspath() = this
     .map { it.absolutePath.replace("\\", "\\\\") }
     .joinToString(", ") { "'$it'" }
 
-fun GradleRunner.withPrunedPluginClasspath(agpVersion: AgpVersion? = null) = also {
-  val fileKey = (agpVersion ?: AgpVersion.latest()).fileKey
+fun GradleRunner.withPrunedPluginClasspath(agpVersion: TestedAgp) = also {
+  val fileKey = agpVersion.fileKey
   val cl = Thread.currentThread().contextClassLoader
   val url = cl.getResource("pruned-plugin-metadata-$fileKey.properties")
   withPluginClasspath(PluginUnderTestMetadataReading.readImplementationClasspath(url))
