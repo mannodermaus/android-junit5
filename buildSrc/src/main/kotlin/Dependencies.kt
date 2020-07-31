@@ -18,7 +18,7 @@ object Plugins {
   val android36x: Agp = Agp("com.android.tools.build:gradle:3.6.4")
   val android40x: Agp = Agp("com.android.tools.build:gradle:4.0.1")
   val android41x: Agp = Agp("com.android.tools.build:gradle:4.1.0-beta04", requiresGradle = "6.5")
-  val android42x: Agp = Agp("com.android.tools.build:gradle:4.2.0-alpha06", requiresGradle = "6.5")
+  val android42x: Agp = Agp("com.android.tools.build:gradle:4.2.0-alpha07", requiresGradle = "6.5")
   val android: Agp = android35x
 
   val supportedAndroidPlugins = listOf(
