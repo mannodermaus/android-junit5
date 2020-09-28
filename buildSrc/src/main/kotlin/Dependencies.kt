@@ -17,8 +17,8 @@ object Plugins {
   val android35x: Agp = Agp("com.android.tools.build:gradle:3.5.4")
   val android36x: Agp = Agp("com.android.tools.build:gradle:3.6.4")
   val android40x: Agp = Agp("com.android.tools.build:gradle:4.0.1")
-  val android41x: Agp = Agp("com.android.tools.build:gradle:4.1.0-rc02", requiresGradle = "6.5")
-  val android42x: Agp = Agp("com.android.tools.build:gradle:4.2.0-alpha10", requiresGradle = "6.5")
+  val android41x: Agp = Agp("com.android.tools.build:gradle:4.1.0-rc03", requiresGradle = "6.5")
+  val android42x: Agp = Agp("com.android.tools.build:gradle:4.2.0-alpha12", requiresGradle = "6.6.1")
   val android: Agp = android35x
 
   val supportedAndroidPlugins = listOf(
@@ -53,9 +53,9 @@ object Libs {
   const val konfToml: Lib = "com.uchuhimo:konf-toml:0.22.1"
 
   // JUnit 5
-  private const val junitJupiterVersion = "5.6.2"
-  private const val junitPlatformVersion = "1.6.2"
-  private const val junitVintageVersion = "5.6.2"
+  private const val junitJupiterVersion = "5.7.0"
+  private const val junitPlatformVersion = "1.7.0"
+  private const val junitVintageVersion = "5.7.0"
   const val junitJupiterApi: Lib = "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
   const val junitJupiterEngine: Lib = "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
   const val junitJupiterParams: Lib = "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
