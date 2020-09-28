@@ -55,8 +55,8 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
         val ifgradleExpression = ifgradleMatch.groupValues.last()
 
         // When the given Gradle requirement is null, or if the requirement
-        // is not matched by the block, ignore it
-        if (targetGradleVersion == null || !targetGradleVersion.startsWith(ifgradleExpression)) {
+        // is not fulfilled by the block, ignore it
+        if (shouldIgnoreIfgradleBlock(ifgradleExpression)) {
           // Ignore this block
           ignoredBlockCount++
         }
@@ -82,5 +82,15 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
       }
     }
     return text2.toString()
+  }
+
+  private fun shouldIgnoreIfgradleBlock(version: String): Boolean {
+    if (targetGradleVersion == null) {
+      return true
+    }
+
+    val targetValue = SemanticVersion(targetGradleVersion)
+    val compareValue = SemanticVersion(version)
+    return compareValue > targetValue
   }
 }
