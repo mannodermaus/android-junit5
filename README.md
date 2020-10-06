@@ -19,6 +19,18 @@ Furthermore, this repository provides a small showcase of the functionality prov
 ## Download
 
 <details open>
+  <summary>Kotlin</summary>
+
+  ```kotlin
+  buildscript {
+    dependencies {
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.6.2.0")
+    }
+  }
+  ```
+</details>
+
+<details>
   <summary>Groovy</summary>
   
   ```groovy
@@ -30,48 +42,14 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```
 </details>
 
-<details>
-  <summary>Kotlin</summary>
-  
-  ```kotlin
-  buildscript {
-    dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.6.2.0")
-    }
-  }
-  ```
-</details>
-
 <br/>
 
 Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
 
 ## Setup
-
 <details open>
-  <summary>Groovy</summary>
-
-  ```groovy
-  apply plugin: "de.mannodermaus.android-junit5"
-
-  dependencies {
-    // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
-
-    // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.2"
-
-    // (Optional) If you also have JUnit 4-based tests
-    testImplementation "junit:junit:4.13"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.6.2"
-  }
-  ```
-</details>
-
-<details>
   <summary>Kotlin</summary>
-  
+
   ```kotlin
   plugins {
     id("de.mannodermaus.android-junit5")
@@ -79,15 +57,36 @@ Snapshots of the development version are available through [Sonatype's `snapshot
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.0")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.2")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.7.0")
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```groovy
+  apply plugin: "de.mannodermaus.android-junit5"
+
+  dependencies {
+    // (Required) Writing and executing Unit Tests on the JUnit Platform
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
+
+    // (Optional) If you need "Parameterized Tests"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.7.0"
+
+    // (Optional) If you also have JUnit 4-based tests
+    testImplementation "junit:junit:4.13"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.7.0"
   }
   ```
 </details>
@@ -109,48 +108,12 @@ There is experimental support for Android instrumentation tests, which requires 
 To start writing instrumentation tests with JUnit Jupiter, make the following changes to your module's build script:
 
 <details open>
-  <summary>Groovy</summary>
-  
-  ```groovy
-  android {
-    defaultConfig {
-      // 1) Make sure to use the AndroidJUnitRunner, of a subclass of it. This requires a dependency on androidx.test:runner, too!
-      testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-      // 2) Connect JUnit 5 to the runner
-      testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
-    }
-
-    // 3) Java 8 is required
-    compileOptions {
-      sourceCompatibility JavaVersion.VERSION_1_8
-      targetCompatibility JavaVersion.VERSION_1_8
-    }
-    
-    // 4) JUnit 5 will bundle in files with identical paths; exclude them
-    packagingOptions {
-      exclude "META-INF/LICENSE*"
-    }
-  }
-
-  dependencies {
-    // 5) Jupiter API & Test Runner, if you don't have it already
-    androidTestImplementation "androidx.test:runner:1.2.0"
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
-    
-    // 6) The instrumentation test companion libraries
-    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.0"
-    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.2.0"
-  }
-  ```
-</details>
-
-<details>
   <summary>Kotlin</summary>
   
   ```groovy
   android {
     defaultConfig {
-      // 1) Make sure to use the AndroidJUnitRunner, of a subclass of it. This requires a dependency on androidx.test:runner, too!
+      // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
       // 2) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
@@ -170,11 +133,47 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
     androidTestImplementation("androidx.test:runner:1.2.0")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
 
     // 6) The instrumentation test companion libraries
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.0")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.2.0")
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```groovy
+  android {
+    defaultConfig {
+      // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
+      testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+      // 2) Connect JUnit 5 to the runner
+      testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
+    }
+
+    // 3) Java 8 is required
+    compileOptions {
+      sourceCompatibility JavaVersion.VERSION_1_8
+      targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // 4) JUnit 5 will bundle in files with identical paths; exclude them
+    packagingOptions {
+      exclude "META-INF/LICENSE*"
+    }
+  }
+
+  dependencies {
+    // 5) Jupiter API & Test Runner, if you don't have it already
+    androidTestImplementation "androidx.test:runner:1.2.0"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
+
+    // 6) The instrumentation test companion libraries
+    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.0"
+    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.2.0"
   }
   ```
 </details>

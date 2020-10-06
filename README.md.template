@@ -108,7 +108,7 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   ```groovy
   android {
     defaultConfig {
-      // 1) Make sure to use the AndroidJUnitRunner, of a subclass of it. This requires a dependency on androidx.test:runner, too!
+      // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
       // 2) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
@@ -143,7 +143,7 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   ```groovy
   android {
     defaultConfig {
-      // 1) Make sure to use the AndroidJUnitRunner, of a subclass of it. This requires a dependency on androidx.test:runner, too!
+      // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
       testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
       // 2) Connect JUnit 5 to the runner
       testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
