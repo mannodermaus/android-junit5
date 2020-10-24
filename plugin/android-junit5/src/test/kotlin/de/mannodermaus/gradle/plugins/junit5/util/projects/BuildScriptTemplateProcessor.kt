@@ -7,6 +7,7 @@ private val GET_MATCHER = Regex("//\\\$GET\\{(.*)}")
 private val IF_MATCHER = Regex("//\\\$IF\\{(.*)}")
 private val ELSE_MATCHER = Regex("//\\\$ELSE")
 private val IFGRADLE_MATCHER = Regex("//\\\$IFGRADLE\\{(.*)}")
+private val FOREACH_MATCHER = Regex("//\\\$FOREACH\\{(.+)}")
 private val END_MATCHER = Regex("//\\\$END")
 
 /**
@@ -19,6 +20,7 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
 
   fun process(rawText: String): String {
     var ignoredBlockCount = 0
+    var loopBlockCount = 0
 
     // Replace GET tokens first
     val text1 = rawText.replace(GET_MATCHER) { result ->
@@ -37,6 +39,7 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
       val ifMatch = IF_MATCHER.find(line)
       val elseMatch = ELSE_MATCHER.find(line)
       val ifgradleMatch = IFGRADLE_MATCHER.find(line)
+      val foreachMatch = FOREACH_MATCHER.find(line)
       val endMatch = END_MATCHER.find(line)
 
       if (ignoredBlockCount == 0 && ifMatch != null) {
@@ -62,6 +65,25 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
         }
       }
 
+      if (ignoredBlockCount == 0 && foreachMatch != null) {
+        val foreachKey = foreachMatch.groupValues.last()
+
+        // Started a loop. Find the associated list of elements first
+        val value = (replacements[foreachKey] as? List<Any?>)
+            ?.joinToString(separator = ",") { "\"$it\""}
+            ?: throw IllegalArgumentException("FOREACH replacement value should be a list, but got: ${replacements[foreachKey]}")
+
+        // Emit the beginning of a foreach loop and continue onward.
+        // As soon as the next END marker is detected, the loop will be closed again
+        if (value.isNotEmpty()) {
+          text2.append("listOf($value).forEach { it ->").appendln()
+          loopBlockCount++
+        } else {
+          // Empty list == ignore the entire block and don't emit it
+          ignoredBlockCount++
+        }
+      }
+
       if (elseMatch != null) {
         ignoredBlockCount = if (ignoredBlockCount == 0) {
           1
@@ -78,7 +100,13 @@ class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
       }
 
       if (endMatch != null) {
-        ignoredBlockCount = max(0, ignoredBlockCount - 1)
+        if (loopBlockCount > 0) {
+          // Emit the end of a prior loop
+          text2.append("}").appendln()
+          loopBlockCount = max(0, loopBlockCount - 1)
+        } else {
+          ignoredBlockCount = max(0, ignoredBlockCount - 1)
+        }
       }
     }
     return text2.toString()

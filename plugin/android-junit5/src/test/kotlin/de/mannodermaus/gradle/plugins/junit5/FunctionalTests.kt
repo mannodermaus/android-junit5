@@ -22,7 +22,6 @@ class FunctionalTests {
 
   // Test permutations for AGP (default: empty set, which will exercise all)
   private val testedAgpVersions: Set<String> = setOf(
-      "4.1"
   )
 
   // Test permutations for projects (default: empty set, which will exercise all)
@@ -145,7 +144,9 @@ class FunctionalTests {
         .ofTask(taskName)
         .apply {
           tests.forEach { expectedClass ->
-            contains("$expectedClass > test() PASSED")
+            val line = "$expectedClass > test() PASSED"
+            contains(line)
+            println(line)
           }
           executedTestCount().isEqualTo(tests.size)
         }

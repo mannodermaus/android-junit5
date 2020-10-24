@@ -82,6 +82,7 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     replacements["USE_CUSTOM_BUILD_TYPE"] = spec.useCustomBuildType
     replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
     replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
+    replacements["DISABLE_TESTS_FOR_BUILD_TYPES"] = spec.disableTestsForBuildTypes
     val processor = BuildScriptTemplateProcessor(agp.requiresGradle, replacements)
 
     val processedBuildGradle = processor.process(rawBuildGradle)
@@ -114,6 +115,10 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     val returnDefaultValues = config[TomlSpec.Settings.returnDefaultValues]
     val includeAndroidResources = config[TomlSpec.Settings.includeAndroidResources]
     val expectedTests = config[TomlSpec.expectations]
+
+    val disableTestsForBuildTypes = config[TomlSpec.Settings.disableTestsForBuildTypes]
+        ?.split(",")?.map(String::trim)
+        ?: emptyList()
 
     companion object {
       fun tryCreate(folder: File): Spec? {
@@ -148,6 +153,7 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
       val useCustomBuildType by optional<String?>(default = null)
       val returnDefaultValues by optional(default = false)
       val includeAndroidResources by optional(default = false)
+      val disableTestsForBuildTypes by optional<String?>(default = null)
     }
   }
 
