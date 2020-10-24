@@ -8,10 +8,10 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import java.io.File
 
 private const val TEST_PROJECTS_RESOURCE = "/test-projects"
-private const val BUILD_GRADLE_TEMPLATE_NAME = "build.gradle.template"
-private const val SETTINGS_GRADLE_TEMPLATE_NAME = "settings.gradle.template"
-private const val BUILD_GRADLE_NAME = "build.gradle.kts"
-private const val SETTINGS_GRADLE_NAME = "settings.gradle.kts"
+private const val BUILD_GRADLE_TEMPLATE_NAME = "build.gradle.kts.template"
+private const val SETTINGS_GRADLE_TEMPLATE_NAME = "settings.gradle.kts.template"
+private const val OUTPUT_BUILD_GRADLE_NAME = "build.gradle.kts"
+private const val OUTPUT_SETTINGS_GRADLE_NAME = "settings.gradle.kts"
 private const val PROJECT_CONFIG_FILE_NAME = "config.toml"
 private const val SRC_FOLDER_NAME = "src"
 
@@ -58,8 +58,8 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     val projectFolder = File(rootFolder, projectName)
     if (projectFolder.exists()) {
       File(projectFolder, SRC_FOLDER_NAME).deleteRecursively()
-      File(projectFolder, BUILD_GRADLE_NAME).delete()
-      File(projectFolder, SETTINGS_GRADLE_NAME).delete()
+      File(projectFolder, OUTPUT_BUILD_GRADLE_NAME).delete()
+      File(projectFolder, OUTPUT_SETTINGS_GRADLE_NAME).delete()
     }
     projectFolder.mkdirs()
 
@@ -78,9 +78,9 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     val processor = BuildScriptTemplateProcessor(agp.requiresGradle, replacements)
 
     val processedBuildGradle = processor.process(rawBuildGradle)
-    File(projectFolder, BUILD_GRADLE_NAME).writeText(processedBuildGradle)
+    File(projectFolder, OUTPUT_BUILD_GRADLE_NAME).writeText(processedBuildGradle)
     val processedSettingsGradle = processor.process(rawSettingsGradle)
-    File(projectFolder, SETTINGS_GRADLE_NAME).writeText(processedSettingsGradle)
+    File(projectFolder, OUTPUT_SETTINGS_GRADLE_NAME).writeText(processedSettingsGradle)
 
     return projectFolder
   }
