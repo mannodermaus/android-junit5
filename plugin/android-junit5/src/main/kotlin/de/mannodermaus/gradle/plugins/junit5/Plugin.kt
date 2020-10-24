@@ -56,9 +56,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   }
 
   private fun Project.configureUnitTests() {
-    // Configure JUnit 5 for each variant-specific unit test task
+    // Configure JUnit 5 for each variant-specific unit test task,
+    // unless that variant has its tests disabled
     projectConfig.variants.all { variant ->
-      val testTask = tasks.testTaskOf(variant)
+      val testTask = tasks.testTaskOf(variant) ?: return@all
       val configuration = junit5ConfigurationOf(variant)
 
       testTask.useJUnitPlatform { options ->
@@ -133,7 +134,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     if (isJacocoApplied && jacocoOptions.taskGenerationEnabled) {
       projectConfig.variants.all { variant ->
         val directoryProviders = collectDirectoryProviders(variant)
-        val testTask = tasks.testTaskOf(variant)
+        val testTask = tasks.testTaskOf(variant) ?: return@all
 
         // Create a Jacoco friend task
         val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
