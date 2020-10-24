@@ -1,0 +1,24 @@
+[settings]
+minAgpVersion = "4.1"
+useFlavors = true
+useKotlin = true
+
+[[expectations]]
+buildType = "debug"
+productFlavor = "free"
+tests = "JavaTest"
+
+[[expectations]]
+buildType = "debug"
+productFlavor = "paid"
+tests = "JavaTest,KotlinPaidDebugTest"
+
+[[expectations]]
+buildType = "release"
+productFlavor = "free"
+tests = "JavaTest,KotlinReleaseTest,JavaFreeReleaseTest"
+
+[[expectations]]
+buildType = "release"
+productFlavor = "paid"
+tests = "JavaTest,KotlinReleaseTest"

@@ -54,7 +54,9 @@ class FunctionalTests {
                     // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
                     println("AGP: ${agp.version}, Project: ${spec.name}, Forced Gradle: ${agp.requiresGradle ?: "no"}")
 
-                    // Create a virtual project with the given settings & AGP version
+                    // Create a virtual project with the given settings & AGP version.
+                    // This call will throw a TestAbortedException if the spec is not eligible for this version,
+                    // marking the test as ignored in the process
                     val project = projectCreator.createProject(spec, agp)
 
                     // Execute the tests of the virtual project with Gradle

@@ -5,6 +5,9 @@ import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.toml
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
+import org.junit.jupiter.api.Assumptions
+import org.junit.jupiter.api.Assumptions.assumeTrue
+import org.opentest4j.TestAbortedException
 import java.io.File
 
 private const val TEST_PROJECTS_RESOURCE = "/test-projects"
@@ -49,7 +52,11 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
         ?: emptyList()
   }
 
+  @Throws(TestAbortedException::class)
   fun createProject(spec: Spec, agp: TestedAgp): File {
+    // Validate the spec requirement against the executing AGP version first
+    validateSpec(spec, agp)
+
     // Construct the project folder, cleaning it if necessary.
     // If any Gradle or build caches already exist, we keep those around.
     // That's the reason for not doing "projectFolder.deleteRecursively()"
@@ -85,12 +92,22 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     return projectFolder
   }
 
+  private fun validateSpec(spec: Spec, agp: TestedAgp) {
+    if (spec.minAgpVersion != null) {
+      // If the spec dictates a minimum version of the AGP,
+      // disable the test for plugin versions below that minimum requirement
+      assumeTrue(
+          SemanticVersion(agp.version) >= SemanticVersion(spec.minAgpVersion),
+          "This project requires AGP ${spec.minAgpVersion} and was disabled on ths version.")
+    }
+  }
+
   /* Types */
 
   class Spec private constructor(val name: String,
                                  val srcFolder: File,
                                  config: Config) {
-
+    val minAgpVersion = config[TomlSpec.Settings.minAgpVersion]
     val useKotlin = config[TomlSpec.Settings.useKotlin]
     val useFlavors = config[TomlSpec.Settings.useFlavors]
     val useCustomBuildType = config[TomlSpec.Settings.useCustomBuildType]
@@ -125,6 +142,7 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     val expectations by required<List<ExpectedTests>>()
 
     object Settings : ConfigSpec() {
+      val minAgpVersion by optional<String?>(default = null)
       val useFlavors by optional(default = false)
       val useKotlin by optional(default = false)
       val useCustomBuildType by optional<String?>(default = null)
@@ -139,7 +157,7 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
   data class ExpectedTests(
       val buildType: String,
       val productFlavor: String?,
-      val tests: String
+      private val tests: String
   ) {
     val testsList = tests.split(",").map(String::trim)
   }
