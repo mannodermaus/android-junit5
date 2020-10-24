@@ -18,66 +18,101 @@ import java.io.File
 class FunctionalTests {
 
   private val environment = TestEnvironment()
-  private lateinit var projectCreator: FunctionalTestProjectCreator
+  private lateinit var folder: File
+
+  // Test permutations for AGP (default: empty set, which will exercise all)
+  private val testedAgpVersions: Set<String> = setOf(
+  )
+
+  // Test permutations for projects (default: empty set, which will exercise all)
+  private val testedProjects: Set<String> = setOf(
+  )
 
   @BeforeAll
   fun beforeAll() {
     // The "project provider" is responsible for the construction
     // of all virtual Gradle projects, using a template file located in
     // the project's test resources.
-    val folder = File("build/tmp/virtualProjectsRoot")
-    folder.mkdirs()
-    projectCreator = FunctionalTestProjectCreator(folder, environment)
+    folder = File("build/tmp/virtualProjectsRoot").also { it.mkdirs() }
   }
 
   @TestFactory
   fun execute(): List<DynamicNode> =
-      environment.supportedAgpVersions.map { agp ->
-        dynamicContainer(
-            "AGP ${agp.shortVersion}",
-            projectCreator.allSpecs.map { spec ->
-              dynamicTest(spec.name) {
-                // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
-                println("AGP: ${agp.version}, Project: ${spec.name}, Forced Gradle: ${agp.requiresGradle ?: "no"}")
+  // Create a matrix of permutations between the AGP versions to test
+      // and the language of the project's build script
+      environment.supportedAgpVersions.filterAgpVersions()
+          .map { agp ->
+            val projectCreator = FunctionalTestProjectCreator(folder, environment)
 
-                // Create a virtual project with the given settings & AGP version
-                val project = projectCreator.createProject(spec, agp)
+            // Generate a container for all tests with this specific AGP/Language combination
+            dynamicContainer("AGP ${agp.shortVersion}",
 
-                // Execute the tests of the virtual project with Gradle
-                val result = runGradle(agp)
-                    .withProjectDir(project)
-                    .build()
+                // Exercise each test project within the given environment
+                projectCreator.allSpecs.filterSpecs().map { spec ->
+                  dynamicTest(spec.name) {
+                    // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
+                    println("AGP: ${agp.version}, Project: ${spec.name}, Forced Gradle: ${agp.requiresGradle ?: "no"}")
 
-                // Check that the task execution was successful in general
-                when (val outcome = result.task(":test")?.outcome) {
-                  TaskOutcome.UP_TO_DATE -> {
-                    // Nothing to do, a previous build already checked this
-                    println("Test task up-to-date; skipping assertions.")
-                  }
+                    // Create a virtual project with the given settings & AGP version.
+                    // This call will throw a TestAbortedException if the spec is not eligible for this version,
+                    // marking the test as ignored in the process
+                    val project = projectCreator.createProject(spec, agp)
 
-                  TaskOutcome.SUCCESS -> {
-                    // Based on the spec's configuration in the test project,
-                    // assert that all test classes have been executed as expected
-                    for (expectation in spec.expectedTests) {
-                      result.assertAgpTests(
-                          buildType = expectation.buildType,
-                          productFlavor = expectation.productFlavor,
-                          tests = expectation.testsList
-                      )
+                    // Execute the tests of the virtual project with Gradle
+                    val result = runGradle(agp)
+                        .withProjectDir(project)
+                        .build()
+
+                    // Check that the task execution was successful in general
+                    when (val outcome = result.task(":test")?.outcome) {
+                      TaskOutcome.UP_TO_DATE -> {
+                        // Nothing to do, a previous build already checked this
+                        println("Test task up-to-date; skipping assertions.")
+                      }
+
+                      TaskOutcome.SUCCESS -> {
+                        // Based on the spec's configuration in the test project,
+                        // assert that all test classes have been executed as expected
+                        for (expectation in spec.expectedTests) {
+                          result.assertAgpTests(
+                              buildType = expectation.buildType,
+                              productFlavor = expectation.productFlavor,
+                              tests = expectation.testsList
+                          )
+                        }
+                      }
+
+                      else -> {
+                        // Unexpected result; fail
+                        fail { "Unexpected task outcome: $outcome" }
+                      }
                     }
                   }
-
-                  else -> {
-                    // Unexpected result; fail
-                    fail { "Unexpected task outcome: $outcome" }
-                  }
                 }
-              }
-            }
-        )
-      }
+            )
+          }
 
   /* Private */
+
+  private fun List<TestedAgp>.filterAgpVersions(): List<TestedAgp> =
+      if (testedAgpVersions.isEmpty()) {
+        // Nothing to do, exercise functional tests on all AGP versions
+        this
+      } else {
+        filter { agp ->
+          testedAgpVersions.any { it == agp.shortVersion }
+        }
+      }
+
+  private fun List<FunctionalTestProjectCreator.Spec>.filterSpecs(): List<FunctionalTestProjectCreator.Spec> =
+      if (testedProjects.isEmpty()) {
+        // Nothing to do, exercise all different projects
+        this
+      } else {
+        filter { spec ->
+          testedProjects.any { it == spec.name }
+        }
+      }
 
   private fun runGradle(agpVersion: TestedAgp) =
       GradleRunner.create()
@@ -109,7 +144,9 @@ class FunctionalTests {
         .ofTask(taskName)
         .apply {
           tests.forEach { expectedClass ->
-            contains("$expectedClass > test() PASSED")
+            val line = "$expectedClass > test() PASSED"
+            contains(line)
+            println(line)
           }
           executedTestCount().isEqualTo(tests.size)
         }

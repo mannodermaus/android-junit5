@@ -217,13 +217,13 @@ internal fun BaseVariant.getTaskName(prefix: String = "", suffix: String = ""): 
 /**
  * Obtains the {AndroidUnitTest} for the provided variant.
  */
-internal fun TaskContainer.testTaskOf(variant: BaseVariant): AndroidUnitTest {
+internal fun TaskContainer.testTaskOf(variant: BaseVariant): AndroidUnitTest? {
   // From AGP 4.1 onwards, there is no Scope API on VariantData anymore.
   // Task names must be constructed manually
   val taskName = variant.getTaskName(
       prefix = VariantTypeCompat.UNIT_TEST_PREFIX,
       suffix = VariantTypeCompat.UNIT_TEST_SUFFIX)
-  return getByName(taskName) as AndroidUnitTest
+  return findByName(taskName) as? AndroidUnitTest
 }
 
 /**

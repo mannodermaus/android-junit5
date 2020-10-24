@@ -16,6 +16,10 @@
 //      Evaluate the running Gradle version against the "versionmarker", excluding the block if it doesn't match.
 //      The "versionmarker" is an expression in the form 'x.y', where x.y is a Gradle version.
 //      An AGP version without a fixed Gradle requirement will always evaluate these blocks to false, skipping them
+// $FOREACH{list}
+//      Emit the body of the enclosed block for each item in the provided "list",
+//      which is coerced into a list of strings by the template processor.
+//      Inside the enclosed block, the list element can be accessed with the `it` variable.
 // $ELSE
 //      Alternative case for $IF or $GRADLE markers.
 //      Inverts the status of excluding/including blocks based on the condition.
@@ -115,6 +119,15 @@ android {
       }, unitTests))
     //$END
   }
+
+  // New Variant API, introduced with AGP 4.1
+  //$FOREACH{DISABLE_TESTS_FOR_BUILD_TYPES}
+  onVariants.withBuildType(it) {
+    unitTest {
+      enabled = false
+    }
+  }
+  //$END
 }
 
 dependencies {
