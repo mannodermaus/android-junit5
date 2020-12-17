@@ -51,6 +51,7 @@ object Libs {
   const val commonsIO: Lib = "commons-io:commons-io:2.6"
   const val commonsLang: Lib = "commons-lang:commons-lang:2.6"
   const val konfToml: Lib = "com.uchuhimo:konf-toml:0.22.1"
+  const val korte: Lib = "com.soywiz.korlibs.korte:korte:1.10.15"
 
   // JUnit 5
   private const val junitJupiterVersion = "5.7.0"
