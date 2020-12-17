@@ -1,38 +1,18 @@
 // This template is the baseline for
 // all functional tests executed against the android-junit5 plugin.
 // It is based on the Gradle Kotlin DSL (.kts) and provides several additional
-// placeholder markers, which are substituted upon creating virtual projects
+// template placeholders markers, which are substituted upon creating virtual projects
 // in which the test code is being executed for every supported Android Gradle Plugin.
 //
 // The individual configuration of each test depends on the config.toml file,
 // located in the sub-folder next to its source code.
-//
-// Placeholder markers:
-// $GET{value}
-//      Retrieve the placeholder named "value" from the input map
-// $IF{placeholder}
-//      Evaluate the boolean condition "placeholder". If it's false, remove everything until the next $END marker
-// $IFGRADLE{versionmarker}
-//      Evaluate the running Gradle version against the "versionmarker", excluding the block if it doesn't match.
-//      The "versionmarker" is an expression in the form 'x.y', where x.y is a Gradle version.
-//      An AGP version without a fixed Gradle requirement will always evaluate these blocks to false, skipping them
-// $FOREACH{list}
-//      Emit the body of the enclosed block for each item in the provided "list",
-//      which is coerced into a list of strings by the template processor.
-//      Inside the enclosed block, the list element can be accessed with the `it` variable.
-// $ELSE
-//      Alternative case for $IF or $GRADLE markers.
-//      Inverts the status of excluding/including blocks based on the condition.
-//      If the associated $IF was true, the $ELSE block is excluded, and vice-versa.
-// $END
-//      End marker for a prior $IF or $GRADLE marker
 
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-val androidGradlePluginVersion: String = //$GET{AGP_VERSION}
-val kotlinVersion: String = //$GET{KOTLIN_VERSION}
-val junitJupiterVersion: String = //$GET{JUNIT_JUPITER_VERSION}
+val androidGradlePluginVersion: String = "{{ AGP_VERSION }}"
+val kotlinVersion: String = "{{ KOTLIN_VERSION }}"
+val junitJupiterVersion: String = "{{ JUNIT_JUPITER_VERSION }}"
 
 buildscript {
   repositories {
@@ -44,9 +24,9 @@ buildscript {
 plugins {
   id("com.android.application")
 
-  //$IF{USE_KOTLIN}
+  {% if USE_KOTLIN %}
     id("org.jetbrains.kotlin.android")
-  //$END
+  {% endif %}
 
   id("de.mannodermaus.android-junit5")
 }
@@ -63,9 +43,9 @@ repositories {
 }
 
 android {
-  val compileSdk: String = //$GET{COMPILE_SDK_VERSION}
-  val minSdk: Int = //$GET{MIN_SDK_VERSION}.toInt()
-  val targetSdk: Int = //$GET{TARGET_SDK_VERSION}.toInt()
+  val compileSdk: String = "{{ COMPILE_SDK_VERSION }}"
+  val minSdk: Int = {{ MIN_SDK_VERSION }}
+  val targetSdk: Int = {{ TARGET_SDK_VERSION }}
 
   compileSdkVersion("${compileSdk}")
 
@@ -73,14 +53,14 @@ android {
     minSdkVersion(minSdk)
     targetSdkVersion(targetSdk)
 
-    //$IF{USE_CUSTOM_BUILD_TYPE}
+    {% if USE_CUSTOM_BUILD_TYPE %}
       buildTypes {
-        register(//$GET{USE_CUSTOM_BUILD_TYPE})
+        register("{{ USE_CUSTOM_BUILD_TYPE }}")
       }
-    //$END
+    {% endif %}
   }
 
-  //$IF{USE_FLAVORS}
+  {% if USE_FLAVORS %}
     flavorDimensions("environment")
     productFlavors {
       register("free") {
@@ -90,25 +70,25 @@ android {
         setDimension("environment")
       }
     }
-  //$END
+  {% endif %}
 
   testOptions {
-    //$IF{RETURN_DEFAULT_VALUES}
+    {% if RETURN_DEFAULT_VALUES %}
       unitTests.isReturnDefaultValues = true
-    //$END
+    {% endif %}
 
-    //$IF{INCLUDE_ANDROID_RESOURCES}
+    {% if INCLUDE_ANDROID_RESOURCES %}
       unitTests.isIncludeAndroidResources = true
-    //$END
+    {% endif %}
 
     // Gradle 6.5 fixed the syntax for UnitTestOptions' DSL
-    //$IFGRADLE{6.5}
+    {% if atLeastGradle("6.5") %}
       unitTests.all { test ->
         test.testLogging {
           events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
         }
       }
-    //$ELSE
+    {% else %}
       // Lower versions of Gradle require more ceremony for UnitTestOptions
       unitTests.all(KotlinClosure1<Any, Test>({
         (this as Test).also {
@@ -117,23 +97,32 @@ android {
           }
         }
       }, unitTests))
-    //$END
+    {% endif %}
   }
-
-  // New Variant API, introduced with AGP 4.1
-  //$FOREACH{DISABLE_TESTS_FOR_BUILD_TYPES}
-  onVariants.withBuildType(it) {
-    unitTest {
-      enabled = false
-    }
-  }
-  //$END
 }
 
+{% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
+  {% if atLeastAgp("7.0.0-alpha01") %}
+    // New Variant API for AGP 7.0
+    androidComponents {
+      beforeUnitTest(selector().withBuildType("{{ type }}")) { test ->
+        test.enabled = false
+      }
+    }
+  {% elseif atLeastAgp("4.1") %}
+    // Variant API for AGP 4.1 & 4.2
+    android.onVariants.withBuildType("{{ type }}") {
+      unitTest {
+        enabled = false
+      }
+    }
+  {% endif %}
+{% end %}
+
 dependencies {
-  //$IF{USE_KOTLIN}
+  {% if USE_KOTLIN %}
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
-  //$END
+  {% endif %}
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")

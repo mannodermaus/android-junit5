@@ -5,7 +5,7 @@ import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.toml
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
-import org.junit.jupiter.api.Assumptions
+import org.gradle.util.GradleVersion
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.opentest4j.TestAbortedException
 import java.io.File
@@ -18,38 +18,24 @@ private const val OUTPUT_SETTINGS_GRADLE_NAME = "settings.gradle.kts"
 private const val PROJECT_CONFIG_FILE_NAME = "config.toml"
 private const val SRC_FOLDER_NAME = "src"
 
-class FunctionalTestProjectCreator(private val rootFolder: File,
-                                   private val environment: TestEnvironment) {
+class FunctionalTestProjectCreator(
+  private val outputFolder: File,
+  private val environment: TestEnvironment
+) {
 
-  private val rawBuildGradle: String
-  private val rawSettingsGradle: String
-
+  private val projectRootFolder: File
   val allSpecs: List<Spec>
 
   init {
     // Obtain access to the root folder for all test projects
     val rootUrl = FunctionalTestProjectCreator::class.java.getResource(TEST_PROJECTS_RESOURCE)
-    val rootFolder = File(rootUrl.toURI())
-
-    // Read in the raw template texts
-    val buildTemplateFile = File(rootFolder, BUILD_GRADLE_TEMPLATE_NAME)
-    rawBuildGradle = if (buildTemplateFile.exists()) {
-      buildTemplateFile.bufferedReader().readText()
-    } else {
-      ""
-    }
-    val settingsTemplateFile = File(rootFolder, SETTINGS_GRADLE_TEMPLATE_NAME)
-    rawSettingsGradle = if (settingsTemplateFile.exists()) {
-      settingsTemplateFile.bufferedReader().readText()
-    } else {
-      ""
-    }
+    projectRootFolder = File(rootUrl.toURI())
 
     // Collect all eligible test folders
-    allSpecs = rootFolder.listFiles()
-        ?.filter { it.isDirectory }
-        ?.mapNotNull { folder -> Spec.tryCreate(folder) }
-        ?: emptyList()
+    allSpecs = projectRootFolder.listFiles()
+      ?.filter { it.isDirectory }
+      ?.mapNotNull { folder -> Spec.tryCreate(folder) }
+      ?: emptyList()
   }
 
   @Throws(TestAbortedException::class)
@@ -62,7 +48,7 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     // That's the reason for not doing "projectFolder.deleteRecursively()"
     // and nuking everything at once.
     val projectName = "${spec.name}_${agp.shortVersion}"
-    val projectFolder = File(rootFolder, projectName)
+    val projectFolder = File(outputFolder, projectName)
     if (projectFolder.exists()) {
       File(projectFolder, SRC_FOLDER_NAME).deleteRecursively()
       File(projectFolder, OUTPUT_BUILD_GRADLE_NAME).delete()
@@ -83,12 +69,21 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
     replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
     replacements["DISABLE_TESTS_FOR_BUILD_TYPES"] = spec.disableTestsForBuildTypes
-    val processor = BuildScriptTemplateProcessor(agp.requiresGradle, replacements)
 
-    val processedBuildGradle = processor.process(rawBuildGradle)
-    File(projectFolder, OUTPUT_BUILD_GRADLE_NAME).writeText(processedBuildGradle)
-    val processedSettingsGradle = processor.process(rawSettingsGradle)
-    File(projectFolder, OUTPUT_SETTINGS_GRADLE_NAME).writeText(processedSettingsGradle)
+    val processor = BuildScriptTemplateProcessor(
+      folder = projectRootFolder,
+      replacements = replacements,
+      agpVersion = agp.version,
+      gradleVersion = agp.requiresGradle ?: GradleVersion.current().version
+    )
+
+    processor.process(BUILD_GRADLE_TEMPLATE_NAME).also { result ->
+      File(projectFolder, OUTPUT_BUILD_GRADLE_NAME).writeText(result)
+    }
+
+    processor.process(SETTINGS_GRADLE_TEMPLATE_NAME).also { result ->
+      File(projectFolder, OUTPUT_SETTINGS_GRADLE_NAME).writeText(result)
+    }
 
     return projectFolder
   }
@@ -98,16 +93,19 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
       // If the spec dictates a minimum version of the AGP,
       // disable the test for plugin versions below that minimum requirement
       assumeTrue(
-          SemanticVersion(agp.version) >= SemanticVersion(spec.minAgpVersion),
-          "This project requires AGP ${spec.minAgpVersion} and was disabled on ths version.")
+        SemanticVersion(agp.version) >= SemanticVersion(spec.minAgpVersion),
+        "This project requires AGP ${spec.minAgpVersion} and was disabled on this version."
+      )
     }
   }
 
   /* Types */
 
-  class Spec private constructor(val name: String,
-                                 val srcFolder: File,
-                                 config: Config) {
+  class Spec private constructor(
+    val name: String,
+    val srcFolder: File,
+    config: Config
+  ) {
     val minAgpVersion = config[TomlSpec.Settings.minAgpVersion]
     val useKotlin = config[TomlSpec.Settings.useKotlin]
     val useFlavors = config[TomlSpec.Settings.useFlavors]
@@ -117,8 +115,8 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
     val expectedTests = config[TomlSpec.expectations]
 
     val disableTestsForBuildTypes = config[TomlSpec.Settings.disableTestsForBuildTypes]
-        ?.split(",")?.map(String::trim)
-        ?: emptyList()
+      ?.split(",")?.map(String::trim)
+      ?: emptyList()
 
     companion object {
       fun tryCreate(folder: File): Spec? {
@@ -161,9 +159,9 @@ class FunctionalTestProjectCreator(private val rootFolder: File,
    * Data holder for one set of expected tests within the virtual project
    */
   data class ExpectedTests(
-      val buildType: String,
-      val productFlavor: String?,
-      private val tests: String
+    val buildType: String,
+    val productFlavor: String?,
+    private val tests: String
   ) {
     val testsList = tests.split(",").map(String::trim)
   }

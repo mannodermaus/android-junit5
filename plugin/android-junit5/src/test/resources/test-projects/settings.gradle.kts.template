@@ -6,14 +6,6 @@
 //
 // The individual configuration of each test depends on the config.toml file,
 // located in the sub-folder next to its source code.
-//
-// Placeholder markers:
-// $GET{value}
-//      Retrieve the placeholder named "value" from the input map
-// $IF{placeholder}
-//      Evaluate the boolean condition "placeholder". If it's false, remove everything until the next $ENDIF marker
-// $ENDIF
-//      End marker for a prior $IF marker
 
 pluginManagement {
   repositories {
@@ -21,8 +13,8 @@ pluginManagement {
   }
   resolutionStrategy {
     eachPlugin {
-      val androidGradlePluginVersion = //$GET{AGP_VERSION}
-      val kotlinVersion = //$GET{KOTLIN_VERSION}
+      val androidGradlePluginVersion = "{{ AGP_VERSION }}"
+      val kotlinVersion = "{{ KOTLIN_VERSION }}"
 
       if (requested.id.id == "com.android.application") {
         useModule("com.android.tools.build:gradle:${androidGradlePluginVersion}")

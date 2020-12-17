@@ -166,6 +166,7 @@ dependencies {
 
   testImplementation(gradleTestKit())
   testImplementation(Plugins.android.dependency)
+  testImplementation(Libs.korte)
   testImplementation(Libs.commonsIO)
   testImplementation(Libs.commonsLang)
   testImplementation(Libs.konfToml)

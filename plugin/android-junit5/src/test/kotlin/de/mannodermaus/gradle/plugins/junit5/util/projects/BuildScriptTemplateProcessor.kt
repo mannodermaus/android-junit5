@@ -1,124 +1,55 @@
 package de.mannodermaus.gradle.plugins.junit5.util.projects
 
-import kotlin.math.max
-
-// Known tokens
-private val GET_MATCHER = Regex("//\\\$GET\\{(.*)}")
-private val IF_MATCHER = Regex("//\\\$IF\\{(.*)}")
-private val ELSE_MATCHER = Regex("//\\\$ELSE")
-private val IFGRADLE_MATCHER = Regex("//\\\$IFGRADLE\\{(.*)}")
-private val FOREACH_MATCHER = Regex("//\\\$FOREACH\\{(.+)}")
-private val END_MATCHER = Regex("//\\\$END")
+import com.soywiz.korte.TeFunction
+import com.soywiz.korte.TemplateConfig
+import com.soywiz.korte.TemplateProvider
+import com.soywiz.korte.Templates
+import kotlinx.coroutines.runBlocking
+import java.io.File
 
 /**
  * Processor class for virtual build script files, used by Functional Tests.
- * It utilizes a very, VERY crude token API for placeholders, which are dynamically
+ * It utilizes a template engine to customize the processed output for the build scripts
  * injected into the virtual projects, based around template files located within src/test/resources.
  */
-class BuildScriptTemplateProcessor(private val targetGradleVersion: String?,
-                                   private val replacements: Map<String, Any>) {
+class BuildScriptTemplateProcessor(
+  folder: File,
+  private val replacements: Map<String, Any>,
+  private val agpVersion: String,
+  private val gradleVersion: String
+) {
 
-  fun process(rawText: String): String {
-    var ignoredBlockCount = 0
-    var loopBlockCount = 0
-
-    // Replace GET tokens first
-    val text1 = rawText.replace(GET_MATCHER) { result ->
-      val key = result.groupValues.last()
-      if (key in replacements) {
-        "\"${replacements[key].toString()}\""
-      } else {
-        "\"(missing: '$key')\""
-      }
-    }
-
-    // Iterate over the result and exclude all non-matching IF token blocks
-    val text2 = StringBuilder()
-    for (line in text1.lines()) {
-      // Check if any conditional marker is included in the line
-      val ifMatch = IF_MATCHER.find(line)
-      val elseMatch = ELSE_MATCHER.find(line)
-      val ifgradleMatch = IFGRADLE_MATCHER.find(line)
-      val foreachMatch = FOREACH_MATCHER.find(line)
-      val endMatch = END_MATCHER.find(line)
-
-      if (ignoredBlockCount == 0 && ifMatch != null) {
-        val ifKey = ifMatch.groupValues.last()
-        val conditionValue = replacements[ifKey]?.toString()
-        val conditionEnabled = conditionValue != "false"
-            && (conditionValue == "true" || conditionValue != null)
-
-        if (!conditionEnabled) {
-          // Ignore this block
-          ignoredBlockCount++
+  private val renderer = Templates(
+    root = FileReadingTemplateProvider(folder),
+    cache = true,
+    config = TemplateConfig(
+      // Allow checking for AGP & Gradle versions inside the templates
+      extraFunctions = listOf(
+        TeFunction("atLeastAgp") { args ->
+          isVersionAtLeast(agpVersion, args[0].toDynamicString())
+        },
+        TeFunction("atLeastGradle") { args ->
+          isVersionAtLeast(gradleVersion, args[0].toDynamicString())
         }
-      }
+      )
+    )
+  )
 
-      if (ignoredBlockCount == 0 && ifgradleMatch != null) {
-        val ifgradleExpression = ifgradleMatch.groupValues.last()
-
-        // When the given Gradle requirement is null, or if the requirement
-        // is not fulfilled by the block, ignore it
-        if (shouldIgnoreIfgradleBlock(ifgradleExpression)) {
-          // Ignore this block
-          ignoredBlockCount++
-        }
-      }
-
-      if (ignoredBlockCount == 0 && foreachMatch != null) {
-        val foreachKey = foreachMatch.groupValues.last()
-
-        // Started a loop. Find the associated list of elements first
-        val value = (replacements[foreachKey] as? List<Any?>)
-            ?.joinToString(separator = ",") { "\"$it\""}
-            ?: throw IllegalArgumentException("FOREACH replacement value should be a list, but got: ${replacements[foreachKey]}")
-
-        // Emit the beginning of a foreach loop and continue onward.
-        // As soon as the next END marker is detected, the loop will be closed again
-        if (value.isNotEmpty()) {
-          text2.append("listOf($value).forEach { it ->").appendln()
-          loopBlockCount++
-        } else {
-          // Empty list == ignore the entire block and don't emit it
-          ignoredBlockCount++
-        }
-      }
-
-      if (elseMatch != null) {
-        ignoredBlockCount = if (ignoredBlockCount == 0) {
-          1
-        } else {
-          max(0, ignoredBlockCount - 1)
-        }
-      }
-
-      // Lines with a marker shouldn't be appended in the first place;
-      // normal lines are appended only if we are not excluding a previously false conditional
-      val isNormalLine = ifMatch == null && ifgradleMatch == null && elseMatch == null && endMatch == null
-      if (isNormalLine && ignoredBlockCount == 0) {
-        text2.append(line).appendln()
-      }
-
-      if (endMatch != null) {
-        if (loopBlockCount > 0) {
-          // Emit the end of a prior loop
-          text2.append("}").appendln()
-          loopBlockCount = max(0, loopBlockCount - 1)
-        } else {
-          ignoredBlockCount = max(0, ignoredBlockCount - 1)
-        }
-      }
-    }
-    return text2.toString()
+  fun process(fileName: String): String = runBlocking {
+    renderer.render(fileName, replacements)
   }
 
-  private fun shouldIgnoreIfgradleBlock(version: String): Boolean {
-    if (targetGradleVersion == null) {
-      return true
-    }
+  /* Private */
 
-    val targetValue = SemanticVersion(targetGradleVersion)
-    val compareValue = SemanticVersion(version)
-    return compareValue > targetValue
+  private fun isVersionAtLeast(actual: String, required: String): Boolean {
+    val actualVersion = SemanticVersion(actual)
+    val requiredVersion = SemanticVersion(required)
+    return actualVersion >= requiredVersion
+  }
+
+  private class FileReadingTemplateProvider(private val folder: File) : TemplateProvider {
+    override suspend fun get(template: String): String {
+      return File(folder, template).readText()
+    }
   }
 }
