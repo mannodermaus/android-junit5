@@ -24,7 +24,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```kotlin
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.6.2.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.7.0.0")
     }
   }
   ```
@@ -36,7 +36,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```groovy
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.6.2.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.7.0.0"
     }
   }
   ```
@@ -124,11 +124,6 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
       setSourceCompatibility(JavaVersion.VERSION_1_8)
       setTargetCompatibility(JavaVersion.VERSION_1_8)
     }
-    
-    // 4) JUnit 5 will bundle in files with identical paths; exclude them
-    packagingOptions {
-      exclude("META-INF/LICENSE*")
-    }
   }
   dependencies {
     // 5) Jupiter API & Test Runner, if you don't have it already
@@ -158,11 +153,6 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
     compileOptions {
       sourceCompatibility JavaVersion.VERSION_1_8
       targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    // 4) JUnit 5 will bundle in files with identical paths; exclude them
-    packagingOptions {
-      exclude "META-INF/LICENSE*"
     }
   }
 
