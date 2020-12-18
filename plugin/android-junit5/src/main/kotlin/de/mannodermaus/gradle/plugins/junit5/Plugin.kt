@@ -45,6 +45,10 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   }
 
   private fun Project.configureExtensions() {
+    // Add default ignore rules for JUnit 5 metadata files to the packaging options of the plugin,
+    // so that consumers don't need to do this explicitly
+    excludedPackagingOptions().forEach(android.packagingOptions::exclude)
+
     // Hook the JUnit Platform configuration into the Android testOptions
     attachDsl(this, projectConfig)
   }

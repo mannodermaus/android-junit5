@@ -33,6 +33,11 @@ import java.util.Properties
 
 /* General */
 
+internal fun excludedPackagingOptions() = listOf(
+  "/META-INF/LICENSE.md",
+  "/META-INF/LICENSE-notice.md"
+)
+
 internal fun requireGradle(version: String, message: () -> String) {
   require(GradleVersion.current() >= GradleVersion.version(version)) {
     throw GradleException(message())
