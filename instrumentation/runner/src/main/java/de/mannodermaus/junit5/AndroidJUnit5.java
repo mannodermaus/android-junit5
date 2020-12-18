@@ -46,6 +46,7 @@ public final class AndroidJUnit5 extends Runner {
 
   private static final String ARG_ENVIRONMENT_VARIABLES = "environmentVariables";
   private static final String ARG_SYSTEM_PROPERTIES = "systemProperties";
+  private static final String ARG_CONFIGURATION_PARAMETERS = "configurationParameters";
 
   private final Class<?> testClass;
   private final Launcher launcher = LauncherFactory.create();
@@ -84,6 +85,15 @@ public final class AndroidJUnit5 extends Runner {
       systemProperties = Collections.emptyMap();
     }
 
+    // Parse configuration parameters
+    Map<String, String> configurationParameters;
+    String configurationParametersArgument = arguments.getString(ARG_CONFIGURATION_PARAMETERS);
+    if (configurationParametersArgument != null) {
+      configurationParameters = PropertiesParser.fromString(configurationParametersArgument);
+    } else {
+      configurationParameters = Collections.emptyMap();
+    }
+
     // Parse the selectors to use from what's handed to the runner.
     List<DiscoverySelector> selectors = ParsedSelectors.fromBundle(testClass, arguments);
 
@@ -93,7 +103,12 @@ public final class AndroidJUnit5 extends Runner {
     // the filters to apply by the AndroidJUnit5 runner.
     List<Filter<?>> filters = GeneratedFilters.fromContext(instrumentation.getContext());
 
-    return new AndroidJUnit5RunnerParams(selectors, filters, environmentVariables, systemProperties);
+    return new AndroidJUnit5RunnerParams(selectors,
+        filters,
+        environmentVariables,
+        systemProperties,
+        configurationParameters
+    );
   }
 
   @Override
