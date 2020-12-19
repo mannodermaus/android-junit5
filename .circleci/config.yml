@@ -141,10 +141,10 @@ workflows:
             - build_plugin
           filters:
             branches:
-              only: master
+              only: main
       - deploy_instrumentation:
           requires:
             - build_instrumentation
           filters:
             branches:
-              only: master
+              only: main

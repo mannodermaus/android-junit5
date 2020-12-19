@@ -3,7 +3,7 @@
   To update the content of this README, please apply modifications
   to `README.md.template` instead, and run the `generateReadme` task from Gradle.
 -->
-# android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/master.svg?style=svg)][circleci]
+# android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
 
 ![Logo](.images/logo.png)
 
