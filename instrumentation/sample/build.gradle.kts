@@ -67,8 +67,7 @@ android {
   }
 
   kotlinOptions {
-    val options = this as KotlinJvmOptions
-    options.jvmTarget = JavaVersion.VERSION_1_8.toString()
+    jvmTarget = JavaVersion.VERSION_1_8.toString()
   }
 
   testOptions {
