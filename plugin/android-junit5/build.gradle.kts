@@ -9,7 +9,7 @@ plugins {
   id("kotlin")
   id("java-gradle-plugin")
   id("jacoco")
-  id("com.github.johnrengelman.shadow")
+//  id("com.github.johnrengelman.shadow")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -60,11 +60,11 @@ gradlePlugin {
 // ------------------------------------------------------------------------------------------------
 
 // Allow building fat JARs if necessary
-tasks.withType<ShadowJar> {
-  isZip64 = true
-  enabled = project.hasProperty("enableFatJar")
-  archiveAppendix.set("fat")
-}
+//tasks.withType<ShadowJar> {
+//  isZip64 = true
+//  enabled = project.hasProperty("enableFatJar")
+//  archiveAppendix.set("fat")
+//}
 
 // Use JUnit 5
 tasks.withType<Test> {
