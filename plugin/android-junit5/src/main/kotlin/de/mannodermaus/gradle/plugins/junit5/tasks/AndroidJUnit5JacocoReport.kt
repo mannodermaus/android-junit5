@@ -1,14 +1,17 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import de.mannodermaus.gradle.plugins.junit5.*
 import de.mannodermaus.gradle.plugins.junit5.internal.*
 import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -26,29 +29,46 @@ private const val GROUP_REPORTING = "reporting"
 open class AndroidJUnit5JacocoReport : JacocoReport() {
 
   companion object {
-    fun create(project: Project,
-               variant: BaseVariant,
-               testTask: Test,
-               directoryProviders: Collection<DirectoryProvider>): AndroidJUnit5JacocoReport? {
+    fun register(
+      project: Project,
+      variant: BaseVariant,
+      testTask: Test,
+      directoryProviders: Collection<DirectoryProvider>
+    ): Boolean {
       val configAction = ConfigAction(project, variant, testTask, directoryProviders)
-      return if (project.tasks.findByName(configAction.name) == null) {
-        project.tasks.create(configAction.name, configAction.type) {
-          configAction.execute(it)
-        }
-      } else {
-        null
+      if (project.tasks.namedOrNull<Task>(configAction.name) != null) {
+        // Already exists; abort
+        return false
       }
+
+      val provider = project.tasks.register(
+        configAction.name,
+        configAction.type,
+        configAction::execute
+      )
+
+      // Hook the task into the build chain
+      provider.dependsOn(testTask.name)
+      findOrRegisterDefaultJacocoTask(project).dependsOn(provider)
+
+      return true
     }
+
+    private fun findOrRegisterDefaultJacocoTask(project: Project): TaskProvider<Task> =
+      project.tasks.namedOrNull(TASK_NAME_DEFAULT)
+        ?: project.tasks.register(TASK_NAME_DEFAULT) { task ->
+          task.group = GROUP_REPORTING
+        }
   }
 
   /**
    * Configuration closure for an Android JUnit5 Jacoco Report task.
    */
   private class ConfigAction(
-      val project: Project,
-      val variant: BaseVariant,
-      val testTask: Test,
-      private val directoryProviders: Collection<DirectoryProvider>
+    val project: Project,
+    val variant: BaseVariant,
+    val testTask: Test,
+    private val directoryProviders: Collection<DirectoryProvider>
   ) {
 
     val name: String = variant.getTaskName(prefix = TASK_NAME_DEFAULT)
@@ -65,9 +85,10 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       // Apply JUnit 5 configuration parameters
       val junit5Jacoco = project.junitPlatform.jacocoOptions
       val allReports = listOf(
-          junit5Jacoco.csv to reportTask.reports.csv,
-          junit5Jacoco.xml to reportTask.reports.xml,
-          junit5Jacoco.html to reportTask.reports.html)
+        junit5Jacoco.csv to reportTask.reports.csv,
+        junit5Jacoco.xml to reportTask.reports.xml,
+        junit5Jacoco.html to reportTask.reports.html
+      )
 
       allReports.forEach { (from, to) ->
         to.isEnabled = from.enabled
@@ -82,22 +103,21 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
 
       // Apply exclusion rules to both class & source directories for Jacoco,
       // using the sum of all DirectoryProviders' outputs as a foundation:
-      reportTask.safeClassDirectoriesSetFrom(project,
-          directoryProviders.mainClassDirectories().toFileCollectionExcluding(junit5Jacoco.excludedClasses))
-      reportTask.safeSourceDirectoriesSetFrom(project,
-          directoryProviders.mainSourceDirectories())
+      reportTask.safeClassDirectoriesSetFrom(
+        project,
+        directoryProviders.mainClassDirectories().toFileCollectionExcluding(junit5Jacoco.excludedClasses)
+      )
+      reportTask.safeSourceDirectoriesSetFrom(
+        project,
+        directoryProviders.mainSourceDirectories()
+      )
 
       project.logger.junit5Info(
-          "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':")
+        "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':"
+      )
       project.logger.junit5Info("|__ Execution Data: ${reportTask.safeGetExecutionData?.asPath}")
       project.logger.junit5Info("|__ Source Dirs: ${reportTask.safeGetSourceDirectories?.asPath}")
       project.logger.junit5Info("|__ Class Dirs: ${reportTask.safeGetClassDirectories?.asPath}")
-
-      // Hook into the main Jacoco task
-      val defaultJacocoTask = project.tasks.maybeCreate(
-          name = TASK_NAME_DEFAULT,
-          group = GROUP_REPORTING)
-      defaultJacocoTask.dependsOn(reportTask)
     }
 
     /* Extension Functions */
@@ -107,10 +127,11 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
      * ignoring the provided patterns in the resulting FileCollection.
      */
     private fun Iterable<File>.toFileCollectionExcluding(
-        patterns: Iterable<String>): FileCollection = this
-        // Convert each directory to a Gradle FileTree, excluding the specified patterns
-        .map { project.fileTree(it).exclude(patterns) }
-        // Convert the resulting list of FileTree objects into a single FileCollection
-        .run { project.files(this) }
+      patterns: Iterable<String>
+    ): FileCollection = this
+      // Convert each directory to a Gradle FileTree, excluding the specified patterns
+      .map { project.fileTree(it).exclude(patterns) }
+      // Convert the resulting list of FileTree objects into a single FileCollection
+      .run { project.files(this) }
   }
 }

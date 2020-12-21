@@ -6,6 +6,7 @@ import org.gradle.api.Task
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions
 import org.gradle.testkit.runner.GradleRunner
@@ -60,6 +61,15 @@ fun Project.applyPlugin(pluginId: String) = apply { it.plugin(pluginId)}
 @Suppress("UNCHECKED_CAST")
 fun <T : Task> TaskContainer.get(name: String): T =
     this.getByName(name) as T
+
+fun Task.getDependentTaskNames(): List<String> =
+  this.dependsOn.map { dependent ->
+    when (dependent) {
+      is Task -> dependent.name
+      is TaskProvider<*> -> dependent.name
+      else -> throw IllegalArgumentException("don't know how to extract task name from: $dependent")
+    }
+  }
 
 fun File.newFile(filePath: String, separator: String = "/"): File {
   val path = Paths.get(this.toString(),

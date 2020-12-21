@@ -243,7 +243,7 @@ class PluginSpec : Spek({
 
             it("hooks in a child task for the $buildType build type") {
               assertThat(project.tasks.getByName("jacocoTestReport")
-                  .dependsOn.map { (it as Task).name })
+                  .getDependentTaskNames())
                   .contains("jacocoTestReport${buildType.capitalize()}")
             }
 
@@ -317,7 +317,7 @@ class PluginSpec : Spek({
 
           it("is hooked into the main Jacoco task") {
             assertThat(project.tasks.getByName("jacocoTestReport")
-                .dependsOn.map { (it as Task).name })
+                .getDependentTaskNames())
                 .contains("jacocoTestReportStaging")
           }
         }
@@ -502,7 +502,7 @@ class PluginSpec : Spek({
 
               it("hooks '$variantName' into the main Jacoco task") {
                 assertThat(project.tasks.getByName("jacocoTestReport")
-                    .dependsOn.map { (it as Task).name })
+                    .getDependentTaskNames())
                     .contains("jacocoTestReport${variantName.capitalize()}")
               }
             }

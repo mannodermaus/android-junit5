@@ -142,8 +142,8 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         // Create a Jacoco friend task
         val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
         if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
-          val jacocoTask = AndroidJUnit5JacocoReport.create(this, variant, testTask, directoryProviders)
-          if (jacocoTask == null) {
+          val registered = AndroidJUnit5JacocoReport.register(this, variant, testTask, directoryProviders)
+          if (!registered) {
             project.logger.junit5Warn("Jacoco task for variant '${variant.name}' already exists. Disabling customization for JUnit 5...")
           }
         }
