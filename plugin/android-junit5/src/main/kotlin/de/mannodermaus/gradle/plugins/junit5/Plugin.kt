@@ -114,16 +114,14 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         |Find more information at: https://bit.ly/junit5-instrumentation-tests""".trimMargin())
     }
 
-    if (hasRunnerBuilder && hasDependency) {
+    if (hasRunnerBuilder) {
       // For each instrumentation test variant,
       // write out an asset file containing the filters applied through the DSL
       projectConfig.variants.all { variant ->
         val instrumentationTestVariant = variant.instrumentationTestVariant
         if (instrumentationTestVariant != null) {
           // Register a resource generator for the androidTest variant
-          val writerTask = AndroidJUnit5WriteFilters.create(this, instrumentationTestVariant)
-          val outputFolder = files(writerTask.outputFolder).builtBy(writerTask)
-          instrumentationTestVariant.registerGeneratedResFolders(outputFolder)
+          AndroidJUnit5WriteFilters.register(this, instrumentationTestVariant)
         }
       }
     }

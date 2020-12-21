@@ -30,12 +30,27 @@ private const val TASK_NAME_DEFAULT = "writeFilters"
 open class AndroidJUnit5WriteFilters : DefaultTask() {
 
   companion object {
-    fun create(project: Project,
-               instrumentationTestVariant: TestVariant): AndroidJUnit5WriteFilters {
-      val configAction = ConfigAction(project, instrumentationTestVariant)
-      return project.tasks.create(configAction.name, configAction.type) {
-        configAction.execute(it)
-      }
+    fun register(
+      project: Project,
+      instrumentationTestVariant: TestVariant
+    ): Boolean {
+      val outputFolder = File("${project.buildDir}/generated/res/android-junit5/${instrumentationTestVariant.name}")
+      val configAction = ConfigAction(project, instrumentationTestVariant, outputFolder)
+
+      val provider = project.tasks.register(
+        configAction.name,
+        configAction.type,
+        configAction::execute
+      )
+
+      // Connect the output folder of the task to the instrumentation tests
+      // so that they are bundled into the built test application
+      instrumentationTestVariant.registerGeneratedResFolders(
+        project.files(outputFolder).builtBy(provider)
+      )
+      instrumentationTestVariant.mergeResourcesProvider.configure { it.dependsOn(provider) }
+
+      return true
     }
   }
 
@@ -43,6 +58,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
 
   @Input
   var includeTags = emptyList<String>()
+
   @Input
   var excludeTags = emptyList<String>()
 
@@ -63,12 +79,12 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
         // as a "raw" resource inside the output folder
         val rawFolder = File(folder, "raw").apply { mkdirs() }
         File(rawFolder, INSTRUMENTATION_FILTER_RES_FILE_NAME)
-            .bufferedWriter()
-            .use { writer ->
-              // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
-              includeTags.forEach { tag -> writer.write("-t $tag") }
-              excludeTags.forEach { tag -> writer.write("-T $tag") }
-            }
+          .bufferedWriter()
+          .use { writer ->
+            // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
+            includeTags.forEach { tag -> writer.write("-t $tag") }
+            excludeTags.forEach { tag -> writer.write("-T $tag") }
+          }
       }
     }
   }
@@ -76,8 +92,9 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
   private fun hasFilters() = includeTags.isNotEmpty() || excludeTags.isNotEmpty()
 
   private class ConfigAction(
-      private val project: Project,
-      private val instrumentationTestVariant: TestVariant
+    private val project: Project,
+    private val instrumentationTestVariant: TestVariant,
+    private val outputFolder: File
   ) {
 
     val name: String = instrumentationTestVariant.getTaskName(prefix = TASK_NAME_DEFAULT)
@@ -86,7 +103,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
 
     fun execute(task: AndroidJUnit5WriteFilters) {
       task.variant = instrumentationTestVariant
-      task.outputFolder = File("${project.buildDir}/generated/res/android-junit5/${instrumentationTestVariant.name}")
+      task.outputFolder = outputFolder
 
       // Access filters for this particular variant & provide them to the task, too
       val configuration = project.junit5ConfigurationOf(instrumentationTestVariant.testedVariant)
