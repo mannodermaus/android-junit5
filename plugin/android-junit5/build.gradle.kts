@@ -184,4 +184,4 @@ dependencies {
   testRuntimeOnly(Libs.spekEngine)
 }
 
-apply(from = "$rootDir/gradle/deployment.gradle")
+apply(from = "${rootDir.parentFile}/deployment.gradle")

@@ -109,4 +109,4 @@ dependencies {
   testRuntimeOnly(Libs.junitJupiterEngine)
 }
 
-apply(from = "$rootDir/gradle/deployment.gradle")
+apply(from = "${rootDir.parentFile}/deployment.gradle")
