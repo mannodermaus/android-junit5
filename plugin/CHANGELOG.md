@@ -10,6 +10,9 @@ Change Log
 
 ## 1.7.0.0 (2020-12-18)
 
+#### Changed
+- Use task avoidance APIs to prevent eager instantiation of Gradle tasks
+
 #### Added
 - JUnit 5.7.0
 
