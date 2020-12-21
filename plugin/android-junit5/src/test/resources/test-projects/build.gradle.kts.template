@@ -7,12 +7,14 @@
 // The individual configuration of each test depends on the config.toml file,
 // located in the sub-folder next to its source code.
 
+import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 val androidGradlePluginVersion: String = "{{ AGP_VERSION }}"
 val kotlinVersion: String = "{{ KOTLIN_VERSION }}"
 val junitJupiterVersion: String = "{{ JUNIT_JUPITER_VERSION }}"
+val junit5AndroidLibsVersion: String = "{{ JUNIT5_ANDROID_LIBS_VERSION }}"
 
 buildscript {
   repositories {
@@ -79,6 +81,9 @@ android {
 
     {% if INCLUDE_ANDROID_RESOURCES %}
       unitTests.isIncludeAndroidResources = true
+      junitPlatform {
+        instrumentationTests.integrityCheckEnabled = false
+      }
     {% endif %}
 
     // Gradle 6.5 fixed the syntax for UnitTestOptions' DSL
@@ -126,4 +131,9 @@ dependencies {
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+  {% if INCLUDE_ANDROID_RESOURCES %}
+    androidTestImplementation("de.mannodermaus.junit5:android-test-core:${junit5AndroidLibsVersion}")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:${junit5AndroidLibsVersion}")
+  {% endif %}
 }

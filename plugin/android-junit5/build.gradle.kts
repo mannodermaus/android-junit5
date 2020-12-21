@@ -76,6 +76,7 @@ tasks.named("processTestResources", Copy::class.java).configure {
 
       "KOTLIN_VERSION" to Plugins.kotlin.version,
       "JUNIT_JUPITER_VERSION" to Libs.junitJupiterApi.version,
+      "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.latestStableVersion,
 
       // Collect all supported AGP versions into a single string.
       // This string is delimited with semicolons, and each of the separated values itself is a 3-tuple.

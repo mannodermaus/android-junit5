@@ -13,11 +13,10 @@ import org.junit.platform.commons.util.Preconditions
 import java.io.File
 
 internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
-  // Hook the JUnit Platform configuration into the Android testOptions,
+  // Hook the JUnit Platform configuration into the project,
   // adding an extension point for all variants, as well as the default one
   // shared between them
-  project.android.testOptions
-      .extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(project)) { ju5 ->
+  project.extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(project)) { ju5 ->
         // General-purpose filters
         ju5.attachFiltersDsl(qualifier = null)
 
@@ -55,8 +54,7 @@ internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
 }
 
 internal fun evaluateDsl(project: Project) {
-  val ju5 = project.android.testOptions
-      .extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
+  val ju5 = project.extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
 
   ju5._filters.forEach { qualifier, actions ->
     val extensionName = ju5.filtersExtensionName(qualifier)
@@ -81,7 +79,7 @@ private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = 
 /**
  * The main extension provided through the android-junit5 Gradle plugin.
  * It defines the root of the configuration tree exposed by the plugin,
- * and is located under "android.testOptions" using the name "junitPlatform".
+ * and is registered under the name "junitPlatform".
  */
 open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyObjectSupport() {
 

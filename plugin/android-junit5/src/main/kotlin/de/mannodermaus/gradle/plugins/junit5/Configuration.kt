@@ -81,7 +81,7 @@ internal class JUnit5TaskConfig(
     private val variant: BaseVariant,
     project: Project) {
 
-  private val extension = project.android.testOptions.junitPlatform
+  private val extension = project.junitPlatform
 
   // There is a distinct application order, which determines how values are merged and overwritten.
   // From top to bottom, this list goes as follows (values on the bottom will override conflicting

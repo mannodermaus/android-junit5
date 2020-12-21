@@ -63,7 +63,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
           "for the ${variant.name.capitalize()} variant."
 
       // Apply JUnit 5 configuration parameters
-      val junit5Jacoco = project.android.testOptions.junitPlatform.jacocoOptions
+      val junit5Jacoco = project.junitPlatform.jacocoOptions
       val allReports = listOf(
           junit5Jacoco.csv to reportTask.reports.csv,
           junit5Jacoco.xml to reportTask.reports.xml,
