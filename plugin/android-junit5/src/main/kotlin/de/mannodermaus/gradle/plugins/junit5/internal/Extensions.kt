@@ -13,6 +13,7 @@ import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.LogLevel.ERROR
@@ -22,6 +23,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.util.GradleVersion
 import java.util.Properties
 
@@ -218,6 +220,18 @@ internal fun BaseVariant.getTaskName(prefix: String = "", suffix: String = ""): 
     append(suffix.capitalize())
   }.toString()
 }
+
+/**
+ * Obtains a task with the given [name] from a container,
+ * or null if it doesn't exist. This method uses the new Gradle TaskProvider API
+ * and doesn't cause any eager instantiation of tasks.
+ */
+internal inline fun <reified T : Task> TaskContainer.namedOrNull(name: String): TaskProvider<T>? =
+  try {
+    named(name, T::class.java)
+  } catch (e: UnknownTaskException) {
+    null
+  }
 
 /**
  * Obtains the {AndroidUnitTest} for the provided variant.

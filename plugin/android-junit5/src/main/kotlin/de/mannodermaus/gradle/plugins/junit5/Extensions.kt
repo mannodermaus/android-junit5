@@ -1,7 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import com.android.build.gradle.internal.dsl.TestOptions
 import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
+import org.gradle.api.Project
 
 /**
  * Kotlin Extension Functions available for usage by clients, e.g. inside a Kotlin Gradle Script environment.
@@ -11,5 +11,5 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
 /**
  * Provides access to the JUnit Platform configuration settings exposed by the plugin
  */
-val TestOptions.junitPlatform
+val Project.junitPlatform
   get() = extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)

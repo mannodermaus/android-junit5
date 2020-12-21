@@ -12,6 +12,7 @@ object Plugins {
   // Maintenance & Build Environment
   const val versions: Lib = "com.github.ben-manes:gradle-versions-plugin:0.20.0"
   const val kotlin: Lib = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+  const val shadow: Lib = "com.github.jengelman.gradle.plugins:shadow:6.1.0"
 
   // Android Gradle Plugin
   val android35x: Agp = Agp("com.android.tools.build:gradle:3.5.4")

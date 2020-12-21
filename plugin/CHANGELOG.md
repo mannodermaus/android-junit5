@@ -8,6 +8,21 @@ Change Log
 #### Fixed
 #### Removed
 
+## 1.7.0.0 (2020-12-18)
+
+#### Changed
+- Use task avoidance APIs to prevent eager instantiation of Gradle tasks
+
+#### Added
+- JUnit 5.7.0
+
+#### Changed
+- Automatically exclude JUnit 5 metadata files from causing conflicts during packaging (#233)
+
+#### Fixed
+- Become more lenient when test tasks are absent (#226)
+- Provide configuration parameters to instrumentation tests, allowing e.g. Extension Auto-Detection to work (#229)
+
 ## 1.6.2.0 (2020-05-03)
 
 #### Added

@@ -1,8 +1,14 @@
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.compile.AbstractCompile
+import java.io.File
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /* RepositoryHandler */
 
@@ -55,3 +61,32 @@ private fun Project.setupCompileChain(sourceCompileName: String,
   // that the other way does not work!
   targetCompile.classpath += project.files(sourceCompile.destinationDir)
 }
+
+/**
+ * Provides a dependency object to the JUnit 5 plugin, if any can be found.
+ * This will look in the build folder of the sibling project to try and find
+ * a previously built "fat JAR", and return it in a format
+ * compatible to the Gradle dependency mechanism. If no file can be found,
+ * this method returns null instead.
+ */
+fun Project.findLocalPluginJar(): File? {
+  val localLibsFolder = rootDir.parentFile.toPath()
+      .resolve("plugin/android-junit5/build/libs")
+      .toFile()
+
+  val localPluginJar = (localLibsFolder.listFiles() ?: emptyArray<File>())
+      .sortedByDescending(File::lastModified)
+      .firstOrNull { "fat" in it.name && "javadoc" !in it.name && "sources" !in it.name }
+
+  return localPluginJar
+}
+
+/* File */
+
+/**
+ * Format the "last modified" timestamp of a file into a human readable string.
+ */
+fun File.lastModifiedDate(): String =
+    Instant.ofEpochMilli(lastModified())
+        .atZone(ZoneId.systemDefault())
+        .format(DateTimeFormatter.ISO_DATE_TIME)

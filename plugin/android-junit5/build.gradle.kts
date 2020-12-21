@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
@@ -8,6 +9,7 @@ plugins {
   id("kotlin")
   id("java-gradle-plugin")
   id("jacoco")
+  id("com.github.johnrengelman.shadow")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -57,6 +59,13 @@ gradlePlugin {
 // Task Setup
 // ------------------------------------------------------------------------------------------------
 
+// Allow building fat JARs if necessary
+tasks.withType<ShadowJar> {
+  isZip64 = true
+  enabled = project.hasProperty("enableFatJar")
+  archiveAppendix.set("fat")
+}
+
 // Use JUnit 5
 tasks.withType<Test> {
   useJUnitPlatform()
@@ -76,6 +85,7 @@ tasks.named("processTestResources", Copy::class.java).configure {
 
       "KOTLIN_VERSION" to Plugins.kotlin.version,
       "JUNIT_JUPITER_VERSION" to Libs.junitJupiterApi.version,
+      "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.latestStableVersion,
 
       // Collect all supported AGP versions into a single string.
       // This string is delimited with semicolons, and each of the separated values itself is a 3-tuple.
@@ -183,4 +193,4 @@ dependencies {
   testRuntimeOnly(Libs.spekEngine)
 }
 
-apply(from = "$rootDir/gradle/deployment.gradle")
+apply(from = "${rootDir.parentFile}/deployment.gradle")

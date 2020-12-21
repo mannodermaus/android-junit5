@@ -59,7 +59,7 @@ class PluginSpec : Spek({
           .applyJUnit5Plugin(true)
           .build()
 
-      project.android.testOptions.junitPlatform {
+      project.junitPlatform {
         filters("unknown", Action {
           it.includeTags("doesnt-matter")
         })
@@ -93,7 +93,7 @@ class PluginSpec : Spek({
       }
 
       it("does actually work when the check is explicitly disabled") {
-        project.android.testOptions.junitPlatform.instrumentationTests.integrityCheckEnabled = false
+        project.junitPlatform.instrumentationTests.integrityCheckEnabled = false
         project.evaluate()
       }
     }
@@ -115,7 +115,7 @@ class PluginSpec : Spek({
       }
 
       it("does actually work when the check is explicitly disabled") {
-        project.android.testOptions.junitPlatform.instrumentationTests.integrityCheckEnabled = false
+        project.junitPlatform.instrumentationTests.integrityCheckEnabled = false
         project.evaluate()
       }
     }
@@ -136,7 +136,7 @@ class PluginSpec : Spek({
 
       on("build & evaluate") {
         val project = testProjectBuilder.buildAndEvaluate()
-        val ju5 = project.android.testOptions.junitPlatform
+        val ju5 = project.junitPlatform
 
         it("doesn't create a parent Jacoco task") {
           assertThat(project.tasks.findByName("jacocoTestReport"))
@@ -176,7 +176,7 @@ class PluginSpec : Spek({
 
         it("throws an exception if the key is empty") {
           val expected = throws<PreconditionViolationException> {
-            project.android.testOptions.junitPlatform {
+            project.junitPlatform {
               configurationParameter("", "some-value")
             }
           }
@@ -186,7 +186,7 @@ class PluginSpec : Spek({
 
         it("throws an exception if the key contains illegal characters") {
           val expected = throws<PreconditionViolationException> {
-            project.android.testOptions.junitPlatform {
+            project.junitPlatform {
               configurationParameter("illegal=key", "some-value")
             }
           }
@@ -206,7 +206,7 @@ class PluginSpec : Spek({
 
         project.evaluate()
 
-        val ju5 = project.android.testOptions.extensionByName<AndroidJUnitPlatformExtension>(
+        val ju5 = project.extensionByName<AndroidJUnitPlatformExtension>(
             "junitPlatform")
 
         listOf("free", "paid").forEach { flavor ->
@@ -243,7 +243,7 @@ class PluginSpec : Spek({
 
             it("hooks in a child task for the $buildType build type") {
               assertThat(project.tasks.getByName("jacocoTestReport")
-                  .dependsOn.map { (it as Task).name })
+                  .getDependentTaskNames())
                   .contains("jacocoTestReport${buildType.capitalize()}")
             }
 
@@ -317,7 +317,7 @@ class PluginSpec : Spek({
 
           it("is hooked into the main Jacoco task") {
             assertThat(project.tasks.getByName("jacocoTestReport")
-                .dependsOn.map { (it as Task).name })
+                .getDependentTaskNames())
                 .contains("jacocoTestReportStaging")
           }
         }
@@ -325,7 +325,7 @@ class PluginSpec : Spek({
         on("applying custom report destination folders") {
           val project = testProjectBuilder.build()
 
-          project.android.testOptions.junitPlatform {
+          project.junitPlatform {
             jacocoOptions {
               xml.destination(project.file("build/other-jacoco-folder/xml"))
               csv.destination(project.file("build/html-reports/jacoco"))
@@ -354,7 +354,7 @@ class PluginSpec : Spek({
           on("$operationName reports in the DSL") {
             val project = testProjectBuilder.build()
 
-            project.android.testOptions.junitPlatform {
+            project.junitPlatform {
               jacocoOptions {
                 xml.enabled(enabled)
                 csv.enabled(enabled)
@@ -413,7 +413,7 @@ class PluginSpec : Spek({
             }
 
             on("adding rules") {
-              project.android.testOptions.junitPlatform {
+              project.junitPlatform {
                 jacocoOptions {
                   excludedClasses.add("Second*.class")
                 }
@@ -460,7 +460,7 @@ class PluginSpec : Spek({
             }
 
             on("replacing class rules") {
-              project.android.testOptions.junitPlatform {
+              project.junitPlatform {
                 jacocoOptions {
                   excludedClasses = mutableListOf()
                 }
@@ -502,7 +502,7 @@ class PluginSpec : Spek({
 
               it("hooks '$variantName' into the main Jacoco task") {
                 assertThat(project.tasks.getByName("jacocoTestReport")
-                    .dependsOn.map { (it as Task).name })
+                    .getDependentTaskNames())
                     .contains("jacocoTestReport${variantName.capitalize()}")
               }
             }
@@ -512,7 +512,7 @@ class PluginSpec : Spek({
             val project by memoized { testProjectBuilder.build() }
 
             on("disabling task generation altogether") {
-              project.android.testOptions.junitPlatform {
+              project.junitPlatform {
                 jacocoOptions {
                   taskGenerationEnabled = false
                 }
@@ -529,7 +529,7 @@ class PluginSpec : Spek({
             }
 
             on("specifying specific variants without product flavors") {
-              project.android.testOptions.junitPlatform {
+              project.junitPlatform {
                 jacocoOptions {
                   onlyGenerateTasksForVariants("debug")
                 }
@@ -557,7 +557,7 @@ class PluginSpec : Spek({
                 it.create("free").dimension = "tier"
               }
 
-              project.android.testOptions.junitPlatform {
+              project.junitPlatform {
                 jacocoOptions {
                   onlyGenerateTasksForVariants("paidDebug", "freeRelease")
                 }
@@ -595,7 +595,7 @@ class PluginSpec : Spek({
         val project by memoized { testProjectBuilder.build() }
 
         on("using global filters") {
-          project.android.testOptions.junitPlatform {
+          project.junitPlatform {
             filters {
               includeTags("global-include-tag")
               excludeTags("global-exclude-tag")
@@ -684,7 +684,7 @@ class PluginSpec : Spek({
               "brandBProductionFreeCiFilters"
           ).forEach { name ->
             it("creates an extension named '$name'") {
-              val ju5 = project.android.testOptions.junitPlatform
+              val ju5 = project.junitPlatform
               val extension = ju5.extensionByName<FiltersExtension>(name)
               assertThat(extension).isNotNull()
             }
@@ -698,7 +698,7 @@ class PluginSpec : Spek({
             create("paid").dimension = "tier"
           }
 
-          project.android.testOptions.junitPlatform {
+          project.junitPlatform {
             filters {
               includeTags("global-include-tag")
               excludeTags("global-exclude-tag")
@@ -790,7 +790,7 @@ class PluginSpec : Spek({
         }
 
         on("using build-type-specific filters") {
-          project.android.testOptions.junitPlatform {
+          project.junitPlatform {
             filters {
               includeTags("global-include-tag")
               includeEngines("global-include-engine")
@@ -855,7 +855,7 @@ class PluginSpec : Spek({
           }
           project.dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
 
-          project.android.testOptions.junitPlatform {
+          project.junitPlatform {
             filters {
               includeTags("global-include-tag")
               includeEngines("global-include-engine")
@@ -917,7 +917,7 @@ class PluginSpec : Spek({
           }
           project.dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
 
-          project.android.testOptions.junitPlatform {
+          project.junitPlatform {
             filters {
               includeTags("global-include-tag")
               excludeTags("global-exclude-tag")

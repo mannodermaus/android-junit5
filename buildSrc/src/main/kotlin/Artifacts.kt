@@ -98,7 +98,7 @@ class DeployedCredentials(private val project: Project) {
     // * CI Server:
     //      Stored in environment variables before launch
     val properties = Properties().apply {
-      val credentialsFile = File(project.rootDir, "local.properties")
+      val credentialsFile = File(project.rootDir.parentFile, "local.properties")
       if (credentialsFile.exists()) {
         load(credentialsFile.inputStream())
       }

@@ -49,7 +49,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
     // so that consumers don't need to do this explicitly
     excludedPackagingOptions().forEach(android.packagingOptions::exclude)
 
-    // Hook the JUnit Platform configuration into the Android testOptions
+    // Hook the JUnit Platform configuration into the project
     attachDsl(this, projectConfig)
   }
 
@@ -80,8 +80,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
       // "The standard Gradle test task currently does not provide a dedicated DSL
       // to set JUnit Platform configuration parameters to influence test discovery and execution.
       // However, you can provide configuration parameters within the build script via system properties"
-      val junit5 = android.testOptions.junitPlatform
-      testTask.systemProperties(junit5.configurationParameters)
+      testTask.systemProperties(junitPlatform.configurationParameters)
     }
   }
 
@@ -102,7 +101,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         .dependencies
         .any { it.group == INSTRUMENTATION_RUNNER_LIBRARY_GROUP && it.name == INSTRUMENTATION_RUNNER_LIBRARY_ARTIFACT }
 
-    val extension = project.android.testOptions.junitPlatform
+    val extension = project.junitPlatform
     val checkEnabled = extension.instrumentationTests.integrityCheckEnabled
 
     if (checkEnabled && hasRunnerBuilder xor hasDependency) {
@@ -115,16 +114,14 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         |Find more information at: https://bit.ly/junit5-instrumentation-tests""".trimMargin())
     }
 
-    if (hasRunnerBuilder && hasDependency) {
+    if (hasRunnerBuilder) {
       // For each instrumentation test variant,
       // write out an asset file containing the filters applied through the DSL
       projectConfig.variants.all { variant ->
         val instrumentationTestVariant = variant.instrumentationTestVariant
         if (instrumentationTestVariant != null) {
           // Register a resource generator for the androidTest variant
-          val writerTask = AndroidJUnit5WriteFilters.create(this, instrumentationTestVariant)
-          val outputFolder = files(writerTask.outputFolder).builtBy(writerTask)
-          instrumentationTestVariant.registerGeneratedResFolders(outputFolder)
+          AndroidJUnit5WriteFilters.register(this, instrumentationTestVariant)
         }
       }
     }
@@ -133,7 +130,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
   private fun Project.configureJacocoTasks() {
     // Connect a Code Coverage report to it if Jacoco is enabled.
     val isJacocoApplied = projectConfig.jacocoPluginApplied
-    val jacocoOptions = this.android.testOptions.junitPlatform.jacocoOptions
+    val jacocoOptions = this.junitPlatform.jacocoOptions
 
     if (isJacocoApplied && jacocoOptions.taskGenerationEnabled) {
       projectConfig.variants.all { variant ->
@@ -143,8 +140,8 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         // Create a Jacoco friend task
         val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
         if (enabledVariants.isEmpty() || enabledVariants.contains(variant.name)) {
-          val jacocoTask = AndroidJUnit5JacocoReport.create(this, variant, testTask, directoryProviders)
-          if (jacocoTask == null) {
+          val registered = AndroidJUnit5JacocoReport.register(this, variant, testTask, directoryProviders)
+          if (!registered) {
             project.logger.junit5Warn("Jacoco task for variant '${variant.name}' already exists. Disabling customization for JUnit 5...")
           }
         }

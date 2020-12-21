@@ -34,7 +34,7 @@ class DslGroovyTests {
         .asAndroidApplication()
         .build()
 
-    project.android.testOptions.junitPlatform {
+    project.junitPlatform {
       filters {
         includeTags "some-tag"
         excludeTags "other-tag"
