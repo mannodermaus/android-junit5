@@ -9,6 +9,7 @@ buildscript {
     classpath(Plugins.bintray)
     classpath(Plugins.versions)
     classpath(Plugins.dokkaCore)
+    classpath(Plugins.shadow)
   }
 }
 

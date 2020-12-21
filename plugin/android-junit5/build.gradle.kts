@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
@@ -8,6 +9,7 @@ plugins {
   id("kotlin")
   id("java-gradle-plugin")
   id("jacoco")
+  id("com.github.johnrengelman.shadow")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -56,6 +58,13 @@ gradlePlugin {
 // ------------------------------------------------------------------------------------------------
 // Task Setup
 // ------------------------------------------------------------------------------------------------
+
+// Allow building fat JARs if necessary
+tasks.withType<ShadowJar> {
+  isZip64 = true
+  enabled = project.hasProperty("enableFatJar")
+  archiveAppendix.set("fat")
+}
 
 // Use JUnit 5
 tasks.withType<Test> {
