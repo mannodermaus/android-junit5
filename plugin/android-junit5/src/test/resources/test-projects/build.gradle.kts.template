@@ -107,15 +107,15 @@ android {
 }
 
 {% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
-  {% if atLeastAgp("7.0.0-alpha01") %}
-    // New Variant API for AGP 7.0
+  {% if atLeastAgp("4.2.0-beta01") %}
+    // New Variant API for AGP 4.2 and above
     androidComponents {
       beforeUnitTest(selector().withBuildType("{{ type }}")) { test ->
         test.enabled = false
       }
     }
   {% elseif atLeastAgp("4.1") %}
-    // Variant API for AGP 4.1 & 4.2
+    // Variant API for AGP 4.1
     android.onVariants.withBuildType("{{ type }}") {
       unitTest {
         enabled = false
