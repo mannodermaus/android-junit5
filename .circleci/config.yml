@@ -9,6 +9,12 @@ defaults: &defaults
 cache_key: &cache_key
   key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Dependencies.kt" }}
 
+commands:
+  construct_signing_key:
+    description: Construct GPG Signing Key
+    steps:
+      - run: base64 -d \<<< $SIGNING_KEY_RING_FILE_CONTENTS > $SIGNING_KEY_RING_FILE
+
 version: 2
 jobs:
   build_plugin:
@@ -105,6 +111,7 @@ jobs:
           at: ~/root
       - restore_cache:
           <<: *cache_key
+      - construct_signing_key
       - run:
           name: (Plugin) Deploy
           command: cd plugin && ./gradlew deploy --stacktrace --no-daemon
@@ -119,6 +126,7 @@ jobs:
           at: ~/root
       - restore_cache:
           <<: *cache_key
+      - construct_signing_key
       - run:
           name: (Instrumentation) Deploy
           command: cd instrumentation && ./gradlew deploy --stacktrace --no-daemon
