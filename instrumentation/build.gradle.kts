@@ -1,24 +1,25 @@
+apply(plugin = "io.codearte.nexus-staging")
+
 buildscript {
   repositories {
     google()
+    mavenCentral()
     jcenter()
     jitpack()
   }
   dependencies {
     classpath(Plugins.kotlin)
     classpath(Plugins.android.dependency)
-    classpath(Plugins.androidMavenPublish)
-    classpath(Plugins.bintray)
-    classpath(Plugins.androidMavenGradle)
     classpath(Plugins.versions)
     classpath(Plugins.dokkaCore)
-    classpath(Plugins.dokkaAndroid)
+    classpath(Plugins.nexusStaging)
   }
 }
 
 subprojects {
   repositories {
     google()
+    mavenCentral()
     jcenter()
     sonatypeSnapshots()
   }

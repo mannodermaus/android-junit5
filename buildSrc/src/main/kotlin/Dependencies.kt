@@ -33,13 +33,10 @@ object Plugins {
   )
 
   // Documentation
-  const val dokkaCore: Lib = "org.jetbrains.dokka:dokka-gradle-plugin:0.9.18"
-  const val dokkaAndroid: Lib = "org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.18"
+  const val dokkaCore: Lib = "org.jetbrains.dokka:dokka-gradle-plugin:1.4.20"
 
   // Publishing
-  const val androidMavenGradle: Lib = "com.github.dcendents:android-maven-gradle-plugin:2.1"
-  const val androidMavenPublish: Lib = "digital.wup:android-maven-publish:3.6.2"
-  const val bintray: Lib = "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+  const val nexusStaging: Lib = "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
 }
 
 /**
