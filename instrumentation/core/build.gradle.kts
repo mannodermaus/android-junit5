@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
   repositories {
     google()
+    mavenCentral()
     jcenter()
     sonatypeSnapshots()
   }

@@ -1,161 +1,134 @@
-// Common logic shared across modules whose artifacts are provided to jCenter and Sonatype OSS.
+// Common logic shared across modules whose artifacts are provided to Maven Central.
 //
 // This script expects an extra named "deployConfig" to exist on the Project instance.
 // Its type is defined within the buildSrc module of this project.
-
-// Access Map properties
 if (!project.ext.has("deployConfig")) {
   throw new IllegalStateException("Deployed module '$name' requires a 'deployConfig'")
 }
 
-final def deployConfig = project.ext.deployConfig
-final def deployCredentials = project.ext.deployCredentials
-final String targetPlatform = deployConfig.platform.name
-final String groupId = deployConfig.groupId
-final String artifactId = deployConfig.artifactId
-final String versionNumber = deployConfig.currentVersion
-final String license = deployConfig.license
-final String description = deployConfig.description
+final Deployed deployConfig = project.ext.deployConfig
+final DeployedCredentials deployCredentials = project.ext.deployCredentials
+final boolean isAndroid = project.plugins.findPlugin("com.android.library") != null
 
-// Apply required plugins
-apply plugin: "com.jfrog.bintray"
+apply plugin: "maven-publish"
+apply plugin: "signing"
+apply plugin: "org.jetbrains.dokka"
 
-if (targetPlatform == "java") {
-  // Releases
-  apply plugin: "maven"
-  // Snapshots
-  apply plugin: "maven-publish"
-} else if (targetPlatform == "android") {
-  // Releases
-  apply plugin: "com.github.dcendents.android-maven"
-  // Snapshots
-  apply plugin: "digital.wup.android-maven-publish"
-}
-
-// ------------------------------------------------------------------------------------------------
-// Artifacts Configuration
-// ------------------------------------------------------------------------------------------------
-
-// Include sources.jar archive in each release
-if (targetPlatform == "java") {
-  task sourcesJar(type: Jar, dependsOn: classes) {
-    baseName = artifactId
-    classifier = "sources"
-    from sourceSets.main.allSource
-  }
-} else {
-  task sourcesJar(type: Jar) {
-    baseName = artifactId
-    classifier = "sources"
+// Create artifact tasks
+task androidSourcesJar(type: Jar) {
+  archiveClassifier.set("sources")
+  if (isAndroid) {
     from android.sourceSets.main.java.srcDirs
+  } else {
+    from sourceSets.main.java.srcDirs
   }
 }
 
-// Include javadoc.jar archive in each release
-if (targetPlatform == "android") {
-  apply plugin: "org.jetbrains.dokka-android"
-} else {
-  apply plugin: "org.jetbrains.dokka"
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+  archiveClassifier.set("javadoc")
+  from dokkaJavadoc.outputDirectory
 }
 
-task javadocJar(type: Jar, dependsOn: dokka) {
-  baseName = artifactId
-  classifier = "javadoc"
-  from dokka.outputDirectory
+artifacts {
+  archives androidSourcesJar
+  archives javadocJar
 }
 
-// ------------------------------------------------------------------------------------------------
-// Publication Configuration
-// ------------------------------------------------------------------------------------------------
+// Setup publication details
+group = deployConfig.groupId
+version = deployConfig.currentVersion
 
-group = groupId
-archivesBaseName = artifactId
-version = versionNumber
+final def isSnapshot = version.endsWith("SNAPSHOT")
 
 publishing {
   publications {
-    library(MavenPublication) { p ->
-      p.from components.getByName(targetPlatform)
-      p.artifact sourcesJar
-      p.artifact javadocJar
-      p.groupId groupId
-      p.artifactId artifactId
-      p.version version
-      p.pom.withXml {
-        def root = asNode()
-        root.appendNode("description", description)
-        root.appendNode("name", artifactId)
-        root.appendNode("url", Artifacts.githubUrl)
+    release(MavenPublication) {
+      groupId deployConfig.groupId
+      artifactId deployConfig.artifactId
+      version deployConfig.currentVersion
+
+      if (isAndroid) {
+        artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+      } else {
+        artifact("$buildDir/libs/${project.getName()}-${version}.jar")
       }
-    }
-  }
-}
+      artifact androidSourcesJar
+      artifact javadocJar
 
-// Copy POM to location expected by Bintray
-task copyPom(type: Copy) {
-  from "build/publications/library"
-  into "build/poms"
-  include "pom-default.xml"
-}
+      pom {
+        name = deployConfig.artifactId
+        description = deployConfig.description
+        url = Artifacts.githubRepo
 
-// ------------------------------------------------------------------------------------------------
-// Target Configuration
-// ------------------------------------------------------------------------------------------------
-
-// Unified task for snapshots & releases
-task deploy() {
-}
-
-project.configure(project) {
-  if (project.version.endsWith("-SNAPSHOT")) {
-    // Configure deployment of snapshot versions to Sonatype OSS
-    project.publishing {
-      repositories {
-        maven {
-          name "snapshot"
-          credentials {
-            username deployCredentials.sonatypeUser
-            password deployCredentials.sonatypePass
+        licenses {
+          license {
+            name = Artifacts.license
+            url = "${Artifacts.githubUrl}/blob/main/LICENSE"
           }
-          url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+
+        developers {
+          developer {
+            id = "mannodermaus"
+            name = "Marcel Schnelle"
+          }
+        }
+
+        scm {
+          connection = "scm:git:${Artifacts.githubRepo}.git"
+          developerConnection = "scm:git:ssh://github.com/${Artifacts.githubRepo}.git"
+          url = "${Artifacts.githubUrl}/tree/main"
+        }
+
+        // Include transitive dependencies
+        withXml {
+          def dependenciesNode = asNode().appendNode("dependencies")
+          project.configurations.implementation.allDependencies.each {
+            def dependencyNode = dependenciesNode.appendNode("dependency")
+            dependencyNode.appendNode("groupId", it.group)
+            dependencyNode.appendNode("artifactId", it.name)
+            dependencyNode.appendNode("version", it.version)
+          }
         }
       }
     }
-    project.tasks.getByName("bintrayUpload").enabled = false
-    publish.dependsOn copyPom
-    deploy.finalizedBy "publishLibraryPublicationToSnapshotRepository"
-
-  } else {
-    // Configure deployment of release versions to Bintray
-    project.artifacts {
-      archives javadocJar
-      archives sourcesJar
-    }
-
-    project.bintray {
-      user = deployCredentials.bintrayUser
-      key = deployCredentials.bintrayKey
-      configurations = ["archives"]
-      dryRun = false
-      publish = true
-      pkg {
-        repo = "maven"
-        name = artifactId
-        desc = description
-        licenses = [license]
-        githubRepo = Artifacts.githubRepo
-        websiteUrl = Artifacts.githubUrl
-        vcsUrl = "${Artifacts.githubUrl}.git"
-        issueTrackerUrl = "${Artifacts.githubUrl}/issues"
-        publicDownloadNumbers = true
-        version {
-          name = versionNumber
-          desc = description
-        }
-      }
-    }
-    // Very important! Otherwise, the POM will be overwritten & have missing dependencies
-    project.tasks.getByName("install").finalizedBy copyPom
-    deploy.finalizedBy "generatePomFileForLibraryPublication", "publish", "install", "bintrayUpload"
   }
+
+  repositories {
+    maven {
+      name = "central"
+
+      def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+      def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+      url = isSnapshot ? snapshotsRepoUrl : releasesRepoUrl
+
+      credentials {
+        username deployCredentials.ossrhUsername
+        password deployCredentials.ossrhPassword
+      }
+    }
+  }
+}
+
+// Setup code signing
+ext["signing.keyId"] = deployCredentials.signingKeyId
+ext["signing.password"] = deployCredentials.signingPassword
+ext["signing.secretKeyRingFile"] = deployCredentials.signingKeyRingFile
+signing {
+  sign publishing.publications
+}
+
+// Setup deployment
+nexusStaging {
+  packageGroup = deployConfig.groupId
+  stagingProfileId = deployCredentials.sonatypeStagingProfileId
+  username = deployCredentials.ossrhUsername
+  password = deployCredentials.ossrhPassword
+}
+
+// Catch-all deployment task for multiple modules
+def deploy = tasks.maybeCreate("deploy")
+deploy.finalizedBy "publishReleasePublicationToCentralRepository"
+if (!isSnapshot) {
+  deploy.finalizedBy "closeAndReleaseRepository"
 }

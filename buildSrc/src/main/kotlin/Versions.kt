@@ -33,8 +33,6 @@ object Versions {
 
   const val java_semver: String = "0.9.0"
 
-  const val gradle_bintray_plugin: String = "1.8.4"
-
   const val truth: String = "0.43"
 
   const val truth_android: String = "1.1.0"

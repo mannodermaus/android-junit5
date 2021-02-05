@@ -47,7 +47,7 @@ object Artifacts {
       platform = Java,
       groupId = "de.mannodermaus.gradle.plugins",
       artifactId = "android-junit5",
-      currentVersion = "1.7.0.1-SNAPSHOT",
+      currentVersion = "1.7.1.0-SNAPSHOT",
       latestStableVersion = "1.7.0.0",
       license = license,
       description = "Unit Testing with JUnit 5 for Android."
@@ -85,10 +85,12 @@ object Artifacts {
 
 class DeployedCredentials(private val project: Project) {
 
-  val bintrayUser: String?
-  val bintrayKey: String?
-  val sonatypeUser: String?
-  val sonatypePass: String?
+  var signingKeyId: String?
+  var signingPassword: String?
+  var signingKeyRingFile: String?
+  var ossrhUsername: String?
+  var ossrhPassword: String?
+  var sonatypeStagingProfileId: String?
 
   init {
     // Populate deployment credentials in an environment-aware fashion.
@@ -104,9 +106,14 @@ class DeployedCredentials(private val project: Project) {
       }
     }
 
-    this.bintrayUser = properties.getProperty("BINTRAY_USER", System.getenv("bintrayUser"))
-    this.bintrayKey = properties.getProperty("BINTRAY_KEY", System.getenv("bintrayKey"))
-    this.sonatypeUser = properties.getProperty("SONATYPE_USER", System.getenv("sonatypeUser"))
-    this.sonatypePass = properties.getProperty("SONATYPE_PASS", System.getenv("sonatypePass"))
+    this.signingKeyId = properties.getOrEnvvar("SIGNING_KEY_ID")
+    this.signingPassword = properties.getOrEnvvar("SIGNING_PASSWORD")
+    this.signingKeyRingFile = properties.getOrEnvvar("SIGNING_KEY_RING_FILE")
+    this.ossrhUsername = properties.getOrEnvvar("OSSRH_USERNAME")
+    this.ossrhPassword = properties.getOrEnvvar("OSSRH_PASSWORD")
+    this.sonatypeStagingProfileId = properties.getOrEnvvar("SONATYPE_STAGING_PROFILE_ID")
   }
+
+  private fun Properties.getOrEnvvar(key: String): String? =
+    getProperty(key, System.getenv(key))
 }

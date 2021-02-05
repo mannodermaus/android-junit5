@@ -1,14 +1,17 @@
+apply(plugin = "io.codearte.nexus-staging")
+
 buildscript {
   repositories {
     google()
+    mavenCentral()
     jcenter()
     jitpack()
   }
   dependencies {
     classpath(Plugins.kotlin)
-    classpath(Plugins.bintray)
     classpath(Plugins.versions)
     classpath(Plugins.dokkaCore)
+    classpath(Plugins.nexusStaging)
     classpath(Plugins.shadow)
   }
 }
@@ -16,6 +19,7 @@ buildscript {
 subprojects {
   repositories {
     google()
+    mavenCentral()
     jcenter()
     sonatypeSnapshots()
   }
@@ -46,7 +50,7 @@ fun Project.configureDeployConfig() {
   // ------------------------------------------------------------------------------------------------
   // Deployment Setup
   //
-  // Releases are pushed to JCenter via Bintray, while snapshots are pushed to Sonatype OSS.
+  // Releases and snapshots are pushed to Maven Central.
   // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
   // ------------------------------------------------------------------------------------------------
   val configuration = Artifacts.from(this) ?: return
