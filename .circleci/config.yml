@@ -77,7 +77,7 @@ jobs:
             sudo gcloud firebase test android run \
               --type instrumentation \
               --app instrumentation/sample/build/outputs/apk/debug/sample-debug.apk \
-              --test instrumentation/core/build/outputs/apk/androidTest/debug/android-test-core-debug-androidTest.apk \
+              --test instrumentation/core/build/outputs/apk/androidTest/debug/core-debug-androidTest.apk \
               --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
               --test-runner-class androidx.test.runner.AndroidJUnitRunner \
               --device model=sailfish,version=28,locale=en_US,orientation=portrait \
@@ -113,8 +113,11 @@ jobs:
           <<: *cache_key
       - construct_signing_key
       - run:
+          name: (Plugin) Build Artifacts
+          command: cd plugin && ./gradlew androidSourcesJar javadocJar
+      - run:
           name: (Plugin) Deploy
-          command: cd plugin && ./gradlew deploy --stacktrace --no-daemon
+          command: cd plugin && ./gradlew deploy --max-workers 1 --stacktrace --no-daemon
       - store_artifacts:
           path: plugin/android-junit5/build/publications
           destination: plugin/publications/snapshots
@@ -128,8 +131,11 @@ jobs:
           <<: *cache_key
       - construct_signing_key
       - run:
+          name: (Plugin) Build Artifacts
+          command: cd instrumentation && ./gradlew androidSourcesJar javadocJar
+      - run:
           name: (Instrumentation) Deploy
-          command: cd instrumentation && ./gradlew deploy --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew deploy --max-workers 1 --stacktrace --no-daemon
       - store_artifacts:
           path: instrumentation/core/build/publications
           destination: instrumentation-core/publications/snapshots
