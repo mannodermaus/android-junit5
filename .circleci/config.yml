@@ -57,7 +57,7 @@ jobs:
           name: (Instrumentation) Build
           command: |
             cd instrumentation
-            ./gradlew :core:assembleDebug :core:assembleDebugAndroidTest \
+            ./gradlew assembleRelease :core:assembleDebug :core:assembleDebugAndroidTest \
             :runner:assembleDebug \
             :sample:assembleDebug --stacktrace --no-daemon
       - run:
