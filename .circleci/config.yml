@@ -15,7 +15,7 @@ commands:
     steps:
       - run: base64 -d \<<< $SIGNING_KEY_RING_FILE_CONTENTS > $SIGNING_KEY_RING_FILE
 
-version: 2
+version: 2.1
 jobs:
   build_plugin:
     <<: *defaults
