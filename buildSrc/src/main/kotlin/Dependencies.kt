@@ -54,9 +54,9 @@ object Libs {
   const val korte: Lib = "com.soywiz.korlibs.korte:korte:1.10.15"
 
   // JUnit 5
-  private const val junitJupiterVersion = "5.7.0"
-  private const val junitPlatformVersion = "1.7.0"
-  private const val junitVintageVersion = "5.7.0"
+  private const val junitJupiterVersion = "5.7.1"
+  private const val junitPlatformVersion = "1.7.1"
+  private const val junitVintageVersion = "5.7.1"
   const val junitJupiterApi: Lib = "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
   const val junitJupiterEngine: Lib = "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
   const val junitJupiterParams: Lib = "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
