@@ -8,6 +8,10 @@ Change Log
 #### Fixed
 #### Removed
 
+## 1.2.1 (2021-02-10)
+
+This version is identical to 1.2.0, but deployed to Maven Central to ensure availability after the upcoming shutdown of JCenter. 
+
 ## 1.2.0 (2019-11-20)
 
 #### Added

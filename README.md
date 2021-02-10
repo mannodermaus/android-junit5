@@ -131,8 +131,8 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
 
     // 5) The instrumentation test companion libraries
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.0")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.2.0")
+    androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.1")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.2.1")
   }
   ```
 </details>
@@ -162,8 +162,8 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.7.1"
 
     // 5) The instrumentation test companion libraries
-    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.0"
-    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.2.0"
+    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.1"
+    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.2.1"
   }
   ```
 </details>
@@ -188,7 +188,7 @@ This repository contains multiple modules, divided into two sub-projects. The re
 ## License
 
 ```
-Copyright 2017-2020 Marcel Schnelle
+Copyright 2017-2021 Marcel Schnelle
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
