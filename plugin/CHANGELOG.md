@@ -8,6 +8,18 @@ Change Log
 #### Fixed
 #### Removed
 
+## 1.7.1.0 (2021-02-10)
+
+#### Added
+- JUnit 5.7.1
+#### Changed
+- Move location of "junitPlatform" extension to Project
+- Migrate Jacoco task integration to new lazy Gradle API
+- Migrate instrumentation test integration task to new lazy TaskProvider API
+#### Fixed
+#### Removed
+- Remove workaround for KotlinJvmOptions (not needed anymore)
+
 ## 1.7.0.0 (2020-12-18)
 
 #### Changed
