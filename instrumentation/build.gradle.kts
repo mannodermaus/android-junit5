@@ -6,6 +6,7 @@ buildscript {
     mavenCentral()
     jcenter()
     jitpack()
+    gradlePluginPortal()
   }
   dependencies {
     classpath(Plugins.kotlin)
@@ -13,6 +14,7 @@ buildscript {
     classpath(Plugins.versions)
     classpath(Plugins.dokkaCore)
     classpath(Plugins.nexusStaging)
+    classpath(Plugins.nexusPublishing)
   }
 }
 

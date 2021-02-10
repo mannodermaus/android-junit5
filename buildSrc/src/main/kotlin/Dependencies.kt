@@ -37,6 +37,7 @@ object Plugins {
 
   // Publishing
   const val nexusStaging: Lib = "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
+  const val nexusPublishing: Lib = "de.marcphilipp.gradle:nexus-publish-plugin:0.4.0"
 }
 
 /**
