@@ -58,8 +58,8 @@ object Artifacts {
    */
   object Instrumentation {
     private val groupId = "de.mannodermaus.junit5"
-    private val currentVersion = "1.2.1"
-    val latestStableVersion = "1.2.0"
+    private val currentVersion = "1.2.2-SNAPSHOT"
+    val latestStableVersion = "1.2.1"
 
     val Core = Deployed(
         platform = Android(minSdk = 14),
