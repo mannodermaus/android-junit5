@@ -5,8 +5,9 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 buildscript {
   repositories {
     google()
+    mavenCentral()
+    sonatypeSnapshots()
     jcenter()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
   }
 
   dependencies {
