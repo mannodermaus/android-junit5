@@ -110,7 +110,7 @@ android {
   {% if atLeastAgp("4.2.0-beta01") %}
     // New Variant API for AGP 4.2 and above
     androidComponents {
-      beforeUnitTest(selector().withBuildType("{{ type }}")) { test ->
+      beforeUnitTests(selector().withBuildType("{{ type }}")) { test ->
         test.enabled = false
       }
     }
