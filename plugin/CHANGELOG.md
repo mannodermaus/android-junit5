@@ -3,10 +3,9 @@ Change Log
 
 ## Unreleased
 
-#### Added
-#### Changed
-#### Fixed
-#### Removed
+## 1.7.1.1 (2021-02-11)
+
+This release is identical to 1.7.1.0, but fixes an incorrect entry in the POM file, making the previous version unusable.
 
 ## 1.7.1.0 (2021-02-10)
 

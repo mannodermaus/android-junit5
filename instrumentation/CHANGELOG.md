@@ -8,6 +8,11 @@ Change Log
 #### Fixed
 #### Removed
 
+## 1.2.2 (2021-03-02)
+
+#### Fixed
+- Include missing transitive runtime-only dependencies in generated POMs (side-effect of moving to a different deployment script)
+
 ## 1.2.1 (2021-02-10)
 
 This version is identical to 1.2.0, but deployed to Maven Central to ensure availability after the upcoming shutdown of JCenter. 
