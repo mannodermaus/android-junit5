@@ -83,8 +83,10 @@ publishing {
         // Include transitive dependencies
         withXml {
           def dependenciesNode = asNode().appendNode("dependencies")
-          project.configurations.implementation
-                  .allDependencies
+          def dependencies = project.configurations.implementation.allDependencies +
+                  project.configurations.runtimeOnly.allDependencies
+
+          dependencies
                   .findAll { it.name != "unspecified" }
                   .each {
                     def dependencyNode = dependenciesNode.appendNode("dependency")
