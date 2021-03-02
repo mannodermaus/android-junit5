@@ -47,6 +47,9 @@ class ExampleKotlinTest {
     fun runOnceAfterTestsFinish() {
       println("@AfterAll")
     }
+    
+    @JvmStatic
+    private fun getNames() = listOf("Alice" to "ALICE", "Bob" to "BOB", "Carol" to "CAROL")
   }
 
   @BeforeEach
@@ -99,6 +102,12 @@ class ExampleKotlinTest {
     assertAll(
         Executable { assertNotNull(value) },
         Executable { assertEquals(15, value.length) })
+  }
+  
+  @ParameterizedTest(name = "Upper case for {0}")
+  @MethodSource("getNames")
+  fun parameterizedMethodTest (names: Pair<String, String>) {
+      assertEquals(names.first.toUpperCase(), names.second)
   }
 
   @Nested
