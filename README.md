@@ -131,8 +131,8 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
 
     // 5) The instrumentation test companion libraries
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.1")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.2.1")
+    androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.2.2")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.2.2")
   }
   ```
 </details>
@@ -162,8 +162,8 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.7.1"
 
     // 5) The instrumentation test companion libraries
-    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.1"
-    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.2.1"
+    androidTestImplementation "de.mannodermaus.junit5:android-test-core:1.2.2"
+    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:1.2.2"
   }
   ```
 </details>
