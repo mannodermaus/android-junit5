@@ -107,7 +107,7 @@ class ExampleKotlinTest {
   @ParameterizedTest(name = "Upper case for {0}")
   @MethodSource("getNames")
   fun parameterizedMethodTest (names: Pair<String, String>) {
-      assertEquals(names.first.toUpperCase(), names.second)
+      assertEquals(names.second, names.first.toUpperCase())
   }
 
   @Nested
