@@ -1,6 +1,5 @@
 package de.mannodermaus.gradle.plugins.junit5.util
 
-import org.apache.commons.lang.StringUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.project.ProjectInternal
@@ -77,8 +76,6 @@ fun File.newFile(filePath: String, separator: String = "/"): File {
   path.parent.mkdirs()
   return path.toFile()
 }
-
-fun String.countMatches(sub: String) = StringUtils.countMatches(this, sub)
 
 fun String.splitToArray(delimiter: String = "/"): Array<String> =
     this.split(delimiter).toTypedArray()

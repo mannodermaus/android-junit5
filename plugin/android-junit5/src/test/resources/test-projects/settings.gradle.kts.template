@@ -10,6 +10,7 @@
 pluginManagement {
   repositories {
     google()
+    mavenCentral()
   }
   resolutionStrategy {
     eachPlugin {

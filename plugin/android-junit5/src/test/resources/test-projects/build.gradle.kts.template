@@ -19,7 +19,7 @@ val junit5AndroidLibsVersion: String = "{{ JUNIT5_ANDROID_LIBS_VERSION }}"
 buildscript {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
   }
 }
 
@@ -107,7 +107,14 @@ android {
 }
 
 {% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
-  {% if atLeastAgp("4.2.0-beta01") %}
+  {% if atLeastAgp("7.0.0-beta01") %}
+    // New Variant API for AGP 7.0 and above (unit test stuff is accessed through ordinary variants now)
+    androidComponents {
+      beforeVariants(selector().withBuildType("{{ type }}")) { variant ->
+        variant.enableUnitTest = false
+      }
+    }
+  {% elseif atLeastAgp("4.2.0-beta01") %}
     // New Variant API for AGP 4.2 and above
     androidComponents {
       beforeUnitTests(selector().withBuildType("{{ type }}")) { test ->

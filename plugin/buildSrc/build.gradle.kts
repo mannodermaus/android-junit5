@@ -3,11 +3,11 @@ plugins {
 }
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 sourceSets {
   main {
-    java.srcDir(file("../../buildSrc/src/main/kotlin"))
+    java.srcDir(file("../../build-logic/src/main/kotlin"))
   }
 }
