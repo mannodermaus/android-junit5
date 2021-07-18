@@ -1,13 +1,11 @@
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 buildscript {
   repositories {
     google()
     mavenCentral()
     sonatypeSnapshots()
-    jcenter()
   }
 
   dependencies {
@@ -36,6 +34,8 @@ apply {
   plugin("de.mannodermaus.android-junit5")
 }
 
+val javaVersion = JavaVersion.VERSION_1_8
+
 android {
   compileSdkVersion(Android.compileSdkVersion)
 
@@ -63,12 +63,12 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
   }
 
   kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_1_8.toString()
+    jvmTarget = javaVersion.toString()
   }
 
   testOptions {
@@ -89,19 +89,19 @@ tasks.withType<Test> {
 }
 
 dependencies {
-  implementation(Libs.kotlinStdLib)
+  implementation(libs.kotlinStdLib)
 
-  testImplementation(Libs.junitJupiterApi)
-  testImplementation(Libs.junitJupiterParams)
-  testRuntimeOnly(Libs.junitJupiterEngine)
+  testImplementation(libs.junitJupiterApi)
+  testImplementation(libs.junitJupiterParams)
+  testRuntimeOnly(libs.junitJupiterEngine)
 
-  androidTestImplementation(Libs.junit4)
-  androidTestImplementation(Libs.androidxTestRunner)
+  androidTestImplementation(libs.junit4)
+  androidTestImplementation(libs.androidXTestRunner)
 
   // Android Instrumentation Tests wth JUnit 5
-  androidTestImplementation(Libs.junitJupiterApi)
-  androidTestImplementation(Libs.junitJupiterParams)
-  androidTestImplementation(Libs.espressoCore)
+  androidTestImplementation(libs.junitJupiterApi)
+  androidTestImplementation(libs.junitJupiterParams)
+  androidTestImplementation(libs.espressoCore)
   androidTestImplementation(project(":core"))
   androidTestRuntimeOnly(project(":runner"))
 }

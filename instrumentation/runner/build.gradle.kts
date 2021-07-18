@@ -7,7 +7,6 @@ buildscript {
     google()
     mavenCentral()
     sonatypeSnapshots()
-    jcenter()
   }
 
   dependencies {
@@ -24,6 +23,8 @@ plugins {
 apply {
   plugin("de.mannodermaus.android-junit5")
 }
+
+val javaVersion = JavaVersion.VERSION_1_8
 
 android {
   compileSdkVersion(Android.compileSdkVersion)
@@ -44,8 +45,8 @@ android {
   }
 
   compileOptions {
-    setSourceCompatibility(JavaVersion.VERSION_1_8)
-    setTargetCompatibility(JavaVersion.VERSION_1_8)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
   }
 
   lintOptions {
@@ -66,7 +67,7 @@ android {
 }
 
 tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
+  kotlinOptions.jvmTarget = javaVersion.toString()
 }
 
 tasks.withType<Test> {
@@ -87,27 +88,27 @@ configurations.all {
 }
 
 dependencies {
-  implementation(Libs.androidxTestMonitor)
-  implementation(Libs.kotlinStdLib)
-  implementation(Libs.kotlinReflect)
-  implementation(Libs.junit4)
+  implementation(libs.androidXTestMonitor)
+  implementation(libs.kotlinStdLib)
+  implementation(libs.kotlinReflect)
+  implementation(libs.junit4)
 
   // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
   // since that would prematurely raise the minSdkVersion requirement for target applications,
   // even though not all product flavors might want to use JUnit 5.
   // Therefore, only compile against those APIs, and have them provided at runtime
   // by the "instrumentation" companion library instead.
-  compileOnly(Libs.junitJupiterApi)
-  compileOnly(Libs.junitJupiterParams)
-  compileOnly(Libs.junitPlatformRunner)
+  compileOnly(libs.junitJupiterApi)
+  compileOnly(libs.junitJupiterParams)
+  compileOnly(libs.junitPlatformRunner)
 
-  testImplementation(Libs.truth)
-  testImplementation(Libs.mockitoCore)
-  testImplementation(Libs.junitJupiterApi)
-  testImplementation(Libs.junitJupiterParams)
-  testImplementation(Libs.junitPlatformRunner)
+  testImplementation(libs.truth)
+  testImplementation(libs.mockitoCore)
+  testImplementation(libs.junitJupiterApi)
+  testImplementation(libs.junitJupiterParams)
+  testImplementation(libs.junitPlatformRunner)
 
-  testRuntimeOnly(Libs.junitJupiterEngine)
+  testRuntimeOnly(libs.junitJupiterEngine)
 }
 
 apply(from = "${rootDir.parentFile}/deployment.gradle")

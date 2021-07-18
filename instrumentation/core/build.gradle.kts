@@ -7,7 +7,6 @@ buildscript {
   repositories {
     google()
     mavenCentral()
-    jcenter()
     sonatypeSnapshots()
   }
 
@@ -25,6 +24,8 @@ plugins {
 apply {
   plugin("de.mannodermaus.android-junit5")
 }
+
+val javaVersion = JavaVersion.VERSION_1_8
 
 android {
   compileSdkVersion(Android.compileSdkVersion)
@@ -49,8 +50,8 @@ android {
   }
 
   compileOptions {
-    setSourceCompatibility(JavaVersion.VERSION_1_8)
-    setTargetCompatibility(JavaVersion.VERSION_1_8)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
   }
 
   lintOptions {
@@ -76,7 +77,7 @@ android {
 }
 
 tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
+  kotlinOptions.jvmTarget = javaVersion.toString()
 }
 
 tasks.withType<Test> {
@@ -88,26 +89,26 @@ tasks.withType<Test> {
 }
 
 dependencies {
-  implementation(Libs.kotlinStdLib)
-  implementation(Libs.junitJupiterApi)
-  api(Libs.androidxTestCore)
+  implementation(libs.kotlinStdLib)
+  implementation(libs.junitJupiterApi)
+  api(libs.androidXTestCore)
   // This is required by the "instrumentation-runner" companion library,
   // since it can't provide any JUnit 5 runtime libraries itself
   // due to fear of prematurely incrementing the minSdkVersion requirement.
-  runtimeOnly(Libs.junitPlatformRunner)
-  runtimeOnly(Libs.junitJupiterEngine)
+  runtimeOnly(libs.junitPlatformRunner)
+  runtimeOnly(libs.junitJupiterEngine)
 
-  androidTestImplementation(Libs.junitJupiterApi)
-  androidTestImplementation(Libs.junitJupiterParams)
-  androidTestImplementation(Libs.espressoCore)
+  androidTestImplementation(libs.junitJupiterApi)
+  androidTestImplementation(libs.junitJupiterParams)
+  androidTestImplementation(libs.espressoCore)
   androidTestRuntimeOnly(project(":runner"))
-  androidTestRuntimeOnly(Libs.junitJupiterEngine)
+  androidTestRuntimeOnly(libs.junitJupiterEngine)
 
-  testImplementation(Libs.junitJupiterApi)
-  testImplementation(Libs.mockitoCore)
-  testImplementation(Libs.mockitoKotlin)
-  testImplementation(Libs.truth)
-  testImplementation(Libs.truthJava8Extensions)
+  testImplementation(libs.junitJupiterApi)
+  testImplementation(libs.mockitoCore)
+  testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.truth)
+  testImplementation(libs.truthJava8Extensions)
 }
 
 apply(from = "${rootDir.parentFile}/deployment.gradle")

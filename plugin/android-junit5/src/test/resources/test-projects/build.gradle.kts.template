@@ -41,7 +41,7 @@ if (version != "${androidGradlePluginVersion}") {
 
 repositories {
   google()
-  jcenter()
+  mavenCentral()
 }
 
 android {

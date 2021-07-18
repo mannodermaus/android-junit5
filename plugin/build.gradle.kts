@@ -23,6 +23,12 @@ subprojects {
         google()
         mavenCentral()
         sonatypeSnapshots()
+        jcenter {
+            mavenContent {
+                // Korte 1.x is not on Maven Central
+                includeGroup("com.soywiz.korlibs.korte")
+            }
+        }
     }
 
     // Configure publishing (if the project is eligible for publication)
