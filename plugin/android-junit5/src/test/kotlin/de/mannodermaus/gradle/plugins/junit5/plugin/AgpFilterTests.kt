@@ -97,7 +97,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
                 dynamicTest("apply freeDebug filters correctly") {
                     val task = project.tasks.get<Test>("testFreeDebugUnitTest")
                     assertThat(task.junitPlatformOptions.includeTags)
-                            .containsAllOf("global-include-tag", "freeDebug-include-tag")
+                            .containsAtLeast("global-include-tag", "freeDebug-include-tag")
                     assertThat(task.junitPlatformOptions.includeTags)
                             .doesNotContain("paidRelease-include-tag")
                     assertThat(task.junitPlatformOptions.excludeTags)
@@ -155,7 +155,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
                 dynamicTest("apply paidRelease filters correctly") {
                     val task = project.tasks.get<Test>("testPaidReleaseUnitTest")
                     assertThat(task.junitPlatformOptions.includeTags)
-                            .containsAllOf("global-include-tag",
+                            .containsAtLeast("global-include-tag",
                                     "global-exclude-tag",
                                     "paidRelease-include-tag")
                     assertThat(task.junitPlatformOptions.includeTags)
@@ -167,7 +167,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
                             .contains("paid-include-engine")
 
                     assertThat(task.includes)
-                            .containsAllOf("com.example.paid", "com.example.paid.release")
+                            .containsAtLeast("com.example.paid", "com.example.paid.release")
                     assertThat(task.includes).doesNotContain("com.example.package1")
                     assertThat(task.excludes).contains("com.example.package1")
                 }
@@ -211,13 +211,13 @@ interface AgpFilterTests : AgpVariantAwareTests {
                     assertThat(task.junitPlatformOptions.excludeEngines).contains("debug-exclude-engine")
 
                     assertThat(task.includes).doesNotContain("pattern123")
-                    assertThat(task.excludes).containsAllOf("pattern123", "debug-pattern")
+                    assertThat(task.excludes).containsAtLeast("pattern123", "debug-pattern")
                 },
 
                 dynamicTest("apply release filters correctly") {
                     val task = project.tasks.get<Test>("testReleaseUnitTest")
-                    assertThat(task.junitPlatformOptions.includeTags).containsAllOf("global-include-tag",
-                            "rel-include-tag")
+                    assertThat(task.junitPlatformOptions.includeTags)
+                            .containsAtLeast("global-include-tag", "rel-include-tag")
                     assertThat(task.junitPlatformOptions.excludeTags).doesNotContain("debug-exclude-tag")
 
                     assertThat(task.junitPlatformOptions.includeEngines).contains("rel-include-engine")
@@ -227,7 +227,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
                     assertThat(task.junitPlatformOptions.excludeEngines).doesNotContain(
                             "debug-exclude-engine")
 
-                    assertThat(task.includes).containsAllOf("pattern123", "release-pattern")
+                    assertThat(task.includes).containsAtLeast("pattern123", "release-pattern")
                     assertThat(task.excludes).doesNotContain("pattern123")
                 }
         )

@@ -80,8 +80,8 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
 
         assertAll(
                 "Mismatch! Actual dirs: $sourceDirs",
-                { assertThat(mainDir).named("main").isNotNull() },
-                { assertThat(typeDir).named(buildType).isNotNull() }
+                { assertWithMessage("main").that(mainDir).isNotNull() },
+                { assertWithMessage(buildType).that(typeDir).isNotNull() }
         )
     }
 
