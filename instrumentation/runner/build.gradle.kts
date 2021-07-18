@@ -90,7 +90,6 @@ configurations.all {
 dependencies {
   implementation(libs.androidXTestMonitor)
   implementation(libs.kotlinStdLib)
-  implementation(libs.kotlinReflect)
   implementation(libs.junit4)
 
   // This module's JUnit 5 dependencies cannot be present on the runtime classpath,

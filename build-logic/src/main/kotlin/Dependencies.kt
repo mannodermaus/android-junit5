@@ -6,7 +6,7 @@ object libs {
         const val junitJupiter = "5.7.2"
         const val junitPlatform = "1.7.2"
         const val truth = "1.1.3"
-        const val androidXTest = "1.2.0"
+        const val androidXTest = "1.4.0"
     }
 
     object plugins {
@@ -21,7 +21,6 @@ object libs {
 
     // Libraries
     const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
-    const val kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
     const val javaSemver = "com.github.zafarkhaja:java-semver:0.9.0"
 
     const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitJupiter}"
@@ -42,5 +41,5 @@ object libs {
     const val androidXTestCore = "androidx.test:core:${versions.androidXTest}"
     const val androidXTestRunner = "androidx.test:runner:${versions.androidXTest}"
     const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTest}"
-    const val espressoCore = "androidx.test.espresso:espresso-core:3.2.0"
+    const val espressoCore = "androidx.test.espresso:espresso-core:3.4.0"
 }
