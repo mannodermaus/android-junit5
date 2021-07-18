@@ -8,5 +8,4 @@ import de.mannodermaus.gradle.plugins.junit5.util.projects.PluginSpecProjectCrea
  */
 class AndroidAppProjectTests : AbstractProjectTests(Builder::asAndroidApplication)
 class AndroidLibraryProjectTests : AbstractProjectTests(Builder::asAndroidLibrary)
-class AndroidFeatureProjectTests : AbstractProjectTests(Builder::asAndroidFeature)
 class AndroidDynamicFeatureProjectTests : AbstractProjectTests(Builder::asAndroidDynamicFeature)
