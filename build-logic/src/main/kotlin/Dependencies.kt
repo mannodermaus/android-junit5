@@ -5,7 +5,6 @@ object libs {
         const val kotlin = "1.3.72"
         const val junitJupiter = "5.7.2"
         const val junitPlatform = "1.7.2"
-        const val spek = "1.2.1"
     }
 
     object plugins {
@@ -32,6 +31,4 @@ object libs {
     const val konfToml = "com.uchuhimo:konf-toml:0.22.1"
     const val mockitoCore = "org.mockito:mockito-core:2.19.0"
     const val truth = "com.google.truth:truth:0.43"
-    const val spekApi = "org.jetbrains.spek:spek-api:${versions.spek}"
-    const val spekEngine = "org.jetbrains.spek:spek-junit-platform-engine:${versions.spek}"
 }

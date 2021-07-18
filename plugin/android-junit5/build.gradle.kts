@@ -94,12 +94,9 @@ dependencies {
         // Incompatibility with AGP pulling in older version
         exclude(group = "com.google.guava", module = "guava")
     }
-  testImplementation(libs.junitJupiterApi)
-  testImplementation(libs.junitJupiterParams)
-  testRuntimeOnly(libs.junitJupiterEngine)
-
-  testImplementation(libs.spekApi)
-  testRuntimeOnly(libs.spekEngine)
+    testImplementation(libs.junitJupiterApi)
+    testImplementation(libs.junitJupiterParams)
+    testRuntimeOnly(libs.junitJupiterEngine)
 }
 
 apply(from = "${rootDir.parentFile}/deployment.gradle")
