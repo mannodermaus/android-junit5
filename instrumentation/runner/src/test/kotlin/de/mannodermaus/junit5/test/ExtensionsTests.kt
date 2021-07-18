@@ -3,6 +3,7 @@
 package de.mannodermaus.junit5.test
 
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.junit5.AndroidJUnit5
 import de.mannodermaus.junit5.AndroidJUnit5RunnerParams
 import de.mannodermaus.junit5.jupiterTestMethods
@@ -38,8 +39,8 @@ class ExtensionsTests {
       )
       AndroidJUnit5(klass, params).run(notifier)
 
-      assertThat(listener.count())
-          .named("Executed ${listener.count()} instead of $expectExecutedTests tests: '${listener.methodNames()}'")
+      assertWithMessage("Executed ${listener.count()} instead of $expectExecutedTests tests: '${listener.methodNames()}'")
+          .that(listener.count())
           .isEqualTo(expectExecutedTests)
     }
   }
@@ -61,8 +62,8 @@ class ExtensionsTests {
     )
     AndroidJUnit5(klass, params).run(notifier)
 
-    assertThat(listener.count())
-        .named("Executed ${listener.count()} instead of 0 tests: '${listener.methodNames()}'")
+    assertWithMessage("Executed ${listener.count()} instead of 0 tests: '${listener.methodNames()}'")
+        .that(listener.count())
         .isEqualTo(0)
   }
 

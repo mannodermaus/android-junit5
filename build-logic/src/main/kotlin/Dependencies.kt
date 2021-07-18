@@ -5,7 +5,7 @@ object libs {
         const val kotlin = "1.3.72"
         const val junitJupiter = "5.7.2"
         const val junitPlatform = "1.7.2"
-        const val truth = "0.43"
+        const val truth = "1.1.3"
         const val androidXTest = "1.2.0"
     }
 

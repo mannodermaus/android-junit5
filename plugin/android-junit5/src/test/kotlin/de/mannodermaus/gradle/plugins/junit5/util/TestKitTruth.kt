@@ -7,51 +7,69 @@ import org.gradle.testkit.runner.TaskOutcome
 
 /* Methods */
 
-fun assertThat(actual: BuildResult): BuildResultSubject = Truth.assertAbout(::BuildResultSubject).that(actual)
+fun assertThat(actual: BuildResult): BuildResultSubject =
+        Truth.assertAbout(::BuildResultSubject).that(actual)
 
 /* Types */
 
-class BuildResultSubject(metadata: FailureMetadata, actual: BuildResult) : Subject<BuildResultSubject, BuildResult>(metadata, actual) {
+class BuildResultSubject(
+        metadata: FailureMetadata,
+        private val actual: BuildResult
+) : Subject(metadata, actual) {
 
-  fun task(name: String): BuildTaskSubject = check().about(::BuildTaskSubject).that(actual().task(name))
+    fun task(name: String): BuildTaskSubject = check("task()")
+            .about(::BuildTaskSubject)
+            .that(actual.task(name))
 
-  fun output(): BuildResultOutputSubject = check().about(::BuildResultOutputSubject).that(actual().output) as BuildResultOutputSubject
+    fun output(): BuildResultOutputSubject = check("output()")
+            .about(::BuildResultOutputSubject)
+            .that(actual.output)
 }
 
-class BuildTaskSubject(metadata: FailureMetadata, actual: BuildTask) : Subject<BuildTaskSubject, BuildTask>(metadata, actual) {
+class BuildTaskSubject(
+        metadata: FailureMetadata,
+        private val actual: BuildTask
+) : Subject(metadata, actual) {
 
-  fun hasOutcome(expected: TaskOutcome) = check().that(actual().outcome).isEqualTo(expected)
+    fun hasOutcome(expected: TaskOutcome) = check("hasOutcome()")
+            .that(actual.outcome)
+            .isEqualTo(expected)
 }
 
-class BuildResultOutputSubject(metadata: FailureMetadata, actual: String) : StringSubject(metadata, actual) {
+class BuildResultOutputSubject(
+        metadata: FailureMetadata,
+        private val actual: String
+) : StringSubject(metadata, actual) {
 
-  fun ofTask(name: String): BuildTaskOutputSubject {
-    val actual = actual()
-    val startIndex = actual.indexOf("> Task $name")
-    if (startIndex == -1) {
-      failWithActual(Fact.simpleFact("Task $name was not executed"))
+    fun ofTask(name: String): BuildTaskOutputSubject {
+        val startIndex = actual.indexOf("> Task $name")
+        if (startIndex == -1) {
+            failWithActual(Fact.simpleFact("Task $name was not executed"))
+        }
+
+        var endIndex = actual.indexOf("> Task", startIndex + 1)
+        if (endIndex == -1) {
+            endIndex = actual.length - 1
+        }
+
+        val strippedOutput = actual.substring(startIndex, endIndex)
+        return check("ofTask()")
+                .about(::BuildTaskOutputSubject)
+                .that(strippedOutput)
     }
-
-    var endIndex = actual.indexOf("> Task", startIndex + 1)
-    if (endIndex == -1) {
-      endIndex = actual.length - 1
-    }
-
-    val strippedOutput = actual.substring(startIndex, endIndex)
-    return check().about(::BuildTaskOutputSubject).that(strippedOutput) as BuildTaskOutputSubject
-  }
 }
 
-class BuildTaskOutputSubject(metadata: FailureMetadata, actual: String) : StringSubject(metadata, actual) {
+class BuildTaskOutputSubject(
+        metadata: FailureMetadata,
+        private val actual: String
+) : StringSubject(metadata, actual) {
 
-  fun executedTestCount(): IntegerSubject {
-    val actual = actual()
+    fun executedTestCount(): IntegerSubject {
+        // Subtract 1 from the total count because the task name is also preceded by ">"
+        val actualCount = actual.count { it == '>' } - 1
 
-    // Subtract 1 from the total count because the task name is also preceded by ">"
-    val actualCount = actual.count { it == '>' } - 1
-
-    return check()
-        .withMessage("actual test count: $actualCount. full task output: $actual")
-        .that(actualCount)
-  }
+        return check("executedTestCount()")
+                .withMessage("actual test count: $actualCount. full task output: $actual")
+                .that(actualCount)
+    }
 }
