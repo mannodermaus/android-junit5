@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.api.function.Executable
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 
 class ExampleKotlinTest {
@@ -97,7 +98,7 @@ class ExampleKotlinTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = arrayOf("Android's Cool!", "JUnit 5 as well", "Acknowledgement"))
+  @ValueSource(strings = ["Android's Cool!", "JUnit 5 as well", "Acknowledgement"])
   internal fun parameterizedTest(value: String) {
     assertAll(
         Executable { assertNotNull(value) },

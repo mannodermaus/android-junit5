@@ -4,17 +4,16 @@ buildscript {
   repositories {
     google()
     mavenCentral()
-    jcenter()
     jitpack()
     gradlePluginPortal()
   }
   dependencies {
-    classpath(Plugins.kotlin)
-    classpath(Plugins.android.dependency)
-    classpath(Plugins.versions)
-    classpath(Plugins.dokkaCore)
-    classpath(Plugins.nexusStaging)
-    classpath(Plugins.nexusPublishing)
+    classpath(libs.plugins.kotlin)
+    classpath(libs.plugins.android)
+    classpath(libs.plugins.versions)
+    classpath(libs.plugins.dokka)
+    classpath(libs.plugins.nexusStaging)
+    classpath(libs.plugins.nexusPublishing)
   }
 }
 
@@ -22,7 +21,6 @@ subprojects {
   repositories {
     google()
     mavenCentral()
-    jcenter()
     sonatypeSnapshots()
   }
 
@@ -34,7 +32,7 @@ fun Project.configureDeployConfig() {
   // ------------------------------------------------------------------------------------------------
   // Deployment Setup
   //
-  // Releases are pushed to JCenter via Bintray, while snapshots are pushed to Sonatype OSS.
+  // Releases are pushed to Maven Central, while snapshots are pushed to Sonatype OSS.
   // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
   // ------------------------------------------------------------------------------------------------
   val configuration = Artifacts.from(this) ?: return
