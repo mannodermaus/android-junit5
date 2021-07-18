@@ -31,7 +31,7 @@ object libs {
 
     // Testing
     const val junit4 = "junit:junit:4.13.2"
-    const val korte = "com.soywiz.korlibs.korte:korte:1.10.15" // TODO After raise to 2.x, remove jcenter()
+    const val korte = "com.soywiz.korlibs.korte:korte:2.2.0"
     const val konfToml = "com.uchuhimo:konf-toml:1.1.2"
     const val mockitoCore = "org.mockito:mockito-core:3.11.1"
     const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"

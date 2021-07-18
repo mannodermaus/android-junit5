@@ -24,12 +24,6 @@ allprojects {
         google()
         mavenCentral()
         sonatypeSnapshots()
-        jcenter {
-            mavenContent {
-                // Korte 1.x is not on Maven Central
-                includeGroup("com.soywiz.korlibs.korte")
-            }
-        }
     }
 
     configurations.all {
