@@ -7,7 +7,7 @@ defaults: &defaults
         GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
 
 cache_key: &cache_key
-  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "buildSrc/src/main/kotlin/Artifacts.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Dependencies.kt" }}
+  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
 
 commands:
   construct_signing_key:
@@ -80,7 +80,7 @@ jobs:
               --test instrumentation/core/build/outputs/apk/androidTest/debug/core-debug-androidTest.apk \
               --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
               --test-runner-class androidx.test.runner.AndroidJUnitRunner \
-              --device model=sailfish,version=28,locale=en_US,orientation=portrait \
+              --device model=blueline,version=28,locale=en_US,orientation=portrait \
               --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
               --timeout 15m
       - run:
