@@ -1,11 +1,12 @@
 apply(plugin = "io.codearte.nexus-staging")
+apply(plugin = "com.github.ben-manes.versions")
 
 buildscript {
     repositories {
         google()
         mavenCentral()
-        jitpack()
         gradlePluginPortal()
+        jitpack()
     }
 
     dependencies {

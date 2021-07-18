@@ -4,8 +4,8 @@ buildscript {
   repositories {
     google()
     mavenCentral()
-    jitpack()
     gradlePluginPortal()
+    jitpack()
   }
   dependencies {
     classpath(libs.plugins.kotlin)
