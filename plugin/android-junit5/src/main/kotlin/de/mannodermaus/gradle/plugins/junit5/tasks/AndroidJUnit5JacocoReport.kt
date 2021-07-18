@@ -17,7 +17,7 @@ import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import java.io.File
 
-private const val TASK_NAME_DEFAULT = "jacocoTestReport"
+const val JACOCO_TASK_NAME = "jacocoTestReport"
 private const val GROUP_REPORTING = "reporting"
 
 /**
@@ -55,8 +55,8 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
     }
 
     private fun findOrRegisterDefaultJacocoTask(project: Project): TaskProvider<Task> =
-      project.tasks.namedOrNull(TASK_NAME_DEFAULT)
-        ?: project.tasks.register(TASK_NAME_DEFAULT) { task ->
+      project.tasks.namedOrNull(JACOCO_TASK_NAME)
+        ?: project.tasks.register(JACOCO_TASK_NAME) { task ->
           task.group = GROUP_REPORTING
         }
   }
@@ -71,7 +71,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
     private val directoryProviders: Collection<DirectoryProvider>
   ) {
 
-    val name: String = variant.getTaskName(prefix = TASK_NAME_DEFAULT)
+    val name: String = variant.getTaskName(prefix = JACOCO_TASK_NAME)
 
     val type = AndroidJUnit5JacocoReport::class.java
 
