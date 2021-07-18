@@ -8,7 +8,7 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
 enum class Type {
-  Unset, Application, Library, Feature, DynamicFeature
+  Unset, Application, Library, DynamicFeature
 }
 
 /**
@@ -52,8 +52,6 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
     fun asAndroidApplication() = setProjectTypeIfUnsetTo(Type.Application)
 
-    fun asAndroidFeature() = setProjectTypeIfUnsetTo(Type.Feature)
-
     fun asAndroidDynamicFeature() = setProjectTypeIfUnsetTo(Type.DynamicFeature)
 
     fun asAndroidLibrary() = setProjectTypeIfUnsetTo(Type.Library)
@@ -83,7 +81,6 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
       // Apply required plugins
       val pluginName = when (projectType) {
         Type.Application -> "com.android.application"
-        Type.Feature -> "com.android.feature"
         Type.DynamicFeature -> "com.android.dynamic-feature"
         Type.Library -> "com.android.library"
         else -> null
