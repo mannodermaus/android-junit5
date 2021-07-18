@@ -2,6 +2,7 @@ import groovy.lang.Closure
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 import java.io.File
@@ -39,6 +40,7 @@ fun Project.configureTestResources() {
         )
 
         inputs.properties(tokens)
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
         // Apply test environment to a resource file
         val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer

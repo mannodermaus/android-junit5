@@ -50,7 +50,7 @@ class ExampleKotlinTest {
     }
     
     @JvmStatic
-    private fun getNames() = listOf("Alice" to "ALICE", "Bob" to "BOB", "Carol" to "CAROL")
+    fun getNames() = listOf("Alice" to "ALICE", "Bob" to "BOB", "Carol" to "CAROL")
   }
 
   @BeforeEach

@@ -2,7 +2,6 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.FeatureExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
@@ -46,14 +45,6 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
     }
   }
 
-  // Although there are "featureVariants" for modules applying the Feature plugin,
-  // there is no distinct per-feature test task per se.
-  // Therefore, we use the default library variants here
-  object Feature : Type<FeatureExtension>("com.android.feature") {
-    override fun variants(extension: FeatureExtension): DomainObjectSet<LibraryVariant> =
-        extension.libraryVariants
-  }
-
   object DynamicFeature : Type<AppExtension>("com.android.dynamic-feature") {
     override fun variants(extension: AppExtension): DomainObjectSet<ApplicationVariant> =
         extension.applicationVariants
@@ -61,7 +52,7 @@ private sealed class Type<in T : BaseExtension>(val pluginId: String) {
 }
 
 private val allTypes: List<Type<*>> =
-    listOf(Application, Library, Feature, DynamicFeature)
+    listOf(Application, Library, DynamicFeature)
 
 @Suppress("UNCHECKED_CAST")
 private fun findType(project: Project): Type<BaseExtension> {

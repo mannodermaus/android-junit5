@@ -2,7 +2,7 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.3.72"
+        const val kotlin = "1.5.21"
         const val junitJupiter = "5.7.2"
         const val junitPlatform = "1.7.2"
         const val truth = "1.1.3"
@@ -14,7 +14,7 @@ object libs {
         const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
         const val versions = "com.github.ben-manes:gradle-versions-plugin:0.39.0"
         const val shadow = "com.github.jengelman.gradle.plugins:shadow:6.1.0"
-        const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.4.20"
+        const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.0"
         const val nexusStaging = "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
         const val nexusPublishing = "de.marcphilipp.gradle:nexus-publish-plugin:0.4.0"
     }
@@ -32,7 +32,7 @@ object libs {
     // Testing
     const val junit4 = "junit:junit:4.13.2"
     const val korte = "com.soywiz.korlibs.korte:korte:1.10.15" // TODO After raise to 2.x, remove jcenter()
-    const val konfToml = "com.uchuhimo:konf-toml:0.22.1"
+    const val konfToml = "com.uchuhimo:konf-toml:1.1.2"
     const val mockitoCore = "org.mockito:mockito-core:3.11.1"
     const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     const val truth = "com.google.truth:truth:${versions.truth}"
