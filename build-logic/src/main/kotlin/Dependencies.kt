@@ -31,11 +31,11 @@ object libs {
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
 
     // Testing
-    const val junit4 = "junit:junit:4.13"
+    const val junit4 = "junit:junit:4.13.2"
     const val korte = "com.soywiz.korlibs.korte:korte:1.10.15" // TODO After raise to 2.x, remove jcenter()
     const val konfToml = "com.uchuhimo:konf-toml:0.22.1"
-    const val mockitoCore = "org.mockito:mockito-core:2.19.0"
-    const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+    const val mockitoCore = "org.mockito:mockito-core:3.11.1"
+    const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     const val truth = "com.google.truth:truth:${versions.truth}"
     const val truthJava8Extensions = "com.google.truth.extensions:truth-java8-extension:${versions.truth}"
 

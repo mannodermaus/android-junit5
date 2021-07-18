@@ -89,7 +89,6 @@ dependencies {
     testImplementation(libs.plugins.android)
     testImplementation(libs.korte)
     testImplementation(libs.konfToml)
-    testImplementation(libs.mockitoCore)
     testImplementation(libs.truth) {
         // Incompatibility with AGP pulling in older version
         exclude(group = "com.google.guava", module = "guava")
