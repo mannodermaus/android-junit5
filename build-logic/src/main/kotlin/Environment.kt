@@ -29,25 +29,6 @@ enum class SupportedAgp(
     val configurationName = "testAgp${shortVersion.replace(".", "")}x"
 }
 
-//class SupportedAgp(val version: String, val requiresGradle: String? = null) {
-//
-//  val shortVersion: String = run {
-//    // Extract first two components of the Maven dependency's version string.
-//    val components = dependency.substringAfterLast(":").split('.')
-//    if (components.size < 2) {
-//      throw IllegalArgumentException("Cannot derive AGP configuration name from: $this")
-//    }
-//
-//    "${components[0]}.${components[1]}"
-//  }
-//
-//  // Derive the Gradle configuration name from that
-//  // (Example: version = "3.2.0" --> configurationName = "testAgp32x")
-//  val configurationName = "testAgp${shortVersion.replace(".", "")}x"
-//
-//  override fun toString() = dependency
-//}
-
 object Android {
     const val buildToolsVersion = "28.0.3"
     const val compileSdkVersion = "android-28"

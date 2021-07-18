@@ -12,7 +12,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-private const val TASK_NAME_DEFAULT = "writeFilters"
+const val WRITE_FILTERS_TASK_NAME = "writeFilters"
 
 /**
  * Helper task for instrumentation tests.
@@ -97,7 +97,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
     private val outputFolder: File
   ) {
 
-    val name: String = instrumentationTestVariant.getTaskName(prefix = TASK_NAME_DEFAULT)
+    val name: String = instrumentationTestVariant.getTaskName(prefix = WRITE_FILTERS_TASK_NAME)
 
     val type = AndroidJUnit5WriteFilters::class.java
 
