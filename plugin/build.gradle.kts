@@ -19,7 +19,7 @@ buildscript {
     }
 }
 
-subprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
@@ -28,6 +28,14 @@ subprojects {
             mavenContent {
                 // Korte 1.x is not on Maven Central
                 includeGroup("com.soywiz.korlibs.korte")
+            }
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin") {
+                useVersion(libs.versions.kotlin)
             }
         }
     }
