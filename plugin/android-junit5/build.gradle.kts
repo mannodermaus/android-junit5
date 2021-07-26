@@ -35,13 +35,8 @@ project.fixCompileTaskChain()
 val pluginClassName = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
 
 gradlePlugin {
-    isAutomatedPublishing = false
     plugins {
-        register("shortIdentifier") {
-            id = "android-junit5"
-            implementationClass = pluginClassName
-        }
-        register("longIdentifier") {
+        create("plugin") {
             id = "de.mannodermaus.android-junit5"
             implementationClass = pluginClassName
         }
