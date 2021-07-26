@@ -3,6 +3,15 @@ Change Log
 
 ## Unreleased
 
+#### Added
+- JUnit 5.8.0
+- New Plugin Marker artifact facilitating usage of the plugin through the `plugins {}` DSL
+
+#### Removed
+- Support for Android Gradle Plugins 3.x
+- Support for the deprecated com.android.feature plugin, which was removed in Android Gradle Plugin 4.x
+- The shorthand version for applying the plugin through the `android-junit5` ID has been removed. Going forward, please apply the Android JUnit 5 plugin through the long form: `de.mannodermaus.android-junit5` 
+
 ## 1.7.1.1 (2021-02-11)
 
 This release is identical to 1.7.1.0, but fixes an incorrect entry in the POM file, making the previous version unusable.
