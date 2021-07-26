@@ -110,4 +110,4 @@ dependencies {
   testRuntimeOnly(libs.junitJupiterEngine)
 }
 
-apply(from = "${rootDir.parentFile}/deployment.gradle")
+project.configureDeployment(Artifacts.Instrumentation.Runner)

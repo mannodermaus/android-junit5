@@ -111,4 +111,4 @@ dependencies {
   testImplementation(libs.truthJava8Extensions)
 }
 
-apply(from = "${rootDir.parentFile}/deployment.gradle")
+project.configureDeployment(Artifacts.Instrumentation.Core)
