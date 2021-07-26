@@ -22,7 +22,12 @@ class VersionCheckerTests {
             "3.4.0, false",
             "3.5.0-alpha13, false",
             "3.3.0, false",
-            "4.0.0-alpha01, true"
+            "4.0.0-alpha01, false",
+            "4.0.0, true",
+            "4.0.1, true",
+            "4.1.0, true",
+            "7.0.0, true",
+            "7.1.0, true",
     )
     @ParameterizedTest
     fun `check AGP compatibility`(version: String, compatible: Boolean) {
