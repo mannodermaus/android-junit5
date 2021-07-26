@@ -151,6 +151,7 @@ private fun MavenPublication.applyPublicationDetails(
     artifactId = deployConfig.artifactId
     version = deployConfig.currentVersion
 
+    artifacts.clear()
     if (isAndroid) {
         artifact("${project.buildDir}/outputs/aar/${project.name}-release.aar")
     } else {

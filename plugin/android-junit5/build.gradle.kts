@@ -19,9 +19,13 @@ plugins {
 //
 // The other way around ("call Kotlin from Groovy") is prohibited explicitly.
 // ------------------------------------------------------------------------------------------------
-val javaVersion = JavaVersion.VERSION_1_8
+val javaVersion = JavaVersion.VERSION_1_8.toString()
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = javaVersion.toString()
+    kotlinOptions.jvmTarget = javaVersion
+}
+tasks.withType<JavaCompile> {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
 }
 
 project.fixCompileTaskChain()
