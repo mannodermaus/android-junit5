@@ -56,7 +56,7 @@ public final class AndroidJUnit5 extends Runner {
   public AndroidJUnit5(Class<?> testClass, AndroidJUnit5RunnerParams params) {
     this.testClass = testClass;
     this.runnerParams = params;
-    this.testTree = generateTestTree(params.createDiscoveryRequest());
+    this.testTree = generateTestTree(params);
   }
 
   public AndroidJUnit5(Class<?> testClass) {
@@ -148,8 +148,9 @@ public final class AndroidJUnit5 extends Runner {
     });
   }
 
-  private AndroidJUnitPlatformTestTree generateTestTree(LauncherDiscoveryRequest discoveryRequest) {
+  private AndroidJUnitPlatformTestTree generateTestTree(AndroidJUnit5RunnerParams params) {
+    LauncherDiscoveryRequest discoveryRequest = params.createDiscoveryRequest();
     TestPlan testPlan = launcher.discover(discoveryRequest);
-    return new AndroidJUnitPlatformTestTree(testPlan, testClass);
+    return new AndroidJUnitPlatformTestTree(testPlan, testClass, params.isIsolatedMethodRun());
   }
 }

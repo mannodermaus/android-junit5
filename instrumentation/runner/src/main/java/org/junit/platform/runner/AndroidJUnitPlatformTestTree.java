@@ -41,8 +41,12 @@ public final class AndroidJUnitPlatformTestTree {
   private final ModifiedTestPlan testPlan;
   private final Function<TestIdentifier, String> nameExtractor;
   private final Description suiteDescription;
+  private final boolean isIsolatedMethodRun;
 
-  public AndroidJUnitPlatformTestTree(TestPlan testPlan, Class<?> testClass) {
+  public AndroidJUnitPlatformTestTree(TestPlan testPlan, Class<?> testClass, boolean isIsolatedMethodRun) {
+    // Must be set first, as other methods in this constructor will access the field already
+    this.isIsolatedMethodRun = isIsolatedMethodRun;
+
     this.testPlan = new ModifiedTestPlan(testPlan);
     this.nameExtractor = this::getTestName;
     this.suiteDescription = generateSuiteDescription(testPlan, testClass);
@@ -75,6 +79,19 @@ public final class AndroidJUnitPlatformTestTree {
   }
 
   private String formatTestName(TestIdentifier identifier) {
+    // During isolated executions, construct a technical version of the test name
+    // for backwards compatibility with the JUnit 4-based instrumentation of Android,
+    // stripping the brackets and parameters completely.
+    // If we didn't, then running them from the IDE doesn't work for @Test methods with parameters
+    // (See AndroidX's TestRequestBuilder$MethodFilter for where this is cross-referenced).
+    if (isIsolatedMethodRun) {
+      String reportName = identifier.getLegacyReportingName();
+      int bracketIndex = reportName.indexOf('(');
+      if (bracketIndex > -1) {
+        return reportName.substring(0, bracketIndex);
+      }
+    }
+
     return identifier.getDisplayName().replace("()", "");
   }
 

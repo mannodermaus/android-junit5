@@ -6,6 +6,10 @@ Change Log
 #### Added
 #### Changed
 #### Fixed
+- Running an individual test method with parameters will properly execute that test, even from the IDE (#199)
+  (Note: Due to limitations with Android's instrumentation, this test would be reported without its parameters in the report)
+- Running an individual test method with @DisplayName will properly execute that test, even from the IDE (#207)
+  (Note: Due to limitations with Android's instrumentation, this test would be reported with its technical method name instead of the display name when executed in isolation)
 #### Removed
 
 ## 1.2.2 (2021-03-02)
