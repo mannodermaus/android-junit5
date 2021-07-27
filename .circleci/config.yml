@@ -17,7 +17,7 @@ commands:
 
 version: 2.1
 jobs:
-  build_plugin:
+  build:
     <<: *defaults
     steps:
       - checkout
@@ -31,28 +31,9 @@ jobs:
           name: (Plugin) Test
           command: cd plugin && ./gradlew :android-junit5:check --stacktrace --no-daemon
 
-      - persist_to_workspace:
-          root: ~/root
-          paths:
-            - project/plugin
-      - store_artifacts:
-          path: plugin/android-junit5/build/reports/tests/test
-          destination: plugin
-
-  build_instrumentation:
-    <<: *defaults
-    steps:
-      - checkout
-      - restore_cache:
-          <<: *cache_key
       - run:
           name: (Instrumentation) Download Dependencies
           command: cd instrumentation && ./gradlew androidDependencies --no-daemon
-      - save_cache:
-          <<: *cache_key
-          paths:
-            - ~/.gradle/caches
-            - ~/.gradle/wrapper
       - run:
           name: (Instrumentation) Build
           command: |
@@ -63,6 +44,13 @@ jobs:
       - run:
           name: (Instrumentation) Test
           command: cd instrumentation && ./gradlew :core:check :runner:check --stacktrace --no-daemon
+
+      - save_cache:
+          <<: *cache_key
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+
       - run:
           name: Store Google Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
@@ -71,6 +59,7 @@ jobs:
           command: |
             sudo gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             sudo gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+
       - run:
           name: Test with Firebase Test Lab
           command: >
@@ -93,7 +82,10 @@ jobs:
       - persist_to_workspace:
           root: ~/root
           paths:
-            - project/instrumentation
+            - project
+      - store_artifacts:
+          path: plugin/android-junit5/build/reports/tests/test
+          destination: plugin
       - store_artifacts:
           path: instrumentation/core/build/reports
           destination: instrumentation-core
@@ -133,12 +125,10 @@ workflows:
 
   build_deploy:
     jobs:
-      - build_plugin
-      - build_instrumentation
+      - build
       - deploy:
           requires:
-            - build_plugin
-            - build_instrumentation
+            - build
           filters:
             branches:
               only: main
