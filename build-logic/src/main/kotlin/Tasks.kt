@@ -1,10 +1,8 @@
-import groovy.lang.Closure
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.DependencyHandlerScope
 import java.io.File
 
 fun Project.configureTestResources() {
@@ -34,7 +32,7 @@ fun Project.configureTestResources() {
                 // |___> Short: "3.6"
                 //       Full: "3.6.3"
                 //       Gradle Requirement: "6.4"
-                "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator=";") { plugin ->
+                "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator = ";") { plugin ->
                     "${plugin.shortVersion}|${plugin.version}|${plugin.gradle ?: ""}"
                 }
         )
@@ -105,10 +103,18 @@ open class GenerateReadme : DefaultTask() {
 
     companion object {
         private val PLACEHOLDER_REGEX = Regex("\\\$\\{(.+)}")
-        private val EXTERNAL_DEP_REGEX = Regex("Libs\\.(.+)")
+        private val EXTERNAL_DEP_REGEX = Regex("libs\\.(.+)")
+        private val CONSTANT_REGEX = Regex("constants\\.(.+)")
 
         private const val PLUGIN_VERSION = "pluginVersion"
         private const val INSTRUMENTATION_VERSION = "instrumentationVersion"
+
+        private const val CONSTANTS_FILE = "android-junit5/src/main/kotlin/de/mannodermaus/gradle/plugins/junit5/Constants.kt"
+        private val CONSTANTS_FILE_REGEX = Regex("const val (.*) = \"(.*)\"")
+        private val CONSTANT_MAPPINGS = mapOf(
+                "minimumRequiredGradleVersion" to "MIN_REQUIRED_GRADLE_VERSION",
+                "minimumRequiredAgpVersion" to "MIN_REQUIRED_AGP_VERSION"
+        )
 
         private val GENERATED_HEADER_COMMENT = """
       <!--
@@ -129,13 +135,14 @@ open class GenerateReadme : DefaultTask() {
     @TaskAction
     fun doWork() {
         val templateText = inputTemplateFile.readText()
-        val replacedText = replacePlaceholdersInTemplate(templateText)
+        val constants = parseConstantsFile()
+        val replacedText = replacePlaceholdersInTemplate(templateText, constants)
         outputFile.writeText(replacedText)
     }
 
     /* Private */
 
-    private fun replacePlaceholdersInTemplate(templateText: String): String {
+    private fun replacePlaceholdersInTemplate(templateText: String, constants: Map<String, String>): String {
         // Apply placeholders in the template with data from Versions.kt & Environment.kt:
         // ${pluginVersion}             Artifacts.Plugin.currentVersion
         // ${instrumentationVersion}    Artifacts.Instrumentation.Core.currentVersion
@@ -151,13 +158,21 @@ open class GenerateReadme : DefaultTask() {
                 PLUGIN_VERSION -> Artifacts.Plugin.anyStableVersion
                 INSTRUMENTATION_VERSION -> Artifacts.Instrumentation.Core.anyStableVersion
                 else -> {
-                    val match2 = EXTERNAL_DEP_REGEX.find(placeholder)
-                            ?: throw InvalidPlaceholder(match)
-                    val externalDependency = match2.groups.last()?.value
-                            ?: throw InvalidPlaceholder(match2)
+                    val match2 = CONSTANT_REGEX.find(placeholder)
+                    if (match2 != null) {
+                        val key = match2.groups.last()?.value
+                        val constantKey = CONSTANT_MAPPINGS[key] ?: throw InvalidPlaceholder(match2)
+                        constants[constantKey] ?: throw InvalidPlaceholder(match2)
 
-                    val field = libs.javaClass.getField(externalDependency)
-                    field.get(null) as String
+                    } else {
+                        val match3 = EXTERNAL_DEP_REGEX.find(placeholder)
+                                ?: throw InvalidPlaceholder(match)
+                        val externalDependency = match3.groups.last()?.value
+                                ?: throw InvalidPlaceholder(match3)
+
+                        val field = libs.javaClass.getField(externalDependency)
+                        field.get(null) as String
+                    }
                 }
             }
 
@@ -170,6 +185,17 @@ open class GenerateReadme : DefaultTask() {
             replacedText = replacedText.replace(key, value)
         }
         return replacedText
+    }
+
+    private fun parseConstantsFile(): Map<String, String> {
+        val constants = mutableMapOf<String, String>()
+        val text = File(CONSTANTS_FILE).readText()
+
+        CONSTANTS_FILE_REGEX.findAll(text).forEach { match ->
+            constants[match.groups[1]!!.value] = match.groups[2]!!.value
+        }
+
+        return constants
     }
 }
 
