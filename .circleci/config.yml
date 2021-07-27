@@ -34,7 +34,7 @@ jobs:
       - persist_to_workspace:
           root: ~/root
           paths:
-            - project
+            - project/plugin
       - store_artifacts:
           path: plugin/android-junit5/build/reports/tests/test
           destination: plugin
@@ -93,7 +93,7 @@ jobs:
       - persist_to_workspace:
           root: ~/root
           paths:
-            - project
+            - project/instrumentation
       - store_artifacts:
           path: instrumentation/core/build/reports
           destination: instrumentation-core
