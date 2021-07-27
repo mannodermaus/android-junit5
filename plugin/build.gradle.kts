@@ -1,5 +1,7 @@
-apply(plugin = "io.codearte.nexus-staging")
-apply(plugin = "com.github.ben-manes.versions")
+plugins {
+    id("io.github.gradle-nexus.publish-plugin").version("1.1.0")
+    id("com.github.ben-manes.versions").version("0.39.0")
+}
 
 buildscript {
     repositories {
@@ -11,10 +13,7 @@ buildscript {
 
     dependencies {
         classpath(libs.plugins.kotlin)
-        classpath(libs.plugins.versions)
         classpath(libs.plugins.dokka)
-        classpath(libs.plugins.nexusStaging)
-        classpath(libs.plugins.nexusPublishing)
         classpath(libs.plugins.shadow)
     }
 }
@@ -33,9 +32,6 @@ allprojects {
             }
         }
     }
-
-    // Configure publishing (if the project is eligible for publication)
-    configureDeployConfig()
 }
 
 tasks.create<GenerateReadme>("generateReadme") {
@@ -54,16 +50,4 @@ tasks.create<GenerateReadme>("generateReadme") {
 
         rootFolder = rootFolder.parentFile
     }
-}
-
-fun Project.configureDeployConfig() {
-    // ------------------------------------------------------------------------------------------------
-    // Deployment Setup
-    //
-    // Releases and snapshots are pushed to Maven Central.
-    // This section defines the necessary tasks to push new releases and snapshots using Gradle tasks.
-    // ------------------------------------------------------------------------------------------------
-    val configuration = Artifacts.from(this) ?: return
-    ext["deployConfig"] = configuration
-    ext["deployCredentials"] = DeployedCredentials(this)
 }

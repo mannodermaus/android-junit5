@@ -104,7 +104,7 @@ jobs:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
 
-  deploy_plugin:
+  deploy:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -113,29 +113,14 @@ jobs:
           <<: *cache_key
       - construct_signing_key
       - run:
-          name: (Plugin) Build Artifacts
-          command: cd plugin && ./gradlew androidSourcesJar javadocJar
+          name: (Plugin) Build & Deploy
+          command: cd plugin && ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
       - run:
-          name: (Plugin) Deploy
-          command: cd plugin && ./gradlew deploy --max-workers 1 --stacktrace --no-daemon
+          name: (Instrumentation) Build & Deploy
+          command: cd instrumentation && ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
       - store_artifacts:
           path: plugin/android-junit5/build/publications
           destination: plugin/publications/snapshots
-
-  deploy_instrumentation:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/root
-      - restore_cache:
-          <<: *cache_key
-      - construct_signing_key
-      - run:
-          name: (Plugin) Build Artifacts
-          command: cd instrumentation && ./gradlew androidSourcesJar javadocJar
-      - run:
-          name: (Instrumentation) Deploy
-          command: cd instrumentation && ./gradlew deploy --max-workers 1 --stacktrace --no-daemon
       - store_artifacts:
           path: instrumentation/core/build/publications
           destination: instrumentation-core/publications/snapshots
@@ -150,14 +135,9 @@ workflows:
     jobs:
       - build_plugin
       - build_instrumentation
-      - deploy_plugin:
+      - deploy:
           requires:
             - build_plugin
-          filters:
-            branches:
-              only: main
-      - deploy_instrumentation:
-          requires:
             - build_instrumentation
           filters:
             branches:

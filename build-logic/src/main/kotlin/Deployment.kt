@@ -10,7 +10,6 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
@@ -19,14 +18,21 @@ import java.io.File
  * Configure deployment tasks and properties for a project using the provided [deployConfig].
  */
 fun Project.configureDeployment(deployConfig: Deployed) {
+    if (this == rootProject) {
+        throw IllegalStateException("This method can not be called on the root project")
+    }
+
     val credentials = DeployedCredentials(this)
 
-    val isSnapshot = version.toString().endsWith("SNAPSHOT")
+    // Configure root project (this only happens once
+    // and will raise an error on inconsistent data)
+    rootProject.configureRootDeployment(deployConfig, credentials)
+
     val isAndroid = plugins.findPlugin("com.android.library") != null
     val isGradlePlugin = plugins.hasPlugin("java-gradle-plugin")
 
     apply {
-        plugin("de.marcphilipp.nexus-publish")
+        plugin("maven-publish")
         plugin("signing")
         plugin("org.jetbrains.dokka")
     }
@@ -68,41 +74,23 @@ fun Project.configureDeployment(deployConfig: Deployed) {
                 all {
                     if (this is MavenPublication && name == "pluginMaven") {
                         applyPublicationDetails(
-                            project = this@configureDeployment,
-                            deployConfig = deployConfig,
-                            isAndroid = isAndroid,
-                            androidSourcesJar = androidSourcesJar,
-                            javadocJar = javadocJar
+                                project = this@configureDeployment,
+                                deployConfig = deployConfig,
+                                isAndroid = isAndroid,
+                                androidSourcesJar = androidSourcesJar,
+                                javadocJar = javadocJar
                         )
                     }
                 }
             } else {
                 create("release", MavenPublication::class.java)
-                    .applyPublicationDetails(
-                        project = this@configureDeployment,
-                        deployConfig = deployConfig,
-                        isAndroid = isAndroid,
-                        androidSourcesJar = androidSourcesJar,
-                        javadocJar = javadocJar
-                    )
-            }
-        }
-        repositories {
-            maven {
-                name = "central"
-
-                setUrl(
-                    if (isSnapshot) {
-                        "https://oss.sonatype.org/content/repositories/snapshots/"
-                    } else {
-                        "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                    }
-                )
-
-                credentials {
-                    username = credentials.ossrhUsername
-                    password = credentials.ossrhPassword
-                }
+                        .applyPublicationDetails(
+                                project = this@configureDeployment,
+                                deployConfig = deployConfig,
+                                isAndroid = isAndroid,
+                                androidSourcesJar = androidSourcesJar,
+                                javadocJar = javadocJar
+                        )
             }
         }
     }
@@ -114,38 +102,47 @@ fun Project.configureDeployment(deployConfig: Deployed) {
     signing {
         sign(publishing.publications)
     }
-
-    // Setup deployment
-    nexusStaging(
-        packageGroup = deployConfig.groupId,
-        stagingProfileId = credentials.sonatypeStagingProfileId,
-        username = credentials.ossrhUsername,
-        password = credentials.ossrhPassword
-    )
-
-    nexusPublishing(
-        sonatypeUsername = credentials.ossrhUsername,
-        sonatypePassword = credentials.ossrhPassword
-    )
-
-    // Catch-all deployment task for multiple modules
-    val deployTask = tasks.maybeCreate("deploy")
-    val publishTask = tasks.getByName("publishToSonatype")
-
-    deployTask.finalizedBy(publishTask)
-    if (!isSnapshot) {
-        publishTask.finalizedBy(":closeAndReleaseRepository")
-    }
 }
 
 /* Private */
 
+private fun Project.configureRootDeployment(deployConfig: Deployed, credentials: DeployedCredentials) {
+    if (this != rootProject) {
+        throw IllegalStateException("This method can only be called on the root project")
+    }
+
+    // Validate the integrity of published versions
+    // (all subprojects must use the same group ID and version number or else an error is raised)
+    if (version != "unspecified") {
+        if (version != deployConfig.currentVersion || group != deployConfig.groupId) {
+            throw IllegalStateException("A subproject tried to set '${deployConfig.groupId}:${deployConfig.currentVersion}' " +
+                    "as the coordinates for the artifacts of the repository, but '$group:$version' was already set " +
+                    "previously by a different subproject. As per the requirements of the Nexus Publishing plugin, " +
+                    "all subprojects must use the same version number! Please check Artifacts.kt for inconsistencies!")
+        } else {
+            // Already configured and correct
+            return
+        }
+    }
+
+    // One-time initialization beyond this point
+    group = deployConfig.groupId
+    version = deployConfig.currentVersion
+
+    nexusPublishing(
+            packageGroup = deployConfig.groupId,
+            stagingProfileId = credentials.sonatypeStagingProfileId,
+            sonatypeUsername = credentials.ossrhUsername,
+            sonatypePassword = credentials.ossrhPassword
+    )
+}
+
 private fun MavenPublication.applyPublicationDetails(
-    project: Project,
-    deployConfig: Deployed,
-    isAndroid: Boolean,
-    androidSourcesJar: Jar,
-    javadocJar: Jar
+        project: Project,
+        deployConfig: Deployed,
+        isAndroid: Boolean,
+        androidSourcesJar: Jar,
+        javadocJar: Jar
 ) {
     groupId = deployConfig.groupId
     artifactId = deployConfig.artifactId
@@ -189,23 +186,23 @@ private fun MavenPublication.applyPublicationDetails(
             with(asNode()) {
                 // Only add dependencies manually if there aren't any already
                 if (children().filterIsInstance<Node>()
-                        .none { it.name().toString().endsWith("dependencies") }
+                                .none { it.name().toString().endsWith("dependencies") }
                 ) {
                     val dependenciesNode = appendNode("dependencies")
                     val dependencies =
-                        project.configurations.getByName("implementation").allDependencies +
-                                project.configurations.getByName("runtimeOnly").allDependencies
+                            project.configurations.getByName("implementation").allDependencies +
+                                    project.configurations.getByName("runtimeOnly").allDependencies
 
                     dependencies
-                        .filter { it.name != "unspecified" }
-                        .forEach {
-                            with(dependenciesNode.appendNode("dependency")) {
-                                appendNode("groupId", it.group)
-                                appendNode("artifactId", it.name)
-                                appendNode("version", it.version)
-                                appendNode("scope", "runtime")
+                            .filter { it.name != "unspecified" }
+                            .forEach {
+                                with(dependenciesNode.appendNode("dependency")) {
+                                    appendNode("groupId", it.group)
+                                    appendNode("artifactId", it.name)
+                                    appendNode("version", it.version)
+                                    appendNode("scope", "runtime")
+                                }
                             }
-                        }
                 }
             }
         }
@@ -233,8 +230,8 @@ private class AndroidDsl(project: Project) {
 
     class SourceSetDsl(android: ExtensionAware) {
         private val delegate = android.javaClass.getDeclaredMethod("getSourceSets")
-            .also { it.isAccessible = true }
-            .invoke(android) as NamedDomainObjectCollection<Any>
+                .also { it.isAccessible = true }
+                .invoke(android) as NamedDomainObjectCollection<Any>
 
         val main = MainDsl(delegate)
 
@@ -247,8 +244,8 @@ private class AndroidDsl(project: Project) {
                 private val delegate = main.javaClass.getDeclaredMethod("getJava").invoke(main)
 
                 val srcDirs: Set<File> = delegate.javaClass
-                    .getDeclaredMethod("getSrcDirs")
-                    .invoke(delegate) as Set<File>
+                        .getDeclaredMethod("getSrcDirs")
+                        .invoke(delegate) as Set<File>
             }
         }
     }
@@ -283,33 +280,46 @@ private fun Project.signing(action: SigningExtension.() -> Unit) {
 
 // Nexus Staging & Publishing Plugins facade
 
-private fun Project.nexusStaging(
-    packageGroup: String,
-    stagingProfileId: String?,
-    username: String?,
-    password: String?
+//private fun Project.nexusStaging(
+//    packageGroup: String,
+//    stagingProfileId: String?,
+//    username: String?,
+//    password: String?
+//) {
+//    rootProject.extensions.getByName("nexusStaging").withGroovyBuilder {
+//        setProperty("packageGroup", packageGroup)
+//        setProperty("stagingProfileId", stagingProfileId)
+//        setProperty("username", username)
+//        setProperty("password", password)
+//    }
+//}
+
+private fun Project.nexusPublishing(
+        packageGroup: String,
+        stagingProfileId: String?,
+        sonatypeUsername: String?,
+        sonatypePassword: String?
 ) {
-    rootProject.extensions.getByName("nexusStaging").withGroovyBuilder {
-        setProperty("packageGroup", packageGroup)
-        setProperty("stagingProfileId", stagingProfileId)
-        setProperty("username", username)
-        setProperty("password", password)
-    }
-}
-
-private fun Project.nexusPublishing(sonatypeUsername: String?, sonatypePassword: String?) {
     extensions.getByName("nexusPublishing").withGroovyBuilder {
-        "repositories" {
-            "sonatype"(delegateClosureOf<Any> {
-                // 🤮
-                javaClass.getDeclaredMethod("setUsername", Any::class.java)
-                    .also { it.isAccessible = true }
-                    .invoke(this, sonatypeUsername)
+        setProperty("packageGroup", packageGroup)
 
-                javaClass.getDeclaredMethod("setPassword", Any::class.java)
-                    .also { it.isAccessible = true }
-                    .invoke(this, sonatypePassword)
-            })
+        "repositories" {
+            "sonatype" {
+                // 🤮
+                val cls = delegate.javaClass
+
+                cls.getDeclaredMethod("setStagingProfileId", Any::class.java)
+                        .also { it.isAccessible = true }
+                        .invoke(delegate, stagingProfileId)
+
+                cls.getDeclaredMethod("setUsername", Any::class.java)
+                        .also { it.isAccessible = true }
+                        .invoke(delegate, sonatypeUsername)
+
+                cls.getDeclaredMethod("setPassword", Any::class.java)
+                        .also { it.isAccessible = true }
+                        .invoke(delegate, sonatypePassword)
+            }
         }
     }
 }
