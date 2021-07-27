@@ -5,10 +5,14 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.applyPlugin
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.testfixtures.ProjectBuilder
 
-enum class Type {
-  Unset, Application, Library, DynamicFeature
+enum class Type(val pluginId: String? = null) {
+    Unset,
+    Application("com.android.application"),
+    Library("com.android.library"),
+    DynamicFeature("com.android.dynamic-feature")
 }
 
 /**
@@ -18,125 +22,124 @@ enum class Type {
  */
 class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
-  fun newRootProject(): Project {
-    // Pre-configure a "local.properties" file
-    // containing the required location of the Android SDK
-    val rootProject = ProjectBuilder.builder().build()
+    fun newRootProject(): Project {
+        // Pre-configure a "local.properties" file
+        // containing the required location of the Android SDK
+        val rootProject = ProjectBuilder.builder().build()
 
-    rootProject.file("local.properties").writer().use {
-      it.write("sdk.dir=${environment.androidSdkFolder.absolutePath}")
-    }
-
-    return rootProject
-  }
-
-  fun newProject(parent: Project, name: String? = null) = Builder(parent, name)
-
-  inner class Builder(parent: Project, name: String?) {
-
-    private var projectType = Type.Unset
-    private var appId = "com.example.android"
-    private var applyJUnit5Plugin = true
-    private var applyJacocoPlugin = false
-    private var applyKotlinPlugin = false
-
-    private val project = ProjectBuilder.builder()
-        .withParent(parent)
-        .run {
-          if (name != null) {
-            this.withName(name)
-          }
-
-          build()
+        rootProject.file("local.properties").writer().use {
+            it.write("sdk.dir=${environment.androidSdkFolder.absolutePath}")
         }
 
-    fun asAndroidApplication() = setProjectTypeIfUnsetTo(Type.Application)
-
-    fun asAndroidDynamicFeature() = setProjectTypeIfUnsetTo(Type.DynamicFeature)
-
-    fun asAndroidLibrary() = setProjectTypeIfUnsetTo(Type.Library)
-
-    fun applyJUnit5Plugin(state: Boolean = true) = apply {
-      this.applyJUnit5Plugin = state
+        return rootProject
     }
 
-    fun applyJacocoPlugin(state: Boolean = true) = apply {
-      this.applyJacocoPlugin = state
-    }
+    fun newProject(parent: Project, name: String? = null) = Builder(parent, name)
 
-    fun applyKotlinPlugin(state: Boolean = true) = apply {
-      this.applyKotlinPlugin = state
-    }
+    inner class Builder(parent: Project, name: String?) {
 
-    fun build(): Project {
-      // Write out required Android file structure
-      project.file(".").mkdir()
-      project.file("src/main").mkdirs()
+        private var projectType = Type.Unset
+        private var appId = "com.example.android"
+        private var applyJUnit5Plugin = true
+        private var applyJacocoPlugin = false
+        private var applyKotlinPlugin = false
 
-      val manifestFile = project.file("src/main/AndroidManifest.xml")
-      if (!manifestFile.exists()) {
-        manifestFile.writeText(androidManifestString())
-      }
+        private val project = ProjectBuilder.builder()
+                .withParent(parent)
+                .run {
+                    if (name != null) {
+                        this.withName(name)
+                    }
 
-      // Apply required plugins
-      val pluginName = when (projectType) {
-        Type.Application -> "com.android.application"
-        Type.DynamicFeature -> "com.android.dynamic-feature"
-        Type.Library -> "com.android.library"
-        else -> null
-      }
-      pluginName?.let { project.applyPlugin(it) }
+                    build()
+                }
 
-      if (applyJacocoPlugin) {
-        project.applyPlugin("jacoco")
-      }
+        fun asAndroidApplication() = setProjectTypeIfUnsetTo(Type.Application)
 
-      if (applyKotlinPlugin) {
-        project.applyPlugin("kotlin-android")
-      }
+        fun asAndroidDynamicFeature() = setProjectTypeIfUnsetTo(Type.DynamicFeature)
 
-      if (applyJUnit5Plugin) {
-        project.applyPlugin("de.mannodermaus.android-junit5")
-      }
+        fun asAndroidLibrary() = setProjectTypeIfUnsetTo(Type.Library)
 
-      // Add default configuration
-      project.android.compileSdkVersion(environment.compileSdkVersion)
-
-      if (projectType == Type.Application) {
-        project.android.defaultConfig.apply {
-          applicationId = appId
-          minSdkVersion(environment.minSdkVersion)
-          targetSdkVersion(environment.targetSdkVersion)
-          versionCode = 1
-          versionName = "1.0"
+        fun applyJUnit5Plugin(state: Boolean = true) = apply {
+            this.applyJUnit5Plugin = state
         }
-      }
 
-      return project
-    }
+        fun applyJacocoPlugin(state: Boolean = true) = apply {
+            this.applyJacocoPlugin = state
+        }
 
-    fun buildAndEvaluate(): Project {
-      val project = build()
-      project.evaluate()
-      return project
-    }
+        fun applyKotlinPlugin(state: Boolean = true) = apply {
+            this.applyKotlinPlugin = state
+        }
 
-    /* Private */
+        fun build(): Project {
+            // Write out required Android file structure
+            project.file(".").mkdir()
+            project.file("src/main").mkdirs()
 
-    private fun setProjectTypeIfUnsetTo(type: Type) = apply {
-      if (projectType != Type.Unset) {
-        throw IllegalArgumentException("Project type already set to $projectType")
-      }
+            val manifestFile = project.file("src/main/AndroidManifest.xml")
+            if (!manifestFile.exists()) {
+                manifestFile.writeText(androidManifestString())
+            }
 
-      this.projectType = type
-    }
+            // Apply required plugins
+            projectType.pluginId?.let { project.applyPlugin(it) }
 
-    private fun androidManifestString() =
-        """
+            if (applyJacocoPlugin) {
+                project.applyPlugin("jacoco")
+            }
+
+            if (applyKotlinPlugin) {
+                project.applyPlugin("kotlin-android")
+            }
+
+            if (applyJUnit5Plugin) {
+                project.applyPlugin("de.mannodermaus.android-junit5")
+            }
+
+            // Add default configuration
+            try {
+                project.android.compileSdkVersion(environment.compileSdkVersion)
+
+                if (projectType == Type.Application) {
+                    project.android.defaultConfig.apply {
+                        applicationId = appId
+                        minSdkVersion(environment.minSdkVersion)
+                        targetSdkVersion(environment.targetSdkVersion)
+                        versionCode = 1
+                        versionName = "1.0"
+                    }
+                }
+            } catch (e: UnknownDomainObjectException) {
+                // Expected when the Android plugin is not applied to a project;
+                // swallow this particular error
+            }
+
+            return project
+        }
+
+        fun buildAndEvaluate(): Project {
+            val project = build()
+            project.evaluate()
+            return project
+        }
+
+        /* Private */
+
+        private fun setProjectTypeIfUnsetTo(type: Type) = apply {
+            if (projectType != Type.Unset) {
+                throw IllegalArgumentException("Project type already set to $projectType")
+            }
+
+            this.projectType = type
+        }
+
+        private fun androidManifestString() =
+                """
         <manifest
             xmlns:android="schemas.android.com/apk/res/android"
             package="$appId">
         </manifest>
     """.trimIndent()
-  }
+    }
 }

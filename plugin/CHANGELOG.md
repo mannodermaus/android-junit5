@@ -7,6 +7,9 @@ Change Log
 - JUnit 5.8.0
 - New Plugin Marker artifact facilitating usage of the plugin through the `plugins {}` DSL
 
+#### Changed
+- The plugin no longer requires users to apply an Android plugin first - ordering can be arbitrary
+
 #### Removed
 - Support for Android Gradle Plugins 3.x
 - Support for the deprecated com.android.feature plugin, which was removed in Android Gradle Plugin 4.x

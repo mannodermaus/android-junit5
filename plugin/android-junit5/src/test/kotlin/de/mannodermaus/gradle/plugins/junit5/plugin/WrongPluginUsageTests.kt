@@ -4,9 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.gradle.plugins.junit5.internal.android
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
-import org.gradle.api.Action
 import org.gradle.api.ProjectConfigurationException
-import org.gradle.api.internal.plugins.PluginApplicationException
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
@@ -22,11 +20,11 @@ class WrongPluginUsageTests {
 
     @Test
     fun `not applying any supported Android plugin`() {
-        val exception = assertThrows<PluginApplicationException> {
-            projectExtension.newProject().build()
+        val exception = assertThrows<ProjectConfigurationException> {
+            projectExtension.newProject().buildAndEvaluate()
         }
         assertThat(exception.cause?.message)
-                .contains("One of the following plugins must be applied to this project")
+                .contains("An Android plugin must be applied in order for android-junit5 to work correctly!")
     }
 
     @Test
@@ -37,9 +35,9 @@ class WrongPluginUsageTests {
                 .build()
 
         project.junitPlatform {
-            filters("unknown", Action {
-                it.includeTags("doesnt-matter")
-            })
+            filters("unknown") {
+                includeTags("doesnt-matter")
+            }
         }
 
         val exception = assertThrows<ProjectConfigurationException> {

@@ -12,55 +12,54 @@ import org.gradle.api.tasks.Input
 import org.junit.platform.commons.util.Preconditions
 import java.io.File
 
-internal fun attachDsl(project: Project, projectConfig: ProjectConfig) {
-  // Hook the JUnit Platform configuration into the project,
-  // adding an extension point for all variants, as well as the default one
-  // shared between them
-  project.extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(project)) { ju5 ->
-        // General-purpose filters
-        ju5.attachFiltersDsl(qualifier = null)
-
-        // Variant-specific filters:
-        // This will add filters for build types (e.g. "debug" or "release")
-        // as well as composed variants  (e.g. "freeDebug" or "paidRelease")
-        // and product flavors (e.g. "free" or "paid")
-        project.android.buildTypes.all { buildType ->
-          // "debugFilters"
-          // "releaseFilters"
-          ju5.attachFiltersDsl(qualifier = buildType.name)
-        }
-
-        // Attach DSL objects for all permutations of variants available.
-        // As an example, assume the incoming `variant` to be:
-        // Name:                    "brandADevelopmentDebug"
-        // Dimension "brand":       "brandA"
-        // Dimension "environment": "development"
-        // Build Type Name:         "debug"
-        //
-        // The following DSL objects have to be generated from this:
-        // 1) brandADevelopmentDebugFilters
-        // 2) brandAFilters
-        // 3) developmentFilters
-        projectConfig.variants.all { variant ->
-          // 1) Fully-specialized name ("brandADevelopmentDebugFilters")
-          ju5.attachFiltersDsl(qualifier = variant.name)
-
-          variant.productFlavors.forEach { flavor ->
-            // 2) & 3) Single flavors ("brandAFilters" & "developmentFilters")
-            ju5.attachFiltersDsl(qualifier = flavor.name)
-          }
-        }
-      }
+internal fun Project.attachGlobalDsl() {
+  // Hook the default JUnit Platform configuration into the project
+  project.extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME) { junitPlatform ->
+    // General-purpose filters
+    junitPlatform.attachFiltersDsl(qualifier = null)
+  }
 }
 
-internal fun evaluateDsl(project: Project) {
-  val ju5 = project.extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
+internal fun Project.attachSpecificDsl(projectConfig: PluginConfig) {
+  // Variant-specific filters:
+  // This will add filters for build types (e.g. "debug" or "release")
+  // as well as composed variants  (e.g. "freeDebug" or "paidRelease")
+  // and product flavors (e.g. "free" or "paid")
+  android.buildTypes.all { buildType ->
+    // "debugFilters"
+    // "releaseFilters"
+    junitPlatform.attachFiltersDsl(qualifier = buildType.name)
+  }
 
-  ju5._filters.forEach { qualifier, actions ->
-    val extensionName = ju5.filtersExtensionName(qualifier)
-    val extension = ju5.extensionByName<FiltersExtension>(extensionName)
+  // Attach DSL objects for all permutations of variants available.
+  // As an example, assume the incoming `variant` to be:
+  // Name:                    "brandADevelopmentDebug"
+  // Dimension "brand":       "brandA"
+  // Dimension "environment": "development"
+  // Build Type Name:         "debug"
+  //
+  // The following DSL objects have to be generated from this:
+  // 1) brandADevelopmentDebugFilters
+  // 2) brandAFilters
+  // 3) developmentFilters
+  projectConfig.variants.all { variant ->
+    // 1) Fully-specialized name ("brandADevelopmentDebugFilters")
+    junitPlatform.attachFiltersDsl(qualifier = variant.name)
+
+    variant.productFlavors.forEach { flavor ->
+      // 2) & 3) Single flavors ("brandAFilters" & "developmentFilters")
+      junitPlatform.attachFiltersDsl(qualifier = flavor.name)
+    }
+  }
+}
+
+internal fun Project.evaluateDsl() {
+  junitPlatform._filters.forEach { (qualifier, actions) ->
+    val extensionName = junitPlatform.filtersExtensionName(qualifier)
+    val extension = junitPlatform.extensionByName<FiltersExtension>(extensionName)
+
     actions.forEach { action ->
-      action.execute(extension)
+      extension.action()
     }
   }
 }
@@ -81,7 +80,7 @@ private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = 
  * It defines the root of the configuration tree exposed by the plugin,
  * and is registered under the name "junitPlatform".
  */
-open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyObjectSupport() {
+open class AndroidJUnitPlatformExtension : GroovyObjectSupport() {
 
   operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
     this.config()
@@ -94,11 +93,11 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
       // Support for filters() DSL called from Groovy
       val qualifier = name.substring(0, name.indexOf("Filters"))
       val closure = (args as Array<*>)[0] as Closure<*>
-      return this.filters(qualifier, Action {
-        closure.delegate = it
+      return this.filters(qualifier) {
+        closure.delegate = this
         closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.call(it)
-      })
+        closure.call(this)
+      }
     }
 
     return null
@@ -130,7 +129,7 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
 
   /* Filters */
 
-  internal val _filters = mutableMapOf<String?, MutableList<Action<FiltersExtension>>>()
+  internal val _filters = mutableMapOf<String?, MutableList<FiltersExtension.() -> Unit>>()
 
   internal fun filtersExtensionName(qualifier: String? = null) = if (qualifier.isNullOrEmpty())
     FILTERS_EXTENSION_NAME
@@ -139,30 +138,39 @@ open class AndroidJUnitPlatformExtension(private val project: Project) : GroovyO
 
   /**
    * Return the {@link FiltersExtension}
+   * for tests that belong to the provided build variant
+   */
+  internal fun findFilters(qualifier: String? = null): FiltersExtension {
+    val extensionName = this.filtersExtensionName(qualifier)
+    return extensionByName(extensionName)
+  }
+
+  /**
+   * Return the {@link FiltersExtension}
    * for all executed tests, applied to all variants
    */
-  val filters: FiltersExtension get() = findFilters(qualifier = null)
+  val filters: FiltersExtension
+    get() = findFilters(qualifier = null)
 
   /**
    * Configure the {@link FiltersExtension}
    * for all executed tests, applied to all variants
    */
-  fun filters(action: Action<FiltersExtension>) = filters(null, Action { action.execute(it) })
-
-  /**
-   * Return the {@link FiltersExtension}
-   * for tests that belong to the provided build variant
-   */
-  fun findFilters(qualifier: String? = null): FiltersExtension {
-    val extensionName = this.filtersExtensionName(qualifier)
-    return extensionByName(extensionName)
+  fun filters(action: Action<FiltersExtension>) = filters(null) {
+    action.execute(this)
   }
 
   /**
    * Configure the {@link FiltersExtension}
    * for tests that belong to the provided build variant
    */
-  fun filters(qualifier: String? = null, action: Action<FiltersExtension>) {
+  fun filters(qualifier: String?, action: Action<FiltersExtension>) {
+    filters(qualifier) {
+      action.execute(this)
+    }
+  }
+
+  fun filters(qualifier: String? = null, action: FiltersExtension.() -> Unit) {
     val actions = _filters.getOrDefault(qualifier, mutableListOf())
     actions += action
     _filters[qualifier] = actions
@@ -468,22 +476,6 @@ class InstrumentationTestOptions {
    */
   fun integrityCheckEnabled(state: Boolean) {
     this.integrityCheckEnabled = state
-  }
-
-  @Deprecated(message = "This does not do anything anymore and can be safely removed")
-  var enabled: Boolean = true
-
-  @Deprecated(message = "This does not do anything anymore and can be safely removed")
-  fun enabled(state: Boolean) {
-    this.enabled = state
-  }
-
-  @Deprecated(message = "This does not do anything anymore and can be safely removed")
-  var version: String? = null
-
-  @Deprecated(message = "This does not do anything anymore and can be safely removed")
-  fun version(version: String?) {
-    this.version = version
   }
 }
 
