@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.util.projects
 
-import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.applyPlugin
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate

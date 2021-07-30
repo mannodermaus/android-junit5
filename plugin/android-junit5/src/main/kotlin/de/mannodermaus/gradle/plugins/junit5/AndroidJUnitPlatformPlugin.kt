@@ -2,10 +2,29 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
 import com.android.build.gradle.api.BaseVariant
-import de.mannodermaus.gradle.plugins.junit5.internal.*
-import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
-import de.mannodermaus.gradle.plugins.junit5.providers.JavaDirectoryProvider
-import de.mannodermaus.gradle.plugins.junit5.providers.KotlinDirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.dsl.attachGlobalDsl
+import de.mannodermaus.gradle.plugins.junit5.dsl.attachSpecificDsl
+import de.mannodermaus.gradle.plugins.junit5.dsl.evaluateExtensions
+import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
+import de.mannodermaus.gradle.plugins.junit5.internal.config.INSTRUMENTATION_RUNNER_LIBRARY_ARTIFACT
+import de.mannodermaus.gradle.plugins.junit5.internal.config.INSTRUMENTATION_RUNNER_LIBRARY_GROUP
+import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.config.MIN_REQUIRED_AGP_VERSION
+import de.mannodermaus.gradle.plugins.junit5.internal.config.MIN_REQUIRED_GRADLE_VERSION
+import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.hasAndroidPlugin
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.instrumentationTestVariant
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Warn
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.testTaskOf
+import de.mannodermaus.gradle.plugins.junit5.internal.providers.DirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.internal.providers.JavaDirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.internal.providers.KotlinDirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.excludedPackagingOptions
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.requireGradle
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.requireVersion
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import org.gradle.api.GradleException
@@ -16,7 +35,7 @@ import org.gradle.api.Project
  * Android JUnit Platform plugin for Gradle.
  * Configures JUnit 5 tasks on all unit-tested variants of an Android project.
  */
-class AndroidJUnitPlatformPlugin : Plugin<Project> {
+public class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         requireGradle(MIN_REQUIRED_GRADLE_VERSION) {
@@ -42,7 +61,7 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
                 excludedPackagingOptions().forEach(project.android.packagingOptions::exclude)
 
                 project.afterEvaluate {
-                    it.evaluateDsl()
+                    it.evaluateExtensions()
                     it.configureUnitTests(config)
                     it.configureInstrumentationTests(config)
                     it.configureJacocoTasks(config)
@@ -65,23 +84,25 @@ class AndroidJUnitPlatformPlugin : Plugin<Project> {
         // unless that variant has its tests disabled
         projectConfig.variants.all { variant ->
             val testTask = tasks.testTaskOf(variant) ?: return@all
-            val configuration = junit5ConfigurationOf(variant)
+            val configuration = JUnit5TaskConfig(variant, this)
 
-            testTask.useJUnitPlatform { options ->
-                options.includeTags(*configuration.combinedIncludeTags)
-                options.excludeTags(*configuration.combinedExcludeTags)
-                options.includeEngines(*configuration.combinedIncludeEngines)
-                options.excludeEngines(*configuration.combinedExcludeEngines)
+            testTask.configure { task ->
+                task.useJUnitPlatform { options ->
+                    options.includeTags(*configuration.combinedIncludeTags)
+                    options.excludeTags(*configuration.combinedExcludeTags)
+                    options.includeEngines(*configuration.combinedIncludeEngines)
+                    options.excludeEngines(*configuration.combinedExcludeEngines)
+                }
+
+                task.include(*configuration.combinedIncludePatterns)
+                task.exclude(*configuration.combinedExcludePatterns)
+
+                // From the User Guide:
+                // "The standard Gradle test task currently does not provide a dedicated DSL
+                // to set JUnit Platform configuration parameters to influence test discovery and execution.
+                // However, you can provide configuration parameters within the build script via system properties"
+                task.systemProperties(junitPlatform.configurationParameters)
             }
-
-            testTask.include(*configuration.combinedIncludePatterns)
-            testTask.exclude(*configuration.combinedExcludePatterns)
-
-            // From the User Guide:
-            // "The standard Gradle test task currently does not provide a dedicated DSL
-            // to set JUnit Platform configuration parameters to influence test discovery and execution.
-            // However, you can provide configuration parameters within the build script via system properties"
-            testTask.systemProperties(junitPlatform.configurationParameters)
         }
     }
 

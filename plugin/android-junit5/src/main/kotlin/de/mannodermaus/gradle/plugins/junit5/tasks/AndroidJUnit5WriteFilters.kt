@@ -1,9 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.TestVariant
-import de.mannodermaus.gradle.plugins.junit5.INSTRUMENTATION_FILTER_RES_FILE_NAME
-import de.mannodermaus.gradle.plugins.junit5.internal.getTaskName
-import de.mannodermaus.gradle.plugins.junit5.internal.junit5ConfigurationOf
+import de.mannodermaus.gradle.plugins.junit5.internal.config.INSTRUMENTATION_FILTER_RES_FILE_NAME
+import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
@@ -12,7 +12,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-const val WRITE_FILTERS_TASK_NAME = "writeFilters"
+internal const val WRITE_FILTERS_TASK_NAME = "writeFilters"
 
 /**
  * Helper task for instrumentation tests.
@@ -27,9 +27,9 @@ const val WRITE_FILTERS_TASK_NAME = "writeFilters"
  * how class name patterns are formatted.
  */
 @CacheableTask
-open class AndroidJUnit5WriteFilters : DefaultTask() {
+public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
 
-  companion object {
+  internal companion object {
     fun register(
       project: Project,
       instrumentationTestVariant: TestVariant
@@ -57,16 +57,16 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
   private lateinit var variant: TestVariant
 
   @Input
-  var includeTags = emptyList<String>()
+  public var includeTags: List<String> = emptyList()
 
   @Input
-  var excludeTags = emptyList<String>()
+  public var excludeTags: List<String> = emptyList()
 
   @OutputDirectory
-  var outputFolder: File? = null
+  public var outputFolder: File? = null
 
   @TaskAction
-  fun execute() {
+  public fun execute() {
     this.outputFolder?.let { folder ->
       // Clear out current contents of the generated folder
       folder.deleteRecursively()
@@ -106,7 +106,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
       task.outputFolder = outputFolder
 
       // Access filters for this particular variant & provide them to the task, too
-      val configuration = project.junit5ConfigurationOf(instrumentationTestVariant.testedVariant)
+      val configuration = JUnit5TaskConfig(instrumentationTestVariant.testedVariant, project)
       task.includeTags = configuration.combinedIncludeTags.toList()
       task.excludeTags = configuration.combinedExcludeTags.toList()
     }

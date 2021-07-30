@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
-import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.projects.PluginSpecProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.times

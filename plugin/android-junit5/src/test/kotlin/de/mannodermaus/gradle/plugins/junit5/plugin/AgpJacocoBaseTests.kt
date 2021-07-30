@@ -1,7 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.JACOCO_TASK_NAME
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll

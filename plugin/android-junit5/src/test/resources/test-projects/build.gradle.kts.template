@@ -7,7 +7,6 @@
 // The individual configuration of each test depends on the config.toml file,
 // located in the sub-folder next to its source code.
 
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -81,9 +80,6 @@ android {
 
     {% if INCLUDE_ANDROID_RESOURCES %}
       unitTests.isIncludeAndroidResources = true
-      junitPlatform {
-        instrumentationTests.integrityCheckEnabled = false
-      }
     {% endif %}
 
     // Gradle 6.5 fixed the syntax for UnitTestOptions' DSL
@@ -105,6 +101,12 @@ android {
     {% endif %}
   }
 }
+
+{% if INCLUDE_ANDROID_RESOURCES %}
+  junitPlatform {
+    instrumentationTests.integrityCheckEnabled = false
+  }
+{% endif %}
 
 {% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
   {% if atLeastAgp("7.0.0-beta01") %}

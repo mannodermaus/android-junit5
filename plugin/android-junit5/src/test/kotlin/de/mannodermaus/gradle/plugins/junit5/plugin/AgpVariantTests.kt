@@ -1,9 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.gradle.plugins.junit5.FiltersExtension
-import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.dsl.FiltersExtension
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import org.junit.jupiter.api.TestFactory
 
 interface AgpVariantTests : AgpVariantAwareTests {
