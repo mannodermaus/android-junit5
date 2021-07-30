@@ -10,12 +10,6 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainSourceDirectories
-import de.mannodermaus.gradle.plugins.junit5.safeClassDirectoriesSetFrom
-import de.mannodermaus.gradle.plugins.junit5.safeExecutionDataSetFrom
-import de.mannodermaus.gradle.plugins.junit5.safeGetClassDirectories
-import de.mannodermaus.gradle.plugins.junit5.safeGetExecutionData
-import de.mannodermaus.gradle.plugins.junit5.safeGetSourceDirectories
-import de.mannodermaus.gradle.plugins.junit5.safeSourceDirectoriesSetFrom
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
@@ -34,7 +28,7 @@ private const val GROUP_REPORTING = "reporting"
  * Required to be "open" in order for Groovy's proxy magic to do its thing.
  */
 @CacheableTask
-abstract class AndroidJUnit5JacocoReport : JacocoReport() {
+public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
     internal companion object {
         fun register(
@@ -106,26 +100,24 @@ abstract class AndroidJUnit5JacocoReport : JacocoReport() {
             // Task-level Configuration
             val taskJacoco = testTask.get().extensionByName<JacocoTaskExtension>("jacoco")
             taskJacoco.destinationFile?.let {
-                reportTask.safeExecutionDataSetFrom(project, it.path)
+                reportTask.executionData.setFrom(it.path)
             }
 
             // Apply exclusion rules to both class & source directories for Jacoco,
             // using the sum of all DirectoryProviders' outputs as a foundation:
-            reportTask.safeClassDirectoriesSetFrom(
-                    project,
+            reportTask.classDirectories.setFrom(
                     directoryProviders.mainClassDirectories().toFileCollectionExcluding(junit5Jacoco.excludedClasses)
             )
-            reportTask.safeSourceDirectoriesSetFrom(
-                    project,
+            reportTask.sourceDirectories.setFrom(
                     directoryProviders.mainSourceDirectories()
             )
 
             project.logger.junit5Info(
                     "Assembled Jacoco Code Coverage for JUnit 5 Task '${testTask.name}':"
             )
-            project.logger.junit5Info("|__ Execution Data: ${reportTask.safeGetExecutionData?.asPath}")
-            project.logger.junit5Info("|__ Source Dirs: ${reportTask.safeGetSourceDirectories?.asPath}")
-            project.logger.junit5Info("|__ Class Dirs: ${reportTask.safeGetClassDirectories?.asPath}")
+            project.logger.junit5Info("|__ Execution Data: ${reportTask.executionData?.asPath}")
+            project.logger.junit5Info("|__ Source Dirs: ${reportTask.sourceDirectories?.asPath}")
+            project.logger.junit5Info("|__ Class Dirs: ${reportTask.classDirectories?.asPath}")
         }
 
         /* Extension Functions */
@@ -134,9 +126,7 @@ abstract class AndroidJUnit5JacocoReport : JacocoReport() {
          * Joins the given collection of Files together, while
          * ignoring the provided patterns in the resulting FileCollection.
          */
-        private fun Iterable<File>.toFileCollectionExcluding(
-                patterns: Iterable<String>
-        ): FileCollection = this
+        private fun Iterable<File>.toFileCollectionExcluding(patterns: Iterable<String>): FileCollection = this
                 // Convert each directory to a Gradle FileTree, excluding the specified patterns
                 .map { project.fileTree(it).exclude(patterns) }
                 // Convert the resulting list of FileTree objects into a single FileCollection

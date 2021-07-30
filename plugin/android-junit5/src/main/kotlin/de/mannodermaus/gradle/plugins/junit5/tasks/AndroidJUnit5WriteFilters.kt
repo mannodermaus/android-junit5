@@ -27,7 +27,7 @@ const val WRITE_FILTERS_TASK_NAME = "writeFilters"
  * how class name patterns are formatted.
  */
 @CacheableTask
-abstract class AndroidJUnit5WriteFilters : DefaultTask() {
+public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
 
   internal companion object {
     fun register(

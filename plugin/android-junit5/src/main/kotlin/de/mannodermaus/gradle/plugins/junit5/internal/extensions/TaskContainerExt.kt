@@ -2,7 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.internal.extensions
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.tasks.factory.AndroidUnitTest
-import de.mannodermaus.gradle.plugins.junit5.VariantTypeCompat
+import com.android.builder.core.VariantType
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.tasks.TaskContainer
@@ -19,8 +19,8 @@ internal fun TaskContainer.testTaskOf(variant: BaseVariant): TaskProvider<Androi
     // From AGP 4.1 onwards, there is no Scope API on VariantData anymore.
     // Task names must be constructed manually
     val taskName = variant.getTaskName(
-            prefix = VariantTypeCompat.UNIT_TEST_PREFIX,
-            suffix = VariantTypeCompat.UNIT_TEST_SUFFIX)
+            prefix = VariantType.UNIT_TEST_PREFIX,
+            suffix = VariantType.UNIT_TEST_SUFFIX)
 
     return namedOrNull(taskName)
 }
