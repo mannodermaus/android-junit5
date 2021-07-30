@@ -19,7 +19,7 @@ import java.io.File
  * Provides test root directories for Kotlin sources,
  * with which a JUnit 5 Task can be enhanced.
  */
-class KotlinDirectoryProvider(
+internal class KotlinDirectoryProvider(
         private val project: Project,
         private val variant: BaseVariant) : DirectoryProvider {
 

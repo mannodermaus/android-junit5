@@ -30,6 +30,10 @@ tasks.withType<JavaCompile> {
 
 project.fixCompileTaskChain()
 
+kotlin {
+    explicitApi()
+}
+
 // ------------------------------------------------------------------------------------------------
 // Plugin Resource Setup
 //

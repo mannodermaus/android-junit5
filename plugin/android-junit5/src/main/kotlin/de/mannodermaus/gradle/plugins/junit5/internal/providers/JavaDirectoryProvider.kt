@@ -8,7 +8,7 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensions.unitTestVariant
  * This will look up the main & test root directories
  * of the variant connected to a given JUnit 5 task.
  */
-class JavaDirectoryProvider(private val variant: BaseVariant) : DirectoryProvider {
+internal class JavaDirectoryProvider(private val variant: BaseVariant) : DirectoryProvider {
 
     override fun mainSourceDirectories() = sourceFoldersOf(variant)
     override fun testSourceDirectories() = sourceFoldersOf(variant.unitTestVariant)

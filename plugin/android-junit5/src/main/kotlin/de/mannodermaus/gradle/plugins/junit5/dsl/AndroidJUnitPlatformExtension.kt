@@ -15,13 +15,13 @@ public abstract class AndroidJUnitPlatformExtension
 @Inject constructor(project: Project)
     : GroovyObjectSupport(), ExtensionAware {
 
-    operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
+    public operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
         this.config()
     }
 
     // Interop with Groovy
     @Suppress("unused")
-    open fun methodMissing(name: String, args: Any): Any? {
+    public fun methodMissing(name: String, args: Any): Any? {
         if (name.endsWith("Filters")) {
             // Support for filters() DSL called from Groovy
             val qualifier = name.substring(0, name.indexOf("Filters"))
@@ -40,13 +40,15 @@ public abstract class AndroidJUnitPlatformExtension
      * The additional configuration parameters to be used
      */
     private val _configurationParameters = mutableMapOf<String, String>()
-    val configurationParameters: Map<String, String>
-        @Input get() = _configurationParameters.toMap()
+
+    @get:Input
+    public val configurationParameters: Map<String, String>
+        get() = _configurationParameters.toMap()
 
     /**
      * Add a configuration parameter
      */
-    fun configurationParameter(key: String, value: String) {
+    public fun configurationParameter(key: String, value: String) {
         Preconditions.notBlank(key, "key must not be blank")
         Preconditions.condition(!key.contains('=')) { "key must not contain '=': \"$key\"" }
         Preconditions.notNull(value) { "value must not be null for key: \"$key\"" }
@@ -56,7 +58,7 @@ public abstract class AndroidJUnitPlatformExtension
     /**
      * Add a map of configuration parameters
      */
-    fun configurationParameters(parameters: Map<String, String>) {
+    public fun configurationParameters(parameters: Map<String, String>) {
         parameters.forEach { configurationParameter(it.key, it.value) }
     }
 
@@ -82,28 +84,20 @@ public abstract class AndroidJUnitPlatformExtension
      * Return the {@link FiltersExtension}
      * for all executed tests, applied to all variants
      */
-    val filters: FiltersExtension
+    public val filters: FiltersExtension
         get() = findFilters(qualifier = null)
-
-//    /**
-//     * Configure the {@link FiltersExtension}
-//     * for all executed tests, applied to all variants
-//     */
-//    fun filters(action: Action<FiltersExtension>) = filters(null) {
-//        action.execute(this)
-//    }
 
     /**
      * Configure the {@link FiltersExtension}
      * for tests that belong to the provided build variant
      */
-    fun filters(qualifier: String?, action: Action<FiltersExtension>) {
+    public fun filters(qualifier: String, action: Action<FiltersExtension>) {
         filters(qualifier) {
             action.execute(this)
         }
     }
 
-    fun filters(qualifier: String? = null, action: FiltersExtension.() -> Unit) {
+    public fun filters(qualifier: String, action: FiltersExtension.() -> Unit) {
         val actions = _filters.getOrDefault(qualifier, mutableListOf())
         actions += action
         _filters[qualifier] = actions
@@ -116,28 +110,14 @@ public abstract class AndroidJUnitPlatformExtension
      *
      * @since 1.0.22
      */
-    val instrumentationTests = project.objects.newInstance(InstrumentationTestOptions::class.java)
-
-    /**
-     * Options for controlling instrumentation test execution with JUnit 5
-     *
-     * @since 1.0.22
-     */
-    fun instrumentationTests(action: Action<InstrumentationTestOptions>) {
-        action.execute(instrumentationTests)
-    }
+    public val instrumentationTests: InstrumentationTestOptions =
+            project.objects.newInstance(InstrumentationTestOptions::class.java)
 
     /* Jacoco Reporting Integration */
 
     /**
      * Options for controlling Jacoco reporting
      */
-    val jacocoOptions = project.objects.newInstance(JacocoOptions::class.java)
-
-    /**
-     * Options for controlling Jacoco reporting
-     */
-    fun jacocoOptions(action: Action<JacocoOptions>) {
-        action.execute(jacocoOptions)
-    }
+    public val jacocoOptions: JacocoOptions =
+            project.objects.newInstance(JacocoOptions::class.java, project)
 }

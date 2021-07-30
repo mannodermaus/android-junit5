@@ -13,7 +13,7 @@ import org.gradle.api.Project
 internal class PluginConfig
 private constructor(private val project: Project, val variants: DomainObjectSet<out BaseVariant>) {
 
-    internal companion object {
+    companion object {
         internal val supportedPlugins: List<String> =
                 listOf("com.android.application", "com.android.library", "com.android.dynamic-feature")
 

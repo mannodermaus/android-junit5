@@ -20,7 +20,7 @@ import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import java.io.File
 
-const val JACOCO_TASK_NAME = "jacocoTestReport"
+internal const val JACOCO_TASK_NAME = "jacocoTestReport"
 private const val GROUP_REPORTING = "reporting"
 
 /**

@@ -4,7 +4,7 @@ import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContai
 
 public abstract class FiltersExtension {
 
-    operator fun invoke(config: FiltersExtension.() -> Unit) {
+    public operator fun invoke(config: FiltersExtension.() -> Unit) {
         this.config()
     }
 
@@ -21,28 +21,28 @@ public abstract class FiltersExtension {
     /**
      * Add a pattern to the list of <em>included</em> patterns
      */
-    fun includePattern(pattern: String) {
+    public fun includePattern(pattern: String) {
         includePatterns(pattern)
     }
 
     /**
      * Add patterns to the list of <em>included</em> patterns
      */
-    fun includePatterns(vararg patterns: String) {
+    public fun includePatterns(vararg patterns: String) {
         this.patterns.include(*patterns)
     }
 
     /**
      * Add a pattern to the list of <em>excluded</em> patterns
      */
-    fun excludePattern(pattern: String) {
+    public fun excludePattern(pattern: String) {
         excludePatterns(pattern)
     }
 
     /**
      * Add patterns to the list of <em>excluded</em> patterns
      */
-    fun excludePatterns(vararg patterns: String) {
+    public fun excludePatterns(vararg patterns: String) {
         this.patterns.exclude(*patterns)
     }
 
@@ -54,14 +54,14 @@ public abstract class FiltersExtension {
     /**
      * Add tags to the list of <em>included</em> tags
      */
-    fun includeTags(vararg tags: String) {
+    public fun includeTags(vararg tags: String) {
         this.tags.include(*tags)
     }
 
     /**
      * Add tags to the list of <em>excluded</em> tags
      */
-    fun excludeTags(vararg tags: String) {
+    public fun excludeTags(vararg tags: String) {
         this.tags.exclude(*tags)
     }
 
@@ -73,14 +73,14 @@ public abstract class FiltersExtension {
     /**
      * Add engines to the list of <em>included</em> engines
      */
-    fun includeEngines(vararg engines: String) {
+    public fun includeEngines(vararg engines: String) {
         this.engines.include(*engines)
     }
 
     /**
      * Add engines to the list of <em>excluded</em> engines
      */
-    fun excludeEngines(vararg engines: String) {
+    public fun excludeEngines(vararg engines: String) {
         this.engines.exclude(*engines)
     }
 }

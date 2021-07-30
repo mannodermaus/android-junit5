@@ -5,7 +5,7 @@ package de.mannodermaus.gradle.plugins.junit5.dsl
  */
 public abstract class InstrumentationTestOptions {
 
-    operator fun invoke(config: InstrumentationTestOptions.() -> Unit) {
+    public operator fun invoke(config: InstrumentationTestOptions.() -> Unit) {
         this.config()
     }
 
@@ -15,7 +15,7 @@ public abstract class InstrumentationTestOptions {
      * won't raise an error during evaluation if the instrumentation
      * libraries or the test runner are missing.
      */
-    var integrityCheckEnabled = true
+    public var integrityCheckEnabled: Boolean = true
 
     /**
      * Whether or not to check if the instrumentation tests
@@ -23,7 +23,7 @@ public abstract class InstrumentationTestOptions {
      * won't raise an error during evaluation if the instrumentation
      * libraries or the test runner are missing.
      */
-    fun integrityCheckEnabled(state: Boolean) {
+    public fun integrityCheckEnabled(state: Boolean) {
         this.integrityCheckEnabled = state
     }
 }
