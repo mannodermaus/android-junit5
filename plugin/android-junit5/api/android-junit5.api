@@ -1,0 +1,87 @@
+public final class de/mannodermaus/gradle/plugins/junit5/AndroidJUnitPlatformPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class de/mannodermaus/gradle/plugins/junit5/DeprecatedKt {
+	public static final fun getJunitPlatform (Lorg/gradle/api/Project;)Lde/mannodermaus/gradle/plugins/junit5/dsl/AndroidJUnitPlatformExtension;
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/AndroidJUnitPlatformExtension : groovy/lang/GroovyObjectSupport, org/gradle/api/plugins/ExtensionAware {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun configurationParameter (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun configurationParameters (Ljava/util/Map;)V
+	public final fun filters (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun filters (Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun getConfigurationParameters ()Ljava/util/Map;
+	public final fun getFilters ()Lde/mannodermaus/gradle/plugins/junit5/dsl/FiltersExtension;
+	public final fun getInstrumentationTests ()Lde/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationTestOptions;
+	public final fun getJacocoOptions ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions;
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+	public final fun methodMissing (Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/FiltersExtension {
+	public fun <init> ()V
+	public final fun excludeEngines ([Ljava/lang/String;)V
+	public final fun excludePattern (Ljava/lang/String;)V
+	public final fun excludePatterns ([Ljava/lang/String;)V
+	public final fun excludeTags ([Ljava/lang/String;)V
+	public final fun includeEngines ([Ljava/lang/String;)V
+	public final fun includePattern (Ljava/lang/String;)V
+	public final fun includePatterns ([Ljava/lang/String;)V
+	public final fun includeTags ([Ljava/lang/String;)V
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationTestOptions {
+	public fun <init> ()V
+	public final fun getIntegrityCheckEnabled ()Z
+	public final fun integrityCheckEnabled (Z)V
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+	public final fun setIntegrityCheckEnabled (Z)V
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun excludedClasses ([Ljava/lang/String;)V
+	public final fun getCsv ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
+	public final fun getExcludedClasses ()Ljava/util/List;
+	public final fun getHtml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
+	public final fun getOnlyGenerateTasksForVariants ()Ljava/util/Set;
+	public final fun getTaskGenerationEnabled ()Z
+	public final fun getXml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+	public final fun onlyGenerateTasksForVariants ([Ljava/lang/String;)V
+	public final fun setExcludedClasses (Ljava/util/List;)V
+	public final fun setTaskGenerationEnabled (Z)V
+	public final fun taskGenerationEnabled (Z)V
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report {
+	public fun <init> ()V
+	public final fun destination (Ljava/io/File;)V
+	public final fun enabled (Z)V
+	public final fun getDestination ()Ljava/io/File;
+	public final fun getEnabled ()Z
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+	public final fun setDestination (Ljava/io/File;)V
+	public final fun setEnabled (Z)V
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/tasks/AndroidJUnit5JacocoReport : org/gradle/testing/jacoco/tasks/JacocoReport {
+	public fun <init> ()V
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/tasks/AndroidJUnit5WriteFilters : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public final fun execute ()V
+	public final fun getExcludeTags ()Ljava/util/List;
+	public final fun getIncludeTags ()Ljava/util/List;
+	public final fun getOutputFolder ()Ljava/io/File;
+	public final fun setExcludeTags (Ljava/util/List;)V
+	public final fun setIncludeTags (Ljava/util/List;)V
+	public final fun setOutputFolder (Ljava/io/File;)V
+}
+
