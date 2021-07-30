@@ -1,9 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.config
 
 import com.android.build.gradle.api.BaseVariant
-import de.mannodermaus.gradle.plugins.junit5.FiltersExtension
+import de.mannodermaus.gradle.plugins.junit5.dsl.FiltersExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContainer
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import org.gradle.api.Project
 
 internal class JUnit5TaskConfig(

@@ -1,10 +1,10 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.gradle.plugins.junit5.FiltersExtension
+import de.mannodermaus.gradle.plugins.junit5.dsl.FiltersExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
 import de.mannodermaus.gradle.plugins.junit5.util.junitPlatformOptions

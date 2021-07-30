@@ -1,19 +1,17 @@
 package de.mannodermaus.gradle.plugins.junit5.dsl
 
-import de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.FiltersExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extend
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionExists
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import org.gradle.api.Project
 
 internal fun Project.attachGlobalDsl() {
     // Hook the default JUnit Platform configuration into the project
-    project.extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME) { junitPlatform ->
+    extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME, arrayOf(this)) { junitPlatform ->
         // General-purpose filters
         junitPlatform.attachFiltersDsl(qualifier = null)
     }

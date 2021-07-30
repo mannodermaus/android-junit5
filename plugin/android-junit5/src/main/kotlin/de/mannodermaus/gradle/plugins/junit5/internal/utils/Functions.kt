@@ -1,4 +1,4 @@
-package de.mannodermaus.gradle.plugins.junit5.internal
+package de.mannodermaus.gradle.plugins.junit5.internal.utils
 
 import com.github.zafarkhaja.semver.Version
 import org.gradle.api.GradleException

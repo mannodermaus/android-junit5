@@ -2,7 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.gradle.plugins.junit5.internal.config.MIN_REQUIRED_AGP_VERSION
-import de.mannodermaus.gradle.plugins.junit5.internal.requireVersion
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.requireVersion
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
