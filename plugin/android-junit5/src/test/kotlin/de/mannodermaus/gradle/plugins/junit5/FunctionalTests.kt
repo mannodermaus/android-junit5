@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.io.File
 
+@Disabled
 @TestInstance(PER_CLASS)
 @DisabledOnCI
 class FunctionalTests {

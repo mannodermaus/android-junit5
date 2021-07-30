@@ -2,11 +2,20 @@ package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import de.mannodermaus.gradle.plugins.junit5.*
-import de.mannodermaus.gradle.plugins.junit5.internal.*
-import de.mannodermaus.gradle.plugins.junit5.providers.DirectoryProvider
-import de.mannodermaus.gradle.plugins.junit5.providers.mainClassDirectories
-import de.mannodermaus.gradle.plugins.junit5.providers.mainSourceDirectories
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Info
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
+import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.providers.DirectoryProvider
+import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainClassDirectories
+import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainSourceDirectories
+import de.mannodermaus.gradle.plugins.junit5.safeClassDirectoriesSetFrom
+import de.mannodermaus.gradle.plugins.junit5.safeExecutionDataSetFrom
+import de.mannodermaus.gradle.plugins.junit5.safeGetClassDirectories
+import de.mannodermaus.gradle.plugins.junit5.safeGetExecutionData
+import de.mannodermaus.gradle.plugins.junit5.safeGetSourceDirectories
+import de.mannodermaus.gradle.plugins.junit5.safeSourceDirectoriesSetFrom
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
@@ -24,15 +33,14 @@ private const val GROUP_REPORTING = "reporting"
  * Jacoco Test Reporting Task connected to a variant-aware JUnit 5 task.
  * Required to be "open" in order for Groovy's proxy magic to do its thing.
  */
-@Suppress("MemberVisibilityCanPrivate")
 @CacheableTask
-open class AndroidJUnit5JacocoReport : JacocoReport() {
+abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
-  companion object {
+  internal companion object {
     fun register(
       project: Project,
       variant: BaseVariant,
-      testTask: Test,
+      testTask: TaskProvider<out Test>,
       directoryProviders: Collection<DirectoryProvider>
     ): Boolean {
       val configAction = ConfigAction(project, variant, testTask, directoryProviders)
@@ -67,7 +75,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
   private class ConfigAction(
     val project: Project,
     val variant: BaseVariant,
-    val testTask: Test,
+    val testTask: TaskProvider<out Test>,
     private val directoryProviders: Collection<DirectoryProvider>
   ) {
 
@@ -96,7 +104,7 @@ open class AndroidJUnit5JacocoReport : JacocoReport() {
       }
 
       // Task-level Configuration
-      val taskJacoco = testTask.extensionByName<JacocoTaskExtension>("jacoco")
+      val taskJacoco = testTask.get().extensionByName<JacocoTaskExtension>("jacoco")
       taskJacoco.destinationFile?.let {
         reportTask.safeExecutionDataSetFrom(project, it.path)
       }

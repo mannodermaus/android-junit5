@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
 import com.google.common.truth.Truth.assertThat
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContainer
 import org.junit.jupiter.api.Test
 
 /**

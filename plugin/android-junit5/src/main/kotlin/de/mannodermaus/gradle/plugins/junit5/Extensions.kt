@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
 import org.gradle.api.Project
 
 /**

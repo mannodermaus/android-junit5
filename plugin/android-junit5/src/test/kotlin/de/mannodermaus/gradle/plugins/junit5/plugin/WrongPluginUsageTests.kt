@@ -1,7 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.gradle.plugins.junit5.internal.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import org.gradle.api.ProjectConfigurationException

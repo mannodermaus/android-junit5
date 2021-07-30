@@ -1,9 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.gradle.api.TestVariant
-import de.mannodermaus.gradle.plugins.junit5.INSTRUMENTATION_FILTER_RES_FILE_NAME
-import de.mannodermaus.gradle.plugins.junit5.internal.getTaskName
-import de.mannodermaus.gradle.plugins.junit5.internal.junit5ConfigurationOf
+import de.mannodermaus.gradle.plugins.junit5.internal.config.INSTRUMENTATION_FILTER_RES_FILE_NAME
+import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
@@ -27,9 +27,9 @@ const val WRITE_FILTERS_TASK_NAME = "writeFilters"
  * how class name patterns are formatted.
  */
 @CacheableTask
-open class AndroidJUnit5WriteFilters : DefaultTask() {
+abstract class AndroidJUnit5WriteFilters : DefaultTask() {
 
-  companion object {
+  internal companion object {
     fun register(
       project: Project,
       instrumentationTestVariant: TestVariant
@@ -106,7 +106,7 @@ open class AndroidJUnit5WriteFilters : DefaultTask() {
       task.outputFolder = outputFolder
 
       // Access filters for this particular variant & provide them to the task, too
-      val configuration = project.junit5ConfigurationOf(instrumentationTestVariant.testedVariant)
+      val configuration = JUnit5TaskConfig(instrumentationTestVariant.testedVariant, project)
       task.includeTags = configuration.combinedIncludeTags.toList()
       task.excludeTags = configuration.combinedExcludeTags.toList()
     }

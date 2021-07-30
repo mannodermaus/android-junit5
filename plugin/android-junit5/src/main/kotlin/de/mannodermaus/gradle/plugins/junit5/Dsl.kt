@@ -1,78 +1,15 @@
 package de.mannodermaus.gradle.plugins.junit5
 
-import de.mannodermaus.gradle.plugins.junit5.internal.android
-import de.mannodermaus.gradle.plugins.junit5.internal.extend
-import de.mannodermaus.gradle.plugins.junit5.internal.extensionByName
-import de.mannodermaus.gradle.plugins.junit5.internal.extensionExists
+import de.mannodermaus.gradle.plugins.junit5.internal.config.FILTERS_EXTENSION_NAME
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContainer
 import groovy.lang.Closure
 import groovy.lang.GroovyObjectSupport
 import org.gradle.api.Action
-import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.Input
 import org.junit.platform.commons.util.Preconditions
 import java.io.File
-
-internal fun Project.attachGlobalDsl() {
-  // Hook the default JUnit Platform configuration into the project
-  project.extend<AndroidJUnitPlatformExtension>(EXTENSION_NAME) { junitPlatform ->
-    // General-purpose filters
-    junitPlatform.attachFiltersDsl(qualifier = null)
-  }
-}
-
-internal fun Project.attachSpecificDsl(projectConfig: PluginConfig) {
-  // Variant-specific filters:
-  // This will add filters for build types (e.g. "debug" or "release")
-  // as well as composed variants  (e.g. "freeDebug" or "paidRelease")
-  // and product flavors (e.g. "free" or "paid")
-  android.buildTypes.all { buildType ->
-    // "debugFilters"
-    // "releaseFilters"
-    junitPlatform.attachFiltersDsl(qualifier = buildType.name)
-  }
-
-  // Attach DSL objects for all permutations of variants available.
-  // As an example, assume the incoming `variant` to be:
-  // Name:                    "brandADevelopmentDebug"
-  // Dimension "brand":       "brandA"
-  // Dimension "environment": "development"
-  // Build Type Name:         "debug"
-  //
-  // The following DSL objects have to be generated from this:
-  // 1) brandADevelopmentDebugFilters
-  // 2) brandAFilters
-  // 3) developmentFilters
-  projectConfig.variants.all { variant ->
-    // 1) Fully-specialized name ("brandADevelopmentDebugFilters")
-    junitPlatform.attachFiltersDsl(qualifier = variant.name)
-
-    variant.productFlavors.forEach { flavor ->
-      // 2) & 3) Single flavors ("brandAFilters" & "developmentFilters")
-      junitPlatform.attachFiltersDsl(qualifier = flavor.name)
-    }
-  }
-}
-
-internal fun Project.evaluateDsl() {
-  junitPlatform._filters.forEach { (qualifier, actions) ->
-    val extensionName = junitPlatform.filtersExtensionName(qualifier)
-    val extension = junitPlatform.extensionByName<FiltersExtension>(extensionName)
-
-    actions.forEach { action ->
-      extension.action()
-    }
-  }
-}
-
-private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = null) {
-  val extensionName = filtersExtensionName(qualifier)
-
-  if (this.extensionExists(extensionName)) {
-    return
-  }
-
-  this.extend<FiltersExtension>(extensionName)
-}
 
 
 /**
@@ -80,7 +17,7 @@ private fun AndroidJUnitPlatformExtension.attachFiltersDsl(qualifier: String? = 
  * It defines the root of the configuration tree exposed by the plugin,
  * and is registered under the name "junitPlatform".
  */
-open class AndroidJUnitPlatformExtension : GroovyObjectSupport() {
+abstract class AndroidJUnitPlatformExtension : GroovyObjectSupport(), ExtensionAware {
 
   operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
     this.config()
@@ -351,7 +288,9 @@ open class FiltersExtension {
   /**
    * Add a pattern to the list of <em>included</em> patterns
    */
-  fun includePattern(pattern: String) = includePatterns(pattern)
+  fun includePattern(pattern: String) {
+    includePatterns(pattern)
+  }
 
   /**
    * Add patterns to the list of <em>included</em> patterns
@@ -363,13 +302,16 @@ open class FiltersExtension {
   /**
    * Add a pattern to the list of <em>excluded</em> patterns
    */
-  fun excludePattern(pattern: String) = excludePatterns(pattern)
+  fun excludePattern(pattern: String) {
+    excludePatterns(pattern)
+  }
 
   /**
    * Add patterns to the list of <em>excluded</em> patterns
    */
-  fun excludePatterns(vararg patterns: String) =
-      this.patterns.exclude(*patterns)
+  fun excludePatterns(vararg patterns: String) {
+    this.patterns.exclude(*patterns)
+  }
 
   /**
    * Included & Excluded JUnit 5 tags.
@@ -407,47 +349,6 @@ open class FiltersExtension {
    */
   fun excludeEngines(vararg engines: String) {
     this.engines.exclude(*engines)
-  }
-}
-
-open class IncludeExcludeContainer {
-  private val _include = mutableSetOf<String>()
-  val include @Input get() = _include.toSet()
-  fun include(vararg items: String) = this.apply {
-    this._include.addAll(items)
-    this._exclude.removeAll(items)
-  }
-
-  private val _exclude = mutableSetOf<String>()
-  val exclude @Input get() = _exclude.toSet()
-  fun exclude(vararg items: String) = this.apply {
-    this._exclude.addAll(items)
-    this._include.removeAll(items)
-  }
-
-  fun isEmpty() = _include.isEmpty() && _exclude.isEmpty()
-
-  operator fun plus(other: IncludeExcludeContainer): IncludeExcludeContainer {
-    // Fast path, where nothing needs to be merged
-    if (this.isEmpty()) return other
-    if (other.isEmpty()) return this
-
-    // Slow path, where rules need to be merged
-    val result = IncludeExcludeContainer()
-
-    result._include.addAll(this.include)
-    result._include.addAll(other.include)
-    result._include.removeAll(other.exclude)
-
-    result._exclude.addAll(this.exclude)
-    result._exclude.addAll(other.exclude)
-    result._exclude.removeAll(other.include)
-
-    return result
-  }
-
-  override fun toString(): String {
-    return "${super.toString()}(include=$_include, exclude=$_exclude)"
   }
 }
 
