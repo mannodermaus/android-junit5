@@ -1,6 +1,7 @@
 package de.mannodermaus.junit5.condition
 
 import com.google.common.truth.Truth.assertThat
+import de.mannodermaus.junit5.internal.DisabledOnSdkVersionCondition
 import de.mannodermaus.junit5.util.AndroidBuildUtils.withApiLevel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,7 +16,8 @@ import org.junit.platform.commons.PreconditionViolationException
  */
 class DisabledOnSdkVersionConditionTests : AbstractExecutionConditionTests() {
 
-  override fun getExecutionCondition(): ExecutionCondition = DisabledOnSdkVersionCondition()
+  override fun getExecutionCondition(): ExecutionCondition =
+      DisabledOnSdkVersionCondition()
 
   override fun getTestClass(): Class<*> = DisabledOnSdkVersionIntegrationTests::class.java
 

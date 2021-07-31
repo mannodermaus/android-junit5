@@ -50,7 +50,7 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
             // and gracefully abort.
             Class.forName("org.junit.jupiter.api.Test")
             Class.forName("org.junit.platform.runner.JUnitPlatform")
-            Class.forName("de.mannodermaus.junit5.AndroidJUnit5")
+            Class.forName("de.mannodermaus.junit5.internal.runners.AndroidJUnit5")
             true
         } catch (e: Throwable) {
             false

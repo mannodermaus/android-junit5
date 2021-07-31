@@ -1,5 +1,6 @@
 package de.mannodermaus.junit5.condition
 
+import de.mannodermaus.junit5.internal.DisabledOnManufacturerCondition
 import org.junit.jupiter.api.extension.ExtendWith
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

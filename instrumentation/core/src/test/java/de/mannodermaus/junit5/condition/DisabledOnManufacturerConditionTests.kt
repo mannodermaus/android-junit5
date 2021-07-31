@@ -1,6 +1,7 @@
 package de.mannodermaus.junit5.condition
 
 import com.google.common.truth.Truth.assertThat
+import de.mannodermaus.junit5.internal.DisabledOnManufacturerCondition
 import de.mannodermaus.junit5.util.AndroidBuildUtils.withManufacturer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,7 +16,8 @@ import org.junit.platform.commons.PreconditionViolationException
  */
 class DisabledOnManufacturerConditionTests : AbstractExecutionConditionTests() {
 
-  override fun getExecutionCondition(): ExecutionCondition = DisabledOnManufacturerCondition()
+  override fun getExecutionCondition(): ExecutionCondition =
+      DisabledOnManufacturerCondition()
 
   override fun getTestClass(): Class<*> = DisabledOnManufacturerIntegrationTests::class.java
 
