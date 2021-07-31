@@ -55,6 +55,11 @@ android {
     targetCompatibility = javaVersion
   }
 
+  buildFeatures {
+    buildConfig = false
+    resValues = false
+  }
+
   lintOptions {
     // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
     warning("InvalidPackage")
@@ -66,15 +71,13 @@ android {
   }
 
   testOptions {
-    junitPlatform {
-      // Using local dependency instead of Maven coordinates
-      instrumentationTests.integrityCheckEnabled = false
-    }
-
-    unitTests.apply {
-      isReturnDefaultValues = true
-    }
+    unitTests.isReturnDefaultValues = true
   }
+}
+
+junitPlatform {
+  // Using local dependency instead of Maven coordinates
+  instrumentationTests.integrityCheckEnabled = false
 }
 
 tasks.withType<KotlinCompile> {
