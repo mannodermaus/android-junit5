@@ -3,21 +3,3 @@ public final class de/mannodermaus/junit5/AndroidJUnit5Builder : org/junit/runne
 	public fun runnerForClass (Ljava/lang/Class;)Lorg/junit/runner/Runner;
 }
 
-public final class org/junit/platform/runner/AndroidJUnit5Utils {
-	public static fun libcore_os_setenv (Ljava/lang/String;Ljava/lang/String;)V
-}
-
-public final class org/junit/platform/runner/AndroidJUnitPlatformRunnerListener : org/junit/platform/launcher/TestExecutionListener {
-	public fun <init> (Lorg/junit/platform/runner/AndroidJUnitPlatformTestTree;Lorg/junit/runner/notification/RunNotifier;)V
-	public fun dynamicTestRegistered (Lorg/junit/platform/launcher/TestIdentifier;)V
-	public fun executionFinished (Lorg/junit/platform/launcher/TestIdentifier;Lorg/junit/platform/engine/TestExecutionResult;)V
-	public fun executionSkipped (Lorg/junit/platform/launcher/TestIdentifier;Ljava/lang/String;)V
-	public fun executionStarted (Lorg/junit/platform/launcher/TestIdentifier;)V
-}
-
-public final class org/junit/platform/runner/AndroidJUnitPlatformTestTree {
-	public fun <init> (Lorg/junit/platform/launcher/TestPlan;Ljava/lang/Class;Z)V
-	public fun getSuiteDescription ()Lorg/junit/runner/Description;
-	public fun getTestPlan ()Lorg/junit/platform/launcher/TestPlan;
-}
-

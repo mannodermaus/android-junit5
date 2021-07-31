@@ -1,9 +1,8 @@
-package de.mannodermaus.junit5.internal
+package de.mannodermaus.junit5.internal.extensions
 
 import android.util.Log
+import de.mannodermaus.junit5.internal.LOG_TAG
 import java.lang.reflect.Method
-
-internal const val LOG_TAG = "AndroidJUnit5"
 
 private val jupiterTestAnnotations = listOf(
     "org.junit.jupiter.api.Test",

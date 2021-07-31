@@ -1,9 +1,9 @@
 package de.mannodermaus.junit5
 
 import android.util.Log
-import de.mannodermaus.junit5.internal.JUnit5RunnerFactory.createJUnit5Runner
+import de.mannodermaus.junit5.internal.runners.JUnit5RunnerFactory.createJUnit5Runner
 import de.mannodermaus.junit5.internal.LOG_TAG
-import de.mannodermaus.junit5.internal.jupiterTestMethods
+import de.mannodermaus.junit5.internal.extensions.jupiterTestMethods
 import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
 

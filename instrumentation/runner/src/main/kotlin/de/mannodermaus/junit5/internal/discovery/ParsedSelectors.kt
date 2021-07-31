@@ -1,7 +1,7 @@
 package de.mannodermaus.junit5.internal.discovery
 
 import android.os.Bundle
-import de.mannodermaus.junit5.internal.AndroidJUnit5
+import de.mannodermaus.junit5.internal.runners.AndroidJUnit5
 import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.discovery.DiscoverySelectors
 

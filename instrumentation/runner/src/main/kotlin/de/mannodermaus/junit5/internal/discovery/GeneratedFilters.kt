@@ -2,7 +2,7 @@ package de.mannodermaus.junit5.internal.discovery
 
 import android.content.Context
 import android.content.res.Resources
-import de.mannodermaus.junit5.internal.AndroidJUnit5
+import de.mannodermaus.junit5.internal.runners.AndroidJUnit5
 import org.junit.platform.engine.Filter
 import org.junit.platform.launcher.TagFilter
 

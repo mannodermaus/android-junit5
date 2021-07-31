@@ -1,6 +1,8 @@
-package de.mannodermaus.junit5.internal
+package de.mannodermaus.junit5.internal.runners
 
 import android.util.Log
+import de.mannodermaus.junit5.internal.LOG_TAG
+import de.mannodermaus.junit5.internal.extensions.jupiterTestMethods
 import org.junit.runner.Description
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier

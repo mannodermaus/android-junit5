@@ -1,4 +1,4 @@
-package de.mannodermaus.junit5.internal
+package de.mannodermaus.junit5.internal.runners
 
 import android.os.Build
 import org.junit.runner.Runner
