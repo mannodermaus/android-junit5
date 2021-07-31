@@ -1,0 +1,51 @@
+public final class de/mannodermaus/junit5/ActivityScenarioExtension : org/junit/jupiter/api/extension/AfterEachCallback, org/junit/jupiter/api/extension/BeforeEachCallback, org/junit/jupiter/api/extension/ParameterResolver {
+	public static final field Companion Lde/mannodermaus/junit5/ActivityScenarioExtension$Companion;
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public final fun getScenario ()Landroidx/test/core/app/ActivityScenario;
+	public static final fun launch (Landroid/content/Intent;)Lde/mannodermaus/junit5/ActivityScenarioExtension;
+	public static final fun launch (Ljava/lang/Class;)Lde/mannodermaus/junit5/ActivityScenarioExtension;
+	public fun resolveParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Object;
+	public fun supportsParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Z
+}
+
+public final class de/mannodermaus/junit5/ActivityScenarioExtension$Companion {
+	public final fun launch (Landroid/content/Intent;)Lde/mannodermaus/junit5/ActivityScenarioExtension;
+	public final fun launch (Ljava/lang/Class;)Lde/mannodermaus/junit5/ActivityScenarioExtension;
+}
+
+public final class de/mannodermaus/junit5/CoreConstantsKt {
+	public static final field JUNIT5_MINIMUM_SDK_VERSION I
+}
+
+public abstract interface annotation class de/mannodermaus/junit5/condition/DisabledIfBuildConfigValue : java/lang/annotation/Annotation {
+	public abstract fun matches ()Ljava/lang/String;
+	public abstract fun named ()Ljava/lang/String;
+}
+
+public abstract interface annotation class de/mannodermaus/junit5/condition/DisabledOnManufacturer : java/lang/annotation/Annotation {
+	public abstract fun ignoreCase ()Z
+	public abstract fun value ()[Ljava/lang/String;
+}
+
+public abstract interface annotation class de/mannodermaus/junit5/condition/DisabledOnSdkVersion : java/lang/annotation/Annotation {
+	public abstract fun from ()I
+	public abstract fun until ()I
+}
+
+public abstract interface annotation class de/mannodermaus/junit5/condition/EnabledIfBuildConfigValue : java/lang/annotation/Annotation {
+	public abstract fun matches ()Ljava/lang/String;
+	public abstract fun named ()Ljava/lang/String;
+}
+
+public abstract interface annotation class de/mannodermaus/junit5/condition/EnabledOnManufacturer : java/lang/annotation/Annotation {
+	public abstract fun ignoreCase ()Z
+	public abstract fun value ()[Ljava/lang/String;
+}
+
+public abstract interface annotation class de/mannodermaus/junit5/condition/EnabledOnSdkVersion : java/lang/annotation/Annotation {
+	public abstract fun from ()I
+	public abstract fun until ()I
+}
+

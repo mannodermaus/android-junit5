@@ -6,7 +6,12 @@ import android.content.Intent
 import android.os.Build
 import androidx.test.core.app.ActivityScenario
 import de.mannodermaus.junit5.ActivityScenarioExtension.Companion.launch
-import org.junit.jupiter.api.extension.*
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.lang.reflect.ParameterizedType
 
 /**
@@ -102,64 +107,71 @@ import java.lang.reflect.ParameterizedType
  *
  */
 @TargetApi(Build.VERSION_CODES.O)
-class ActivityScenarioExtension<A : Activity>
-private constructor(private val scenarioSupplier: () -> ActivityScenario<A>)
-  : BeforeEachCallback, AfterEachCallback, ParameterResolver {
+public class ActivityScenarioExtension<A : Activity>
+private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : BeforeEachCallback,
+    AfterEachCallback, ParameterResolver {
 
-  companion object {
+    public companion object {
+
+        /**
+         * Launches an activity of a given class and constructs an [ActivityScenario] for it.
+         * A default launch intent without specific extras is used to launch the activity.
+         */
+        @JvmStatic
+        public fun <A : Activity> launch(activityClass: Class<A>): ActivityScenarioExtension<A> =
+            ActivityScenarioExtension { ActivityScenario.launch(activityClass) }
+
+        /**
+         * Launches an activity of a given class and constructs an [ActivityScenario] for it.
+         * The given intent is used to launch the activity.
+         */
+        @JvmStatic
+        public fun <A : Activity> launch(startActivityIntent: Intent): ActivityScenarioExtension<A> =
+            ActivityScenarioExtension { ActivityScenario.launch<A>(startActivityIntent) }
+
+        /* Kotlin-specific convenience variations */
+
+        /**
+         * Launches an activity of a given class and constructs an [ActivityScenario] for it.
+         * A default launch intent without specific extras is used to launch the activity.
+         */
+        public inline fun <reified A : Activity> launch(): ActivityScenarioExtension<A> =
+            launch(A::class.java)
+    }
+
+    /* Fields */
+
+    private var _scenario: ActivityScenario<A>? = null
 
     /**
-     * Launches an activity of a given class and constructs an [ActivityScenario] for it.
-     * A default launch intent without specific extras is used to launch the activity.
+     * Returns the current [ActivityScenario] of the activity class.
+     * @throws NullPointerException If this method is called while no test is running
      */
-    @JvmStatic
-    fun <A : Activity> launch(activityClass: Class<A>) =
-        ActivityScenarioExtension { ActivityScenario.launch(activityClass) }
+    public val scenario: ActivityScenario<A>
+        get() = _scenario!!
 
-    /**
-     * Launches an activity of a given class and constructs an [ActivityScenario] for it.
-     * The given intent is used to launch the activity.
-     */
-    @JvmStatic
-    fun <A : Activity> launch(startActivityIntent: Intent) =
-        ActivityScenarioExtension { ActivityScenario.launch<A>(startActivityIntent) }
+    /* Methods */
 
-    /* Kotlin-specific convenience variations */
+    override fun beforeEach(context: ExtensionContext) {
+        _scenario = scenarioSupplier()
+    }
 
-    /**
-     * Launches an activity of a given class and constructs an [ActivityScenario] for it.
-     * A default launch intent without specific extras is used to launch the activity.
-     */
-    inline fun <reified A : Activity> launch() = launch(A::class.java)
-  }
+    override fun afterEach(context: ExtensionContext) {
+        scenario.close()
+    }
 
-  /* Fields */
+    override fun supportsParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext
+    ): Boolean {
+        // The extension can resolve ActivityScenario parameters that use the correct activity type.
+        val paramType = parameterContext.parameter.parameterizedType
+        return paramType is ParameterizedType
+                && paramType.rawType == ActivityScenario::class.java
+    }
 
-  private var _scenario: ActivityScenario<A>? = null
-
-  /**
-   * Returns the current [ActivityScenario] of the activity class.
-   * @throws NullPointerException If this method is called while no test is running
-   */
-  val scenario: ActivityScenario<A>
-    get() = _scenario!!
-
-  /* Methods */
-
-  override fun beforeEach(context: ExtensionContext) {
-    _scenario = scenarioSupplier()
-  }
-
-  override fun afterEach(context: ExtensionContext) {
-    scenario.close()
-  }
-
-  override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
-    // The extension can resolve ActivityScenario parameters that use the correct activity type.
-    val paramType = parameterContext.parameter.parameterizedType
-    return paramType is ParameterizedType
-        && paramType.rawType == ActivityScenario::class.java
-  }
-
-  override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any? = scenario
+    override fun resolveParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext
+    ): Any = scenario
 }

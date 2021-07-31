@@ -18,6 +18,7 @@ buildscript {
 plugins {
   id("com.android.library")
   kotlin("android")
+  id("explicit-api-mode")
 }
 
 apply {
@@ -49,6 +50,11 @@ android {
     targetCompatibility = javaVersion
   }
 
+  buildFeatures {
+    buildConfig = false
+    resValues = false
+  }
+
   lintOptions {
     // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
     warning("InvalidPackage")
@@ -60,9 +66,7 @@ android {
   }
 
   testOptions {
-    unitTests.apply {
-      isReturnDefaultValues = true
-    }
+    unitTests.isReturnDefaultValues = true
   }
 }
 

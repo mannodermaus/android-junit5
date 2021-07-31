@@ -1,0 +1,5 @@
+public final class de/mannodermaus/junit5/AndroidJUnit5Builder : org/junit/runners/model/RunnerBuilder {
+	public fun <init> ()V
+	public fun runnerForClass (Ljava/lang/Class;)Lorg/junit/runner/Runner;
+}
+

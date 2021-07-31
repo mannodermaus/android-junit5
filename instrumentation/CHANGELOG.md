@@ -5,6 +5,7 @@ Change Log
 
 #### Added
 #### Changed
+- Restructured and converted internal code of `core` and `runner` modules to 100% Kotlin
 #### Fixed
 - Running an individual test method with parameters will properly execute that test, even from the IDE (#199)
   (Note: Due to limitations with Android's instrumentation, this test would be reported without its parameters in the report)
