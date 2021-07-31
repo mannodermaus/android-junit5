@@ -1,13 +1,22 @@
 plugins {
-  `kotlin-dsl`
+    `kotlin-dsl`
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 sourceSets {
-  main {
-    java.srcDir(file("../../build-logic/src/main/kotlin"))
-  }
+    main {
+        java.srcDir(file("../../build-logic/src/main/kotlin"))
+    }
+}
+
+gradlePlugin {
+    plugins {
+        register("explicit-api-mode") {
+            id = "explicit-api-mode"
+            implementationClass = "ExplicitApiModePlugin"
+        }
+    }
 }
