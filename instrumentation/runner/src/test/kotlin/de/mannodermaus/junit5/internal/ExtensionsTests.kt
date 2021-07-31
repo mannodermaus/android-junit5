@@ -1,12 +1,17 @@
 @file:Suppress("unused")
 
-package de.mannodermaus.junit5.test
+package de.mannodermaus.junit5.internal
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import de.mannodermaus.junit5.AndroidJUnit5
-import de.mannodermaus.junit5.AndroidJUnit5RunnerParams
-import de.mannodermaus.junit5.jupiterTestMethods
+import de.mannodermaus.junit5.DoesntHaveTestMethods
+import de.mannodermaus.junit5.HasInnerClassWithTest
+import de.mannodermaus.junit5.HasParameterizedTest
+import de.mannodermaus.junit5.HasRepeatedTest
+import de.mannodermaus.junit5.HasTaggedTest
+import de.mannodermaus.junit5.HasTest
+import de.mannodermaus.junit5.HasTestFactory
+import de.mannodermaus.junit5.HasTestTemplate
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -14,6 +19,8 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.TagFilter
+import org.junit.runner.Description
+import org.junit.runner.notification.RunListener
 import org.junit.runner.notification.RunNotifier
 
 class ExtensionsTests {
@@ -80,4 +87,19 @@ class ExtensionsTests {
         Arguments.of(HasInnerClassWithTest::class.java, 1)
     )
   }
+}
+
+private class CountingRunListener : RunListener() {
+
+    private val methodNames = mutableListOf<String>()
+
+    override fun testFinished(description: Description) {
+        // Only count actual method executions
+        // (this method is also called for the class itself)
+        description.methodName?.let { methodNames += it }
+    }
+
+    fun count() = this.methodNames.size
+
+    fun methodNames() = methodNames.toList()
 }

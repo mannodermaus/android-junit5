@@ -1,10 +1,13 @@
-package de.mannodermaus.junit5;
+package de.mannodermaus.junit5.internal;
+
+import static androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE;
 
 import android.annotation.SuppressLint;
 import android.app.Instrumentation;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.platform.engine.DiscoverySelector;
@@ -23,11 +26,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import de.mannodermaus.junit5.discovery.GeneratedFilters;
-import de.mannodermaus.junit5.discovery.ParsedSelectors;
-import de.mannodermaus.junit5.discovery.PropertiesParser;
+import de.mannodermaus.junit5.internal.discovery.GeneratedFilters;
+import de.mannodermaus.junit5.internal.discovery.ParsedSelectors;
+import de.mannodermaus.junit5.internal.discovery.PropertiesParser;
 
-import static de.mannodermaus.junit5.ExtensionsKt.LOG_TAG;
+import static de.mannodermaus.junit5.internal.ExtensionsKt.LOG_TAG;
 import static org.junit.platform.runner.AndroidJUnit5Utils.libcore_os_setenv;
 
 /**
@@ -42,6 +45,7 @@ import static org.junit.platform.runner.AndroidJUnit5Utils.libcore_os_setenv;
  * @see org.junit.platform.runner.JUnitPlatform
  */
 @SuppressLint("NewApi")
+@VisibleForTesting(otherwise = PACKAGE_PRIVATE)
 public final class AndroidJUnit5 extends Runner {
 
   private static final String ARG_ENVIRONMENT_VARIABLES = "environmentVariables";

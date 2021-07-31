@@ -1,4 +1,4 @@
-package de.mannodermaus.junit5.test
+package de.mannodermaus.junit5
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.DynamicTest.dynamicTest

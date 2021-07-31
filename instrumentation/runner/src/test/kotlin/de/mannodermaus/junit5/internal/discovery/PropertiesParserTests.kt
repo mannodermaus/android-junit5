@@ -1,7 +1,6 @@
-package de.mannodermaus.junit5.test.discovery
+package de.mannodermaus.junit5.internal.discovery
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.junit5.discovery.PropertiesParser
 import org.junit.jupiter.api.Test
 
 class PropertiesParserTests {

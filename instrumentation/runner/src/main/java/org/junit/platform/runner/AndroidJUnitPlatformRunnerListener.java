@@ -10,7 +10,7 @@ import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
-import static de.mannodermaus.junit5.ExtensionsKt.LOG_TAG;
+import static de.mannodermaus.junit5.internal.ExtensionsKt.LOG_TAG;
 import static org.junit.platform.engine.TestExecutionResult.Status.ABORTED;
 import static org.junit.platform.engine.TestExecutionResult.Status.FAILED;
 

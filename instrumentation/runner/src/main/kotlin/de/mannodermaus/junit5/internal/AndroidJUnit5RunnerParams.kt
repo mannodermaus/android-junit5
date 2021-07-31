@@ -1,4 +1,4 @@
-package de.mannodermaus.junit5
+package de.mannodermaus.junit5.internal
 
 import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.Filter
@@ -6,7 +6,7 @@ import org.junit.platform.engine.discovery.MethodSelector
 import org.junit.platform.launcher.LauncherDiscoveryRequest
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 
-data class AndroidJUnit5RunnerParams(
+internal data class AndroidJUnit5RunnerParams(
     private val selectors: List<DiscoverySelector> = emptyList(),
     private val filters: List<Filter<*>> = emptyList(),
     val environmentVariables: Map<String, String> = emptyMap(),

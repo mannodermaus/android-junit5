@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-import static de.mannodermaus.junit5.ExtensionsKt.LOG_TAG;
+import static de.mannodermaus.junit5.internal.ExtensionsKt.LOG_TAG;
 
 @SuppressLint("NewApi")
 public final class AndroidJUnit5Utils {

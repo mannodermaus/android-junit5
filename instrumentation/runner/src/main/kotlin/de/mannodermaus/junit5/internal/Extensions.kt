@@ -1,28 +1,27 @@
-package de.mannodermaus.junit5
+package de.mannodermaus.junit5.internal
 
 import android.util.Log
 import java.lang.reflect.Method
 
-/**
- * Created by Marcel Schnelle on 2019-03-16.
- */
+internal const val LOG_TAG = "AndroidJUnit5"
 
-const val LOG_TAG = "AndroidJUnit5"
 private val jupiterTestAnnotations = listOf(
-        "org.junit.jupiter.api.Test",
-        "org.junit.jupiter.api.TestFactory",
-        "org.junit.jupiter.api.RepeatedTest",
-        "org.junit.jupiter.api.TestTemplate",
-        "org.junit.jupiter.params.ParameterizedTest")
+    "org.junit.jupiter.api.Test",
+    "org.junit.jupiter.api.TestFactory",
+    "org.junit.jupiter.api.RepeatedTest",
+    "org.junit.jupiter.api.TestTemplate",
+    "org.junit.jupiter.params.ParameterizedTest"
+)
 
-fun Class<*>.jupiterTestMethods(): List<Method> {
+internal fun Class<*>.jupiterTestMethods(): List<Method> {
     val allJupiterMethods = mutableListOf<Method>()
     try {
 
         // Check each method in the Class for the presence
         // of the well-known list of JUnit Jupiter annotations
         allJupiterMethods += declaredMethods.filter { method ->
-            val annotationClassNames = method.declaredAnnotations.map { it.annotationClass.qualifiedName }
+            val annotationClassNames =
+                method.declaredAnnotations.map { it.annotationClass.qualifiedName }
             jupiterTestAnnotations.firstOrNull { annotation ->
                 annotationClassNames.contains(annotation)
             } != null
