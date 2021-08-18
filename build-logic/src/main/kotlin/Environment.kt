@@ -12,7 +12,7 @@ enum class SupportedAgp(
     AGP_4_1("4.1.2", gradle = "6.5"),
     AGP_4_2("4.2.2", gradle = "6.7.1"),
     AGP_7_0("7.0.0", gradle = "7.0.2"),
-    AGP_7_1("7.1.0-alpha07", gradle = "7.1");
+    AGP_7_1("7.1.0-alpha08", gradle = "7.1");
 
     val shortVersion: String = run {
         // Extract first two components of the Maven dependency's version string.
