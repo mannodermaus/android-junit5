@@ -80,4 +80,4 @@ tasks.withType<Test> {
 dependencies {
 }
 
-//project.configureDeployment(Artifacts.Instrumentation.Core)
+project.configureDeployment(Artifacts.Instrumentation.Compose)

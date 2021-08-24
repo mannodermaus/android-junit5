@@ -96,9 +96,9 @@ object Artifacts {
      * Instrumentation Test artifacts
      */
     object Instrumentation {
-        private val groupId = "de.mannodermaus.junit5"
-        private val currentVersion = "1.3.1-SNAPSHOT"
-        val latestStableVersion = "1.3.0"
+        private const val groupId = "de.mannodermaus.junit5"
+        private const val currentVersion = "1.3.1-SNAPSHOT"
+        const val latestStableVersion = "1.3.0"
 
         val Core = Deployed(
                 platform = Android(minSdk = 14),
@@ -118,6 +118,16 @@ object Artifacts {
                 latestStableVersion = latestStableVersion,
                 license = license,
                 description = "Runner for integration of instrumented Android tests with JUnit 5."
+        )
+
+        val Compose = Deployed(
+            platform = Android(minSdk = 21),
+            groupId = groupId,
+            artifactId = "android-test-compose",
+            currentVersion = "0.1.0-SNAPSHOT",
+            latestStableVersion = "0.1.0-SNAPSHOT",
+            license = license,
+            description = "Extensions for Jetpack Compose tests with JUnit 5."
         )
     }
 }
