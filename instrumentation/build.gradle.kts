@@ -36,5 +36,6 @@ allprojects {
 
 apiValidation {
   ignoredPackages.add("de.mannodermaus.junit5.internal")
+  ignoredPackages.add("de.mannodermaus.junit5.compose.internal")
   ignoredProjects.add("sample")
 }

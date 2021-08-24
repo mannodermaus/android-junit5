@@ -1,7 +1,6 @@
 import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
   repositories {
@@ -11,7 +10,7 @@ buildscript {
   }
 
   dependencies {
-    val latest = Artifacts.Plugin.latestStableVersion
+    val latest = Artifacts.Plugin.currentVersion
     classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
   }
 }
@@ -26,22 +25,23 @@ apply {
   plugin("de.mannodermaus.android-junit5")
 }
 
-val javaVersion = JavaVersion.VERSION_1_8
+val javaVersion = JavaVersion.VERSION_11
 
 android {
-  compileSdkVersion(Android.compileSdkVersion)
-
-  dexOptions {
-    javaMaxHeapSize = Android.javaMaxHeapSize
-  }
+  compileSdk = Android.compileSdkVersion
 
   defaultConfig {
-    minSdkVersion(Android.testCoreMinSdkVersion)
-    targetSdkVersion(Android.targetSdkVersion)
-    multiDexEnabled = true
+    minSdk = Android.testComposeMinSdkVersion
+    targetSdk = Android.targetSdkVersion
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+    testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
+  }
+
+  buildFeatures {
+    compose = true
+    buildConfig = false
+    resValues = false
   }
 
   sourceSets {
@@ -55,18 +55,27 @@ android {
     targetCompatibility = javaVersion
   }
 
+  kotlinOptions {
+    jvmTarget = javaVersion.toString()
+  }
+
+  composeOptions {
+    kotlinCompilerExtensionVersion = libs.versions.compose
+  }
+
   testOptions {
     unitTests.isReturnDefaultValues = true
+  }
+
+  packagingOptions {
+    resources.excludes.add("META-INF/AL2.0")
+    resources.excludes.add("META-INF/LGPL2.1")
   }
 }
 
 junitPlatform {
   // Using local dependency instead of Maven coordinates
   instrumentationTests.integrityCheckEnabled = false
-}
-
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = javaVersion.toString()
 }
 
 tasks.withType<Test> {
@@ -78,6 +87,28 @@ tasks.withType<Test> {
 }
 
 dependencies {
+  implementation(libs.kotlinStdLib)
+  implementation(libs.kotlinCoroutinesCore)
+
+  implementation(libs.junitJupiterApi)
+  implementation(libs.junit4)
+  implementation(libs.espressoCore)
+
+  implementation(libs.composeUi)
+  implementation(libs.composeUiTooling)
+  implementation(libs.composeFoundation)
+  implementation(libs.composeMaterial)
+  implementation(libs.composeUiTestJUnit4)
+  implementation(libs.composeUiTestManifest)
+  api(libs.composeUiTest)
+
+  androidTestImplementation(libs.junitJupiterApi)
+  androidTestImplementation(libs.junitJupiterParams)
+  androidTestImplementation(libs.espressoCore)
+
+  androidTestImplementation(project(":core"))
+  androidTestRuntimeOnly(project(":runner"))
+  androidTestRuntimeOnly(libs.androidXTestRunner)
 }
 
 project.configureDeployment(Artifacts.Instrumentation.Compose)

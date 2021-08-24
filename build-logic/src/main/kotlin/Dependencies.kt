@@ -8,6 +8,7 @@ object libs {
         const val junitPlatform = "1.8.0"
         const val truth = "1.1.3"
         const val androidXTest = "1.4.0"
+        const val compose = "1.0.1"
     }
 
     object plugins {
@@ -19,6 +20,7 @@ object libs {
 
     // Libraries
     const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
+    const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1"
     const val javaSemver = "com.github.zafarkhaja:java-semver:0.9.0"
 
     const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitJupiter}"
@@ -27,6 +29,11 @@ object libs {
     const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:${versions.junitVintage}"
     const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
+
+    const val composeUi = "androidx.compose.ui:ui:${versions.compose}"
+    const val composeUiTooling = "androidx.compose.ui:ui-tooling:${versions.compose}"
+    const val composeFoundation = "androidx.compose.foundation:foundation:${versions.compose}"
+    const val composeMaterial = "androidx.compose.material:material:${versions.compose}"
 
     // Testing
     const val junit4 = "junit:junit:4.13.2"
@@ -41,4 +48,8 @@ object libs {
     const val androidXTestRunner = "androidx.test:runner:${versions.androidXTest}"
     const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTest}"
     const val espressoCore = "androidx.test.espresso:espresso-core:3.4.0"
+
+    const val composeUiTest = "androidx.compose.ui:ui-test:${versions.compose}"
+    const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4:${versions.compose}"
+    const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest:${versions.compose}"
 }
