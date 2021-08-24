@@ -56,7 +56,7 @@ fun Project.configureTestResources() {
                         "tests source code in Gradle functional tests against AGP ${plugin.version}"
                 extendsFrom(configurations.getByName("implementation"))
 
-                val agpDependency = libs.plugins.android.substringBeforeLast(":")
+                val agpDependency = libs.plugins.android(plugin).substringBeforeLast(":")
                 project.dependencies.add(this.name, "${agpDependency}:${plugin.version}")
             }
         }

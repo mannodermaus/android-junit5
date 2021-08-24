@@ -11,7 +11,7 @@ object libs {
     }
 
     object plugins {
-        val android = "com.android.tools.build:gradle:${SupportedAgp.values().first().version}"
+        fun android(version: SupportedAgp) = "com.android.tools.build:gradle:${version.version}"
         const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
         const val shadow = "com.github.jengelman.gradle.plugins:shadow:6.1.0"
         const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.0"

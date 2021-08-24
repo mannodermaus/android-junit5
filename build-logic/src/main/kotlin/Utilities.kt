@@ -81,6 +81,15 @@ fun Project.findLocalPluginJar(): File? {
   return localPluginJar
 }
 
+/**
+ * Returns whether or not the Compose library module is included in the project.
+ * This depends on the presence of the :compose module, which is configured
+ * in settings.gradle.
+ */
+val Project.isComposeIncluded: Boolean get() {
+    return findProject(":compose") != null
+}
+
 /* File */
 
 /**
