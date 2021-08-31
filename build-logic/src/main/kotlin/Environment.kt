@@ -29,7 +29,6 @@ enum class SupportedAgp(
 
 object Android {
     const val compileSdkVersion = "android-28"
-    const val javaMaxHeapSize = "3g"
 
     const val targetSdkVersion = 28
     const val sampleMinSdkVersion = 14

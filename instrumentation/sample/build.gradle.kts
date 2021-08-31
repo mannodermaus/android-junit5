@@ -39,10 +39,6 @@ val javaVersion = JavaVersion.VERSION_1_8
 android {
   compileSdkVersion(Android.compileSdkVersion)
 
-  dexOptions {
-    javaMaxHeapSize = Android.javaMaxHeapSize
-  }
-
   defaultConfig {
     applicationId = "de.mannodermaus.junit5.sample"
     minSdkVersion(Android.sampleMinSdkVersion)

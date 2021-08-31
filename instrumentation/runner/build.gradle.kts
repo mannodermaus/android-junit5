@@ -30,10 +30,6 @@ val javaVersion = JavaVersion.VERSION_1_8
 android {
   compileSdkVersion(Android.compileSdkVersion)
 
-  dexOptions {
-    javaMaxHeapSize = Android.javaMaxHeapSize
-  }
-
   defaultConfig {
     minSdkVersion(Android.testRunnerMinSdkVersion)
     targetSdkVersion(Android.targetSdkVersion)
