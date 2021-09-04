@@ -80,7 +80,7 @@ project.configureTestResources()
 // ------------------------------------------------------------------------------------------------
 
 dependencies {
-    compileOnly(libs.plugins.android)
+    compileOnly(libs.plugins.android(SupportedAgp.oldest))
     implementation(libs.plugins.kotlin)
 
     implementation(gradleApi())
@@ -89,7 +89,7 @@ dependencies {
     implementation(libs.junitPlatformCommons)
 
     testImplementation(gradleTestKit())
-    testImplementation(libs.plugins.android)
+    testImplementation(libs.plugins.android(SupportedAgp.oldest))
     testImplementation(libs.korte)
     testImplementation(libs.konfToml)
     testImplementation(libs.truth) {
