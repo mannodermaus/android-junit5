@@ -21,7 +21,7 @@ buildscript {
     if (project.isComposeIncluded) {
       classpath(libs.plugins.android(SupportedAgp.AGP_7_0))
     } else {
-      classpath(libs.plugins.android(SupportedAgp.oldest))
+      classpath(libs.plugins.android(SupportedAgp.AGP_4_2))
     }
   }
 }
