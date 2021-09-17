@@ -180,7 +180,7 @@ internal class AndroidJUnitPlatformTestTree(
     /**
      * Custom drop-in TestPlan for Android purposes.
      */
-    private class ModifiedTestPlan(val delegate: TestPlan) : TestPlan(delegate.containsTests()) {
+    private class ModifiedTestPlan(val delegate: TestPlan) : TestPlan(delegate.containsTests(), delegate.configurationParameters) {
 
         fun getRealParent(child: TestIdentifier?): Optional<TestIdentifier> {
             // Because the overridden "getParent()" from the superclass is modified,
