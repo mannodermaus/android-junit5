@@ -194,15 +194,16 @@ private fun MavenPublication.applyPublicationDetails(
 
 private fun MavenPublication.configurePom(deployConfig: Deployed) {
     pom {
-        // Name cannot be set directly through the property, since it somehow isn't applied to Gradle Plugin Marker's POM
-        // (maybe that plugin removes it somehow). Therefore, use the XML builder for this node as it's still required by Maven Central
+        // Name and description cannot be set directly through the property, since they somehow aren't applied
+        // to Gradle Plugin Marker's POM file (maybe that plugin removes them somehow). Therefore,
+        // use the XML builder for this node as these properties are still required by Maven Central
         withXml {
             with(asNode()) {
                 appendNode("name").setValue(deployConfig.artifactId)
+                appendNode("description").setValue(deployConfig.description)
             }
         }
 
-        description.set(deployConfig.description)
         url.set(Artifacts.githubUrl)
 
         licenses {
