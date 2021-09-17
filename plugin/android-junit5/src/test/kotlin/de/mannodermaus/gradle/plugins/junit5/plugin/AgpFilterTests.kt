@@ -94,7 +94,6 @@ interface AgpFilterTests : AgpVariantAwareTests {
 
         return listOf(
                 dynamicTest("apply freeDebug filters correctly") {
-                    println("STARTOOOOOOO ----------")
                     val task = project.tasks.get<Test>("testFreeDebugUnitTest")
                     assertThat(task.junitPlatformOptions.includeTags)
                             .containsAtLeast("global-include-tag", "freeDebug-include-tag")
