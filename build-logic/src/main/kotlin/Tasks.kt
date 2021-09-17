@@ -109,7 +109,7 @@ open class GenerateReadme : DefaultTask() {
         private const val PLUGIN_VERSION = "pluginVersion"
         private const val INSTRUMENTATION_VERSION = "instrumentationVersion"
 
-        private const val CONSTANTS_FILE = "android-junit5/src/main/kotlin/de/mannodermaus/gradle/plugins/junit5/Constants.kt"
+        private const val CONSTANTS_FILE = "android-junit5/src/main/kotlin/de/mannodermaus/gradle/plugins/junit5/internal/config/Constants.kt"
         private val CONSTANTS_FILE_REGEX = Regex("const val (.*) = \"(.*)\"")
         private val CONSTANT_MAPPINGS = mapOf(
                 "minimumRequiredGradleVersion" to "MIN_REQUIRED_GRADLE_VERSION",

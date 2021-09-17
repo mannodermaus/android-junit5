@@ -3,6 +3,10 @@ Change Log
 
 ## Unreleased
 
+## 1.3.0 (2021-09-17)
+
+**This release of the instrumentation libraries requires JUnit 5.8.0 or newer. Please check your dependency declarations!**
+
 #### Added
 #### Changed
 - Restructured and converted internal code of `core` and `runner` modules to 100% Kotlin

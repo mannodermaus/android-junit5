@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+## 1.8.0.0 (2021-09-17)
+
 #### Added
 - JUnit 5.8.0
 - New Plugin Marker artifact facilitating usage of the plugin through the `plugins {}` DSL
