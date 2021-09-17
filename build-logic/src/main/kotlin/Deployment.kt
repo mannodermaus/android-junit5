@@ -97,6 +97,7 @@ fun Project.configureDeployment(deployConfig: Deployed) {
                                 androidSourcesJar = androidSourcesJar,
                                 javadocJar = javadocJar
                         )
+                        .configurePom(deployConfig)
             }
         }
     }
@@ -149,7 +150,7 @@ private fun MavenPublication.applyPublicationDetails(
         isAndroid: Boolean,
         androidSourcesJar: Jar,
         javadocJar: Jar
-) {
+) = also {
     groupId = deployConfig.groupId
     artifactId = deployConfig.artifactId
     version = deployConfig.currentVersion
@@ -192,7 +193,7 @@ private fun MavenPublication.applyPublicationDetails(
     }
 }
 
-private fun MavenPublication.configurePom(deployConfig: Deployed) {
+private fun MavenPublication.configurePom(deployConfig: Deployed) = also {
     pom {
         // Name and description cannot be set directly through the property, since they somehow aren't applied
         // to Gradle Plugin Marker's POM file (maybe that plugin removes them somehow). Therefore,
