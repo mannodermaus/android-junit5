@@ -72,15 +72,21 @@ fun Project.configureDeployment(deployConfig: Deployed) {
             // For other projects, a new publication must be created instead
             if (isGradlePlugin) {
                 all {
-                    if (this is MavenPublication && name == "pluginMaven") {
+                    if (this !is MavenPublication) return@all
+
+                    if (name == "pluginMaven") {
                         applyPublicationDetails(
-                                project = this@configureDeployment,
-                                deployConfig = deployConfig,
-                                isAndroid = isAndroid,
-                                androidSourcesJar = androidSourcesJar,
-                                javadocJar = javadocJar
+                            project = this@configureDeployment,
+                            deployConfig = deployConfig,
+                            isAndroid = isAndroid,
+                            androidSourcesJar = androidSourcesJar,
+                            javadocJar = javadocJar
                         )
                     }
+
+                    // Always extend POM details to satisfy Maven Central's POM validation
+                    // (they require a bunch of metadata for each POM, which isn't filled out by default)
+                    configurePom(deployConfig)
                 }
             } else {
                 create("release", MavenPublication::class.java)
@@ -157,8 +163,45 @@ private fun MavenPublication.applyPublicationDetails(
     artifact(androidSourcesJar)
     artifact(javadocJar)
 
+    // Attach dependency information
     pom {
-        name.set(deployConfig.artifactId)
+        withXml {
+            with(asNode()) {
+                // Only add dependencies manually if there aren't any already
+                if (children().filterIsInstance<Node>()
+                        .none { it.name().toString().endsWith("dependencies") }
+                ) {
+                    val dependenciesNode = appendNode("dependencies")
+                    val dependencies =
+                        project.configurations.getByName("implementation").allDependencies +
+                                project.configurations.getByName("runtimeOnly").allDependencies
+
+                    dependencies
+                        .filter { it.name != "unspecified" }
+                        .forEach {
+                            with(dependenciesNode.appendNode("dependency")) {
+                                appendNode("groupId", it.group)
+                                appendNode("artifactId", it.name)
+                                appendNode("version", it.version)
+                                appendNode("scope", "runtime")
+                            }
+                        }
+                }
+            }
+        }
+    }
+}
+
+private fun MavenPublication.configurePom(deployConfig: Deployed) {
+    pom {
+        // Name cannot be set directly through the property, since it somehow isn't applied to Gradle Plugin Marker's POM
+        // (maybe that plugin removes it somehow). Therefore, use the XML builder for this node as it's still required by Maven Central
+        withXml {
+            with(asNode()) {
+                appendNode("name").setValue(deployConfig.artifactId)
+            }
+        }
+
         description.set(deployConfig.description)
         url.set(Artifacts.githubUrl)
 
@@ -180,31 +223,6 @@ private fun MavenPublication.applyPublicationDetails(
             connection.set("scm:git:${Artifacts.githubRepo}.git")
             developerConnection.set("scm:git:ssh://github.com/${Artifacts.githubRepo}.git")
             url.set("${Artifacts.githubUrl}/tree/main")
-        }
-
-        withXml {
-            with(asNode()) {
-                // Only add dependencies manually if there aren't any already
-                if (children().filterIsInstance<Node>()
-                                .none { it.name().toString().endsWith("dependencies") }
-                ) {
-                    val dependenciesNode = appendNode("dependencies")
-                    val dependencies =
-                            project.configurations.getByName("implementation").allDependencies +
-                                    project.configurations.getByName("runtimeOnly").allDependencies
-
-                    dependencies
-                            .filter { it.name != "unspecified" }
-                            .forEach {
-                                with(dependenciesNode.appendNode("dependency")) {
-                                    appendNode("groupId", it.group)
-                                    appendNode("artifactId", it.name)
-                                    appendNode("version", it.version)
-                                    appendNode("scope", "runtime")
-                                }
-                            }
-                }
-            }
         }
     }
 }
