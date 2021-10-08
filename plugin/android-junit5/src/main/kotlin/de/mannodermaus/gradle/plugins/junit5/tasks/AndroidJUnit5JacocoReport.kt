@@ -93,7 +93,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
             )
 
             allReports.forEach { (from, to) ->
-                to.isEnabled = from.enabled
+                to.required.set(from.enabled)
                 from.destination?.let { to.destination = it }
             }
 
