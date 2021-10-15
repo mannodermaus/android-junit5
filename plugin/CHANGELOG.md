@@ -2,6 +2,7 @@ Change Log
 ==========
 
 ## Unreleased
+- Replaced deprecated method `Report.setEnabled` with `Report.required.set` to remove deprecation warnings in Gradle 7+ (CC @gmarques33, #260)
 
 ## 1.8.0.0 (2021-09-17)
 
