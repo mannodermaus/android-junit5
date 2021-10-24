@@ -98,9 +98,9 @@ dependencies {
   implementation(libs.composeUiTooling)
   implementation(libs.composeFoundation)
   implementation(libs.composeMaterial)
-  implementation(libs.composeUiTestJUnit4)
-  implementation(libs.composeUiTestManifest)
   api(libs.composeUiTest)
+  api(libs.composeUiTestJUnit4)
+  implementation(libs.composeUiTestManifest)
 
   androidTestImplementation(libs.junitJupiterApi)
   androidTestImplementation(libs.junitJupiterParams)

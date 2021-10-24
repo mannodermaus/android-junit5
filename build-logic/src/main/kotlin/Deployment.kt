@@ -194,18 +194,27 @@ private fun MavenPublication.applyPublicationDetails(
                         .none { it.name().toString().endsWith("dependencies") }
                 ) {
                     val dependenciesNode = appendNode("dependencies")
-                    val dependencies =
-                        project.configurations.getByName("implementation").allDependencies +
-                                project.configurations.getByName("runtimeOnly").allDependencies
+
+                    val compileDeps = project.configurations.getByName("api").allDependencies
+                    val runtimeDeps = project.configurations.getByName("implementation").allDependencies +
+                            project.configurations.getByName("runtimeOnly").allDependencies -
+                            compileDeps
+
+                    val dependencies = mapOf(
+                        "runtime" to runtimeDeps,
+                        "compile" to compileDeps
+                    )
 
                     dependencies
-                        .filter { it.name != "unspecified" }
-                        .forEach {
-                            with(dependenciesNode.appendNode("dependency")) {
-                                appendNode("groupId", it.group)
-                                appendNode("artifactId", it.name)
-                                appendNode("version", it.version)
-                                appendNode("scope", "runtime")
+                        .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
+                        .forEach { (scope, dependencies) ->
+                            dependencies.forEach {
+                                with(dependenciesNode.appendNode("dependency")) {
+                                    appendNode("groupId", it.group)
+                                    appendNode("artifactId", it.name)
+                                    appendNode("version", it.version)
+                                    appendNode("scope", scope)
+                                }
                             }
                         }
                 }
