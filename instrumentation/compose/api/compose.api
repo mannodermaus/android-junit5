@@ -1,21 +1,18 @@
-public final class de/mannodermaus/junit5/compose/AndroidComposeExtension : de/mannodermaus/junit5/compose/ComposeContentExtension, org/junit/jupiter/api/extension/AfterEachCallback, org/junit/jupiter/api/extension/BeforeEachCallback {
+public final class de/mannodermaus/junit5/compose/AndroidComposeExtension : de/mannodermaus/junit5/compose/ComposeExtension, org/junit/jupiter/api/extension/BeforeEachCallback, org/junit/jupiter/api/extension/ParameterResolver {
 	public static final field $stable I
-	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun <init> ()V
 	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
-	public fun onAllNodes (Landroidx/compose/ui/test/SemanticsMatcher;Z)Landroidx/compose/ui/test/SemanticsNodeInteractionCollection;
-	public fun onNode (Landroidx/compose/ui/test/SemanticsMatcher;Z)Landroidx/compose/ui/test/SemanticsNodeInteraction;
-	public fun setContent (Lkotlin/jvm/functions/Function2;)V
+	public fun resolveParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Object;
+	public fun runComposeTest (Lkotlin/jvm/functions/Function1;)V
+	public fun supportsParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Z
 }
 
 public final class de/mannodermaus/junit5/compose/AndroidComposeExtensionKt {
 	public static final fun createAndroidComposeExtension (Ljava/lang/Class;)Lde/mannodermaus/junit5/compose/AndroidComposeExtension;
-	public static final fun createComposeExtension ()Lde/mannodermaus/junit5/compose/ComposeContentExtension;
-}
-
-public abstract interface class de/mannodermaus/junit5/compose/ComposeContentExtension : androidx/compose/ui/test/SemanticsNodeInteractionsProvider, de/mannodermaus/junit5/compose/ComposeExtension {
-	public abstract fun setContent (Lkotlin/jvm/functions/Function2;)V
+	public static final fun createComposeExtension ()Lde/mannodermaus/junit5/compose/ComposeExtension;
 }
 
 public abstract interface class de/mannodermaus/junit5/compose/ComposeExtension {
+	public abstract fun runComposeTest (Lkotlin/jvm/functions/Function1;)V
 }
 

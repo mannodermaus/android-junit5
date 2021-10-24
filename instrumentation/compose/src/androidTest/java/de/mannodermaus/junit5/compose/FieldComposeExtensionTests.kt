@@ -1,6 +1,6 @@
 package de.mannodermaus.junit5.compose
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
-class ComposeExtensionTests {
+class FieldComposeExtensionTests {
 
     @JvmField
     @RegisterExtension
@@ -29,19 +29,21 @@ class ComposeExtensionTests {
     )
     @ParameterizedTest
     fun test(buttonLabel: String) {
-        extension.setContent {
-            Box {
-                var counter by remember { mutableStateOf(0) }
+        extension.runComposeTest {
+            setContent {
+                Column {
+                    var counter by remember { mutableStateOf(0) }
 
-                Text(text = "Clicked: $counter")
-                Button(onClick = { counter++ }) {
-                    Text(text = buttonLabel)
+                    Text(text = "Clicked: $counter")
+                    Button(onClick = { counter++ }) {
+                        Text(text = buttonLabel)
+                    }
                 }
             }
-        }
 
-        extension.onNodeWithText("Clicked: 0").assertIsDisplayed()
-        extension.onNodeWithText(buttonLabel).performClick()
-        extension.onNodeWithText("Clicked: 1").assertIsDisplayed()
+            onNodeWithText("Clicked: 0").assertIsDisplayed()
+            onNodeWithText(buttonLabel).performClick()
+            onNodeWithText("Clicked: 1").assertIsDisplayed()
+        }
     }
 }

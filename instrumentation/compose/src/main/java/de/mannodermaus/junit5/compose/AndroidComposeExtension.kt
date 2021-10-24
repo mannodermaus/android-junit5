@@ -1,21 +1,21 @@
 package de.mannodermaus.junit5.compose
 
+import android.annotation.SuppressLint
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import de.mannodermaus.junit5.compose.internal.ComposeRuleAdapter
-import org.junit.jupiter.api.extension.AfterEachCallback
+import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
 /**
  *
  */
-public fun createComposeExtension(): ComposeContentExtension =
+public fun createComposeExtension(): ComposeExtension =
     createAndroidComposeExtension<ComponentActivity>()
 
 /**
@@ -25,48 +25,66 @@ public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(
     return createAndroidComposeExtension(A::class.java)
 }
 
+/**
+ *
+ */
 public fun <A : ComponentActivity> createAndroidComposeExtension(
     activityClass: Class<A>
 ): AndroidComposeExtension {
     return AndroidComposeExtension(
-        rule = createAndroidComposeRule(activityClass)
+        ruleFactory = { createAndroidComposeRule(activityClass) }
     )
 }
 
 /**
  *
  */
+@SuppressLint("NewApi")
 public class AndroidComposeExtension
-internal constructor(rule: ComposeContentTestRule) :
+@JvmOverloads
+internal constructor(
+    private val ruleFactory: () -> ComposeContentTestRule = { createComposeRule() }
+) :
     BeforeEachCallback,
-    AfterEachCallback,
-    ComposeContentExtension {
+    ParameterResolver,
+    ComposeExtension {
 
-    private val adapter = ComposeRuleAdapter(rule)
+    private var description: Description? = null
 
-    override fun beforeEach(context: ExtensionContext?) {
-        adapter.setup()
+    /* BeforeEachCallback */
+
+    override fun beforeEach(context: ExtensionContext) {
+        description = Description.createTestDescription(
+            context.testClass.orElse(this::class.java),
+            context.displayName
+        )
     }
 
-    override fun afterEach(context: ExtensionContext?) {
-        adapter.teardown()
+    /* ParameterResolver */
+
+    override fun supportsParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext
+    ): Boolean {
+        return ComposeExtension::class.java.isAssignableFrom(parameterContext.parameter.type)
     }
 
-    public override fun setContent(block: @Composable () -> Unit) {
-        adapter.rule.setContent(block)
+    override fun resolveParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext
+    ): Any {
+        return this
     }
 
-    override fun onAllNodes(
-        matcher: SemanticsMatcher,
-        useUnmergedTree: Boolean
-    ): SemanticsNodeInteractionCollection {
-        return adapter.rule.onAllNodes(matcher, useUnmergedTree)
-    }
+    /* ComposeExtension */
 
-    override fun onNode(
-        matcher: SemanticsMatcher,
-        useUnmergedTree: Boolean
-    ): SemanticsNodeInteraction {
-        return adapter.rule.onNode(matcher, useUnmergedTree)
+    override fun runComposeTest(block: ComposeContext.() -> Unit) {
+        ruleFactory().also { rule ->
+            rule.apply(object : Statement() {
+                override fun evaluate() {
+                    rule.block()
+                }
+            }, description).evaluate()
+        }
     }
 }
