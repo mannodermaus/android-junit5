@@ -12,7 +12,7 @@ enum class SupportedAgp(
     AGP_4_1("4.1.2", gradle = "6.5"),
     AGP_4_2("4.2.2", gradle = "6.7.1"),
     AGP_7_0("7.0.2", gradle = "7.0.2"),
-    AGP_7_1("7.1.0-beta01", gradle = "7.2"),
+    AGP_7_1("7.1.0-beta02", gradle = "7.2"),
     AGP_7_2("7.2.0-alpha03", gradle = "7.3-rc-1");
 
     val shortVersion: String = run {
