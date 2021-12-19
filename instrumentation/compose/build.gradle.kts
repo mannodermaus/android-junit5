@@ -10,7 +10,7 @@ buildscript {
   }
 
   dependencies {
-    val latest = Artifacts.Plugin.currentVersion
+    val latest = Artifacts.Plugin.latestStableVersion
     classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
   }
 }
