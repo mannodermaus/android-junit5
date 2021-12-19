@@ -8,7 +8,7 @@ object libs {
         const val junitPlatform = "1.8.0"
         const val truth = "1.1.3"
         const val androidXTest = "1.4.0"
-        const val compose = "1.0.1"
+        const val compose = "1.0.5"
     }
 
     object plugins {
