@@ -14,8 +14,15 @@ buildscript {
 
   dependencies {
     classpath(libs.plugins.kotlin)
-    classpath(libs.plugins.android)
     classpath(libs.plugins.dokka)
+
+    // Use a different version of the Android Gradle Plugin
+    // depending on the presence of Compose in the project
+    if (project.isComposeIncluded) {
+      classpath(libs.plugins.android(SupportedAgp.AGP_7_0))
+    } else {
+      classpath(libs.plugins.android(SupportedAgp.AGP_4_2))
+    }
   }
 }
 
@@ -29,5 +36,6 @@ allprojects {
 
 apiValidation {
   ignoredPackages.add("de.mannodermaus.junit5.internal")
+  ignoredPackages.add("de.mannodermaus.junit5.compose.internal")
   ignoredProjects.add("sample")
 }

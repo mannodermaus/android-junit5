@@ -22,6 +22,17 @@ fun Project.configureDeployment(deployConfig: Deployed) {
         throw IllegalStateException("This method can not be called on the root project")
     }
 
+    // Deployment of modules needs to be conditionally locked.
+    // If the project is set to Compose mode, only the Compose modules may be deployed.
+    // On the other hand, if the project is set to Default mode, only the ordinary
+    // instrumentation modules are deployed. This has to do with the restrictions
+    // of the Nexus Publishing plugin, which must use the same group and version declaration
+    // for all modules. It's impossible to use Version A for instrumentation modules and Version B
+    // for Compose modules at the same time, hence this conditional.
+    if (shouldSkipDeployment(deployConfig)) {
+        return
+    }
+
     val credentials = DeployedCredentials(this)
 
     // Configure root project (this only happens once
@@ -113,6 +124,16 @@ fun Project.configureDeployment(deployConfig: Deployed) {
 
 /* Private */
 
+private fun Project.shouldSkipDeployment(deployConfig: Deployed): Boolean {
+    return if (this.isComposeIncluded) {
+        // If Compose is included, any non-compose module should be skipped
+        deployConfig != Artifacts.Instrumentation.Compose
+    } else {
+        // If Compose is disabled, any compose module should be skipped
+        deployConfig == Artifacts.Instrumentation.Compose
+    }
+}
+
 private fun Project.configureRootDeployment(deployConfig: Deployed, credentials: DeployedCredentials) {
     if (this != rootProject) {
         throw IllegalStateException("This method can only be called on the root project")
@@ -173,18 +194,27 @@ private fun MavenPublication.applyPublicationDetails(
                         .none { it.name().toString().endsWith("dependencies") }
                 ) {
                     val dependenciesNode = appendNode("dependencies")
-                    val dependencies =
-                        project.configurations.getByName("implementation").allDependencies +
-                                project.configurations.getByName("runtimeOnly").allDependencies
+
+                    val compileDeps = project.configurations.getByName("api").allDependencies
+                    val runtimeDeps = project.configurations.getByName("implementation").allDependencies +
+                            project.configurations.getByName("runtimeOnly").allDependencies -
+                            compileDeps
+
+                    val dependencies = mapOf(
+                        "runtime" to runtimeDeps,
+                        "compile" to compileDeps
+                    )
 
                     dependencies
-                        .filter { it.name != "unspecified" }
-                        .forEach {
-                            with(dependenciesNode.appendNode("dependency")) {
-                                appendNode("groupId", it.group)
-                                appendNode("artifactId", it.name)
-                                appendNode("version", it.version)
-                                appendNode("scope", "runtime")
+                        .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
+                        .forEach { (scope, dependencies) ->
+                            dependencies.forEach {
+                                with(dependenciesNode.appendNode("dependency")) {
+                                    appendNode("groupId", it.group)
+                                    appendNode("artifactId", it.name)
+                                    appendNode("version", it.version)
+                                    appendNode("scope", scope)
+                                }
                             }
                         }
                 }
@@ -261,11 +291,9 @@ private class AndroidDsl(project: Project) {
             val java = JavaDsl(delegate)
 
             class JavaDsl(main: Any) {
-                private val delegate = main.javaClass.getDeclaredMethod("getJava").invoke(main)
-
-                val srcDirs: Set<File> = delegate.javaClass
-                        .getDeclaredMethod("getSrcDirs")
-                        .invoke(delegate) as Set<File>
+                val srcDirs = main.javaClass
+                    .getDeclaredMethod("getJavaDirectories")
+                    .invoke(main) as Set<File>
             }
         }
     }
@@ -299,20 +327,6 @@ private fun Project.signing(action: SigningExtension.() -> Unit) {
 }
 
 // Nexus Staging & Publishing Plugins facade
-
-//private fun Project.nexusStaging(
-//    packageGroup: String,
-//    stagingProfileId: String?,
-//    username: String?,
-//    password: String?
-//) {
-//    rootProject.extensions.getByName("nexusStaging").withGroovyBuilder {
-//        setProperty("packageGroup", packageGroup)
-//        setProperty("stagingProfileId", stagingProfileId)
-//        setProperty("username", username)
-//        setProperty("password", password)
-//    }
-//}
 
 private fun Project.nexusPublishing(
         packageGroup: String,

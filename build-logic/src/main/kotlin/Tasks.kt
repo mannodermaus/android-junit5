@@ -10,7 +10,7 @@ fun Project.configureTestResources() {
     // for different versions of the Android Gradle Plugin
     tasks.named("processTestResources", Copy::class.java).configure {
         val tokens = mapOf(
-                "COMPILE_SDK_VERSION" to Android.compileSdkVersion,
+                "COMPILE_SDK_VERSION" to Android.compileSdkVersion.toString(),
                 "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
                 "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
@@ -56,7 +56,7 @@ fun Project.configureTestResources() {
                         "tests source code in Gradle functional tests against AGP ${plugin.version}"
                 extendsFrom(configurations.getByName("implementation"))
 
-                val agpDependency = libs.plugins.android.substringBeforeLast(":")
+                val agpDependency = libs.plugins.android(plugin).substringBeforeLast(":")
                 project.dependencies.add(this.name, "${agpDependency}:${plugin.version}")
             }
         }

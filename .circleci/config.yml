@@ -32,6 +32,11 @@ jobs:
           command: cd plugin && ./gradlew :android-junit5:check --stacktrace --no-daemon
 
       - run:
+          name: (Instrumentation) Prepare local.properties
+          command: |
+            touch instrumentation/local.properties
+            echo "junit5.includeCompose = false" > instrumentation/local.properties
+      - run:
           name: (Instrumentation) Download Dependencies
           command: cd instrumentation && ./gradlew androidDependencies --no-daemon
       - run:
@@ -44,6 +49,24 @@ jobs:
       - run:
           name: (Instrumentation) Test
           command: cd instrumentation && ./gradlew :core:check :runner:check --stacktrace --no-daemon
+
+      - run:
+          name: (Compose) Prepare local.properties
+          command: |
+            touch instrumentation/local.properties
+            echo "junit5.includeCompose = true" > instrumentation/local.properties
+
+      - run:
+          name: (Compose) Download Dependencies
+          command: cd instrumentation && ./gradlew androidDependencies --no-daemon
+      - run:
+          name: (Compose) Build
+          command: |
+            cd instrumentation
+            ./gradlew :compose:assemble :compose:assembleDebugAndroidTest --stacktrace --no-daemon
+      - run:
+          name: (Compose) Test
+          command: cd instrumentation && ./gradlew :compose:check --stacktrace --no-daemon
 
       - save_cache:
           <<: *cache_key
@@ -95,6 +118,9 @@ jobs:
       - store_artifacts:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
+      - store_artifacts:
+          path: instrumentation/compose/build/reports
+          destination: instrumentation-compose
 
   deploy:
     <<: *defaults
@@ -109,7 +135,16 @@ jobs:
           command: cd plugin && ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
       - run:
           name: (Instrumentation) Build & Deploy
-          command: cd instrumentation && ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
+          command: |
+            cd instrumentation
+            echo "junit5.includeCompose = false" > local.properties
+            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
+      - run:
+          name: (Compose) Build & Deploy
+          command: |
+            cd instrumentation
+            echo "junit5.includeCompose = true" > local.properties
+            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
       - store_artifacts:
           path: plugin/android-junit5/build/publications
           destination: plugin/publications/snapshots
@@ -119,6 +154,9 @@ jobs:
       - store_artifacts:
           path: instrumentation/runner/build/publications
           destination: instrumentation-runner/publications/snapshots
+      - store_artifacts:
+          path: instrumentation/compose/build/publications
+          destination: instrumentation-compose/publications/snapshots
 
 workflows:
   version: 2
