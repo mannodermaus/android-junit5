@@ -3,6 +3,9 @@ Change Log
 
 ## Unreleased
 
+## 1.8.2.0 (2021-12-19)
+- JUnit 5.8.2
+
 ## 1.8.1.0 (2021-12-19)
 - JUnit 5.8.1
 - Replaced deprecated method `Report.setEnabled` with `Report.required.set` to remove deprecation warnings in Gradle 7+ (CC @gmarques33, #260)
