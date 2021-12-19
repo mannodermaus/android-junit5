@@ -3,9 +3,7 @@
   To update the content of this README, please apply modifications
   to `README.md.template` instead, and run the `generateReadme` task from Gradle.
 -->
-# android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
-
-![Logo](.images/logo.png)
+# <img src=".images/logo.png" align="right" width="100">android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
 
 A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 4.0.0 or later.**
 
