@@ -125,7 +125,7 @@ object Artifacts {
             platform = Android(minSdk = 21),
             groupId = groupId,
             artifactId = "android-test-compose",
-            currentVersion = "0.1.0-SNAPSHOT",
+            currentVersion = "1.0.0-SNAPSHOT",
             latestStableVersion = "0.1.0-SNAPSHOT",
             license = license,
             description = "Extensions for Jetpack Compose tests with JUnit 5."
