@@ -2,7 +2,7 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.5.21"
+        const val kotlin = "1.5.31"
         const val junitJupiter = "5.8.0"
         const val junitVintage = "5.8.0"
         const val junitPlatform = "1.8.0"
