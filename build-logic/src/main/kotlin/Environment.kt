@@ -13,7 +13,7 @@ enum class SupportedAgp(
     AGP_4_2("4.2.2", gradle = "6.7.1"),
     AGP_7_0("7.0.4", gradle = "7.0.2"),
     AGP_7_1("7.1.0-beta05", gradle = "7.2"),
-    AGP_7_2("7.2.0-alpha06", gradle = "7.3");
+    AGP_7_2("7.2.0-alpha07", gradle = "7.3");
 
     companion object {
         val oldest = values().first()
