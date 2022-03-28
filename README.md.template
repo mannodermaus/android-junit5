@@ -103,13 +103,13 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
 <details open>
   <summary>Kotlin</summary>
   
-  ```groovy
+  ```kotlin
   android {
     defaultConfig {
       // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
       // 2) Connect JUnit 5 to the runner
-      testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+      testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
     }
 
     // 3) Java 8 is required
