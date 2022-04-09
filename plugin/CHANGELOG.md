@@ -2,6 +2,7 @@ Change Log
 ==========
 
 ## Unreleased
+- Support Gradle configuration cache (#265)
 
 ## 1.8.2.0 (2021-12-19)
 - JUnit 5.8.2
