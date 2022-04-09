@@ -38,6 +38,10 @@ class FunctionalTestProjectCreator(
       ?: emptyList()
   }
 
+  fun specNamed(name: String): Spec =
+    allSpecs.firstOrNull { it.name == name }
+      ?: throw IllegalAccessException("No test project named '$name' found in src/test/resources/test-projects")
+
   @Throws(TestAbortedException::class)
   fun createProject(spec: Spec, agp: TestedAgp): File {
     // Validate the spec requirement against the executing AGP version first
@@ -55,6 +59,11 @@ class FunctionalTestProjectCreator(
       File(projectFolder, OUTPUT_SETTINGS_GRADLE_NAME).delete()
     }
     projectFolder.mkdirs()
+
+    // Set up static files
+    File(projectFolder, "gradle.properties").bufferedWriter().use { file ->
+      file.write("android.useAndroidX = true")
+    }
 
     // Copy over the source folders
     val targetSrcFolder = File(projectFolder, "src").also { it.mkdir() }
