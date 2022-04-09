@@ -54,8 +54,6 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
     }
   }
 
-  private lateinit var variant: TestVariant
-
   @Input
   public var includeTags: List<String> = emptyList()
 
@@ -102,7 +100,6 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
     val type = AndroidJUnit5WriteFilters::class.java
 
     fun execute(task: AndroidJUnit5WriteFilters) {
-      task.variant = instrumentationTestVariant
       task.outputFolder = outputFolder
 
       // Access filters for this particular variant & provide them to the task, too
