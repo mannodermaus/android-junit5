@@ -1,0 +1,10 @@
+[settings]
+includeAndroidResources = true
+
+[[expectations]]
+buildType = "debug"
+tests = "AndroidTest"
+
+[[expectations]]
+buildType = "release"
+tests = "AndroidTest"

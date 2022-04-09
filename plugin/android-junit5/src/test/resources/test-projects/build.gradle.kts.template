@@ -54,6 +54,11 @@ android {
     minSdkVersion(minSdk)
     targetSdkVersion(targetSdk)
 
+    {% if INCLUDE_ANDROID_RESOURCES %}
+      testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+      testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
+    {% endif %}
+
     {% if USE_CUSTOM_BUILD_TYPE %}
       buildTypes {
         register("{{ USE_CUSTOM_BUILD_TYPE }}")
@@ -142,6 +147,9 @@ dependencies {
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 
   {% if INCLUDE_ANDROID_RESOURCES %}
+    androidTestImplementation("androidx.test:runner:1.4.0")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:${junit5AndroidLibsVersion}")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:${junit5AndroidLibsVersion}")
   {% endif %}
