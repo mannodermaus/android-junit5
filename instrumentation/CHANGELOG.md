@@ -2,6 +2,7 @@ Change Log
 ==========
 
 ## Unreleased
+- Update formatting of instrumentation test names to prevent breaking generation of log files in newer versions of AGP (#263)
 
 ## 1.3.0 (2021-09-17)
 

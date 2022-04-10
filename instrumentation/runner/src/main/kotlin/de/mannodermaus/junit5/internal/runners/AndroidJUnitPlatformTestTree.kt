@@ -50,7 +50,12 @@ internal class AndroidJUnitPlatformTestTree(
                 }
 
                 nameComponents.reverse()
-                nameComponents.joinToString(": ")
+
+                // Android's Unified Test Platform (AGP 7.0+) is using literal test names
+                // to create files when capturing Logcat output during execution.
+                // Ergo, make sure that only legal characters are being used in the test names
+                // (ref. https://github.com/mannodermaus/android-junit5/issues/263)
+                nameComponents.joinToString(" - ")
             }
 
             else -> formatTestName(identifier)
