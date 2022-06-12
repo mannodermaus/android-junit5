@@ -38,7 +38,7 @@ internal object GeneratedFilters {
         }
 
         if (inputStream == null) {
-            // File does't exist, or couldn't be located; return
+            // File doesn't exist, or couldn't be located; return
             return emptyList()
         }
 

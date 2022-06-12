@@ -106,6 +106,8 @@ dependencies {
   compileOnly(libs.junitPlatformRunner)
 
   testImplementation(project(":testutil"))
+  testImplementation(libs.robolectric)
+  testRuntimeOnly(libs.junitVintageEngine)
   testRuntimeOnly(libs.junitJupiterEngine)
 }
 

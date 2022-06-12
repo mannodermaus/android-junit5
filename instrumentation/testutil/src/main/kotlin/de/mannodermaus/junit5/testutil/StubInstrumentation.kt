@@ -23,7 +23,9 @@ internal class StubInstrumentation : Instrumentation() {
     companion object {
         private fun createMockTargetContext(): Context {
             return mock {
-                on { packageName } doReturn "de.mannodermaus.junit5.target"
+                // Needed for some ExecutionCondition tests that
+                // require access to the BuildConfig class inside module ':core'
+                on { packageName } doReturn "de.mannodermaus.junit5.util"
             }
         }
 

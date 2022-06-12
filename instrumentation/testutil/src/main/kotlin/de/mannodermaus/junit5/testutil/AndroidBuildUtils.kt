@@ -28,7 +28,7 @@ object AndroidBuildUtils {
         }
     }
 
-    fun withMockedInstrumentation(block: () -> Unit) {
+    fun withMockedInstrumentation(arguments: Bundle = Bundle(), block: () -> Unit) {
         val (oldInstrumentation, oldArguments) = try {
             InstrumentationRegistry.getInstrumentation() to InstrumentationRegistry.getArguments()
         } catch (ignored: Throwable) {
@@ -37,7 +37,7 @@ object AndroidBuildUtils {
 
         try {
             val instrumentation = StubInstrumentation()
-            InstrumentationRegistry.registerInstance(instrumentation, Bundle())
+            InstrumentationRegistry.registerInstance(instrumentation, arguments)
             block()
         } finally {
             if (oldInstrumentation != null) {

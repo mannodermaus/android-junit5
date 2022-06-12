@@ -4,6 +4,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import de.mannodermaus.junit5.internal.discovery.GeneratedFilters
 import de.mannodermaus.junit5.internal.discovery.ParsedSelectors
 import de.mannodermaus.junit5.internal.discovery.PropertiesParser
+import de.mannodermaus.junit5.internal.discovery.ShardingFilter
 import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.Filter
 import org.junit.platform.engine.discovery.MethodSelector
@@ -60,7 +61,8 @@ internal fun createRunnerParams(testClass: Class<*>): AndroidJUnit5RunnerParams 
     // which aren't subject to the filtering imposed through adb.
     // A special resource file may be looked up at runtime, containing
     // the filters to apply by the AndroidJUnit5 runner.
-    val filters = GeneratedFilters.fromContext(instrumentation.context)
+    val filters = GeneratedFilters.fromContext(instrumentation.context) +
+            listOfNotNull(ShardingFilter.fromArguments(arguments))
 
     return AndroidJUnit5RunnerParams(
         selectors,
