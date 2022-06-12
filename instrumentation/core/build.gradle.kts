@@ -108,11 +108,7 @@ dependencies {
   androidTestRuntimeOnly(project(":runner"))
   androidTestRuntimeOnly(libs.junitJupiterEngine)
 
-  testImplementation(libs.junitJupiterApi)
-  testImplementation(libs.mockitoCore)
-  testImplementation(libs.mockitoKotlin)
-  testImplementation(libs.truth)
-  testImplementation(libs.truthJava8Extensions)
+  testImplementation(project(":testutil"))
 }
 
 project.configureDeployment(Artifacts.Instrumentation.Core)

@@ -2,7 +2,7 @@ package de.mannodermaus.junit5.condition
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.internal.DisabledIfBuildConfigValueCondition
-import de.mannodermaus.junit5.util.AndroidBuildUtils.withMockedInstrumentation
+import de.mannodermaus.junit5.testutil.AndroidBuildUtils.withMockedInstrumentation
 import de.mannodermaus.junit5.util.RESOURCE_LOCK_INSTRUMENTATION
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
