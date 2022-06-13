@@ -105,12 +105,9 @@ dependencies {
   compileOnly(libs.junitJupiterParams)
   compileOnly(libs.junitPlatformRunner)
 
-  testImplementation(libs.truth)
-  testImplementation(libs.mockitoCore)
-  testImplementation(libs.junitJupiterApi)
-  testImplementation(libs.junitJupiterParams)
-  testImplementation(libs.junitPlatformRunner)
-
+  testImplementation(project(":testutil"))
+  testImplementation(libs.robolectric)
+  testRuntimeOnly(libs.junitVintageEngine)
   testRuntimeOnly(libs.junitJupiterEngine)
 }
 

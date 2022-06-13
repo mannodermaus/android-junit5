@@ -2,7 +2,7 @@ package de.mannodermaus.junit5.condition
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.internal.DisabledOnSdkVersionCondition
-import de.mannodermaus.junit5.util.AndroidBuildUtils.withApiLevel
+import de.mannodermaus.junit5.testutil.AndroidBuildUtils.withApiLevel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExecutionCondition

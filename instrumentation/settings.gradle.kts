@@ -3,6 +3,7 @@ includeBuild("../build-logic")
 include(":core")
 include(":runner")
 include(":sample")
+include(":testutil")
 
 // Include the Compose library module only if a special flag is available.
 // The 'junit5.includeCompose' flag must be present in either of the following places:

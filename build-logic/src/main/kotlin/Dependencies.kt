@@ -43,6 +43,7 @@ object libs {
     const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     const val truth = "com.google.truth:truth:${versions.truth}"
     const val truthJava8Extensions = "com.google.truth.extensions:truth-java8-extension:${versions.truth}"
+    const val robolectric = "org.robolectric:robolectric:4.8.1"
 
     const val androidXTestCore = "androidx.test:core:${versions.androidXTest}"
     const val androidXTestRunner = "androidx.test:runner:${versions.androidXTest}"
