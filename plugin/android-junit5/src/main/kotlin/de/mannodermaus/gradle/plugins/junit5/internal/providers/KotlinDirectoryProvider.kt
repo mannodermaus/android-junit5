@@ -39,7 +39,7 @@ internal class KotlinDirectoryProvider(
         val kotlinTask = project.tasks.findByName(variant.kotlinTaskName)
         return if (kotlinTask != null) {
             // Read folder directly from the Kotlin task
-            setOf((kotlinTask as KotlinCompile).destinationDir)
+            setOfNotNull((kotlinTask as KotlinCompile).destinationDirectory.asFile.orNull)
         } else {
             // If the Kotlin plugin is applied _after_ JUnit 5 in the build file,
             // fall back to the expected path… However, make sure to log a warning to users!

@@ -3,6 +3,7 @@ Change Log
 
 ## Unreleased
 - Support Gradle configuration cache (#265)
+- Replace usage of deprecated `destinationDir` compiler task property to support Kotlin 1.7.0 and beyond (#274) 
 
 ## 1.8.2.0 (2021-12-19)
 - JUnit 5.8.2
