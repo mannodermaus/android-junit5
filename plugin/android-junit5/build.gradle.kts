@@ -1,5 +1,7 @@
+import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -97,6 +99,16 @@ dependencies {
     testImplementation(libs.junitJupiterApi)
     testImplementation(libs.junitJupiterParams)
     testRuntimeOnly(libs.junitJupiterEngine)
+
+    // Bugfix for missing service injection in Gradle tests
+    // FIXME Track progress here and remove once updated to Gradle 7.6 Stable
+    //  https://github.com/gradle/gradle/issues/16774
+    testRuntimeOnly(
+        files(
+            serviceOf<ModuleRegistry>().getModule("gradle-tooling-api-builders")
+                .classpath.asFiles.first()
+        )
+    )
 }
 
 project.configureDeployment(Artifacts.Plugin)
