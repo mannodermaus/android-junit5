@@ -10,6 +10,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
 import de.mannodermaus.gradle.plugins.junit5.util.getDependentTaskNames
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
@@ -29,12 +30,55 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
         project.evaluate()
 
         assertWithMessage("create a child task")
-                .that(project.tasks.findByName("${JACOCO_TASK_NAME}Staging"))
-                .isNotNull()
+            .that(project.tasks.findByName("${JACOCO_TASK_NAME}Staging"))
+            .isNotNull()
 
         assertWithMessage("connect to parent task")
-                .that(project.tasks.getByName(JACOCO_TASK_NAME).getDependentTaskNames())
-                .contains("${JACOCO_TASK_NAME}Staging")
+            .that(project.tasks.getByName(JACOCO_TASK_NAME).getDependentTaskNames())
+            .contains("${JACOCO_TASK_NAME}Staging")
+    }
+
+    @TestFactory
+    fun `do not interfere if task generation is disabled`() = forEachBuildType(
+        beforeBuild = {
+            it.applyJacocoPlugin()
+        },
+        beforeEvaluate = {
+            it.junitPlatform.jacocoOptions {
+                taskGenerationEnabled = false
+            }
+        }
+    ) { project, buildType ->
+        val name = jacocoVariantTaskName(buildType)
+
+        assertWithMessage("do not create a child task for build type $buildType")
+            .that(project.tasks.findByName(name))
+            .isNull()
+    }
+
+    @TestFactory
+    fun `do not interfere with custom Jacoco task if task generation is disabled`() = forEachBuildType(
+        beforeBuild = {
+            it.applyJacocoPlugin()
+        },
+        beforeEvaluate = {
+            it.tasks.register("jacocoTestReport", JacocoReport::class.java) { task ->
+                task.group = "TEST MARKER"
+            }
+            it.junitPlatform.jacocoOptions {
+                taskGenerationEnabled = false
+            }
+        }
+    ) { project, buildType ->
+        val name = jacocoVariantTaskName(buildType)
+
+        assertWithMessage("do not create a child task for build type $buildType")
+            .that(project.tasks.findByName(name))
+            .isNull()
+
+        assertWithMessage("do not overwrite the custom task")
+            .that(project.tasks.getByName("jacocoTestReport").group)
+            .isEqualTo("TEST MARKER")
     }
 
     @TestFactory
