@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.config
 
-internal const val MIN_REQUIRED_GRADLE_VERSION = "7.0"
+internal const val MIN_REQUIRED_GRADLE_VERSION = "7.0" // When updating this, check buildSrc/Tasks.kt and update it there, too
 internal const val MIN_REQUIRED_AGP_VERSION = "7.0.0"
 
 internal const val EXTENSION_NAME = "junitPlatform"

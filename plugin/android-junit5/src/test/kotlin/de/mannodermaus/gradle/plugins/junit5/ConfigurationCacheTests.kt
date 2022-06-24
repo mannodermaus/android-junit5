@@ -54,11 +54,11 @@ class ConfigurationCacheTests {
         val spec = projectCreator.specNamed("product-flavors")
         val project = projectCreator.createProject(spec, agp)
 
-        runGradle(project, "test", expectSuccess = true).assertWithLogging {
-            assertThat(it).task(":test").hasOutcome(SUCCESS)
+        runGradle(project, "help", expectSuccess = true).assertWithLogging {
+            assertThat(it).task(":help").hasOutcome(SUCCESS)
         }
 
-        runGradle(project, "test", expectSuccess = true).assertWithLogging {
+        runGradle(project, "help", expectSuccess = true).assertWithLogging {
             assertThat(it).output().contains("Reusing configuration cache.")
         }
     }
@@ -69,7 +69,7 @@ class ConfigurationCacheTests {
         GradleRunner.create()
             .withProjectDir(project)
             .apply { agp.requiresGradle?.let(::withGradleVersion) }
-            .withArguments("--configuration-cache", task)
+            .withArguments("--configuration-cache", "--stacktrace", task)
             .withPrunedPluginClasspath(agp)
             .run {
                 if (expectSuccess) build()

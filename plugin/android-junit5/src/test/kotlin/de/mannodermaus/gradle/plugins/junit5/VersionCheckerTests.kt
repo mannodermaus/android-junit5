@@ -14,21 +14,17 @@ import org.junit.jupiter.params.provider.CsvSource
 class VersionCheckerTests {
 
     @CsvSource(
-            "2.3.3, false",
-            "3.0.0, false",
-            "3.1.3, false",
-            "3.2.0-alpha01, false",
-            "3.2.0-alpha14, false",
-            "3.3.0, false",
-            "3.4.0, false",
-            "3.5.0-alpha13, false",
-            "3.3.0, false",
             "4.0.0-alpha01, false",
-            "4.0.0, true",
-            "4.0.1, true",
-            "4.1.0, true",
+            "7.0.0-alpha01, false",
+            "7.0.0-beta01, false",
+            "7.0.0-rc01, false",
             "7.0.0, true",
+            "7.0.1, true",
+            "7.0.1-alpha01, true",
             "7.1.0, true",
+            "7.1.0-beta01, true",
+            "7.2.0, true",
+            "7.3.0-rc01, true",
     )
     @ParameterizedTest
     fun `check AGP compatibility`(version: String, compatible: Boolean) {
