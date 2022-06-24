@@ -1,9 +1,21 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.attributes.Usage
+import org.gradle.api.attributes.Usage.JAVA_RUNTIME
+import org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE
+import org.gradle.api.attributes.java.TargetJvmEnvironment
+import org.gradle.api.attributes.java.TargetJvmEnvironment.STANDARD_JVM
+import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
+import org.gradle.api.attributes.plugin.GradlePluginApiVersion
+import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.named
 import java.io.File
+
+private const val minimumGradleVersion = "7.0"
 
 fun Project.configureTestResources() {
     // Create a test resource task which will power the instrumented tests
@@ -58,6 +70,32 @@ fun Project.configureTestResources() {
 
                 val agpDependency = libs.plugins.android(plugin).substringBeforeLast(":")
                 project.dependencies.add(this.name, "${agpDependency}:${plugin.version}")
+
+                // Add the Kotlin Gradle Plugin explicitly,
+                // acknowledging the different plugin variants introduced in Kotlin 1.7.
+                // Acknowleding the minimum required Gradle version, request the correct variant for KGP
+                // (see https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#plugin-with-variants)
+                project.dependencies.add(
+                    this.name,
+                    "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
+                ).apply {
+                    with(this as ExternalModuleDependency) {
+                        attributes {
+                            attribute(
+                                TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
+                                objects.named(TargetJvmEnvironment::class.java, STANDARD_JVM)
+                            )
+                            attribute(
+                                USAGE_ATTRIBUTE,
+                                objects.named(Usage::class.java, JAVA_RUNTIME)
+                            )
+                            attribute(
+                                GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+                                objects.named(GradlePluginApiVersion::class.java, minimumGradleVersion)
+                            )
+                        }
+                    }
+                }
             }
         }
     }

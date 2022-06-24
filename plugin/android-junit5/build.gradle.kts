@@ -19,7 +19,7 @@ plugins {
 //
 // The other way around ("call Kotlin from Groovy") is prohibited explicitly.
 // ------------------------------------------------------------------------------------------------
-val javaVersion = JavaVersion.VERSION_1_8.toString()
+val javaVersion = JavaVersion.VERSION_11.toString()
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = javaVersion
 }
@@ -82,7 +82,7 @@ project.configureTestResources()
 dependencies {
     compileOnly(libs.plugins.android(SupportedAgp.oldest))
     compileOnly(libs.androidTools)
-    implementation(libs.plugins.kotlin)
+    compileOnly(libs.plugins.kotlin)
 
     implementation(gradleApi())
     implementation(libs.kotlinStdLib)
@@ -93,10 +93,7 @@ dependencies {
     testImplementation(libs.plugins.android(SupportedAgp.oldest))
     testImplementation(libs.korte)
     testImplementation(libs.konfToml)
-    testImplementation(libs.truth) {
-        // Incompatibility with AGP pulling in older version
-        exclude(group = "com.google.guava", module = "guava")
-    }
+    testImplementation(libs.truth)
     testImplementation(libs.junitJupiterApi)
     testImplementation(libs.junitJupiterParams)
     testRuntimeOnly(libs.junitJupiterEngine)

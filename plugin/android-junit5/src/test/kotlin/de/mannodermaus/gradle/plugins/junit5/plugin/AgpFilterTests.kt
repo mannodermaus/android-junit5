@@ -54,7 +54,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
         val project = createProject().build()
         project.registerProductFlavors(advancedFlavorList)
         project.android.buildTypes { container ->
-            container.create("ci").initWith(container.findByName("debug"))
+            container.create("ci").initWith(container.getByName("debug"))
         }
         project.evaluate()
 
