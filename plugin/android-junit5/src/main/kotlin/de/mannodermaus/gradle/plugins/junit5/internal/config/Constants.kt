@@ -1,7 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.config
 
-internal const val MIN_REQUIRED_GRADLE_VERSION = "6.1.1"
-internal const val MIN_REQUIRED_AGP_VERSION = "4.0.0"
+internal const val MIN_REQUIRED_GRADLE_VERSION = "7.0"
+internal const val MIN_REQUIRED_AGP_VERSION = "7.0.0"
 
 internal const val EXTENSION_NAME = "junitPlatform"
 internal const val FILTERS_EXTENSION_NAME = "filters"

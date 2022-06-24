@@ -8,9 +8,6 @@ enum class SupportedAgp(
         val version: String,
         val gradle: String? = null
 ) {
-    AGP_4_0("4.0.2", gradle = "6.1.1"),
-    AGP_4_1("4.1.3", gradle = "6.5"),
-    AGP_4_2("4.2.2", gradle = "6.7.1"),
     AGP_7_0("7.0.4", gradle = "7.0.2"),
     AGP_7_1("7.1.3", gradle = "7.2"),
     AGP_7_2("7.2.1", gradle = "7.3.3"),
@@ -89,7 +86,7 @@ object Artifacts {
             platform = Java,
             groupId = "de.mannodermaus.gradle.plugins",
             artifactId = "android-junit5",
-            currentVersion = "1.8.2.2-SNAPSHOT",
+            currentVersion = "1.9.0.0-SNAPSHOT",
             latestStableVersion = "1.8.2.1",
             license = license,
             description = "Unit Testing with JUnit 5 for Android."
