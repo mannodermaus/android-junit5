@@ -81,6 +81,7 @@ project.configureTestResources()
 
 dependencies {
     compileOnly(libs.plugins.android(SupportedAgp.oldest))
+    compileOnly(libs.androidTools)
     implementation(libs.plugins.kotlin)
 
     implementation(gradleApi())

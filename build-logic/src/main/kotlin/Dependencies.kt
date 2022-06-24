@@ -2,25 +2,33 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.5.31"
-        const val junitJupiter = "5.8.2"
-        const val junitVintage = "5.8.2"
-        const val junitPlatform = "1.8.2"
+        const val kotlin = "1.7.0"
+        const val junitJupiter = "5.9.0"
+        const val junitVintage = "5.9.0"
+        const val junitPlatform = "1.9.0"
         const val truth = "1.1.3"
         const val androidXTest = "1.4.0"
-        const val compose = "1.0.5"
+        const val compose = "1.2.0"
     }
 
     object plugins {
         fun android(version: SupportedAgp) = "com.android.tools.build:gradle:${version.version}"
         const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
         const val shadow = "com.github.jengelman.gradle.plugins:shadow:6.1.0"
-        const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.5.0"
+        const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.7.0"
     }
 
     // Libraries
+    val androidTools = run {
+        // The version of this library is linked to AGP
+        // (essentially: "AGP + 23.0.0")
+        val agpVersionParts = SupportedAgp.oldest.version.split('.')
+        val toolsVersion = "${23 + agpVersionParts.first().toInt()}." + agpVersionParts.drop(1).joinToString(".")
+        "com.android.tools:common:$toolsVersion"
+    }
+
     const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
-    const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1"
+    const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
     const val javaSemver = "com.github.zafarkhaja:java-semver:0.9.0"
 
     const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitJupiter}"
