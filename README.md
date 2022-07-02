@@ -22,7 +22,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```kotlin
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.8.2.1")
     }
   }
   ```
@@ -34,7 +34,7 @@ Furthermore, this repository provides a small showcase of the functionality prov
   ```groovy
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.8.2.1"
     }
   }
   ```
