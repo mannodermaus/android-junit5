@@ -4,7 +4,6 @@ internal const val MIN_REQUIRED_GRADLE_VERSION = "7.0" // When updating this, ch
 internal const val MIN_REQUIRED_AGP_VERSION = "7.0.0"
 
 internal const val EXTENSION_NAME = "junitPlatform"
-internal const val FILTERS_EXTENSION_NAME = "filters"
 
 internal const val ANDROID_JUNIT5_RUNNER_BUILDER_CLASS = "de.mannodermaus.junit5.AndroidJUnit5Builder"
 internal const val INSTRUMENTATION_RUNNER_LIBRARY_GROUP = "de.mannodermaus.junit5"

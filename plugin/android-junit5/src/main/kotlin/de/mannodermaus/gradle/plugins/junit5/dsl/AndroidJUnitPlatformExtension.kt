@@ -1,49 +1,31 @@
 package de.mannodermaus.gradle.plugins.junit5.dsl
 
-import de.mannodermaus.gradle.plugins.junit5.internal.config.FILTERS_EXTENSION_NAME
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
+import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
 import groovy.lang.Closure
 import groovy.lang.GroovyObjectSupport
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
 import org.junit.platform.commons.util.Preconditions
 import javax.inject.Inject
 
-public abstract class AndroidJUnitPlatformExtension
-@Inject constructor(project: Project)
-    : GroovyObjectSupport(), ExtensionAware {
+public abstract class AndroidJUnitPlatformExtension @Inject constructor(
+    private val objects: ObjectFactory
+) : GroovyObjectSupport() {
 
-    public operator fun invoke(config: AndroidJUnitPlatformExtension.() -> Unit) {
-        this.config()
+    internal companion object {
+        fun Project.createJUnit5Extension() =
+            extensions.create(EXTENSION_NAME, AndroidJUnitPlatformExtension::class.java)
     }
 
-    // Interop with Groovy
-    @Suppress("unused")
-    public fun methodMissing(name: String, args: Any): Any? {
-        if (name.endsWith("Filters")) {
-            // Support for filters() DSL called from Groovy
-            val qualifier = name.substring(0, name.indexOf("Filters"))
-            val closure = (args as Array<*>)[0] as Closure<*>
-            return this.filters(qualifier) {
-                closure.delegate = this
-                closure.resolveStrategy = Closure.DELEGATE_FIRST
-                closure.call(this)
-            }
-        }
-
-        return null
+    internal operator fun invoke(block: AndroidJUnitPlatformExtension.() -> Unit) {
+        this.block()
     }
-
-    /**
-     * The additional configuration parameters to be used
-     */
-    private val _configurationParameters = mutableMapOf<String, String>()
 
     @get:Input
-    public val configurationParameters: Map<String, String>
-        get() = _configurationParameters.toMap()
+    public abstract val configurationParameters: MapProperty<String, String>
 
     /**
      * Add a configuration parameter
@@ -52,7 +34,7 @@ public abstract class AndroidJUnitPlatformExtension
         Preconditions.notBlank(key, "key must not be blank")
         Preconditions.condition(!key.contains('=')) { "key must not contain '=': \"$key\"" }
         Preconditions.notNull(value) { "value must not be null for key: \"$key\"" }
-        _configurationParameters[key] = value
+        configurationParameters.put(key, value)
     }
 
     /**
@@ -64,54 +46,57 @@ public abstract class AndroidJUnitPlatformExtension
 
     /* Filters */
 
-    internal val _filters = mutableMapOf<String?, MutableList<FiltersExtension.() -> Unit>>()
-
-    internal fun filtersExtensionName(qualifier: String? = null) = if (qualifier.isNullOrEmpty())
-        FILTERS_EXTENSION_NAME
-    else
-        "$qualifier${FILTERS_EXTENSION_NAME.capitalize()}"
-
-    /**
-     * Return the {@link FiltersExtension}
-     * for tests that belong to the provided build variant
-     */
-    internal fun findFilters(qualifier: String? = null): FiltersExtension {
-        val extensionName = this.filtersExtensionName(qualifier)
-        return extensionByName(extensionName)
-    }
-
-    /**
-     * Return the {@link FiltersExtension}
-     * for all executed tests, applied to all variants
-     */
-    public val filters: FiltersExtension
-        get() = findFilters(qualifier = null)
+    private val _filters = mutableMapOf<String?, FiltersExtension>()
 
     /**
      * Configure the {@link FiltersExtension}
      * for tests that belong to the provided build variant
      */
-    public fun filters(qualifier: String, action: Action<FiltersExtension>) {
-        filters(qualifier) {
-            action.execute(this)
+    public fun filters(qualifier: String?, action: Action<FiltersExtension>) {
+        action.execute(filters(qualifier))
+    }
+
+    /**
+     * Configure the global {@link FiltersExtension} for all variants.
+     */
+    public fun filters(action: Action<FiltersExtension>) {
+        filters(null, action)
+    }
+
+    internal fun filters(qualifier: String? = null): FiltersExtension {
+        return _filters.getOrPut(qualifier) {
+            objects.newInstance(FiltersExtension::class.java)
         }
     }
 
-    public fun filters(qualifier: String, action: FiltersExtension.() -> Unit) {
-        val actions = _filters.getOrDefault(qualifier, mutableListOf())
-        actions += action
-        _filters[qualifier] = actions
-    }
+    @Suppress("unused")
+    public fun methodMissing(name: String, args: Any): Any? {
+        // Interop with Groovy
+        if (name.endsWith("Filters")) {
+            // Support for filters() DSL called from Groovy
+            val qualifier = name.substring(0, name.indexOf("Filters"))
+            val closure = (args as Array<*>)[0] as Closure<*>
+            return filters(qualifier) {
+                closure.delegate = this
+                closure.resolveStrategy = Closure.DELEGATE_FIRST
+                closure.call(this)
+            }
+        }
 
+        return null
+    }
+    
     /* Android Instrumentation Test support */
 
     /**
      * Options for controlling instrumentation test execution with JUnit 5
-     *
-     * @since 1.0.22
      */
     public val instrumentationTests: InstrumentationTestOptions =
-            project.objects.newInstance(InstrumentationTestOptions::class.java)
+        objects.newInstance(InstrumentationTestOptions::class.java)
+
+    public fun instrumentationTests(action: Action<InstrumentationTestOptions>) {
+        action.execute(instrumentationTests)
+    }
 
     /* Jacoco Reporting Integration */
 
@@ -119,5 +104,9 @@ public abstract class AndroidJUnitPlatformExtension
      * Options for controlling Jacoco reporting
      */
     public val jacocoOptions: JacocoOptions =
-            project.objects.newInstance(JacocoOptions::class.java, project)
+        objects.newInstance(JacocoOptions::class.java)
+
+    public fun jacocoOptions(action: Action<JacocoOptions>) {
+        action.execute(jacocoOptions)
+    }
 }

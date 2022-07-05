@@ -21,21 +21,21 @@ interface AgpInstrumentationSupportTests : AgpVariantAwareTests {
         project.setupInstrumentationTests()
         project.junitPlatform {
             filters {
-                includeTags("global-include-tag")
-                includeEngines("global-include-engine")
-                includePattern("pattern123")
+                it.includeTags("global-include-tag")
+                it.includeEngines("global-include-engine")
+                it.includePattern("pattern123")
             }
             filters("debug") {
-                excludeTags("debug-exclude-tag")
-                excludeEngines("debug-exclude-engine")
-                excludePattern("pattern123")
-                excludePattern("debug-pattern")
+                it.excludeTags("debug-exclude-tag")
+                it.excludeEngines("debug-exclude-engine")
+                it.excludePattern("pattern123")
+                it.excludePattern("debug-pattern")
             }
             filters("release") {
-                includeTags("rel-include-tag")
-                includeEngines("rel-include-engine")
-                excludeEngines("global-include-engine")
-                includePattern("release-pattern")
+                it.includeTags("rel-include-tag")
+                it.includeEngines("rel-include-engine")
+                it.excludeEngines("global-include-engine")
+                it.includePattern("release-pattern")
             }
         }
         project.evaluate()
@@ -75,22 +75,22 @@ interface AgpInstrumentationSupportTests : AgpVariantAwareTests {
         project.setupInstrumentationTests()
         project.junitPlatform {
             filters {
-                includeTags("global-include-tag")
-                excludeTags("global-exclude-tag")
-                includePattern("com.example.package1")
+                it.includeTags("global-include-tag")
+                it.excludeTags("global-exclude-tag")
+                it.includePattern("com.example.package1")
             }
             filters("paid") {
-                includeEngines("paid-include-engine")
-                includePattern("com.example.paid")
-                excludePattern("com.example.package1")
+                it.includeEngines("paid-include-engine")
+                it.includePattern("com.example.paid")
+                it.excludePattern("com.example.package1")
             }
             filters("freeDebug") {
-                includeTags("freeDebug-include-tag")
+                it.includeTags("freeDebug-include-tag")
             }
             filters("paidRelease") {
-                includeTags("paidRelease-include-tag")
-                includeTags("global-exclude-tag")
-                includePattern("com.example.paid.release")
+                it.includeTags("paidRelease-include-tag")
+                it.includeTags("global-exclude-tag")
+                it.includePattern("com.example.paid.release")
             }
         }
         project.evaluate()

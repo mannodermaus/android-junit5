@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package de.mannodermaus.gradle.plugins.junit5.internal.extensions
 
+import com.android.build.api.variant.Variant
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.api.TestVariant
 import com.android.build.gradle.api.UnitTestVariant
@@ -23,7 +26,7 @@ internal val BaseVariant.instrumentationTestVariant: TestVariant?
         return this.testVariant
     }
 
-internal fun BaseVariant.getTaskName(prefix: String = "", suffix: String = ""): String {
+internal fun Variant.getTaskName(prefix: String = "", suffix: String = ""): String {
     // At least one value must be provided
     require(prefix.isNotEmpty() || suffix.isNotEmpty())
 

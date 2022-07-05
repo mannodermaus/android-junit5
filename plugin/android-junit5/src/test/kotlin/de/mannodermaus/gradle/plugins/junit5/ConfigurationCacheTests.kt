@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
+import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
 import org.gradle.testkit.runner.BuildResult
@@ -75,15 +76,6 @@ class ConfigurationCacheTests {
                 if (expectSuccess) build()
                 else buildAndFail()
             }
-
-    private fun BuildResult.prettyPrint() {
-        // Indent every line to separate it from 'actual' Gradle output
-        val prefix = "[BuildResult-${hashCode()}]    "
-        val fixedOutput = this.output.lines()
-            .joinToString("\n") { "$prefix$it" }
-
-        println(fixedOutput)
-    }
 
     private fun BuildResult.assertWithLogging(block: (BuildResult) -> Unit) {
         try {

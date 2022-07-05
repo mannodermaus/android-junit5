@@ -4,10 +4,6 @@ import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContai
 
 public abstract class FiltersExtension {
 
-    public operator fun invoke(config: FiltersExtension.() -> Unit) {
-        this.config()
-    }
-
     /**
      * Class name patterns in the form of regular expressions for
      * classes that should be <em>included</em> in the test plan.
