@@ -31,7 +31,7 @@ class ExtensionsTests {
   @ParameterizedTest
   @MethodSource("jupiterTestMethods")
   @DisplayName("jupiterTestMethods() has correct values & will execute expected number of tests")
-  fun jupiterTestMethods(klass: Class<*>, expectExecutedTests: Int) {
+  fun run(klass: Class<*>, expectExecutedTests: Int) {
     val methods = klass.jupiterTestMethods()
     if (expectExecutedTests == 0) {
       assertThat(methods).isEmpty()
