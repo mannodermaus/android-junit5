@@ -31,6 +31,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the RunnerBuilder`() {
+        project.addJUnitJupiterApi()
         project.evaluate()
 
         assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
@@ -39,6 +40,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `maintain any existing RunnerBuilder`() {
+        project.addJUnitJupiterApi()
         project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"] = "something.else"
         project.evaluate()
 
@@ -48,7 +50,15 @@ class InstrumentationSupportTests {
 
     @Test
     fun `do not add the RunnerBuilder when disabled`() {
+        project.addJUnitJupiterApi()
         project.junitPlatform.instrumentationTests.enabled = false
+        project.evaluate()
+
+        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]).isNull()
+    }
+
+    @Test
+    fun `do not add the RunnerBuilder when Jupiter is not added`() {
         project.evaluate()
 
         assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]).isNull()
@@ -58,6 +68,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the dependencies`() {
+        project.addJUnitJupiterApi()
         project.evaluate()
 
         assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core"))
@@ -68,6 +79,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `allow overriding the dependencies`() {
+        project.addJUnitJupiterApi()
         val addedCore = "de.mannodermaus.junit5:android-test-core:0.1.3.3.7"
         val addedRunner = "de.mannodermaus.junit5:android-test-runner:0.1.3.3.7"
         project.dependencies.add("androidTestImplementation", addedCore)
@@ -80,6 +92,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `do not add the dependencies when disabled`() {
+        project.addJUnitJupiterApi()
         project.junitPlatform.instrumentationTests.enabled = false
         project.evaluate()
 
@@ -87,7 +100,20 @@ class InstrumentationSupportTests {
         assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).isNull()
     }
 
+    @Test
+    fun `do not add the dependencies when Jupiter is not added`() {
+        project.evaluate()
+
+        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).isNull()
+        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).isNull()
+    }
+
     /* Private */
+
+    private fun Project.addJUnitJupiterApi() {
+        dependencies.add("androidTestImplementation", "org.junit.jupiter:junit-jupiter-api:+")
+    }
+
     private fun Project.dependencyNamed(configurationName: String, name: String): String? {
         return configurations.getByName(configurationName)
             .dependencies
