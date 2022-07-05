@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
@@ -76,6 +77,31 @@ tasks.withType<Test> {
 
 // Setup environment & versions for test projects
 project.configureTestResources()
+
+// Generate a file with the latest versions of the plugin & instrumentation
+val versionClassTask = tasks.register<Copy>("createVersionClass") {
+    from("src/main/templates/Libraries.kt")
+    into("build/generated/sources/plugin/de/mannodermaus")
+    filter(
+        mapOf(
+            "tokens" to mapOf(
+                "INSTRUMENTATION_GROUP" to Artifacts.Instrumentation.groupId,
+                "INSTRUMENTATION_CORE" to Artifacts.Instrumentation.Core.artifactId,
+                "INSTRUMENTATION_RUNNER" to Artifacts.Instrumentation.Runner.artifactId,
+                "INSTRUMENTATION_VERSION" to Artifacts.Instrumentation.latestStableVersion,
+            )
+        ), ReplaceTokens::class.java
+    )
+    outputs.upToDateWhen { false }
+}
+tasks.named("compileKotlin").configure {
+    dependsOn(versionClassTask)
+}
+sourceSets {
+    main {
+        java.srcDir("build/generated/sources/plugin")
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions

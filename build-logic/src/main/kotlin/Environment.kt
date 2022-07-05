@@ -96,7 +96,7 @@ object Artifacts {
      * Instrumentation Test artifacts
      */
     object Instrumentation {
-        private const val groupId = "de.mannodermaus.junit5"
+        const val groupId = "de.mannodermaus.junit5"
         private const val currentVersion = "1.3.1-SNAPSHOT"
         const val latestStableVersion = "1.3.0"
 
