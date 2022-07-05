@@ -20,7 +20,6 @@ import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import java.util.concurrent.atomic.AtomicReference
 
 internal fun configureJUnit5(
     project: Project,
@@ -31,12 +30,10 @@ internal fun configureJUnit5(
         // General-purpose filters
         filters(qualifier = null)
 
-        val androidRef = AtomicReference<AndroidExtension>()
         config.finalizeDsl { android ->
             prepareBuildTypeDsl(android)
             prepareUnitTests(android)
             prepareInstrumentationTests(project, android)
-            androidRef.set(android)
         }
 
         val variants = mutableSetOf<Variant>()
@@ -49,7 +46,7 @@ internal fun configureJUnit5(
             variants.forEach { variant ->
                 configureUnitTests(it, variant)
                 configureJacoco(it, config, variant)
-                configureInstrumentationTests(it, config, variant, androidRef.get())
+                configureInstrumentationTests(it, config, variant)
             }
         }
     }
@@ -99,6 +96,13 @@ private fun AndroidJUnitPlatformExtension.prepareUnitTests(android: AndroidExten
 
 private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: Project, android: AndroidExtension) {
     if (!instrumentationTests.enabled) return
+
+    // Automatically configure instrumentation tests when JUnit 5 is detected in that configuration
+    val hasJupiterApi = project.configurations
+        .getByName("androidTestImplementation")
+        .dependencies
+        .any { it.group == "org.junit.jupiter" && it.name == "junit-jupiter-api" }
+    if (!hasJupiterApi) return
 
     // Attach the JUnit 5 RunnerBuilder to the list, unless it's already added
     val runnerBuilders = android.defaultConfig.testInstrumentationRunnerArguments.getAsList("runnerBuilder")
@@ -168,34 +172,8 @@ private fun AndroidJUnitPlatformExtension.configureInstrumentationTests(
     project: Project,
     config: PluginConfig,
     variant: Variant,
-    android: AndroidExtension,
 ) {
     if (!instrumentationTests.enabled) return
-
-    // Validate correctness of the added dependencies
-    if (instrumentationTests.integrityCheckEnabled) {
-        val hasTestCoreDependency = project.configurations.findByName("androidTestImplementation")
-            ?.dependencies
-            ?.any { it.group == "de.mannodermaus.junit5" && it.name == "android-test-core" }
-            ?: false
-        val hasTestRunnerDependency = project.configurations.findByName("androidTestRuntimeOnly")
-            ?.dependencies
-            ?.any { it.group == "de.mannodermaus.junit5" && it.name == "android-test-runner" }
-            ?: false
-
-        require(hasTestCoreDependency) {
-            "Incomplete configuration for JUnit 5 instrumentation tests! Add the android-test-core library to the androidTestImplementation configuration's dependencies."
-        }
-        require(hasTestRunnerDependency) {
-            "Incomplete configuration for JUnit 5 instrumentation tests! Add the android-test-runner library to the androidTestRuntimeOnly configuration's dependencies."
-        }
-
-        // Check the runner builder once more
-        val runnerBuilders = android.defaultConfig.testInstrumentationRunnerArguments.getAsList("runnerBuilder")
-        require(ANDROID_JUNIT5_RUNNER_BUILDER_CLASS in runnerBuilders) {
-            "Incomplete configuration for JUnit 5 instrumentation tests! Don't override the 'runnerBuilder' test instrumentation argument, or explicitly add '$ANDROID_JUNIT5_RUNNER_BUILDER_CLASS' to it if you have to."
-        }
-    }
 
     config.instrumentationTestVariantOf(variant)?.let { instrumentationTestVariant ->
         AndroidJUnit5WriteFilters.register(project, variant, instrumentationTestVariant)
