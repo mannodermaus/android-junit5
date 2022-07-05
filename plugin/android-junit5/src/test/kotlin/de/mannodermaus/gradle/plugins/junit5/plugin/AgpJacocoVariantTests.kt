@@ -45,7 +45,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
         },
         beforeEvaluate = {
             it.junitPlatform.jacocoOptions {
-                taskGenerationEnabled = false
+                it.taskGenerationEnabled = false
             }
         }
     ) { project, buildType ->
@@ -66,7 +66,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
                 task.group = "TEST MARKER"
             }
             it.junitPlatform.jacocoOptions {
-                taskGenerationEnabled = false
+                it.taskGenerationEnabled = false
             }
         }
     ) { project, buildType ->
@@ -163,7 +163,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
     fun `only generate jacoco task for debug builds`(): List<DynamicTest> {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            onlyGenerateTasksForVariants("debug")
+            it.onlyGenerateTasksForVariants("debug")
         }
         project.evaluate()
 
@@ -189,7 +189,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
         val project = createProject().applyJacocoPlugin().build()
         project.registerProductFlavors()
         project.junitPlatform.jacocoOptions {
-            onlyGenerateTasksForVariants("paidDebug", "freeRelease")
+            it.onlyGenerateTasksForVariants("paidDebug", "freeRelease")
         }
         project.evaluate()
 

@@ -5,6 +5,7 @@ import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.BuildResultSubject
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
+import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
 import org.gradle.testkit.runner.BuildResult
@@ -136,7 +137,10 @@ class FunctionalTests {
   private fun BuildResult.assertAgpTests(
       buildType: String,
       productFlavor: String? = null,
-      tests: List<String>) {
+      tests: List<String>
+  ) {
+      this.prettyPrint()
+
     // Construct task name from given build type and/or product flavor
     // Examples:
     // - buildType="debug", productFlavor=null --> ":testDebugUnitTest"

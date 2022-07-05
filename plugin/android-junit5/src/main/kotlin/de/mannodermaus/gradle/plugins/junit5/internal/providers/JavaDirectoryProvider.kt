@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package de.mannodermaus.gradle.plugins.junit5.internal.providers
 
 import com.android.build.gradle.api.BaseVariant
@@ -18,10 +20,10 @@ internal class JavaDirectoryProvider(private val variant: BaseVariant) : Directo
     /* Private */
 
     private fun sourceFoldersOf(variant: BaseVariant) =
-            variant.sourceSets
-                    .flatMap { it.javaDirectories }
-                    .toSet()
+        variant.sourceSets
+            .flatMap { it.javaDirectories }
+            .toSet()
 
     private fun classFoldersOf(variant: BaseVariant) =
-            setOf(variant.javaCompileProvider.map { it.destinationDir }.get())
+        setOfNotNull(variant.javaCompileProvider.map { it.destinationDirectory.asFile }.get().orNull)
 }

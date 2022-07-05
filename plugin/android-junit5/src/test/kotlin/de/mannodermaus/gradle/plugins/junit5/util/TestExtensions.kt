@@ -8,6 +8,7 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.jupiter.api.Assertions
@@ -120,4 +121,13 @@ operator fun <T : Any, U : Any> Iterable<T>.times(other: Iterable<U>): Sequence<
     }
 
     return generateSequence { nextPair() }
+}
+
+fun BuildResult.prettyPrint() {
+    // Indent every line to separate it from 'actual' Gradle output
+    val prefix = "[BuildResult-${hashCode()}]    "
+    val fixedOutput = this.output.lines()
+        .joinToString("\n") { "$prefix$it" }
+
+    println(fixedOutput)
 }

@@ -45,7 +45,7 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     fun `acknowledge disabling of jacoco task generation`(): List<DynamicTest> {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            taskGenerationEnabled = false
+            it.taskGenerationEnabled = false
         }
         project.evaluate()
 
@@ -63,9 +63,9 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     fun `acknowledge custom report folders`() {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            xml.destination(project.file("build/other-jacoco-folder/xml"))
-            csv.destination(project.file("build/html-reports/jacoco"))
-            html.destination(project.file("build/CSVISDABEST"))
+            it.xml.destination(project.file("build/other-jacoco-folder/xml"))
+            it.csv.destination(project.file("build/html-reports/jacoco"))
+            it.html.destination(project.file("build/CSVISDABEST"))
         }
         project.evaluate()
 
@@ -85,9 +85,9 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     fun `acknowledge status of report tasks`(enabled: Boolean) {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            xml.enabled(enabled)
-            csv.enabled(enabled)
-            html.enabled(enabled)
+            it.xml.enabled(enabled)
+            it.csv.enabled(enabled)
+            it.html.enabled(enabled)
         }
         project.evaluate()
 

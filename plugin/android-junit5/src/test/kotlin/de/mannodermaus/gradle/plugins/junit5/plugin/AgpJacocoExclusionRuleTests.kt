@@ -26,7 +26,7 @@ interface AgpJacocoExclusionRuleTests : AgpVariantAwareTests {
     fun `add exclusion rules`(): List<DynamicTest> {
         val project = createPreparedProject()
         project.junitPlatform.jacocoOptions {
-            excludedClasses.add("Second*.class")
+            it.excludedClasses.add("Second*.class")
         }
         project.evaluate()
 
@@ -76,7 +76,7 @@ interface AgpJacocoExclusionRuleTests : AgpVariantAwareTests {
             beforeEvaluate = { project ->
                 project.createFakeFiles()
                 project.junitPlatform.jacocoOptions {
-                    excludedClasses = mutableListOf()
+                    it.excludedClasses = mutableListOf()
                 }
             }
     ) { project, buildType ->

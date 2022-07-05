@@ -1,16 +1,16 @@
+@file:Suppress("UnstableApiUsage")
+
 package de.mannodermaus.gradle.plugins.junit5.internal.config
 
-import com.android.build.gradle.api.BaseVariant
+import com.android.build.api.variant.Variant
+import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.dsl.FiltersExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContainer
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
-import org.gradle.api.Project
 
 internal class JUnit5TaskConfig(
-        private val variant: BaseVariant,
-        project: Project) {
-
-    private val extension = project.junitPlatform
+    private val variant: Variant,
+    private val extension: AndroidJUnitPlatformExtension,
+) {
 
     // There is a distinct application order, which determines how values are merged and overwritten.
     // From top to bottom, this list goes as follows (values on the bottom will override conflicting
@@ -23,23 +23,19 @@ internal class JUnit5TaskConfig(
         // 1)
         val layer1 = filtersOf(null, func)
         // 2)
-        val layer2 = layer1 + filtersOf(variant.buildType.name, func)
+        val layer2 = layer1 + filtersOf(variant.buildType, func)
         // 3)
         val layer3 = variant.productFlavors
-                .map { filtersOf(it.name, func) }
-                .fold(layer2) { a, b -> a + b }
+            .map { filtersOf(it.second, func) }
+            .fold(layer2) { a, b -> a + b }
         // 4)
         return layer3 + filtersOf(variant.name, func)
     }
 
     private inline fun filtersOf(
-            qualifier: String?,
-            func: FiltersExtension.() -> IncludeExcludeContainer) =
-            if (qualifier == null) {
-                extension.filters.func()
-            } else {
-                extension.findFilters(qualifier).func()
-            }
+        qualifier: String?,
+        func: FiltersExtension.() -> IncludeExcludeContainer
+    ): IncludeExcludeContainer = extension.filters(qualifier).run { func() }
 
     val combinedIncludePatterns = this.collect { patterns }.include.toTypedArray()
     val combinedExcludePatterns = this.collect { patterns }.exclude.toTypedArray()
