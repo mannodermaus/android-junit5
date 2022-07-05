@@ -24,11 +24,6 @@ internal interface DirectoryProvider {
     fun testClassDirectories(): Set<File>
 
     /**
-     * The combined locations of all compiled class files
-     */
-    fun classDirectories() = mainClassDirectories() + testClassDirectories()
-
-    /**
      * The locations of source files
      */
     fun mainSourceDirectories(): Set<File>
@@ -37,18 +32,9 @@ internal interface DirectoryProvider {
      * The locations of test source files
      */
     fun testSourceDirectories(): Set<File>
-
-    /**
-     * The combined locations of all source files
-     */
-    fun sourceDirectories() = mainSourceDirectories() + testSourceDirectories()
 }
 
 /* Extensions */
 
-internal fun Iterable<DirectoryProvider>.classDirectories() = flatMap { it.classDirectories() }.distinct()
 internal fun Iterable<DirectoryProvider>.mainClassDirectories() = flatMap { it.mainClassDirectories() }.distinct()
-internal fun Iterable<DirectoryProvider>.testClassDirectories() = flatMap { it.testClassDirectories() }.distinct()
-internal fun Iterable<DirectoryProvider>.sourceDirectories() = flatMap { it.sourceDirectories() }.distinct()
 internal fun Iterable<DirectoryProvider>.mainSourceDirectories() = flatMap { it.mainSourceDirectories() }.distinct()
-internal fun Iterable<DirectoryProvider>.testSourceDirectories() = flatMap { it.testSourceDirectories() }.distinct()

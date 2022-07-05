@@ -2,11 +2,13 @@ package de.mannodermaus.gradle.plugins.junit5.tasks
 
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.extensionByName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.setDestinationCompat
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainSourceDirectories
@@ -82,7 +84,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
             reportTask.dependsOn(testTask)
             reportTask.group = GROUP_REPORTING
             reportTask.description = "Generates Jacoco coverage reports " +
-                    "for the ${variant.name.capitalize()} variant."
+                    "for the ${variant.name.capitalized()} variant."
 
             // Apply JUnit 5 configuration parameters
             val junit5Jacoco = project.junitPlatform.jacocoOptions
@@ -94,7 +96,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
             allReports.forEach { (from, to) ->
                 to.required.set(from.enabled)
-                from.destination?.let { to.destination = it }
+                from.destination?.let(to::setDestinationCompat)
             }
 
             // Task-level Configuration

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package de.mannodermaus.gradle.plugins.junit5.internal.config
 
 internal const val MIN_REQUIRED_GRADLE_VERSION = "7.0" // When updating this, check buildSrc/Tasks.kt and update it there, too

@@ -1,5 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.utils
 
+@Suppress("ConvertArgumentToSet")
 internal class IncludeExcludeContainer {
 
     private val _include = mutableSetOf<String>()
@@ -22,7 +23,7 @@ internal class IncludeExcludeContainer {
     }
 
     fun isEmpty() =
-            _include.isEmpty() && _exclude.isEmpty()
+        _include.isEmpty() && _exclude.isEmpty()
 
     operator fun plus(other: IncludeExcludeContainer): IncludeExcludeContainer {
         // Fast path, where nothing needs to be merged
