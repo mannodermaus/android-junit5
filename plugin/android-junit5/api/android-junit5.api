@@ -4,21 +4,17 @@ public final class de/mannodermaus/gradle/plugins/junit5/AndroidJUnitPlatformPlu
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
-public final class de/mannodermaus/gradle/plugins/junit5/DeprecatedKt {
-	public static final fun getJunitPlatform (Lorg/gradle/api/Project;)Lde/mannodermaus/gradle/plugins/junit5/dsl/AndroidJUnitPlatformExtension;
-}
-
-public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/AndroidJUnitPlatformExtension : groovy/lang/GroovyObjectSupport, org/gradle/api/plugins/ExtensionAware {
-	public fun <init> (Lorg/gradle/api/Project;)V
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/AndroidJUnitPlatformExtension : groovy/lang/GroovyObjectSupport {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun configurationParameter (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun configurationParameters (Ljava/util/Map;)V
-	public final fun filters (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun filters (Ljava/lang/String;Lorg/gradle/api/Action;)V
-	public final fun getConfigurationParameters ()Ljava/util/Map;
-	public final fun getFilters ()Lde/mannodermaus/gradle/plugins/junit5/dsl/FiltersExtension;
+	public final fun filters (Lorg/gradle/api/Action;)V
+	public abstract fun getConfigurationParameters ()Lorg/gradle/api/provider/MapProperty;
 	public final fun getInstrumentationTests ()Lde/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationTestOptions;
 	public final fun getJacocoOptions ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions;
-	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+	public final fun instrumentationTests (Lorg/gradle/api/Action;)V
+	public final fun jacocoOptions (Lorg/gradle/api/Action;)V
 	public final fun methodMissing (Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;
 }
 
@@ -32,19 +28,20 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/FiltersExtension
 	public final fun includePattern (Ljava/lang/String;)V
 	public final fun includePatterns ([Ljava/lang/String;)V
 	public final fun includeTags ([Ljava/lang/String;)V
-	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationTestOptions {
 	public fun <init> ()V
+	public final fun enabled (Z)V
+	public final fun getEnabled ()Z
 	public final fun getIntegrityCheckEnabled ()Z
 	public final fun integrityCheckEnabled (Z)V
-	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+	public final fun setEnabled (Z)V
 	public final fun setIntegrityCheckEnabled (Z)V
 }
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions {
-	public fun <init> (Lorg/gradle/api/Project;)V
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun excludedClasses ([Ljava/lang/String;)V
 	public final fun getCsv ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
 	public final fun getExcludedClasses ()Ljava/util/List;
@@ -52,7 +49,6 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions {
 	public final fun getOnlyGenerateTasksForVariants ()Ljava/util/Set;
 	public final fun getTaskGenerationEnabled ()Z
 	public final fun getXml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
-	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
 	public final fun onlyGenerateTasksForVariants ([Ljava/lang/String;)V
 	public final fun setExcludedClasses (Ljava/util/List;)V
 	public final fun setTaskGenerationEnabled (Z)V
