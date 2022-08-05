@@ -146,6 +146,7 @@ open class GenerateReadme : DefaultTask() {
 
         private const val PLUGIN_VERSION = "pluginVersion"
         private const val INSTRUMENTATION_VERSION = "instrumentationVersion"
+        private const val COMPOSE_VERSION = "composeVersion"
 
         private const val CONSTANTS_FILE = "android-junit5/src/main/kotlin/de/mannodermaus/gradle/plugins/junit5/internal/config/Constants.kt"
         private val CONSTANTS_FILE_REGEX = Regex("const val (.*) = \"(.*)\"")
@@ -195,6 +196,7 @@ open class GenerateReadme : DefaultTask() {
             val replacement = when (placeholder) {
                 PLUGIN_VERSION -> Artifacts.Plugin.anyStableVersion
                 INSTRUMENTATION_VERSION -> Artifacts.Instrumentation.Core.anyStableVersion
+                COMPOSE_VERSION -> Artifacts.Instrumentation.Compose.anyStableVersion
                 else -> {
                     val match2 = CONSTANT_REGEX.find(placeholder)
                     if (match2 != null) {
