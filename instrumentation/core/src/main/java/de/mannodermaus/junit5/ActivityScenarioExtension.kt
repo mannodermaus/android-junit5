@@ -127,7 +127,7 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
          */
         @JvmStatic
         public fun <A : Activity> launch(startActivityIntent: Intent): ActivityScenarioExtension<A> =
-            ActivityScenarioExtension { ActivityScenario.launch<A>(startActivityIntent) }
+            ActivityScenarioExtension { ActivityScenario.launch(startActivityIntent) }
 
         /* Kotlin-specific convenience variations */
 
