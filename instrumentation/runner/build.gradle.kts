@@ -28,21 +28,11 @@ apply {
 val javaVersion = JavaVersion.VERSION_1_8
 
 android {
-  compileSdkVersion(Android.compileSdkVersion)
-
-  dexOptions {
-    javaMaxHeapSize = Android.javaMaxHeapSize
-  }
+  compileSdk = Android.compileSdkVersion
 
   defaultConfig {
-    minSdkVersion(Android.testRunnerMinSdkVersion)
-    targetSdkVersion(Android.targetSdkVersion)
-  }
-
-  sourceSets {
-    getByName("main").java.srcDir("src/main/kotlin")
-    getByName("test").java.srcDir("src/test/kotlin")
-    getByName("androidTest").java.srcDir("src/androidTest/kotlin")
+    minSdk = Android.testRunnerMinSdkVersion
+    targetSdk = Android.targetSdkVersion
   }
 
   compileOptions {
@@ -55,14 +45,14 @@ android {
     resValues = false
   }
 
-  lintOptions {
+  lint {
     // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
     warning("InvalidPackage")
   }
 
   packagingOptions {
-    exclude("META-INF/LICENSE.md")
-    exclude("META-INF/LICENSE-notice.md")
+    resources.excludes.add("META-INF/LICENSE.md")
+    resources.excludes.add("META-INF/LICENSE-notice.md")
   }
 
   testOptions {

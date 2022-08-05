@@ -37,22 +37,18 @@ apply {
 val javaVersion = JavaVersion.VERSION_1_8
 
 android {
-  compileSdkVersion(Android.compileSdkVersion)
-
-  dexOptions {
-    javaMaxHeapSize = Android.javaMaxHeapSize
-  }
+  compileSdk = Android.compileSdkVersion
 
   defaultConfig {
     applicationId = "de.mannodermaus.junit5.sample"
-    minSdkVersion(Android.sampleMinSdkVersion)
-    targetSdkVersion(Android.targetSdkVersion)
+    minSdk = Android.sampleMinSdkVersion
+    targetSdk = Android.targetSdkVersion
     versionCode = 1
     versionName = "1.0"
 
     // Make sure to use the AndroidJUnitRunner (or a sub-class) in order to hook in the JUnit 5 Test Builder
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+    testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
 
     buildConfigField("boolean", "MY_VALUE", "true")
   }
@@ -70,18 +66,16 @@ android {
   kotlinOptions {
     jvmTarget = javaVersion.toString()
   }
+}
 
-  testOptions {
-    junitPlatform {
-      // Configure JUnit 5 tests here
-      filters("debug") {
-        excludeTags("slow")
-      }
-
-      // Using local dependency instead of Maven coordinates
-      instrumentationTests.integrityCheckEnabled = false
-    }
+junitPlatform {
+  // Configure JUnit 5 tests here
+  filters("debug") {
+    excludeTags("slow")
   }
+
+  // Using local dependency instead of Maven coordinates
+  instrumentationTests.integrityCheckEnabled = false
 }
 
 tasks.withType<Test> {
