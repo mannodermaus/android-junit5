@@ -4,10 +4,9 @@ A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in An
 
 ## How?
 
-This plugin configures the unit test tasks for each build variant of a project to run on the JUnit Platform. Furthermore, it provides additional configuration options for these tests [through a DSL][wiki-dsl] attached to `android.testOptions`.
+This plugin configures the unit test tasks for each build variant of a project to run on the JUnit Platform. Furthermore, it provides additional configuration options for these tests [through a DSL][wiki-dsl] and facilitates the usage of JUnit 5 for instrumentation tests.
 
-Instructions on how to write JUnit 5 tests can be found [in their User Guide][junit5ug].
-Furthermore, this repository provides a small showcase of the functionality provided by JUnit 5 [here][sampletests].
+Instructions on how to write tests with the JUnit 5 framework can be found [in their User Guide][junit5ug]. To get a first look at its features, a small showcase project can be found [here][sampletests].
 
 ## Download
 
@@ -96,36 +95,16 @@ The latest version of this plugin requires:
 
 ## Instrumentation Test Support
 
-There is experimental support for Android instrumentation tests, which requires some additional configuration & dependencies. Furthermore, because JUnit 5 is built on Java 8 from the ground up, its instrumentation tests will only run on devices running Android 8.0 (API 26) or newer. Older phones will skip the execution of these tests completely, marking them as "ignored".
+You can use JUnit 5 to run instrumentation tests on emulators and physical devices, too. Because the framework is built on Java 8 from the ground up, these instrumentation tests will only run on devices running Android 8.0 (API 26) or newer – older phones will skip the execution of these tests completely, marking them as "ignored".
 
-To start writing instrumentation tests with JUnit Jupiter, make the following changes to your module's build script:
+Before you can write instrumentation tests with JUnit Jupiter, make sure that your module is using the `androidx.test.runner.AndroidJUnitRunner` (or a subclass of it) as its `testInstrumentationRunner`. Then, simply add a dependency on `junit-jupiter-api` to the `androidTestImplementation` configuration in your build script and the plugin will automatically configure JUnit 5 tests for you:
 
 <details open>
   <summary>Kotlin</summary>
   
   ```kotlin
-  android {
-    defaultConfig {
-      // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
-      testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-      // 2) Connect JUnit 5 to the runner
-      testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
-    }
-
-    // 3) Java 8 is required
-    compileOptions {
-      setSourceCompatibility(JavaVersion.VERSION_1_8)
-      setTargetCompatibility(JavaVersion.VERSION_1_8)
-    }
-  }
   dependencies {
-    // 4) Jupiter API & Test Runner, if you don't have it already
-    androidTestImplementation("${libs.androidXTestRunner}")
     androidTestImplementation("${libs.junitJupiterApi}")
-
-    // 5) The instrumentation test companion libraries
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:${instrumentationVersion}")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:${instrumentationVersion}")
   }
   ```
 </details>
@@ -134,34 +113,39 @@ To start writing instrumentation tests with JUnit Jupiter, make the following ch
   <summary>Groovy</summary>
 
   ```groovy
-  android {
-    defaultConfig {
-      // 1) Make sure to use the AndroidJUnitRunner, or a subclass of it. This requires a dependency on androidx.test:runner, too!
-      testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-      // 2) Connect JUnit 5 to the runner
-      testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
-    }
-
-    // 3) Java 8 is required
-    compileOptions {
-      sourceCompatibility JavaVersion.VERSION_1_8
-      targetCompatibility JavaVersion.VERSION_1_8
-    }
-  }
-
   dependencies {
-    // 4) Jupiter API & Test Runner, if you don't have it already
-    androidTestImplementation "${libs.androidXTestRunner}"
     androidTestImplementation "${libs.junitJupiterApi}"
-
-    // 5) The instrumentation test companion libraries
-    androidTestImplementation "de.mannodermaus.junit5:android-test-core:${instrumentationVersion}"
-    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:${instrumentationVersion}"
   }
   ```
 </details>
 
-The `android-test-core` artifact includes an extension point for the `ActivityScenario` API; more information on that can be found in the wiki.
+By enabling JUnit 5 for instrumentation tests, you will gain access to `ActivityScenarioExtension` (amog other things), which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
+
+## Jetpack Compose
+
+Support for Jetpack Compose is in the works, but considered experimental and unstable at this stage. To use it, first enable support for instrumentation tests as described above, then add the integration library for Jetpack Compose as well:
+
+<details open>
+  <summary>Kotlin</summary>
+  
+  ```kotlin
+  dependencies {
+    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:${composeVersion}")
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```groovy
+  dependencies {
+    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:${composeVersion}"
+  }
+  ```
+</details>
+
+[The wiki][wiki-home] includes a section on how to test your Composables with JUnit 5.
 
 # Official Support
 
@@ -203,5 +187,6 @@ See also the [full License text](LICENSE).
  [circleci]: https://circleci.com/gh/mannodermaus/android-junit5
  [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
  [sampletests]: instrumentation/sample
- [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration-DSL
+ [wiki-home]: https://github.com/mannodermaus/android-junit5/wiki
+ [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration
  [wiki-gettingstarted]: https://github.com/mannodermaus/android-junit5/wiki/Getting-Started
