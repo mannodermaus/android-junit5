@@ -1,7 +1,7 @@
 plugins {
   id("io.github.gradle-nexus.publish-plugin").version("1.1.0")
-  id("com.github.ben-manes.versions").version("0.39.0")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator").version("0.6.0")
+  id("com.github.ben-manes.versions").version("0.42.0")
+  id("org.jetbrains.kotlinx.binary-compatibility-validator").version("0.11.0")
 }
 
 buildscript {
