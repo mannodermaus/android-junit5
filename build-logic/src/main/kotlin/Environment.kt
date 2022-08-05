@@ -32,10 +32,8 @@ enum class SupportedAgp(
 }
 
 object Android {
-    const val compileSdkVersion = 30
-    const val javaMaxHeapSize = "3g"
-
-    const val targetSdkVersion = 30
+    const val compileSdkVersion = 33
+    const val targetSdkVersion = 32
     const val sampleMinSdkVersion = 14
     val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
     val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Android).minSdk

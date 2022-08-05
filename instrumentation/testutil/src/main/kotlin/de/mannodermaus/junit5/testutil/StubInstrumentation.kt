@@ -1,5 +1,6 @@
 package de.mannodermaus.junit5.testutil
 
+import android.annotation.SuppressLint
 import android.app.Instrumentation
 import android.content.Context
 import android.content.res.Resources
@@ -29,6 +30,7 @@ internal class StubInstrumentation : Instrumentation() {
             }
         }
 
+        @SuppressLint("DiscouragedApi")
         private fun createMockContext(): Context {
             // Needed by AndroidJUnit5Tests in module ':runner'
             val resources = mock<Resources> {

@@ -15,7 +15,7 @@ private const val INSTRUMENTATION_FILTER_RES_FILE_NAME = "de_mannodermaus_junit5
  */
 internal object GeneratedFilters {
 
-    @Suppress("FoldInitializerAndIfToElvis")
+    @Suppress("FoldInitializerAndIfToElvis", "DiscouragedApi")
     @JvmStatic
     fun fromContext(context: Context): List<Filter<*>> {
         // Look up the resource file written by the Gradle plugin
@@ -29,7 +29,7 @@ internal object GeneratedFilters {
         val inputStream = if (identifier != 0) {
             try {
                 context.resources.openRawResource(identifier)
-            } catch (rnfe: Resources.NotFoundException) {
+            } catch (ignored: Resources.NotFoundException) {
                 // Ignore
                 null
             }

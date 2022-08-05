@@ -15,7 +15,6 @@ private val jupiterTestAnnotations = listOf(
 internal fun Class<*>.jupiterTestMethods(): List<Method> {
     val allJupiterMethods = mutableListOf<Method>()
     try {
-
         // Check each method in the Class for the presence
         // of the well-known list of JUnit Jupiter annotations
         allJupiterMethods += declaredMethods.filter { method ->
@@ -30,7 +29,6 @@ internal fun Class<*>.jupiterTestMethods(): List<Method> {
         declaredClasses.forEach { inner ->
             allJupiterMethods += inner.jupiterTestMethods()
         }
-
     } catch (t: Throwable) {
         Log.w(LOG_TAG, "${t.javaClass.name} in 'hasJupiterTestMethods()' for $name", t)
     }
