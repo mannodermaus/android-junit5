@@ -71,8 +71,10 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
 
                     C = C.superclass
 
-                    if(!C.jupiterTestMethods().isEmpty()) {
-                        return createJUnit5Runner(testClass)
+                    if(C != null) {
+                        if(!C.jupiterTestMethods().isEmpty()) {
+                            return createJUnit5Runner(testClass)
+                        }
                     }
                 }
 
