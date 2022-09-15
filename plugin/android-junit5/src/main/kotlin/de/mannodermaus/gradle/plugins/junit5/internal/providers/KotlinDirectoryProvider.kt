@@ -3,15 +3,10 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.providers
 
 import com.android.build.gradle.api.BaseVariant
-import com.android.builder.model.SourceProvider
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.agpLog
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.unitTestVariant
 import org.gradle.api.Project
-import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.internal.HasConvention
 import org.gradle.api.logging.LogLevel.WARN
-import org.jetbrains.kotlin.gradle.plugin.KOTLIN_DSL_NAME
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 
@@ -35,7 +30,7 @@ internal class KotlinDirectoryProvider(
 
     private fun sourceFoldersOf(variant: BaseVariant) =
         variant.sourceSets
-            .flatMap { it.kotlin.srcDirs }
+            .flatMap { it.javaDirectories + it.kotlinDirectories }
             .toSet()
 
     private fun classFoldersOf(variant: BaseVariant): Set<File> {
@@ -59,13 +54,3 @@ internal class KotlinDirectoryProvider(
 
 private val BaseVariant.kotlinTaskName
     get() = "compile${this.name.capitalize()}Kotlin"
-
-private val SourceProvider.kotlin: SourceDirectorySet
-    get() {
-        if (this !is HasConvention) {
-            throw IllegalArgumentException("Argument doesn't have Conventions: $this")
-        }
-
-        val kotlinConvention = this.convention.plugins[KOTLIN_DSL_NAME] as KotlinSourceSet
-        return kotlinConvention.kotlin
-    }
