@@ -8,43 +8,16 @@ This plugin configures the unit test tasks for each build variant of a project t
 
 Instructions on how to write tests with the JUnit 5 framework can be found [in their User Guide][junit5ug]. To get a first look at its features, a small showcase project can be found [here][sampletests].
 
-## Download
-
-<details open>
-  <summary>Kotlin</summary>
-
-  ```kotlin
-  buildscript {
-    dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:${pluginVersion}")
-    }
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-  
-  ```groovy
-  buildscript {
-    dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:${pluginVersion}"
-    }
-  }
-  ```
-</details>
-
-<br/>
-
-Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
-
 ## Setup
+
+To get started, declare the plugin in your `app` module's build script alongside the latest version. Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
+
 <details open>
   <summary>Kotlin</summary>
 
   ```kotlin
   plugins {
-    id("de.mannodermaus.android-junit5")
+    id("de.mannodermaus.android-junit5") version "${pluginVersion}"
   }
 
   dependencies {
@@ -66,7 +39,9 @@ Snapshots of the development version are available through [Sonatype's `snapshot
   <summary>Groovy</summary>
 
   ```groovy
-  apply plugin: "de.mannodermaus.android-junit5"
+  plugins {
+    id("de.mannodermaus.android-junit5").version("${pluginVersion}")
+  }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
@@ -79,6 +54,36 @@ Snapshots of the development version are available through [Sonatype's `snapshot
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "${libs.junit4}"
     testRuntimeOnly "${libs.junitVintageEngine}"
+  }
+  ```
+</details>
+
+<br/>
+
+### Alternative: Legacy DSL
+
+If you prefer to use the legacy way to declare the dependency instead, remove the `version()` block from above and declare the plugin in your _root project's build script_ like so:
+
+<details>
+  <summary>Kotlin</summary>
+
+  ```kotlin
+  buildscript {
+    dependencies {
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:${pluginVersion}")
+    }
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```kotlin
+  buildscript {
+    dependencies {
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:${pluginVersion}"
+    }
   }
   ```
 </details>
