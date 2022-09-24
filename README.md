@@ -47,7 +47,7 @@ dependencies {
 
 ```groovy
 plugins {
-  id("de.mannodermaus.android-junit5").version("1.8.2.1")
+  id "de.mannodermaus.android-junit5" version "1.8.2.1"
 }
 
 dependencies {

@@ -40,7 +40,7 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```groovy
   plugins {
-    id("de.mannodermaus.android-junit5").version("${pluginVersion}")
+    id "de.mannodermaus.android-junit5" version "${pluginVersion}"
   }
 
   dependencies {
