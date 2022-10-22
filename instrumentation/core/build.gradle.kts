@@ -72,6 +72,7 @@ junitPlatform {
 
 tasks.withType<KotlinCompile> {
   kotlinOptions.jvmTarget = javaVersion.toString()
+  kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all")
 }
 
 tasks.withType<Test> {

@@ -5,6 +5,8 @@ package de.mannodermaus.junit5.internal
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.junit5.DoesntHaveTestMethods
+import de.mannodermaus.junit5.HasInheritedTestsFromClass
+import de.mannodermaus.junit5.HasInheritedTestsFromInterface
 import de.mannodermaus.junit5.HasInnerClassWithTest
 import de.mannodermaus.junit5.HasParameterizedTest
 import de.mannodermaus.junit5.HasRepeatedTest
@@ -49,7 +51,7 @@ class ExtensionsTests {
       )
       AndroidJUnit5(klass, params).run(notifier)
 
-      assertWithMessage("Executed ${listener.count()} instead of $expectExecutedTests tests: '${listener.methodNames()}'")
+      assertWithMessage("Executed ${listener.count()} instead of $expectExecutedTests tests on class '${klass.simpleName}': '${listener.methodNames()}'")
           .that(listener.count())
           .isEqualTo(expectExecutedTests)
     }
@@ -87,7 +89,9 @@ class ExtensionsTests {
         Arguments.of(HasTestFactory::class.java, 2),
         Arguments.of(HasTestTemplate::class.java, 2),
         Arguments.of(HasParameterizedTest::class.java, 2),
-        Arguments.of(HasInnerClassWithTest::class.java, 1)
+        Arguments.of(HasInnerClassWithTest::class.java, 1),
+        Arguments.of(HasInheritedTestsFromClass::class.java, 2),
+        Arguments.of(HasInheritedTestsFromInterface::class.java, 1),
     )
   }
 }

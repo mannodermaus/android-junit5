@@ -81,3 +81,23 @@ class HasTaggedTest {
 
   }
 }
+
+abstract class AbstractTestClass {
+  @Test
+  fun abstractTest() {
+  }
+}
+
+interface AbstractTestInterface {
+  @Test
+  fun interfaceTest() {
+  }
+}
+
+class HasInheritedTestsFromClass : AbstractTestClass() {
+  @Test
+  fun method() {
+  }
+}
+
+class HasInheritedTestsFromInterface : AbstractTestInterface
