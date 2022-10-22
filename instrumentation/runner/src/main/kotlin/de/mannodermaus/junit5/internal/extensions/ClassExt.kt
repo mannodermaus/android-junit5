@@ -9,29 +9,35 @@ private val jupiterTestAnnotations = listOf(
     "org.junit.jupiter.api.TestFactory",
     "org.junit.jupiter.api.RepeatedTest",
     "org.junit.jupiter.api.TestTemplate",
-    "org.junit.jupiter.params.ParameterizedTest"
+    "org.junit.jupiter.params.ParameterizedTest",
 )
 
-internal fun Class<*>.jupiterTestMethods(): List<Method> {
-    val allJupiterMethods = mutableListOf<Method>()
+internal fun Class<*>.jupiterTestMethods(): Set<Method> =
+    jupiterTestMethods(includeInherited = true)
+
+private fun Class<*>.jupiterTestMethods(includeInherited: Boolean): Set<Method> = buildSet {
     try {
         // Check each method in the Class for the presence
-        // of the well-known list of JUnit Jupiter annotations
-        allJupiterMethods += declaredMethods.filter { method ->
-            val annotationClassNames =
-                method.declaredAnnotations.map { it.annotationClass.qualifiedName }
-            jupiterTestAnnotations.firstOrNull { annotation ->
-                annotationClassNames.contains(annotation)
-            } != null
-        }
+        // of the well-known list of JUnit Jupiter annotations.
+        addAll(declaredMethods.filterAnnotatedByJUnitJupiter())
 
         // Recursively check inner classes as well
         declaredClasses.forEach { inner ->
-            allJupiterMethods += inner.jupiterTestMethods()
+            addAll(inner.jupiterTestMethods(includeInherited = false))
+        }
+
+        // Attach methods from inherited superclass or (for Java) implemented interfaces, too
+        if (includeInherited) {
+            addAll(superclass?.jupiterTestMethods(includeInherited = true).orEmpty())
+            interfaces.forEach { i -> addAll(i.jupiterTestMethods(includeInherited = true)) }
         }
     } catch (t: Throwable) {
         Log.w(LOG_TAG, "${t.javaClass.name} in 'hasJupiterTestMethods()' for $name", t)
     }
-
-    return allJupiterMethods
 }
+
+private fun Array<Method>.filterAnnotatedByJUnitJupiter(): List<Method> =
+    filter { method ->
+        val names = method.declaredAnnotations.map { it.annotationClass.qualifiedName }
+        jupiterTestAnnotations.any { it in names }
+    }
