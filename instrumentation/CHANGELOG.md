@@ -5,6 +5,7 @@ Change Log
 - Update formatting of instrumentation test names to prevent breaking generation of log files in newer versions of AGP (#263)
 - Add support for test sharding (#270)
 - Add support for inherited tests (#288)
+- Only autoconfigure JUnit 5 for instrumentation tests when the user explicitly adds junit-jupiter-api as a dependency
 
 ## 1.3.0 (2021-09-17)
 
