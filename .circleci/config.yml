@@ -1,13 +1,26 @@
 # Shared default parameters and variables
-defaults: &defaults
+defaults:
+  &defaults
   working_directory: ~/root/project
   docker:
     - image: circleci/android:api-28
       environment:
-        GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
+        GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.caching=true
+          -Dorg.gradle.configureondemand=true
+          -Dkotlin.compiler.execution.strategy=in-process
+          -Dkotlin.incremental=false
 
-cache_key: &cache_key
-  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
+cache_key:
+  &cache_key
+  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum
+    "plugin/android-junit5/build.gradle.kts" }}-{{ checksum
+    "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum
+    "instrumentation/build.gradle.kts" }}-{{ checksum
+    "instrumentation/runner/build.gradle.kts" }}-{{ checksum
+    "instrumentation/sample/build.gradle.kts" }}-{{ checksum
+    "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum
+    "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum
+    "build-logic/src/main/kotlin/Dependencies.kt" }}
 
 commands:
   construct_signing_key:
@@ -26,7 +39,8 @@ jobs:
 
       - run:
           name: (Plugin) Build
-          command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace --no-daemon
+          command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace
+            --no-daemon
       - run:
           name: (Plugin) Test
           command: cd plugin && ./gradlew :android-junit5:check --stacktrace --no-daemon
@@ -48,7 +62,8 @@ jobs:
             :sample:assembleDebug --stacktrace --no-daemon
       - run:
           name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :core:check :runner:check --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew :core:check :runner:check --stacktrace
+            --no-daemon
 
       - run:
           name: (Compose) Prepare local.properties
@@ -121,6 +136,8 @@ jobs:
       - store_artifacts:
           path: instrumentation/compose/build/reports
           destination: instrumentation-compose
+    # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
+    resource_class: large
 
   deploy:
     <<: *defaults
@@ -132,7 +149,8 @@ jobs:
       - construct_signing_key
       - run:
           name: (Plugin) Build & Deploy
-          command: cd plugin && ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
+          command: cd plugin && ./gradlew publishToSonatype
+            closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
       - run:
           name: (Instrumentation) Build & Deploy
           command: |
