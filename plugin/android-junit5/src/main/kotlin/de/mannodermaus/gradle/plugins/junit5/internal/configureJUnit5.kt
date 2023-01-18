@@ -11,6 +11,7 @@ import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
 import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Warn
@@ -32,7 +33,7 @@ internal fun configureJUnit5(
 
         config.finalizeDsl { android ->
             prepareBuildTypeDsl(android)
-            prepareUnitTests(android)
+            prepareUnitTests(project, android)
             prepareInstrumentationTests(project, android)
         }
 
@@ -88,10 +89,21 @@ private fun AndroidJUnitPlatformExtension.prepareVariantDsl(variant: Variant) {
     }
 }
 
-private fun AndroidJUnitPlatformExtension.prepareUnitTests(android: AndroidExtension) {
+private fun prepareUnitTests(project: Project, android: AndroidExtension) {
     // Add default ignore rules for JUnit 5 metadata files to the packaging options of the plugin,
     // so that consumers don't need to do this explicitly
-    android.packagingOptions.resources.excludes.addAll(excludedPackagingOptions())
+    val options = excludedPackagingOptions()
+
+    try {
+        android.packagingOptions.resources.excludes.addAll(options)
+    } catch (e: NoSuchMethodError) {
+        // TODO Because of https://issuetracker.google.com/issues/263387063,
+        //  there is a breaking API change in AGP 8.x that causes a NoSuchMethodError
+        //  (renaming PackagingOptions to Packaging without any fallback).
+        //  Fall back to the old DSL when this happens
+        @Suppress("DEPRECATION")
+        options.forEach(project.android.packagingOptions::exclude)
+    }
 }
 
 private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: Project, android: AndroidExtension) {
