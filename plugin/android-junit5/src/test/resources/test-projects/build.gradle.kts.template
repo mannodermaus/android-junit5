@@ -92,22 +92,11 @@ android {
     {% endif %}
 
     // Gradle 6.5 fixed the syntax for UnitTestOptions' DSL
-    {% if atLeastGradle("6.5") %}
-      unitTests.all { test ->
-        test.testLogging {
-          events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-        }
+    unitTests.all { test ->
+      test.testLogging {
+        events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
       }
-    {% else %}
-      // Lower versions of Gradle require more ceremony for UnitTestOptions
-      unitTests.all(KotlinClosure1<Any, Test>({
-        (this as Test).also {
-          testLogging {
-            events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-          }
-        }
-      }, unitTests))
-    {% endif %}
+    }
   }
 }
 
@@ -118,28 +107,11 @@ android {
 {% endif %}
 
 {% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
-  {% if atLeastAgp("7.0.0-beta01") %}
-    // New Variant API for AGP 7.0 and above (unit test stuff is accessed through ordinary variants now)
-    androidComponents {
-      beforeVariants(selector().withBuildType("{{ type }}")) { variant ->
-        variant.enableUnitTest = false
-      }
+  androidComponents {
+    beforeVariants(selector().withBuildType("{{ type }}")) { variant ->
+      variant.enableUnitTest = false
     }
-  {% elseif atLeastAgp("4.2.0-beta01") %}
-    // New Variant API for AGP 4.2 and above
-    androidComponents {
-      beforeUnitTests(selector().withBuildType("{{ type }}")) { test ->
-        test.enabled = false
-      }
-    }
-  {% elseif atLeastAgp("4.1") %}
-    // Variant API for AGP 4.1
-    android.onVariants.withBuildType("{{ type }}") {
-      unitTest {
-        enabled = false
-      }
-    }
-  {% endif %}
+  }
 {% end %}
 
 dependencies {
