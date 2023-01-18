@@ -2,6 +2,13 @@ Change Log
 ==========
 
 ## Unreleased
+- JUnit 5.9.2
+- Add support for Android Gradle Plugin 8.x.y
+- Raise minimum supported versions for AGP and Gradle to 7.0.x and 7.0, respectively 
+- Refactor implementation to mostly use new Variant API from Android Gradle Plugin
+- Use the correct Kotlin source directory set on AGP 7 (@Goooler, #279)
+- Recommend new plugin DSL for configuration over legacy DSL
+- Work around breaking binary change for PackagingOptions in AGP 8.x
 
 ## 1.8.2.1 (2022-07-02)
 - Support Gradle configuration cache (#265)
