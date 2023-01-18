@@ -51,6 +51,10 @@ android {
   compileSdkVersion("${compileSdk}")
 
   defaultConfig {
+    {% if atLeastAgp("8.0.0-alpha01") %}
+        namespace = "de.mannodermaus.app"
+    {% endif %}
+
     minSdkVersion(minSdk)
     targetSdkVersion(targetSdk)
 
