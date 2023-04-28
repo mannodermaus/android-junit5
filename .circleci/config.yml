@@ -3,9 +3,9 @@ defaults: &defaults
   working_directory: ~/root/project
   resource_class: large
   docker:
-    - image: cimg/android:2022.12.1
+    - image: cimg/android:2023.04.1
       environment:
-        GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
+        GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
 
 cache_key: &cache_key
   key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
@@ -27,47 +27,26 @@ jobs:
 
       - run:
           name: (Plugin) Build
-          command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace --no-daemon
+          command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace
       - run:
           name: (Plugin) Test
-          command: cd plugin && ./gradlew :android-junit5:check --stacktrace --no-daemon
+          command: cd plugin && ./gradlew :android-junit5:check --stacktrace
 
       - run:
-          name: (Instrumentation) Prepare local.properties
-          command: |
-            touch instrumentation/local.properties
-            echo "junit5.includeCompose = false" > instrumentation/local.properties
-      - run:
           name: (Instrumentation) Download Dependencies
-          command: cd instrumentation && ./gradlew androidDependencies --no-daemon
+          command: cd instrumentation && ./gradlew androidDependencies
       - run:
           name: (Instrumentation) Build
           command: |
             cd instrumentation
-            ./gradlew assembleRelease :core:assembleDebug :core:assembleDebugAndroidTest \
+            ./gradlew assembleRelease :core:assembleDebug \
+            :core:assembleDebugAndroidTest \
+            :compose:assembleDebugAndroidTest \
             :runner:assembleDebug \
-            :sample:assembleDebug --stacktrace --no-daemon
+            :sample:assembleDebug --stacktrace 
       - run:
           name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :core:check :runner:check --stacktrace --no-daemon
-
-      - run:
-          name: (Compose) Prepare local.properties
-          command: |
-            touch instrumentation/local.properties
-            echo "junit5.includeCompose = true" > instrumentation/local.properties
-
-      - run:
-          name: (Compose) Download Dependencies
-          command: cd instrumentation && ./gradlew androidDependencies --no-daemon
-      - run:
-          name: (Compose) Build
-          command: |
-            cd instrumentation
-            ./gradlew :compose:assemble :compose:assembleDebugAndroidTest --stacktrace --no-daemon
-      - run:
-          name: (Compose) Test
-          command: cd instrumentation && ./gradlew :compose:check --stacktrace --no-daemon
+          command: cd instrumentation && ./gradlew :core:check :runner:check :compose:check --stacktrace
 
       - save_cache:
           <<: *cache_key
@@ -133,19 +112,14 @@ jobs:
       - construct_signing_key
       - run:
           name: (Plugin) Build & Deploy
-          command: cd plugin && ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
+          command: |
+            cd plugin
+            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
       - run:
           name: (Instrumentation) Build & Deploy
           command: |
             cd instrumentation
-            echo "junit5.includeCompose = false" > local.properties
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
-      - run:
-          name: (Compose) Build & Deploy
-          command: |
-            cd instrumentation
-            echo "junit5.includeCompose = true" > local.properties
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace --no-daemon
+            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
       - store_artifacts:
           path: plugin/android-junit5/build/publications
           destination: plugin/publications/snapshots
