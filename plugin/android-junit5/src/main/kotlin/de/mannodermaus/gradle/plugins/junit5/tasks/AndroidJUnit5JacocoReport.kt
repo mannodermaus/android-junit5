@@ -8,13 +8,15 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Info
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.setDestinationCompat
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.outputLocationFile
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainClassDirectories
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainSourceDirectories
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.FileSystemLocationProperty
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
@@ -96,7 +98,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
             allReports.forEach { (from, to) ->
                 to.required.set(from.enabled)
-                from.destination?.let(to::setDestinationCompat)
+                from.destination?.let { to.outputLocationFile?.set(it) }
             }
 
             // Task-level Configuration

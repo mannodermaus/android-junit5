@@ -2,10 +2,12 @@ package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.outputLocationFile
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.JACOCO_TASK_NAME
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -64,8 +66,8 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
             it.xml.destination(project.file("build/other-jacoco-folder/xml"))
-            it.csv.destination(project.file("build/html-reports/jacoco"))
-            it.html.destination(project.file("build/CSVISDABEST"))
+            it.csv.destination(project.file("build/CSVISDABEST"))
+            it.html.destination(project.file("build/html-reports/jacoco"))
         }
         project.evaluate()
 
@@ -73,21 +75,21 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
                 .map { it.reports }
                 .forEach { report ->
                     assertAll(
-                            { assertThat(report.xml.destination.endsWith("build/other-jacoco-folder/xml")) },
-                            { assertThat(report.csv.destination.endsWith("build/html-reports/jacoco")) },
-                            { assertThat(report.html.destination.endsWith("build/CSVISDABEST")) }
+                            { assertThat(report.xml.outputLocationFilePath).endsWith("build/other-jacoco-folder/xml") },
+                            { assertThat(report.csv.outputLocationFilePath).endsWith("build/CSVISDABEST") },
+                            { assertThat(report.html.outputLocationFilePath).endsWith("build/html-reports/jacoco") },
                     )
                 }
     }
 
     @ValueSource(booleans = [true, false])
     @ParameterizedTest(name = "acknowledge status of report tasks when enabled={0}")
-    fun `acknowledge status of report tasks`(enabled: Boolean) {
+    fun `acknowledge status of report tasks`(required: Boolean) {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            it.xml.enabled(enabled)
-            it.csv.enabled(enabled)
-            it.html.enabled(enabled)
+            it.xml.enabled(required)
+            it.csv.enabled(required)
+            it.html.enabled(required)
         }
         project.evaluate()
 
@@ -95,10 +97,15 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
                 .map { it.reports }
                 .forEach {
                     assertAll(
-                            { assertThat(it.xml.isEnabled == enabled) },
-                            { assertThat(it.csv.isEnabled == enabled) },
-                            { assertThat(it.html.isEnabled == enabled) }
+                            { assertThat(it.xml.required.get() == required) },
+                            { assertThat(it.csv.required.get() == required) },
+                            { assertThat(it.html.required.get() == required) }
                     )
                 }
     }
+
+    /* Private */
+
+    private val ConfigurableReport.outputLocationFilePath get() =
+        outputLocationFile?.asFile?.get()?.absolutePath
 }
