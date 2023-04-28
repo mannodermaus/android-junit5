@@ -94,9 +94,6 @@ val versionClassTask = tasks.register<Copy>("createVersionClass") {
     )
     outputs.upToDateWhen { false }
 }
-tasks.named("compileKotlin").configure {
-    dependsOn(versionClassTask)
-}
 sourceSets {
     main {
         java.srcDir("build/generated/sources/plugin")
@@ -138,3 +135,10 @@ dependencies {
 }
 
 project.configureDeployment(Artifacts.Plugin)
+
+// Register source-processing tasks as dependants of the custom source generation task
+listOf("compileKotlin", "androidSourcesJar", "dokkaJavadoc").forEach { taskName ->
+    tasks.named(taskName).configure {
+        dependsOn(versionClassTask)
+    }
+}
