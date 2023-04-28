@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 1.9.0.0 (2023-04-28)
 - JUnit 5.9.0
 - Add support for Android Gradle Plugin 8.x.y
 - Raise minimum supported versions for AGP and Gradle to 7.0.x and 7.0, respectively 
