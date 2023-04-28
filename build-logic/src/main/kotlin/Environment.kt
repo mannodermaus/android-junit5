@@ -12,9 +12,10 @@ enum class SupportedAgp(
     AGP_7_1("7.1.3", gradle = "7.2"),
     AGP_7_2("7.2.2", gradle = "7.3.3"),
     AGP_7_3("7.3.1", gradle = "7.4.2"),
-    AGP_7_4("7.4.0", gradle = "7.5.1"),
-    AGP_8_0("8.0.0-beta01", gradle = "8.0-rc-1"),
-    AGP_8_1("8.1.0-alpha01", gradle = "8.0-rc-1");
+    AGP_7_4("7.4.2", gradle = "7.5.1"),
+    AGP_8_0("8.0.0", gradle = "8.0"),
+    AGP_8_1("8.1.0-beta01", gradle = "8.0"),
+    AGP_8_2("8.2.0-alpha01", gradle = "8.0");
 
     companion object {
         val oldest = values().first()
@@ -86,7 +87,7 @@ object Artifacts {
             platform = Java,
             groupId = "de.mannodermaus.gradle.plugins",
             artifactId = "android-junit5",
-            currentVersion = "1.9.2.0-SNAPSHOT",
+            currentVersion = "1.9.0.0-SNAPSHOT",
             latestStableVersion = "1.8.2.1",
             license = license,
             description = "Unit Testing with JUnit 5 for Android."
