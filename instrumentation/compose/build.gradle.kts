@@ -1,28 +1,11 @@
-import de.mannodermaus.gradle.plugins.junit5.junitPlatform
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-
-buildscript {
-  repositories {
-    google()
-    mavenCentral()
-    sonatypeSnapshots()
-  }
-
-  dependencies {
-    val latest = Artifacts.Plugin.latestStableVersion
-    classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
-  }
-}
 
 plugins {
   id("com.android.library")
   kotlin("android")
   id("explicit-api-mode")
-}
-
-apply {
-  plugin("de.mannodermaus.android-junit5")
+  id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
 }
 
 val javaVersion = JavaVersion.VERSION_11
@@ -69,7 +52,7 @@ android {
 
 junitPlatform {
   // Using local dependency instead of Maven coordinates
-  instrumentationTests.integrityCheckEnabled = false
+  instrumentationTests.enabled = false
 }
 
 tasks.withType<Test> {
