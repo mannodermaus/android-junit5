@@ -4,29 +4,22 @@ import android.os.Build
 import android.os.Bundle
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
-import kotlin.reflect.KClass
+import de.mannodermaus.junit5.testutil.reflect.getFieldReflectively
+import de.mannodermaus.junit5.testutil.reflect.setStaticValue
 
 object AndroidBuildUtils {
 
-    fun withApiLevel(api: Int, block: () -> Unit) {
-        try {
-            assumeApiLevel(api)
-            block()
-        } finally {
-            resetApiLevel()
-        }
-    }
+    fun withApiLevel(api: Int, block: () -> Unit) = withMockedStaticField<Build.VERSION>(
+        fieldName = "SDK_INT",
+        value = api,
+        block = block,
+    )
 
-    fun withManufacturer(name: String, block: () -> Unit) {
-        try {
-            assumeManufacturer(name)
-            block()
-        } finally {
-            resetManufacturer()
-        }
-    }
+    fun withManufacturer(name: String, block: () -> Unit) = withMockedStaticField<Build>(
+        fieldName = "MANUFACTURER",
+        value = name,
+        block = block,
+    )
 
     fun withMockedInstrumentation(arguments: Bundle = Bundle(), block: () -> Unit) {
         val (oldInstrumentation, oldArguments) = try {
@@ -46,37 +39,20 @@ object AndroidBuildUtils {
         }
     }
 
-    private fun setWithReflection(clazz: KClass<*>, fieldName: String, value: Any?) {
-        // Adjust the value of the target field statically using reflection
-        val field = clazz.java.getDeclaredField(fieldName)
-        field.isAccessible = true
+    private inline fun <reified T : Any> withMockedStaticField(
+        fieldName: String,
+        value: Any?,
+        block: () -> Unit,
+    ) {
+        val field = T::class.java.getFieldReflectively(fieldName)
+        val oldValue = field.get(null)
 
-        // Temporarily remove the field's "final" modifier
-        val modifiersField = Field::class.java.getDeclaredField("modifiers")
-        modifiersField.isAccessible = true
-        modifiersField.setInt(field, field.modifiers and Modifier.FINAL.inv())
-
-        // Apply the value to the field, re-finalize it, then lock it again
-        field.set(null, value)
-        modifiersField.setInt(field, field.modifiers or Modifier.FINAL)
-        field.isAccessible = false
-    }
-
-    private fun assumeApiLevel(apiLevel: Int) {
-        setWithReflection(Build.VERSION::class, "SDK_INT", apiLevel)
-        assertThat(Build.VERSION.SDK_INT).isEqualTo(apiLevel)
-    }
-
-    private fun resetApiLevel() {
-        assumeApiLevel(0)
-    }
-
-    private fun assumeManufacturer(name: String?) {
-        setWithReflection(Build::class, "MANUFACTURER", name)
-        assertThat(Build.MANUFACTURER).isEqualTo(name)
-    }
-
-    private fun resetManufacturer() {
-        assumeManufacturer(null)
+        try {
+            field.setStaticValue(value)
+            assertThat(field.get(null)).isEqualTo(value)
+            block()
+        } finally {
+            field.setStaticValue(oldValue)
+        }
     }
 }
