@@ -55,6 +55,8 @@ tasks.withType<Test> {
 }
 
 dependencies {
+  implementation(project(":testutil-reflect"))
+
   api(libs.androidXTestMonitor)
   api(libs.truth)
   api(libs.truthJava8Extensions)
