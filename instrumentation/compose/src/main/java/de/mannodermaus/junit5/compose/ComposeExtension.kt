@@ -18,10 +18,17 @@ import org.junit.jupiter.api.extension.Extension
 public interface ComposeExtension {
     /**
      * Set up and drive the execution of a Compose test within the provided [block].
+     * Depending on the time this is called, it will either queue up a preparatory action for the test
+     * (e.g. in @BeforeEach)
      * The receive of this block is a [ComposeContext], through which you can access all sorts of
      * utilities to drive the execution of the test, such as driving the clock or executing actions
      * on the UI thread. The main purpose is provided through [ComposeContext.setContent], however:
      * With this function, you can pass an arbitrary composable tree to the extension and evaluate it afterwards.
      */
-    public fun runComposeTest(block: ComposeContext.() -> Unit)
+    public fun use(block: ComposeContext.() -> Unit)
+
+    @Deprecated(message = "Change to use()", replaceWith = ReplaceWith("use(block)"))
+    public fun runComposeTest(block: ComposeContext.() -> Unit) {
+        use(block)
+    }
 }

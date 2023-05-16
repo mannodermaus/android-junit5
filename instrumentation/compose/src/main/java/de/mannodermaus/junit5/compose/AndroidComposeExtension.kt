@@ -3,18 +3,19 @@ package de.mannodermaus.junit5.compose
 import android.annotation.SuppressLint
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.AndroidComposeUiTestEnvironment
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.test.core.app.ActivityScenario
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.jupiter.api.extension.RegisterExtension
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
 
 /**
  * Factory method to provide a JUnit 5 extension for Compose using its [RegisterExtension] API
@@ -29,6 +30,7 @@ import org.junit.runners.model.Statement
  * }
  * ```
  */
+@ExperimentalTestApi
 public fun createComposeExtension(): ComposeExtension =
     createAndroidComposeExtension<ComponentActivity>()
 
@@ -39,7 +41,8 @@ public fun createComposeExtension(): ComposeExtension =
  * via [ComposeContext.setContent], provided through the extension. Make sure that you add the provided
  * Activity to your app's manifest file.
  */
-public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(): AndroidComposeExtension {
+@ExperimentalTestApi
+public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(): AndroidComposeExtension<A> {
     return createAndroidComposeExtension(A::class.java)
 }
 
@@ -50,11 +53,14 @@ public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(
  * via [ComposeContext.setContent], provided through the extension. Make sure that you add the provided
  * Activity to your app's manifest file.
  */
+@ExperimentalTestApi
 public fun <A : ComponentActivity> createAndroidComposeExtension(
     activityClass: Class<A>
-): AndroidComposeExtension {
+): AndroidComposeExtension<A> {
     return AndroidComposeExtension(
-        ruleFactory = { createAndroidComposeRule(activityClass) }
+        scenarioSupplier = {
+            ActivityScenario.launch(activityClass)
+        }
     )
 }
 
@@ -70,24 +76,96 @@ public fun <A : ComponentActivity> createAndroidComposeExtension(
  * [createAndroidComposeExtension] factory methods.
  */
 @SuppressLint("NewApi")
-public class AndroidComposeExtension
-@JvmOverloads
+@OptIn(ExperimentalTestApi::class)
+public class AndroidComposeExtension<A : ComponentActivity>
 internal constructor(
-    private val ruleFactory: () -> ComposeContentTestRule = { createComposeRule() }
-) :
-    BeforeEachCallback,
-    ParameterResolver,
-    ComposeExtension {
+    private val scenarioSupplier: () -> ActivityScenario<A>
+) : ComposeExtension, BeforeEachCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback,
+    AfterEachCallback, ParameterResolver {
 
-    private var description: Description? = null
+    // Management of pending test operations
+    private val pendingPrepareBlocks = mutableListOf<ComposeContext.() -> Unit>()
+    private var environment: AndroidComposeUiTestEnvironment<A>? = null
+    private var _scenario: ActivityScenario<A>? = null
+
+    // Instantiated by JUnit 5
+    @Suppress("UNCHECKED_CAST", "unused")
+    internal constructor() : this(
+        scenarioSupplier = {
+            ActivityScenario.launch(ComponentActivity::class.java) as ActivityScenario<A>
+        }
+    )
+
+    public val scenario: ActivityScenario<A>
+        get() = checkNotNull(_scenario) {
+            "Activity scenario could not be launched"
+        }
+
+    public val activity: A
+        get() = checkNotNull(environment?.test?.activity) {
+            "Host activity not found"
+        }
+
+    private var state = STATE_INIT
+
+    override fun use(block: ComposeContext.() -> Unit) {
+        when (state) {
+            STATE_INIT -> {
+                pendingPrepareBlocks.add(block)
+            }
+
+            STATE_READY -> {
+                requireNotNull(environment).runTest {
+                    val bridge = ComposeContextImpl(this)
+
+                    _scenario = scenarioSupplier()
+                    pendingPrepareBlocks.forEach { bridge.it() }
+                    bridge.block()
+                }
+
+                state = STATE_CALLED
+            }
+
+            STATE_CALLED -> {
+                throw IllegalStateException("Only a single call to use() is allowed per @Test method")
+            }
+
+            else -> {
+                throw IllegalStateException("Cannot call use() from @AfterEach or @AfterAll method")
+            }
+        }
+    }
 
     /* BeforeEachCallback */
 
     override fun beforeEach(context: ExtensionContext) {
-        description = Description.createTestDescription(
-            context.testClass.orElse(this::class.java),
-            context.displayName
-        )
+        state = STATE_INIT
+
+        environment = AndroidComposeUiTestEnvironment {
+            getActivityFromScenario(scenario)
+        }
+    }
+
+    /* BeforeTestExecutionCallback */
+
+    override fun beforeTestExecution(context: ExtensionContext) {
+        state = STATE_READY
+    }
+
+    /* AfterTestExecutionCallback */
+
+    override fun afterTestExecution(context: ExtensionContext) {
+        state = STATE_STALE
+    }
+
+    /* AfterEachCallback */
+
+    override fun afterEach(context: ExtensionContext) {
+        pendingPrepareBlocks.clear()
+        environment = null
+
+        scenario.close()
+        _scenario = null
     }
 
     /* ParameterResolver */
@@ -105,16 +183,15 @@ internal constructor(
     ): Any {
         return this
     }
+}
 
-    /* ComposeExtension */
+private const val STATE_INIT = 0
+private const val STATE_READY = 1
+private const val STATE_CALLED = 2
+private const val STATE_STALE = 3
 
-    override fun runComposeTest(block: ComposeContext.() -> Unit) {
-        ruleFactory().also { rule ->
-            rule.apply(object : Statement() {
-                override fun evaluate() {
-                    rule.block()
-                }
-            }, description).evaluate()
-        }
-    }
+private fun <A : ComponentActivity> getActivityFromScenario(scenario: ActivityScenario<A>): A? {
+    var activity: A? = null
+    scenario.onActivity { activity = it }
+    return activity
 }

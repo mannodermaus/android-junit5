@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="de.mannodermaus.junit5.compose">
+
+    <application>
+        <activity android:name=".ExistingActivity" />
+    </application>
+</manifest>

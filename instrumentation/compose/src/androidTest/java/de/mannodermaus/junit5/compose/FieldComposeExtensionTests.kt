@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -18,6 +19,7 @@ class FieldComposeExtensionTests {
 
     @JvmField
     @RegisterExtension
+    @OptIn(ExperimentalTestApi::class)
     val extension = createComposeExtension()
 
     @ValueSource(
@@ -28,22 +30,20 @@ class FieldComposeExtensionTests {
         ]
     )
     @ParameterizedTest
-    fun test(buttonLabel: String) {
-        extension.runComposeTest {
-            setContent {
-                Column {
-                    var counter by remember { mutableStateOf(0) }
+    fun test(buttonLabel: String) = extension.use {
+        setContent {
+            Column {
+                var counter by remember { mutableStateOf(0) }
 
-                    Text(text = "Clicked: $counter")
-                    Button(onClick = { counter++ }) {
-                        Text(text = buttonLabel)
-                    }
+                Text(text = "Clicked: $counter")
+                Button(onClick = { counter++ }) {
+                    Text(text = buttonLabel)
                 }
             }
-
-            onNodeWithText("Clicked: 0").assertIsDisplayed()
-            onNodeWithText(buttonLabel).performClick()
-            onNodeWithText("Clicked: 1").assertIsDisplayed()
         }
+
+        onNodeWithText("Clicked: 0").assertIsDisplayed()
+        onNodeWithText(buttonLabel).performClick()
+        onNodeWithText("Clicked: 1").assertIsDisplayed()
     }
 }
