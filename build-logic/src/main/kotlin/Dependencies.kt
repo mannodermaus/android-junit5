@@ -2,13 +2,14 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.7.0"
+        const val kotlin = "1.8.21"
         const val junitJupiter = "5.9.3"
         const val junitVintage = "5.9.3"
         const val junitPlatform = "1.9.3"
         const val truth = "1.1.3"
         const val androidXTest = "1.4.0"
-        const val compose = "1.2.0"
+        const val composeCompiler = "1.4.7"
+        const val composeBom = "2023.05.01"
     }
 
     object plugins {
@@ -38,10 +39,12 @@ object libs {
     const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
 
-    const val composeUi = "androidx.compose.ui:ui:${versions.compose}"
-    const val composeUiTooling = "androidx.compose.ui:ui-tooling:${versions.compose}"
-    const val composeFoundation = "androidx.compose.foundation:foundation:${versions.compose}"
-    const val composeMaterial = "androidx.compose.material:material:${versions.compose}"
+    const val composeBom = "androidx.compose:compose-bom:${versions.composeBom}"
+    const val composeUi = "androidx.compose.ui:ui"
+    const val composeUiTooling = "androidx.compose.ui:ui-tooling"
+    const val composeFoundation = "androidx.compose.foundation:foundation"
+    const val composeMaterial = "androidx.compose.material:material"
+    const val composeActivity = "androidx.activity:activity-compose:1.7.1"
 
     // Testing
     const val junit4 = "junit:junit:4.13.2"
@@ -58,7 +61,7 @@ object libs {
     const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTest}"
     const val espressoCore = "androidx.test.espresso:espresso-core:3.4.0"
 
-    const val composeUiTest = "androidx.compose.ui:ui-test:${versions.compose}"
-    const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4:${versions.compose}"
-    const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest:${versions.compose}"
+    const val composeUiTest = "androidx.compose.ui:ui-test"
+    const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4"
+    const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest"
 }
