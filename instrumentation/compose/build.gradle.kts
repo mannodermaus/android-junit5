@@ -37,7 +37,7 @@ android {
   }
 
   composeOptions {
-    kotlinCompilerExtensionVersion = libs.versions.compose
+    kotlinCompilerExtensionVersion = libs.versions.composeCompiler
   }
 
   testOptions {
@@ -64,6 +64,7 @@ tasks.withType<Test> {
 }
 
 dependencies {
+  implementation(project(":core"))
   implementation(libs.kotlinStdLib)
   implementation(libs.kotlinCoroutinesCore)
 
@@ -71,6 +72,8 @@ dependencies {
   implementation(libs.junit4)
   implementation(libs.espressoCore)
 
+  implementation(platform(libs.composeBom))
+  implementation(libs.composeActivity)
   implementation(libs.composeUi)
   implementation(libs.composeUiTooling)
   implementation(libs.composeFoundation)
@@ -83,7 +86,6 @@ dependencies {
   androidTestImplementation(libs.junitJupiterParams)
   androidTestImplementation(libs.espressoCore)
 
-  androidTestImplementation(project(":core"))
   androidTestRuntimeOnly(project(":runner"))
   androidTestRuntimeOnly(libs.androidXTestRunner)
 }

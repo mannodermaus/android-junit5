@@ -1,10 +1,15 @@
-public final class de/mannodermaus/junit5/compose/AndroidComposeExtension : de/mannodermaus/junit5/compose/ComposeExtension, org/junit/jupiter/api/extension/BeforeEachCallback, org/junit/jupiter/api/extension/ParameterResolver {
+public final class de/mannodermaus/junit5/compose/AndroidComposeExtension : de/mannodermaus/junit5/compose/ComposeExtension, org/junit/jupiter/api/extension/AfterEachCallback, org/junit/jupiter/api/extension/AfterTestExecutionCallback, org/junit/jupiter/api/extension/BeforeEachCallback, org/junit/jupiter/api/extension/BeforeTestExecutionCallback, org/junit/jupiter/api/extension/ParameterResolver {
 	public static final field $stable I
-	public fun <init> ()V
+	public fun afterEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun afterTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public fun beforeTestExecution (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public final fun getActivity ()Landroidx/activity/ComponentActivity;
+	public final fun getScenario ()Landroidx/test/core/app/ActivityScenario;
 	public fun resolveParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/Object;
 	public fun runComposeTest (Lkotlin/jvm/functions/Function1;)V
 	public fun supportsParameter (Lorg/junit/jupiter/api/extension/ParameterContext;Lorg/junit/jupiter/api/extension/ExtensionContext;)Z
+	public fun use (Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class de/mannodermaus/junit5/compose/AndroidComposeExtensionKt {
@@ -12,7 +17,25 @@ public final class de/mannodermaus/junit5/compose/AndroidComposeExtensionKt {
 	public static final fun createComposeExtension ()Lde/mannodermaus/junit5/compose/ComposeExtension;
 }
 
+public abstract interface class de/mannodermaus/junit5/compose/ComposeContext : androidx/compose/ui/test/SemanticsNodeInteractionsProvider {
+	public abstract fun awaitIdle (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getDensity ()Landroidx/compose/ui/unit/Density;
+	public abstract fun getMainClock ()Landroidx/compose/ui/test/MainTestClock;
+	public abstract fun registerIdlingResource (Landroidx/compose/ui/test/IdlingResource;)V
+	public abstract fun runOnIdle (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun runOnUiThread (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun setContent (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun unregisterIdlingResource (Landroidx/compose/ui/test/IdlingResource;)V
+	public abstract fun waitForIdle ()V
+	public abstract fun waitUntil (JLkotlin/jvm/functions/Function0;)V
+}
+
 public abstract interface class de/mannodermaus/junit5/compose/ComposeExtension {
 	public abstract fun runComposeTest (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun use (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class de/mannodermaus/junit5/compose/ComposeExtension$DefaultImpls {
+	public static fun runComposeTest (Lde/mannodermaus/junit5/compose/ComposeExtension;Lkotlin/jvm/functions/Function1;)V
 }
 
