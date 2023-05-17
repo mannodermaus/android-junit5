@@ -3,12 +3,15 @@
 import groovy.util.Node
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.plugins.signing.SigningExtension
@@ -208,12 +211,17 @@ private fun MavenPublication.applyPublicationDetails(
                     dependencies
                         .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
                         .forEach { (scope, dependencies) ->
-                            dependencies.forEach {
+                            dependencies.forEach { dep ->
                                 with(dependenciesNode.appendNode("dependency")) {
-                                    appendNode("groupId", it.group)
-                                    appendNode("artifactId", it.name)
-                                    appendNode("version", it.version)
-                                    appendNode("scope", scope)
+                                    if (dep is ProjectDependency) {
+                                        appendProjectDependencyCoordinates(dep)
+                                    } else {
+                                        appendExternalDependencyCoordinates(dep)
+                                    }
+
+                                    // Rewrite scope definition for BOM dependencies
+                                    val isBom = "-bom" in dep.name
+                                    appendNode("scope", if (isBom) "import" else scope)
                                 }
                             }
                         }
@@ -221,6 +229,26 @@ private fun MavenPublication.applyPublicationDetails(
             }
         }
     }
+}
+
+private fun Node.appendProjectDependencyCoordinates(dep: ProjectDependency) {
+    // Find the external coordinates for the given project dependency
+    val projectName = dep.name
+
+    val config = Artifacts.Instrumentation::class.java
+        .getMethod("get${projectName.capitalized()}")
+        .invoke(Artifacts.Instrumentation)
+        as Deployed
+
+    appendNode("groupId", config.groupId)
+    appendNode("artifactId", config.artifactId)
+    appendNode("version", config.latestStableVersion)
+}
+
+private fun Node.appendExternalDependencyCoordinates(dep: Dependency) {
+    appendNode("groupId", dep.group)
+    appendNode("artifactId", dep.name)
+    dep.version?.let { appendNode("version", it) }
 }
 
 private fun MavenPublication.configurePom(deployConfig: Deployed) = also {
