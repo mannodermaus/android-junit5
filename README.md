@@ -140,7 +140,10 @@ Support for Jetpack Compose is in the works, but considered experimental and uns
   
   ```kotlin
   dependencies {
-    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:0.1.0-SNAPSHOT")
+    // Test extension & transitive dependencies
+    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:1.0.0-SNAPSHOT")
+    // Needed for createComposeExtension() and createAndroidComposeExtension()
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
   }
   ```
 </details>
@@ -150,7 +153,10 @@ Support for Jetpack Compose is in the works, but considered experimental and uns
 
   ```groovy
   dependencies {
-    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:0.1.0-SNAPSHOT"
+    // Test extension & transitive dependencies
+    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:1.0.0-SNAPSHOT"
+    // Needed for createComposeExtension() and createAndroidComposeExtension()
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
   }
   ```
 </details>
