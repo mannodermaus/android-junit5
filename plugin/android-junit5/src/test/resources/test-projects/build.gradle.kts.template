@@ -51,7 +51,7 @@ android {
   compileSdkVersion("${compileSdk}")
 
   defaultConfig {
-    {% if atLeastAgp("8.0.0-alpha01") %}
+    {% if atLeastAgp("8.0.0") %}
         namespace = "de.mannodermaus.app"
     {% endif %}
 
@@ -69,6 +69,22 @@ android {
       }
     {% endif %}
   }
+
+  // Enforce Java 17 for AGP 8 and above
+  {% if atLeastAgp("8.0.0") %}
+    val javaVersion = JavaVersion.VERSION_17
+
+    compileOptions {
+      sourceCompatibility = javaVersion
+      targetCompatibility = javaVersion
+    }
+
+    {% if USE_KOTLIN %}
+      tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = javaVersion.toString()
+      }
+    {% endif %}
+  {% endif %}
 
   {% if USE_FLAVORS %}
     flavorDimensions("environment")
