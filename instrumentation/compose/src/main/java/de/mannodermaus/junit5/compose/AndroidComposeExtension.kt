@@ -46,6 +46,11 @@ public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(
     return createAndroidComposeExtension(A::class.java)
 }
 
+@ExperimentalTestApi
+public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(noinline scenarioSupplier: () -> ActivityScenario<A>): AndroidComposeExtension<A> {
+    return createAndroidComposeExtension(A::class.java, scenarioSupplier)
+}
+
 /**
  * Factory method to provide a JUnit 5 extension for Compose using its [RegisterExtension] API
  * for field injection. Prefer this over [createComposeExtension] if your tests require a custom Activity.
@@ -54,11 +59,8 @@ public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(
  * Activity to your app's manifest file.
  */
 @ExperimentalTestApi
-public fun <A : ComponentActivity> createAndroidComposeExtension(
-    activityClass: Class<A>, scenarioSupplier: () -> ActivityScenario<A> = {
-        ActivityScenario.launch(activityClass)
-    }
-): AndroidComposeExtension<A> {
+public fun <A : ComponentActivity> createAndroidComposeExtension(activityClass: Class<A>,
+                                                                 scenarioSupplier: () -> ActivityScenario<A> = { ActivityScenario.launch(activityClass) }): AndroidComposeExtension<A> {
     return AndroidComposeExtension(scenarioSupplier)
 }
 
