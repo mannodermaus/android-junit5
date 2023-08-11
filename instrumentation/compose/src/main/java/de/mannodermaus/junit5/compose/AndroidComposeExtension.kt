@@ -55,13 +55,11 @@ public inline fun <reified A : ComponentActivity> createAndroidComposeExtension(
  */
 @ExperimentalTestApi
 public fun <A : ComponentActivity> createAndroidComposeExtension(
-    activityClass: Class<A>
+    activityClass: Class<A>, scenarioSupplier: () -> ActivityScenario<A> = {
+        ActivityScenario.launch(activityClass)
+    }
 ): AndroidComposeExtension<A> {
-    return AndroidComposeExtension(
-        scenarioSupplier = {
-            ActivityScenario.launch(activityClass)
-        }
-    )
+    return AndroidComposeExtension(scenarioSupplier)
 }
 
 /**
