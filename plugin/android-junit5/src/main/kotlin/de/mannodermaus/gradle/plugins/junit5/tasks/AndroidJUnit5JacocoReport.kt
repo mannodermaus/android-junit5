@@ -15,8 +15,6 @@ import de.mannodermaus.gradle.plugins.junit5.internal.providers.mainSourceDirect
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.FileSystemLocationProperty
-import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
@@ -90,15 +88,23 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
             // Apply JUnit 5 configuration parameters
             val junit5Jacoco = project.junitPlatform.jacocoOptions
-            val allReports = listOf(
-                junit5Jacoco.csv to reportTask.reports.csv,
-                junit5Jacoco.xml to reportTask.reports.xml,
-                junit5Jacoco.html to reportTask.reports.html
-            )
-
-            allReports.forEach { (from, to) ->
-                to.required.set(from.enabled)
-                from.destination?.let { to.outputLocationFile?.set(it) }
+            junit5Jacoco.csv.also { from ->
+                reportTask.reports.csv.also { to ->
+                    to.required.set(from.enabled)
+                    from.destination?.let { to.outputLocationFile?.set(it) }
+                }
+            }
+            junit5Jacoco.xml.also { from ->
+                reportTask.reports.xml.also { to ->
+                    to.required.set(from.enabled)
+                    from.destination?.let { to.outputLocationFile?.set(it) }
+                }
+            }
+            junit5Jacoco.html.also { from ->
+                reportTask.reports.html.also { to ->
+                    to.required.set(from.enabled)
+                    from.destination?.let { to.outputLocationFile?.set(it) }
+                }
             }
 
             // Task-level Configuration

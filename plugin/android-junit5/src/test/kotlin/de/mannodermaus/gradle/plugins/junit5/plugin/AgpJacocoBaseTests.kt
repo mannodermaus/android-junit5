@@ -7,7 +7,8 @@ import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.JACOCO_TASK_NAME
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
-import org.gradle.api.reporting.ConfigurableReport
+import org.gradle.api.reporting.DirectoryReport
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -106,6 +107,9 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
 
     /* Private */
 
-    private val ConfigurableReport.outputLocationFilePath get() =
+    private val SingleFileReport.outputLocationFilePath get() =
+        outputLocationFile?.asFile?.get()?.absolutePath
+
+    private val DirectoryReport.outputLocationFilePath get() =
         outputLocationFile?.asFile?.get()?.absolutePath
 }
