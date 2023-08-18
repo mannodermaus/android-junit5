@@ -74,6 +74,7 @@ class FunctionalTestProjectCreator(
     replacements["AGP_VERSION"] = agp.version
     replacements["USE_KOTLIN"] = spec.useKotlin
     replacements["USE_FLAVORS"] = spec.useFlavors
+    replacements["USE_JACOCO"] = spec.useJacoco
     replacements["USE_CUSTOM_BUILD_TYPE"] = spec.useCustomBuildType
     replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
     replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
@@ -115,8 +116,10 @@ class FunctionalTestProjectCreator(
     val srcFolder: File,
     config: Config
   ) {
+    val task = config[TomlSpec.Settings.task]
     val minAgpVersion = config[TomlSpec.Settings.minAgpVersion]
     val useKotlin = config[TomlSpec.Settings.useKotlin]
+    val useJacoco = config[TomlSpec.Settings.useJacoco]
     val useFlavors = config[TomlSpec.Settings.useFlavors]
     val useCustomBuildType = config[TomlSpec.Settings.useCustomBuildType]
     val returnDefaultValues = config[TomlSpec.Settings.returnDefaultValues]
@@ -151,12 +154,14 @@ class FunctionalTestProjectCreator(
 
   // Structure of the virtual project config file, used only internally
   private object TomlSpec : ConfigSpec(prefix = "") {
-    val expectations by required<List<ExpectedTests>>()
+    val expectations by optional<List<ExpectedTests>>(default = emptyList())
 
     object Settings : ConfigSpec() {
+      val task by optional<String?>(default = null)
       val minAgpVersion by optional<String?>(default = null)
       val useFlavors by optional(default = false)
       val useKotlin by optional(default = false)
+      val useJacoco by optional(default = false)
       val useCustomBuildType by optional<String?>(default = null)
       val returnDefaultValues by optional(default = false)
       val includeAndroidResources by optional(default = false)

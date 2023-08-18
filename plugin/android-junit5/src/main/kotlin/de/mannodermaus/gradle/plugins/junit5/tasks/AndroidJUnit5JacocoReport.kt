@@ -98,7 +98,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
             allReports.forEach { (from, to) ->
                 to.required.set(from.enabled)
-                from.destination?.let { to.outputLocationFile?.set(it) }
+                from.destination?.let { to.outputLocationFile.set(it) }
             }
 
             // Task-level Configuration

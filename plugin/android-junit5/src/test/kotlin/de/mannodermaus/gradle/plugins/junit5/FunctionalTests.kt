@@ -67,12 +67,13 @@ class FunctionalTests {
                     val project = projectCreator.createProject(spec, agp)
 
                     // Execute the tests of the virtual project with Gradle
-                    val result = runGradle(agp)
+                    val taskName = spec.task ?: "test"
+                    val result = runGradle(agp, taskName)
                         .withProjectDir(project)
                         .build()
 
                     // Check that the task execution was successful in general
-                    when (val outcome = result.task(":test")?.outcome) {
+                    when (val outcome = result.task(":$taskName")?.outcome) {
                       TaskOutcome.UP_TO_DATE -> {
                         // Nothing to do, a previous build already checked this
                         println("Test task up-to-date; skipping assertions.")
@@ -122,14 +123,14 @@ class FunctionalTests {
         }
       }
 
-  private fun runGradle(agpVersion: TestedAgp) =
+  private fun runGradle(agpVersion: TestedAgp, task: String) =
       GradleRunner.create()
           .apply {
             if (agpVersion.requiresGradle != null) {
               withGradleVersion(agpVersion.requiresGradle)
             }
           }
-          .withArguments("test", "--stacktrace")
+          .withArguments(task, "--stacktrace")
           .withPrunedPluginClasspath(agpVersion)
 
   // Helper DSL to assert AGP-specific results of the virtual Gradle executions.
