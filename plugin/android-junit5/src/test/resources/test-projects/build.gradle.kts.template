@@ -29,6 +29,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
   {% endif %}
 
+  {% if USE_JACOCO %}
+    jacoco
+  {% endif %}
+
   id("de.mannodermaus.android-junit5")
 }
 
@@ -116,11 +120,20 @@ android {
   }
 }
 
-{% if INCLUDE_ANDROID_RESOURCES %}
-  junitPlatform {
+junitPlatform {
+  {% if INCLUDE_ANDROID_RESOURCES %}
     instrumentationTests.integrityCheckEnabled = false
-  }
-{% endif %}
+  {% endif %}
+
+  {% if USE_JACOCO %}
+    jacocoOptions {
+      html {
+        enabled = true
+        destination = layout.buildDirectory.file("reports/jacoco/${name}.html").get().asFile
+      }
+    }
+  {% endif %}
+}
 
 {% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
   androidComponents {
