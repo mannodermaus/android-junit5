@@ -1,4 +1,3 @@
 [settings]
 useJacoco = true
-minAgpVersion = "7.4"
 task = "tasks"
