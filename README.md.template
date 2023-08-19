@@ -124,7 +124,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
   ```
 </details>
 
-By enabling JUnit 5 for instrumentation tests, you will gain access to `ActivityScenarioExtension` (amog other things), which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
+By enabling JUnit 5 for instrumentation tests, you will gain access to `ActivityScenarioExtension` (among other things), which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
 
 ## Jetpack Compose
 
