@@ -13,7 +13,8 @@ public final class de/mannodermaus/junit5/compose/AndroidComposeExtension : de/m
 }
 
 public final class de/mannodermaus/junit5/compose/AndroidComposeExtensionKt {
-	public static final fun createAndroidComposeExtension (Ljava/lang/Class;)Lde/mannodermaus/junit5/compose/AndroidComposeExtension;
+	public static final fun createAndroidComposeExtension (Ljava/lang/Class;Lkotlin/jvm/functions/Function0;)Lde/mannodermaus/junit5/compose/AndroidComposeExtension;
+	public static synthetic fun createAndroidComposeExtension$default (Ljava/lang/Class;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lde/mannodermaus/junit5/compose/AndroidComposeExtension;
 	public static final fun createComposeExtension ()Lde/mannodermaus/junit5/compose/ComposeExtension;
 }
 
