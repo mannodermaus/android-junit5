@@ -76,6 +76,11 @@ dependencies {
   runtimeOnly(libs.junitPlatformRunner)
   runtimeOnly(libs.junitJupiterEngine)
 
+  // This transitive dependency of JUnit 5 is required to be on the runtime classpath,
+  // since otherwise ART will print noisy logs to console when trying to resolve any
+  // of the annotations of JUnit 5 (see #291 for more info)
+  runtimeOnly(libs.apiguardianApi)
+
   androidTestImplementation(libs.junitJupiterApi)
   androidTestImplementation(libs.junitJupiterParams)
   androidTestImplementation(libs.espressoCore)

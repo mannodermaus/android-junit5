@@ -38,6 +38,7 @@ object libs {
     const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:${versions.junitVintage}"
     const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
+    const val apiguardianApi = "org.apiguardian:apiguardian-api:1.1.2"
 
     const val composeBom = "androidx.compose:compose-bom:${versions.composeBom}"
     const val composeUi = "androidx.compose.ui:ui"
