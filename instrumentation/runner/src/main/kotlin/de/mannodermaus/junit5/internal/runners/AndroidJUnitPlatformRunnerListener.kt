@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
 import org.junit.platform.engine.TestExecutionResult
+import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.launcher.TestExecutionListener
 import org.junit.platform.launcher.TestIdentifier
+import org.junit.platform.launcher.TestPlan
 import org.junit.runner.Description
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunNotifier
@@ -18,6 +20,18 @@ internal class AndroidJUnitPlatformRunnerListener(
     private val testTree: AndroidJUnitPlatformTestTree,
     private val notifier: RunNotifier
 ) : TestExecutionListener {
+
+    override fun testPlanExecutionStarted(testPlan: TestPlan) {
+        // No-op, but must be declared to avoid AbstractMethodError
+    }
+
+    override fun testPlanExecutionFinished(testPlan: TestPlan) {
+        // No-op, but must be declared to avoid AbstractMethodError
+    }
+
+    override fun reportingEntryPublished(testIdentifier: TestIdentifier?, entry: ReportEntry?) {
+        // No-op, but must be declared to avoid AbstractMethodError
+    }
 
     override fun executionStarted(testIdentifier: TestIdentifier) {
         val description = testTree.getDescription(testIdentifier)
