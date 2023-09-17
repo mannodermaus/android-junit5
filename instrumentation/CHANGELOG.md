@@ -6,6 +6,7 @@ Change Log
 - Add support for test sharding (#270)
 - Add support for inherited tests (#288)
 - Only autoconfigure JUnit 5 for instrumentation tests when the user explicitly adds junit-jupiter-api as a dependency
+- Prevent noisy logs in Logcat complaining about unresolvable annotation classes (#306)
 
 ## 1.3.0 (2021-09-17)
 
