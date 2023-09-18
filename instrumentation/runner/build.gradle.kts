@@ -83,6 +83,7 @@ configurations.all {
 
 dependencies {
   implementation(libs.androidXTestMonitor)
+  implementation(libs.androidXTestRunner)
   implementation(libs.kotlinStdLib)
   implementation(libs.junit4)
 

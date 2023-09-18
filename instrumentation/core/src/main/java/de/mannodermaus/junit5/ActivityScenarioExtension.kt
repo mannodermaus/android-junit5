@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.parallel.ExecutionMode
 import java.lang.reflect.ParameterizedType
 
 /**
@@ -153,6 +154,13 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
     /* Methods */
 
     override fun beforeEach(context: ExtensionContext) {
+        require(context.executionMode == ExecutionMode.SAME_THREAD) {
+            "UI tests using ActivityScenarioExtension cannot be executed in ${context.executionMode} mode. " +
+                    "Please change it to ${ExecutionMode.SAME_THREAD}, e.g. via the @Execution annotation! " +
+                    "For more information, you can consult the JUnit 5 User Guide at " +
+                    "https://junit.org/junit5/docs/current/user-guide/#writing-tests-parallel-execution-synchronization."
+        }
+
         _scenario = scenarioSupplier()
     }
 
