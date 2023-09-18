@@ -22,7 +22,8 @@ import java.util.function.Predicate
 internal class AndroidJUnitPlatformTestTree(
     testPlan: TestPlan,
     testClass: Class<*>,
-    private val isIsolatedMethodRun: Boolean
+    private val isIsolatedMethodRun: Boolean,
+    val isParallelExecutionEnabled: Boolean,
 ) {
 
     private val descriptions = mutableMapOf<TestIdentifier, Description>()
@@ -146,7 +147,8 @@ internal class AndroidJUnitPlatformTestTree(
                     .map(nameExtractor)
                     .orElse("<unrooted>"),
                 /* name = */ name,
-                /* uniqueId = */ identifier.uniqueId
+                // Used to distinguish JU5 from other frameworks (e.g. for parallel execution)
+                /* ...annotations = */ org.junit.jupiter.api.Test(),
             )
         } else {
             Description.createSuiteDescription(name, identifier.uniqueId)

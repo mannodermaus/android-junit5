@@ -31,4 +31,6 @@ apiValidation {
   ignoredPackages.add("de.mannodermaus.junit5.internal")
   ignoredPackages.add("de.mannodermaus.junit5.compose.internal")
   ignoredProjects.add("sample")
+  ignoredProjects.add("testutil")
+  ignoredProjects.add("testutil-reflect")
 }

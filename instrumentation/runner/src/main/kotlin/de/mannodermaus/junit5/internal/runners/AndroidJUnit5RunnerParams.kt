@@ -26,9 +26,11 @@ internal data class AndroidJUnit5RunnerParams(
             .configurationParameters(this.configurationParameters)
             .build()
 
-    fun isIsolatedMethodRun(): Boolean {
-        return selectors.size == 1 && selectors.first() is MethodSelector
-    }
+    val isIsolatedMethodRun: Boolean
+        get() = selectors.size == 1 && selectors.first() is MethodSelector
+
+    val isParallelExecutionEnabled: Boolean
+        get() = configurationParameters["junit.jupiter.execution.parallel.enabled"] == "true"
 }
 
 private const val ARG_ENVIRONMENT_VARIABLES = "environmentVariables"
