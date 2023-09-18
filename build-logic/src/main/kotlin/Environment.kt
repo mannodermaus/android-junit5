@@ -15,8 +15,8 @@ enum class SupportedAgp(
     AGP_7_4("7.4.2", gradle = "7.5.1"),
     AGP_8_0("8.0.2", gradle = "8.0"),
     AGP_8_1("8.1.1", gradle = "8.0"),
-    AGP_8_2("8.2.0-beta01", gradle = "8.2"),
-    AGP_8_3("8.3.0-alpha01", gradle = "8.3");
+    AGP_8_2("8.2.0-beta04", gradle = "8.2"),
+    AGP_8_3("8.3.0-alpha04", gradle = "8.3");
 
     companion object {
         val oldest = values().first()
