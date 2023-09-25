@@ -3,6 +3,7 @@ package de.mannodermaus.junit5.internal.utils
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import de.mannodermaus.junit5.internal.LOG_TAG
 import java.lang.reflect.Field
 
 @SuppressLint("NewApi")
@@ -33,7 +34,7 @@ internal object BuildConfigValueUtils {
         try {
             Wrapper()
         } catch (t: Throwable) {
-            Log.e("AndroidJUnit5", "Cannot initialize access to BuildConfig", t)
+            Log.e(LOG_TAG, "Cannot initialize access to BuildConfig", t)
             null
         }
     }
