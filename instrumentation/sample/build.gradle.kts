@@ -25,6 +25,10 @@ android {
     testInstrumentationRunnerArguments["configurationParameters"] = "junit.jupiter.execution.parallel.enabled=true,junit.jupiter.execution.parallel.mode.default=concurrent"
 
     buildConfigField("boolean", "MY_VALUE", "true")
+
+    testOptions {
+      animationsDisabled = true
+    }
   }
 
   // Add Kotlin source directory to all source sets

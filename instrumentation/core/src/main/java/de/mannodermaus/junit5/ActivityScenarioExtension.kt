@@ -4,8 +4,10 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.test.core.app.ActivityScenario
 import de.mannodermaus.junit5.ActivityScenarioExtension.Companion.launch
+import de.mannodermaus.junit5.internal.LOG_TAG
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.api.parallel.ExecutionMode
 import java.lang.reflect.ParameterizedType
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * JUnit 5 Extension for the [ActivityScenario] API,
@@ -113,6 +116,11 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
     AfterEachCallback, ParameterResolver {
 
     public companion object {
+        private const val WARNING_KEY = "de.mannodermaus.junit5.LogConcurrentExecutionWarning"
+        private const val LOCK_KEY = "de.mannodermaus.junit5.SharedResourceLock"
+
+        private val NAMESPACE =
+            ExtensionContext.Namespace.create(ActivityScenarioExtension::class)
 
         /**
          * Launches an activity of a given class and constructs an [ActivityScenario] for it.
@@ -151,22 +159,23 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
     public val scenario: ActivityScenario<A>
         get() = _scenario!!
 
-    /* Methods */
+    /* BeforeEachCallback */
 
     override fun beforeEach(context: ExtensionContext) {
-        require(context.executionMode == ExecutionMode.SAME_THREAD) {
-            "UI tests using ActivityScenarioExtension cannot be executed in ${context.executionMode} mode. " +
-                    "Please change it to ${ExecutionMode.SAME_THREAD}, e.g. via the @Execution annotation! " +
-                    "For more information, you can consult the JUnit 5 User Guide at " +
-                    "https://junit.org/junit5/docs/current/user-guide/#writing-tests-parallel-execution-synchronization."
-        }
+        context.acquireLock(true)
 
         _scenario = scenarioSupplier()
     }
 
+    /* AfterEachCallback */
+
     override fun afterEach(context: ExtensionContext) {
         scenario.close()
+
+        context.acquireLock(false)
     }
+
+    /* ParameterResolver */
 
     override fun supportsParameter(
         parameterContext: ParameterContext,
@@ -182,4 +191,50 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
         parameterContext: ParameterContext,
         extensionContext: ExtensionContext
     ): Any = scenario
+
+    /* Private */
+
+    @Suppress("InconsistentCommentForJavaParameter")
+    private fun ExtensionContext.acquireLock(state: Boolean) {
+        // No need to do anything unless parallelism is enabled
+        if (executionMode != ExecutionMode.CONCURRENT) {
+            return
+        }
+
+        val rootContext = this.root
+        val store = rootContext.getStore(NAMESPACE)
+
+        logConcurrentExecutionWarningOnce(store)
+
+        // Create a global lock for restricting test execution to one-by-one;
+        // this is necessary to ensure that only one ActivityScenario is ever active at a time,
+        // preventing violations of Android's instrumentation and Espresso
+        val lock = store.getOrComputeIfAbsent(
+            /* key = */ LOCK_KEY,
+            /* defaultCreator = */ { ReentrantLock() },
+            /* requiredType = */ ReentrantLock::class.java,
+        )
+
+        if (state) {
+            lock.lock()
+        } else {
+            lock.unlock()
+        }
+    }
+
+    private fun logConcurrentExecutionWarningOnce(store: ExtensionContext.Store) {
+        store.getOrComputeIfAbsent(WARNING_KEY) {
+            setOf(
+                "  [WARNING!] UI tests using ActivityScenarioExtension should not be executed in CONCURRENT mode.",
+                "  We will try to disable parallelism for Espresso tests, but this may be error-prone",
+                "  (also, your execution times will look off). If you encounter issues, please consider",
+                "  annotating your Espresso test classes to use the SAME_THREAD mode via the @Execution annotation!",
+                "  --------------------------------------------------------------------",
+                "  For more information, feel free to consult the JUnit 5 User Guide at:",
+                "  https://junit.org/junit5/docs/current/user-guide/#writing-tests-parallel-execution-synchronization",
+            ).forEach { line ->
+                Log.e(LOG_TAG, line)
+            }
+        }
+    }
 }
