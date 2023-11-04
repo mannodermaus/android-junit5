@@ -1,0 +1,10 @@
+public final class de/mannodermaus/junit5/extensions/GrantPermissionExtension : org/junit/jupiter/api/extension/BeforeEachCallback {
+	public static final field Companion Lde/mannodermaus/junit5/extensions/GrantPermissionExtension$Companion;
+	public fun beforeEach (Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public static final fun grant ([Ljava/lang/String;)Lde/mannodermaus/junit5/extensions/GrantPermissionExtension;
+}
+
+public final class de/mannodermaus/junit5/extensions/GrantPermissionExtension$Companion {
+	public final fun grant ([Ljava/lang/String;)Lde/mannodermaus/junit5/extensions/GrantPermissionExtension;
+}
+
