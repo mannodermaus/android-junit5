@@ -2,11 +2,11 @@ import Platform.Android
 import Platform.Java
 import org.gradle.api.Project
 import java.io.File
-import java.util.*
+import java.util.Properties
 
 enum class SupportedAgp(
-        val version: String,
-        val gradle: String? = null
+    val version: String,
+    val gradle: String? = null
 ) {
     AGP_7_0("7.0.4", gradle = "7.0.2"),
     AGP_7_1("7.1.3", gradle = "7.2"),
@@ -55,13 +55,13 @@ sealed class Platform(val name: String) {
  * containing all sorts of configuration related to Maven coordinates, for instance.
  */
 class Deployed internal constructor(
-        val platform: Platform,
-        val groupId: String,
-        val artifactId: String,
-        val currentVersion: String,
-        val latestStableVersion: String,
-        val description: String,
-        val license: String
+    val platform: Platform,
+    val groupId: String,
+    val artifactId: String,
+    val currentVersion: String,
+    val latestStableVersion: String,
+    val description: String,
+    val license: String
 )
 
 object Artifacts {
@@ -74,24 +74,24 @@ object Artifacts {
      * Return null if none can be found
      */
     fun from(project: Project) =
-            when (project.name) {
-                "core" -> Instrumentation.Core
-                "runner" -> Instrumentation.Runner
-                "android-junit5" -> Plugin
-                else -> null
-            }
+        when (project.name) {
+            "core" -> Instrumentation.Core
+            "runner" -> Instrumentation.Runner
+            "android-junit5" -> Plugin
+            else -> null
+        }
 
     /**
      * Gradle Plugin artifact
      */
     val Plugin = Deployed(
-            platform = Java,
-            groupId = "de.mannodermaus.gradle.plugins",
-            artifactId = "android-junit5",
-            currentVersion = "1.10.0.0-SNAPSHOT",
-            latestStableVersion = "1.9.3.0",
-            license = license,
-            description = "Unit Testing with JUnit 5 for Android."
+        platform = Java,
+        groupId = "de.mannodermaus.gradle.plugins",
+        artifactId = "android-junit5",
+        currentVersion = "1.10.0.0-SNAPSHOT",
+        latestStableVersion = "1.9.3.0",
+        license = license,
+        description = "Unit Testing with JUnit 5 for Android."
     )
 
     /**
@@ -103,23 +103,33 @@ object Artifacts {
         const val latestStableVersion = "1.3.0"
 
         val Core = Deployed(
-                platform = Android(minSdk = 14),
-                groupId = groupId,
-                artifactId = "android-test-core",
-                currentVersion = currentVersion,
-                latestStableVersion = latestStableVersion,
-                license = license,
-                description = "Extensions for instrumented Android tests with JUnit 5."
+            platform = Android(minSdk = 14),
+            groupId = groupId,
+            artifactId = "android-test-core",
+            currentVersion = currentVersion,
+            latestStableVersion = latestStableVersion,
+            license = license,
+            description = "Extensions for instrumented Android tests with JUnit 5."
+        )
+
+        val Extensions = Deployed(
+            platform = Android(minSdk = 14),
+            groupId = groupId,
+            artifactId = "android-test-extensions",
+            currentVersion = currentVersion,
+            latestStableVersion = latestStableVersion,
+            license = license,
+            description = "Optional extensions for instrumented Android tests with JUnit 5."
         )
 
         val Runner = Deployed(
-                platform = Android(minSdk = 14),
-                groupId = groupId,
-                artifactId = "android-test-runner",
-                currentVersion = currentVersion,
-                latestStableVersion = latestStableVersion,
-                license = license,
-                description = "Runner for integration of instrumented Android tests with JUnit 5."
+            platform = Android(minSdk = 14),
+            groupId = groupId,
+            artifactId = "android-test-runner",
+            currentVersion = currentVersion,
+            latestStableVersion = latestStableVersion,
+            license = license,
+            description = "Runner for integration of instrumented Android tests with JUnit 5."
         )
 
         val Compose = Deployed(
@@ -166,5 +176,5 @@ class DeployedCredentials(private val project: Project) {
     }
 
     private fun Properties.getOrEnvvar(key: String): String? =
-            getProperty(key, System.getenv(key))
+        getProperty(key, System.getenv(key))
 }

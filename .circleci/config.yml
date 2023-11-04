@@ -8,7 +8,7 @@ defaults: &defaults
         GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
 
 cache_key: &cache_key
-  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
+  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/core/build.gradle.kts" }}-{{ checksum "instrumentation/compose/build.gradle.kts" }}-{{ checksum "instrumentation/extensions/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
 
 commands:
   construct_signing_key:
@@ -42,11 +42,12 @@ jobs:
             ./gradlew assembleRelease :core:assembleDebug \
             :core:assembleDebugAndroidTest \
             :compose:assembleDebugAndroidTest \
+            :extensions:assembleDebug \
             :runner:assembleDebug \
-            :sample:assembleDebug --stacktrace 
+            :sample:assembleDebug --stacktrace
       - run:
           name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :core:check :runner:check :compose:check --stacktrace
+          command: cd instrumentation && ./gradlew :core:check :extensions:check :runner:check :compose:check --stacktrace
 
       - save_cache:
           <<: *cache_key
@@ -96,6 +97,9 @@ jobs:
           path: test-lab-results
           destination: instrumentation-core/test-lab-results
       - store_artifacts:
+          path: instrumentation/extensions/build/reports
+          destination: instrumentation-extensions
+      - store_artifacts:
           path: instrumentation/runner/build/reports
           destination: instrumentation-runner
       - store_artifacts:
@@ -126,6 +130,9 @@ jobs:
       - store_artifacts:
           path: instrumentation/core/build/publications
           destination: instrumentation-core/publications/snapshots
+      - store_artifacts:
+          path: instrumentation/extensions/build/publications
+          destination: instrumentation-extensions/publications/snapshots
       - store_artifacts:
           path: instrumentation/runner/build/publications
           destination: instrumentation-runner/publications/snapshots

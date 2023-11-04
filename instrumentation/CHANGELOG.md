@@ -8,6 +8,7 @@ Change Log
 - Only autoconfigure JUnit 5 for instrumentation tests when the user explicitly adds junit-jupiter-api as a dependency
 - Prevent noisy logs in Logcat complaining about unresolvable annotation classes (#306)
 - Add support for parallel execution of non-UI instrumentation tests (#295)
+- Introduce `android-test-extensions` artifact with optional extensions, starting with a port of JUnit 4's `GrantPermissionRule` (#251)
 
 ## 1.3.0 (2021-09-17)
 
