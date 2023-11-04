@@ -131,9 +131,39 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
 
 By enabling JUnit 5 for instrumentation tests, you will gain access to `ActivityScenarioExtension` (among other things), which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
 
-## Jetpack Compose
+### Extensions
 
-Support for Jetpack Compose is in the works, but considered experimental and unstable at this stage. To use it, first enable support for instrumentation tests as described above, then add the integration library for Jetpack Compose as well:
+An optional artifact with more helper extensions is available for specific use cases.
+It contains the following APIs:
+
+- `GrantPermissionExtension` for granting permissions before each test
+
+Can you think of more? Let's discuss in the issues section!
+
+<details open>
+  <summary>Kotlin</summary>
+
+  ```kotlin
+  dependencies {
+    androidTestImplementation("de.mannodermaus.junit5:android-test-extensions:1.4.0")
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```groovy
+  dependencies {
+    androidTestImplementation "de.mannodermaus.junit5:android-test-extensions:1.4.0"
+  }
+  ```
+</details>
+
+### Jetpack Compose
+
+To test `@Composable` functions on device with JUnit 5, first enable support for instrumentation tests as described above.
+Then, add the integration library for Jetpack Compose to the `androidTestImplementation` configuration:
 
 <details open>
   <summary>Kotlin</summary>
@@ -141,7 +171,8 @@ Support for Jetpack Compose is in the works, but considered experimental and uns
   ```kotlin
   dependencies {
     // Test extension & transitive dependencies
-    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:1.0.0-SNAPSHOT")
+    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:1.4.0")
+
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
   }
@@ -154,7 +185,8 @@ Support for Jetpack Compose is in the works, but considered experimental and uns
   ```groovy
   dependencies {
     // Test extension & transitive dependencies
-    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:1.0.0-SNAPSHOT"
+    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:1.4.0"
+
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
   }
