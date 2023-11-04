@@ -2,6 +2,9 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 1.4.0 (2023-11-05)
+
 - Update formatting of instrumentation test names to prevent breaking generation of log files in newer versions of AGP (#263)
 - Add support for test sharding (#270)
 - Add support for inherited tests (#288)

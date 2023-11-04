@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 1.10.0.0 (2023-11-05)
 - JUnit 5.10.0
 - Fix binary-incompatible API change between Gradle 7&8 for output location of Jacoco reports (#302)
 
