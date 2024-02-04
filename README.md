@@ -67,7 +67,33 @@ To get started, declare the plugin in your `app` module's build script alongside
 
 ### Alternative: Legacy DSL
 
-If you prefer to use the legacy way to declare the dependency instead, remove the `version()` block from above and declare the plugin in your _root project's build script_ like so:
+If you prefer to use the legacy way to declare the dependency instead, remove the `version()` block from above and apply in your`app` module:
+
+<details>
+  <summary>Kotlin</summary>
+
+  ```kotlin
+   plugins {
+    id("de.mannodermaus.android-junit5")
+  }
+  ```  
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```kotlin
+  plugins {
+    id "de.mannodermaus.android-junit5"
+  }
+  ```
+  or 
+  ```kotlin
+  apply plugin: 'de.mannodermaus.android-junit5'
+  ```
+</details>
+
+Then declare the plugin in your _root project's build script_ like so:
 
 <details>
   <summary>Kotlin</summary>
