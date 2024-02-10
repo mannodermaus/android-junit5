@@ -73,10 +73,16 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   <summary>Kotlin</summary>
 
   ```kotlin
+  // In the root project's build.gradle.kts:
   buildscript {
     dependencies {
       classpath("de.mannodermaus.gradle.plugins:android-junit5:1.10.0.0")
     }
+  }
+
+  // In the app module's build.gradle.kts:
+  plugins {
+    id("de.mannodermaus.android-junit5")
   }
   ```
 </details>
@@ -84,12 +90,16 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
 <details>
   <summary>Groovy</summary>
 
-  ```kotlin
+  ```groovy
+  // In the root project's build.gradle:
   buildscript {
     dependencies {
       classpath "de.mannodermaus.gradle.plugins:android-junit5:1.10.0.0"
     }
   }
+
+  // In the app module's build.gradle:
+  apply plugin: "de.mannodermaus.android-junit5"
   ```
 </details>
 
