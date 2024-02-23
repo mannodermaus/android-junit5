@@ -12,8 +12,9 @@ import org.gradle.api.attributes.plugin.GradlePluginApiVersion
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.named
 import java.io.File
+import java.time.ZonedDateTime
+import java.util.*
 
 private const val minimumGradleVersion = "7.0"
 
@@ -105,7 +106,7 @@ fun Project.configureTestResources() {
         val defaultDirectory = outputs.files.singleFile
 
         configurations.filter { it.name.startsWith("testAgp") }.forEach { configuration ->
-            val strippedName = configuration.name.substring(4).toLowerCase()
+            val strippedName = configuration.name.substring(4).lowercase(Locale.ROOT)
             val prunedFile = File(defaultDirectory, "pruned-plugin-metadata-$strippedName.properties")
             outputs.file(prunedFile)
 
@@ -151,7 +152,8 @@ open class GenerateReadme : DefaultTask() {
         private val CONSTANTS_FILE_REGEX = Regex("const val (.*) = \"(.*)\"")
         private val CONSTANT_MAPPINGS = mapOf(
                 "minimumRequiredGradleVersion" to "MIN_REQUIRED_GRADLE_VERSION",
-                "minimumRequiredAgpVersion" to "MIN_REQUIRED_AGP_VERSION"
+                "minimumRequiredAgpVersion" to "MIN_REQUIRED_AGP_VERSION",
+                "currentYear" to "CURRENT_YEAR",
         )
 
         private val GENERATED_HEADER_COMMENT = """
@@ -228,6 +230,9 @@ open class GenerateReadme : DefaultTask() {
     private fun parseConstantsFile(): Map<String, String> {
         val constants = mutableMapOf<String, String>()
         val text = File(CONSTANTS_FILE).readText()
+
+        // Add hardcoded constants
+        constants["CURRENT_YEAR"] = ZonedDateTime.now().year.toString()
 
         CONSTANTS_FILE_REGEX.findAll(text).forEach { match ->
             constants[match.groups[1]!!.value] = match.groups[2]!!.value

@@ -218,7 +218,7 @@ This repository contains multiple modules, divided into two sub-projects. The re
 ## License
 
 ```
-Copyright 2017-2023 Marcel Schnelle
+Copyright 2017-${constants.currentYear} Marcel Schnelle
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
