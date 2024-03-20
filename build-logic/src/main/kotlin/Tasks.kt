@@ -18,6 +18,7 @@ import java.util.*
 
 private const val minimumGradleVersion = "7.0"
 
+@Suppress("DEPRECATION")
 fun Project.configureTestResources() {
     // Create a test resource task which will power the instrumented tests
     // for different versions of the Android Gradle Plugin
@@ -106,7 +107,7 @@ fun Project.configureTestResources() {
         val defaultDirectory = outputs.files.singleFile
 
         configurations.filter { it.name.startsWith("testAgp") }.forEach { configuration ->
-            val strippedName = configuration.name.substring(4).lowercase(Locale.ROOT)
+            val strippedName = configuration.name.substring(4).toLowerCase(Locale.ROOT)
             val prunedFile = File(defaultDirectory, "pruned-plugin-metadata-$strippedName.properties")
             outputs.file(prunedFile)
 
