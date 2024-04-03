@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+- Fix inheritance hierarchy of `ComposeExtension` to avoid false-positive warning regarding `@RegisterExtension` (#318)
+
 ## 1.4.0 (2023-11-05)
 
 - Update formatting of instrumentation test names to prevent breaking generation of log files in newer versions of AGP (#263)

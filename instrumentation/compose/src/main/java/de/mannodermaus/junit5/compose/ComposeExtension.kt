@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.Extension
  * in a field within the test class using any of the [createComposeExtension] or
  * [createAndroidComposeExtension] factory methods.
  */
-public interface ComposeExtension {
+public interface ComposeExtension : Extension {
     /**
      * Set up and drive the execution of a Compose test within the provided [block].
      * Depending on the time this is called, it will either queue up a preparatory action for the test
