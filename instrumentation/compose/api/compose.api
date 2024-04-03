@@ -31,7 +31,7 @@ public abstract interface class de/mannodermaus/junit5/compose/ComposeContext : 
 	public abstract fun waitUntil (JLkotlin/jvm/functions/Function0;)V
 }
 
-public abstract interface class de/mannodermaus/junit5/compose/ComposeExtension {
+public abstract interface class de/mannodermaus/junit5/compose/ComposeExtension : org/junit/jupiter/api/extension/Extension {
 	public abstract fun runComposeTest (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun use (Lkotlin/jvm/functions/Function1;)V
 }
