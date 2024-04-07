@@ -51,7 +51,7 @@ class InstrumentationSupportTests {
     @Test
     fun `do not add the RunnerBuilder when disabled`() {
         project.addJUnitJupiterApi()
-        project.junitPlatform.instrumentationTests.enabled = false
+        project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
         assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]).isNull()
@@ -72,9 +72,19 @@ class InstrumentationSupportTests {
         project.evaluate()
 
         assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core"))
-            .isEqualTo(Libraries.instrumentationCore)
+            .isEqualTo("${Libraries.instrumentationCore}:${Libraries.instrumentationVersion}")
         assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner"))
-            .isEqualTo(Libraries.instrumentationRunner)
+            .isEqualTo("${Libraries.instrumentationRunner}:${Libraries.instrumentationVersion}")
+    }
+
+    @Test
+    fun `allow overriding the version`() {
+        project.addJUnitJupiterApi()
+        project.junitPlatform.instrumentationTests.version.set("1.3.3.7")
+        project.evaluate()
+
+        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).endsWith("1.3.3.7")
+        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).endsWith("1.3.3.7")
     }
 
     @Test
@@ -93,7 +103,7 @@ class InstrumentationSupportTests {
     @Test
     fun `do not add the dependencies when disabled`() {
         project.addJUnitJupiterApi()
-        project.junitPlatform.instrumentationTests.enabled = false
+        project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
         assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).isNull()

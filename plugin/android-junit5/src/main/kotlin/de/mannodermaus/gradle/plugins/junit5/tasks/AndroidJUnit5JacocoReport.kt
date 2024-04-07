@@ -98,7 +98,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
 
             allReports.forEach { (from, to) ->
                 to.required.set(from.enabled)
-                from.destination?.let { to.outputLocationFile.set(it) }
+                to.outputLocationFile.fileProvider(from.destination.asFile)
             }
 
             // Task-level Configuration
@@ -110,7 +110,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
             // Apply exclusion rules to both class & source directories for Jacoco,
             // using the sum of all DirectoryProviders' outputs as a foundation:
             reportTask.classDirectories.setFrom(
-                directoryProviders.mainClassDirectories().toFileCollectionExcluding(junit5Jacoco.excludedClasses)
+                directoryProviders.mainClassDirectories().toFileCollectionExcluding(junit5Jacoco.excludedClasses.get())
             )
             reportTask.sourceDirectories.setFrom(
                 directoryProviders.mainSourceDirectories()

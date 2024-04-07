@@ -5,6 +5,8 @@ Change Log
 - JUnit 5.10.2
 - Raise minimum supported versions for AGP and Gradle to 8.0.x and 8.0, respectively
 - Allow overriding the version of the instrumentation libraries applied with the plugin
+- Update Jacoco & instrumentation test DSLs of the plugin to use Gradle Providers for their input parameters (e.g. `instrumentationTests.enabled.set(true)` instead of `instrumentationTests.enabled = true`)
+- Removed deprecated `integrityCheckEnabled` flag from the plugin DSL's instrumentation test options
 
 ## 1.10.0.0 (2023-11-05)
 - JUnit 5.10.0

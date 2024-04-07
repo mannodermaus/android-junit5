@@ -1,5 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.dsl
 
+import de.mannodermaus.Libraries
 import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
 import groovy.lang.Closure
 import groovy.lang.GroovyObjectSupport
@@ -9,6 +10,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
 import org.junit.platform.commons.util.Preconditions
+import java.io.File
 import javax.inject.Inject
 
 public abstract class AndroidJUnitPlatformExtension @Inject constructor(
@@ -16,7 +18,7 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
 ) : GroovyObjectSupport() {
 
     internal companion object {
-        fun Project.createJUnit5Extension() =
+        fun Project.createJUnit5Extension(): AndroidJUnitPlatformExtension =
             extensions.create(EXTENSION_NAME, AndroidJUnitPlatformExtension::class.java)
     }
 
@@ -85,14 +87,18 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
 
         return null
     }
-    
+
     /* Android Instrumentation Test support */
 
     /**
      * Options for controlling instrumentation test execution with JUnit 5
      */
     public val instrumentationTests: InstrumentationTestOptions =
-        objects.newInstance(InstrumentationTestOptions::class.java)
+        objects.newInstance(InstrumentationTestOptions::class.java).apply {
+            enabled.convention(true)
+            version.convention(Libraries.instrumentationVersion)
+            includeExtensions.convention(false)
+        }
 
     public fun instrumentationTests(action: Action<InstrumentationTestOptions>) {
         action.execute(instrumentationTests)
@@ -103,8 +109,19 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
     /**
      * Options for controlling Jacoco reporting
      */
+    @Suppress("CAST_NEVER_SUCCEEDS")
     public val jacocoOptions: JacocoOptions =
-        objects.newInstance(JacocoOptions::class.java)
+        objects.newInstance(JacocoOptions::class.java).apply {
+            taskGenerationEnabled.convention(true)
+            onlyGenerateTasksForVariants.convention(emptySet())
+            excludedClasses.set(listOf("**/R.class", "**/R$*.class", "**/BuildConfig.*"))
+            html.enabled.convention(true)
+            html.destination.set(null as? File)
+            csv.enabled.convention(true)
+            csv.destination.set(null as? File)
+            xml.enabled.convention(true)
+            xml.destination.set(null as? File)
+        }
 
     public fun jacocoOptions(action: Action<JacocoOptions>) {
         action.execute(jacocoOptions)

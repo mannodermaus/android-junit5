@@ -10,6 +10,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
 import de.mannodermaus.gradle.plugins.junit5.util.getDependentTaskNames
+import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -45,7 +46,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
         },
         beforeEvaluate = {
             it.junitPlatform.jacocoOptions {
-                it.taskGenerationEnabled = false
+                it.taskGenerationEnabled.set(false)
             }
         }
     ) { project, buildType ->
@@ -66,7 +67,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
                 task.group = "TEST MARKER"
             }
             it.junitPlatform.jacocoOptions {
-                it.taskGenerationEnabled = false
+                it.taskGenerationEnabled.set(false)
             }
         }
     ) { project, buildType ->
@@ -142,7 +143,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
                 "Mismatch! Actual dirs: $sourceDirs",
                 { assertThat(sourceDirs).doesNotContain("src/test/java") },
                 {
-                    assertThat(sourceDirs).doesNotContain("src/test${buildType.capitalize()}/java")
+                    assertThat(sourceDirs).doesNotContain("src/test${buildType.capitalized()}/java")
                 }
         )
     }
@@ -163,7 +164,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
     fun `only generate jacoco task for debug builds`(): List<DynamicTest> {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            it.onlyGenerateTasksForVariants("debug")
+            it.onlyGenerateTasksForVariants.add("debug")
         }
         project.evaluate()
 
@@ -189,7 +190,7 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
         val project = createProject().applyJacocoPlugin().build()
         project.registerProductFlavors()
         project.junitPlatform.jacocoOptions {
-            it.onlyGenerateTasksForVariants("paidDebug", "freeRelease")
+            it.onlyGenerateTasksForVariants.addAll("paidDebug", "freeRelease")
         }
         project.evaluate()
 

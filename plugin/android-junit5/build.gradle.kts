@@ -87,6 +87,7 @@ val versionClassTask = tasks.register<Copy>("createVersionClass") {
             "tokens" to mapOf(
                 "INSTRUMENTATION_GROUP" to Artifacts.Instrumentation.groupId,
                 "INSTRUMENTATION_CORE" to Artifacts.Instrumentation.Core.artifactId,
+                "INSTRUMENTATION_EXTENSIONS" to Artifacts.Instrumentation.Extensions.artifactId,
                 "INSTRUMENTATION_RUNNER" to Artifacts.Instrumentation.Runner.artifactId,
                 "INSTRUMENTATION_VERSION" to Artifacts.Instrumentation.latestStableVersion,
             )

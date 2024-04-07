@@ -47,7 +47,7 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     fun `acknowledge disabling of jacoco task generation`(): List<DynamicTest> {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            it.taskGenerationEnabled = false
+            it.taskGenerationEnabled.set(false)
         }
         project.evaluate()
 
@@ -65,9 +65,9 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     fun `acknowledge custom report folders`() {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            it.xml.destination(project.file("build/other-jacoco-folder/xml"))
-            it.csv.destination(project.file("build/CSVISDABEST"))
-            it.html.destination(project.file("build/html-reports/jacoco"))
+            it.xml.destination.set(project.file("build/other-jacoco-folder/xml"))
+            it.csv.destination.set(project.file("build/CSVISDABEST"))
+            it.html.destination.set(project.file("build/html-reports/jacoco"))
         }
         project.evaluate()
 
@@ -87,9 +87,9 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     fun `acknowledge status of report tasks`(required: Boolean) {
         val project = createProject().applyJacocoPlugin().build()
         project.junitPlatform.jacocoOptions {
-            it.xml.enabled(required)
-            it.csv.enabled(required)
-            it.html.enabled(required)
+            it.xml.enabled.set(required)
+            it.csv.enabled.set(required)
+            it.html.enabled.set(required)
         }
         project.evaluate()
 
@@ -107,5 +107,5 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
     /* Private */
 
     private val ConfigurableReport.outputLocationFilePath get() =
-        outputLocationFile?.asFile?.get()?.absolutePath
+        outputLocationFile.asFile.orNull?.absolutePath
 }
