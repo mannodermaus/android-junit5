@@ -3,7 +3,6 @@ package de.mannodermaus.junit5
 import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
-import de.mannodermaus.junit5.test.R
 
 class TestActivity : Activity() {
 

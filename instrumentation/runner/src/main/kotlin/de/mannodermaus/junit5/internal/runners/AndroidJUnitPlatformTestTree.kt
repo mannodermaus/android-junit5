@@ -1,8 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package de.mannodermaus.junit5.internal.runners
 
 import android.annotation.SuppressLint
 import de.mannodermaus.junit5.internal.extensions.isDynamicTest
 import org.junit.platform.commons.util.AnnotationUtils
+import org.junit.platform.engine.UniqueId
 import org.junit.platform.engine.support.descriptor.ClassSource
 import org.junit.platform.engine.support.descriptor.MethodSource
 import org.junit.platform.launcher.TestIdentifier
@@ -231,10 +234,20 @@ internal class AndroidJUnitPlatformTestTree(
             return delegate.getChildren(parent)
         }
 
+        override fun getChildren(parentId: UniqueId): MutableSet<TestIdentifier> {
+            return delegate.getChildren(parentId)
+        }
+
+        @Suppress("OVERRIDE_DEPRECATION")
         override fun getChildren(parentId: String): Set<TestIdentifier> {
             return delegate.getChildren(parentId)
         }
 
+        override fun getTestIdentifier(uniqueId: UniqueId): TestIdentifier {
+            return delegate.getTestIdentifier(uniqueId)
+        }
+
+        @Suppress("OVERRIDE_DEPRECATION")
         override fun getTestIdentifier(uniqueId: String): TestIdentifier {
             return delegate.getTestIdentifier(uniqueId)
         }

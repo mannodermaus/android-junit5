@@ -9,14 +9,14 @@ plugins {
   id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
 }
 
-val javaVersion = JavaVersion.VERSION_1_8
+val javaVersion = JavaVersion.VERSION_11
 
 android {
+  namespace = "de.mannodermaus.junit5"
   compileSdk = Android.compileSdkVersion
 
   defaultConfig {
     minSdk = Android.testCoreMinSdkVersion
-    targetSdk = Android.targetSdkVersion
     multiDexEnabled = true
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -35,16 +35,18 @@ android {
 
   lint {
     // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
-    warning("InvalidPackage")
+    warning.add("InvalidPackage")
+    targetSdk = Android.targetSdkVersion
   }
 
-  packagingOptions {
+  packaging {
     resources.excludes.add("META-INF/LICENSE.md")
     resources.excludes.add("META-INF/LICENSE-notice.md")
   }
 
   testOptions {
     unitTests.isReturnDefaultValues = true
+    targetSdk = Android.targetSdkVersion
   }
 }
 

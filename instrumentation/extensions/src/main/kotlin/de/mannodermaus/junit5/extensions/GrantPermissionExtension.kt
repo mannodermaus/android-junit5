@@ -1,8 +1,10 @@
 package de.mannodermaus.junit5.extensions
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.VisibleForTesting
+import androidx.test.annotation.ExperimentalTestApi
 import androidx.test.internal.platform.ServiceLoaderWrapper.loadSingleService
 import androidx.test.internal.platform.content.PermissionGranter
 import androidx.test.runner.permission.PermissionRequester
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
  * Instrumentation. There is no way of revoking a permission after it was granted. Attempting to do
  * so will crash the Instrumentation process.
  */
+@SuppressLint("RestrictedApi")
 public class GrantPermissionExtension
 internal constructor(private val permissionGranter: PermissionGranter) : BeforeEachCallback {
 
@@ -35,6 +38,7 @@ internal constructor(private val permissionGranter: PermissionGranter) : BeforeE
          *
          * @see android.Manifest.permission
          */
+        @ExperimentalTestApi
         @JvmStatic
         public fun grant(vararg permissions: String): GrantPermissionExtension {
             val granter = loadSingleService(PermissionGranter::class.java, ::PermissionRequester)

@@ -8,6 +8,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
+import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -146,7 +147,7 @@ class FunctionalTests {
     // Examples:
     // - buildType="debug", productFlavor=null --> ":testDebugUnitTest"
     // - buildType="debug", productFlavor="free" --> ":testFreeDebugUnitTest"
-    val taskName = ":test${productFlavor?.capitalize() ?: ""}${buildType.capitalize()}UnitTest"
+    val taskName = ":test${productFlavor?.capitalized() ?: ""}${buildType.capitalized()}UnitTest"
 
     // Perform assertions
     assertWithMessage("AGP Tests for '$taskName' did not match expectations")

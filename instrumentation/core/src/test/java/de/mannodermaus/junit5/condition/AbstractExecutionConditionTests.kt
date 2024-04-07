@@ -1,8 +1,6 @@
 package de.mannodermaus.junit5.condition
 
-import com.google.common.truth.Truth8.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInfo
@@ -10,6 +8,8 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult
 import org.junit.jupiter.api.extension.ExecutionCondition
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.platform.commons.util.ReflectionUtils
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import java.lang.reflect.AnnotatedElement
 import java.util.*
 
