@@ -21,16 +21,12 @@ internal class AndroidJUnitPlatformRunnerListener(
     private val notifier: RunNotifier
 ) : TestExecutionListener {
 
-    override fun testPlanExecutionStarted(testPlan: TestPlan) {
-        // No-op, but must be declared to avoid AbstractMethodError
-    }
-
-    override fun testPlanExecutionFinished(testPlan: TestPlan) {
-        // No-op, but must be declared to avoid AbstractMethodError
-    }
-
     override fun reportingEntryPublished(testIdentifier: TestIdentifier?, entry: ReportEntry?) {
         // No-op, but must be declared to avoid AbstractMethodError
+    }
+
+    override fun testPlanExecutionStarted(testPlan: TestPlan) {
+        notifier.fireTestSuiteStarted(testTree.suiteDescription)
     }
 
     override fun executionStarted(testIdentifier: TestIdentifier) {
@@ -71,10 +67,13 @@ internal class AndroidJUnitPlatformRunnerListener(
             notifier.fireTestAssumptionFailed(toFailure(testExecutionResult, description))
         } else if (status == TestExecutionResult.Status.FAILED) {
             notifier.fireTestFailure(toFailure(testExecutionResult, description))
-        }
-        if (description.isTest) {
+        } else if (description.isTest) {
             notifier.fireTestFinished(description)
         }
+    }
+
+    override fun testPlanExecutionFinished(testPlan: TestPlan) {
+        notifier.fireTestSuiteFinished(testTree.suiteDescription)
     }
 
     private fun toFailure(
