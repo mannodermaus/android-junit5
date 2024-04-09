@@ -106,7 +106,7 @@ private fun prepareUnitTests(project: Project, android: AndroidExtension) {
 }
 
 private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: Project, android: AndroidExtension) {
-    if (!instrumentationTests.enabled) return
+    if (!instrumentationTests.enabled.get()) return
 
     // Automatically configure instrumentation tests when JUnit 5 is detected in that configuration
     val hasJupiterApi = project.configurations
@@ -124,14 +124,23 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
             .joinToString(",")
     }
 
+    val version = instrumentationTests.version.get()
+
     project.dependencies.add(
         "androidTestImplementation",
-        Libraries.instrumentationCore
+        "${Libraries.instrumentationCore}:$version"
     )
     project.dependencies.add(
         "androidTestRuntimeOnly",
-        Libraries.instrumentationRunner
+        "${Libraries.instrumentationRunner}:$version"
     )
+
+    if (instrumentationTests.includeExtensions.get()) {
+        project.dependencies.add(
+            "androidTestImplementation",
+            "${Libraries.instrumentationExtensions}:$version"
+        )
+    }
 }
 
 private fun AndroidJUnitPlatformExtension.configureUnitTests(project: Project, variant: Variant) {
@@ -163,11 +172,11 @@ private fun AndroidJUnitPlatformExtension.configureJacoco(
     variant: Variant
 ) {
     // Connect a Code Coverage report to it if Jacoco is enabled
-    if (jacocoOptions.taskGenerationEnabled && config.hasJacocoPlugin) {
+    if (jacocoOptions.taskGenerationEnabled.get() && config.hasJacocoPlugin) {
         val taskName = variant.getTaskName(prefix = UNIT_TEST_PREFIX, suffix = UNIT_TEST_SUFFIX)
         project.tasks.namedOrNull<Test>(taskName)?.get()?.let { testTask ->
             // Create a Jacoco friend task
-            val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants
+            val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants.get()
             if (enabledVariants.isEmpty() || variant.name in enabledVariants) {
                 val directoryProviders = config.directoryProvidersOf(variant)
                 val registered = AndroidJUnit5JacocoReport.register(project, variant, testTask, directoryProviders)
@@ -184,7 +193,7 @@ private fun AndroidJUnitPlatformExtension.configureInstrumentationTests(
     config: PluginConfig,
     variant: Variant,
 ) {
-    if (!instrumentationTests.enabled) return
+    if (!instrumentationTests.enabled.get()) return
 
     config.instrumentationTestVariantOf(variant)?.let { instrumentationTestVariant ->
         AndroidJUnit5WriteFilters.register(project, variant, instrumentationTestVariant)

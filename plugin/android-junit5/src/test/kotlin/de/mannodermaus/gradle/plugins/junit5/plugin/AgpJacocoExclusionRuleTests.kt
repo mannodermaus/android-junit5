@@ -7,6 +7,7 @@ import de.mannodermaus.gradle.plugins.junit5.tasks.JACOCO_TASK_NAME
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
 import org.gradle.api.Project
+import org.gradle.configurationcache.extensions.capitalized
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -76,11 +77,11 @@ interface AgpJacocoExclusionRuleTests : AgpVariantAwareTests {
             beforeEvaluate = { project ->
                 project.createFakeFiles()
                 project.junitPlatform.jacocoOptions {
-                    it.excludedClasses = mutableListOf()
+                    it.excludedClasses.set(emptyList())
                 }
             }
     ) { project, buildType ->
-        val name = "${JACOCO_TASK_NAME}${buildType.capitalize()}"
+        val name = "${JACOCO_TASK_NAME}${buildType.capitalized()}"
         val fileNames = project.tasks.get<AndroidJUnit5JacocoReport>(name)
                 .classDirectories!!.asFileTree.files
                 .map { it.name }

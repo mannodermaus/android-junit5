@@ -55,9 +55,7 @@ android {
   compileSdkVersion("${compileSdk}")
 
   defaultConfig {
-    {% if atLeastAgp("8.0.0") %}
-        namespace = "de.mannodermaus.app"
-    {% endif %}
+    namespace = "de.mannodermaus.app"
 
     minSdkVersion(minSdk)
     targetSdkVersion(targetSdk)
@@ -74,20 +72,17 @@ android {
     {% endif %}
   }
 
-  // Enforce Java 17 for AGP 8 and above
-  {% if atLeastAgp("8.0.0") %}
-    val javaVersion = JavaVersion.VERSION_17
+  val javaVersion = JavaVersion.VERSION_17
 
-    compileOptions {
-      sourceCompatibility = javaVersion
-      targetCompatibility = javaVersion
+  compileOptions {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+  }
+
+  {% if USE_KOTLIN %}
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+      kotlinOptions.jvmTarget = javaVersion.toString()
     }
-
-    {% if USE_KOTLIN %}
-      tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = javaVersion.toString()
-      }
-    {% endif %}
   {% endif %}
 
   {% if USE_FLAVORS %}
@@ -121,15 +116,11 @@ android {
 }
 
 junitPlatform {
-  {% if INCLUDE_ANDROID_RESOURCES %}
-    instrumentationTests.integrityCheckEnabled = false
-  {% endif %}
-
   {% if USE_JACOCO %}
     jacocoOptions {
       html {
-        enabled = true
-        destination = layout.buildDirectory.file("reports/jacoco/${name}.html").get().asFile
+        enabled.set(true)
+        destination.set(layout.buildDirectory.file("reports/jacoco/${name}.html"))
       }
     }
   {% endif %}
