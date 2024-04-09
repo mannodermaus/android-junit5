@@ -67,9 +67,9 @@ internal class AndroidJUnitPlatformRunnerListener(
             notifier.fireTestAssumptionFailed(toFailure(testExecutionResult, description))
         } else if (status == TestExecutionResult.Status.FAILED) {
             notifier.fireTestFailure(toFailure(testExecutionResult, description))
-        } else if (description.isTest) {
-            notifier.fireTestFinished(description)
         }
+
+        notifier.fireTestFinished(description)
     }
 
     override fun testPlanExecutionFinished(testPlan: TestPlan) {

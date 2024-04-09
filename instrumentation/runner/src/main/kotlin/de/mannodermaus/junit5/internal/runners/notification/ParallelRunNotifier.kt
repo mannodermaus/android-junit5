@@ -59,6 +59,10 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
     private lateinit var eventThread: EventThread
     private val executor = Executors.newSingleThreadExecutor()
 
+    // Track finished tests, since the instrumentation reports failed tests through two calls
+    // but we only need to forward the first call to the actual reporting
+    private val finished = mutableSetOf<String>()
+
     // Original printer registered via Android instrumentation
     private val printer = reflection?.initialize(delegate) ?: nopPrinter
 
@@ -81,15 +85,21 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
     }
 
     override fun fireTestFailure(failure: Failure) {
-        eventThread.enqueue(Event.Finished(failure.description, testFailure = failure))
+        if (finished.add(failure.description.uniqueIdentifier)) {
+            eventThread.enqueue(Event.Finished(failure.description, testFailure = failure))
+        }
     }
 
     override fun fireTestAssumptionFailed(failure: Failure) {
-        eventThread.enqueue(Event.Finished(failure.description, assumptionFailure = failure))
+        if (finished.add(failure.description.uniqueIdentifier)) {
+            eventThread.enqueue(Event.Finished(failure.description, assumptionFailure = failure))
+        }
     }
 
     override fun fireTestFinished(description: Description) {
-        eventThread.enqueue(Event.Finished(description))
+        if (finished.add(description.uniqueIdentifier)) {
+            eventThread.enqueue(Event.Finished(description))
+        }
     }
 
     override fun fireTestSuiteFinished(description: Description) {
@@ -112,7 +122,7 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
 
                 // Persist the current printer state for this test
                 // (for later, when this test's finish event comes in)
-                states[description] = printer.captureTestState()
+                states[description.uniqueIdentifier] = printer.captureTestState()
             }
 
             is Event.Ignored -> {
@@ -164,20 +174,9 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
 
             // Unlocks the blockage from fireTestSuiteFinished(),
             // allowing the test engine to properly finish this class
+            finished.clear()
             doneLock.notifyAll()
         }
-    }
-
-    private operator fun <T> Map<String, T>.get(key: Description): T? {
-        return get(key.displayName)
-    }
-
-    private operator fun <T> MutableMap<String, T>.set(key: Description, value: T) {
-        put(key.displayName, value)
-    }
-
-    private fun <T> MutableMap<String, T>.remove(key: Description) {
-        remove(key.displayName)
     }
 
     private fun InstrumentationResultPrinter.captureTestState(): TestState {
@@ -185,10 +184,15 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
     }
 
     private fun InstrumentationResultPrinter.restoreTestState(description: Description) {
-        val state = requireNotNull(states[description])
+        val id = description.uniqueIdentifier
+        val state = requireNotNull(states[id])
         reflection?.restoreTestState(this, state)
-        states.remove(description)
+        states.remove(id)
     }
+
+    private val Description.uniqueIdentifier
+        get() =
+            "$className-$displayName"
 
     private class EventThread(
         private val onProcessEvent: (Event) -> Unit,
