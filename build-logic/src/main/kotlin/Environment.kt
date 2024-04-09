@@ -8,11 +8,6 @@ enum class SupportedAgp(
     val version: String,
     val gradle: String? = null
 ) {
-    AGP_7_0("7.0.4", gradle = "7.0.2"),
-    AGP_7_1("7.1.3", gradle = "7.2"),
-    AGP_7_2("7.2.2", gradle = "7.3.3"),
-    AGP_7_3("7.3.1", gradle = "7.4.2"),
-    AGP_7_4("7.4.2", gradle = "7.5.1"),
     AGP_8_0("8.0.2", gradle = "8.0"),
     AGP_8_1("8.1.4", gradle = "8.0"),
     AGP_8_2("8.2.2", gradle = "8.2"),
@@ -22,6 +17,7 @@ enum class SupportedAgp(
 
     companion object {
         val oldest = values().first()
+        val newestStable = values().reversed().first { '-' !in it.version }
     }
 
     val shortVersion: String = run {
@@ -38,9 +34,9 @@ enum class SupportedAgp(
 }
 
 object Android {
-    const val compileSdkVersion = 33
-    const val targetSdkVersion = 32
-    const val sampleMinSdkVersion = 14
+    const val compileSdkVersion = 34
+    const val targetSdkVersion = 34
+    const val sampleMinSdkVersion = 21
     val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
     val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Android).minSdk
     val testComposeMinSdkVersion = (Artifacts.Instrumentation.Compose.platform as Android).minSdk

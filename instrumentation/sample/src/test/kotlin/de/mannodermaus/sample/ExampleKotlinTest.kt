@@ -108,7 +108,7 @@ class ExampleKotlinTest {
   @ParameterizedTest(name = "Upper case for {0}")
   @MethodSource("getNames")
   fun parameterizedMethodTest (names: Pair<String, String>) {
-      assertEquals(names.second, names.first.toUpperCase())
+      assertEquals(names.second, names.first.uppercase())
   }
 
   @Nested
@@ -129,10 +129,10 @@ class ExampleKotlinTest {
     return listOf(
         dynamicTest("Length of input") { assertEquals(18, input.length) },
         dynamicTest("Lowercase of input") {
-          assertEquals("dynamic test input", input.toLowerCase())
+          assertEquals("dynamic test input", input.lowercase())
         },
         dynamicTest("Uppercase of input") {
-          assertEquals("DYNAMIC TEST INPUT", input.toUpperCase())
+          assertEquals("DYNAMIC TEST INPUT", input.uppercase())
         })
   }
 }

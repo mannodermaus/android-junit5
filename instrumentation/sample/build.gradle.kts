@@ -7,9 +7,10 @@ plugins {
   id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
 }
 
-val javaVersion = JavaVersion.VERSION_1_8
+val javaVersion = JavaVersion.VERSION_11
 
 android {
+  namespace = "de.mannodermaus.junit5.sample"
   compileSdk = Android.compileSdkVersion
 
   defaultConfig {
@@ -23,6 +24,10 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
     testInstrumentationRunnerArguments["configurationParameters"] = "junit.jupiter.execution.parallel.enabled=true,junit.jupiter.execution.parallel.mode.default=concurrent"
+
+    buildFeatures {
+      buildConfig = true
+    }
 
     buildConfigField("boolean", "MY_VALUE", "true")
 

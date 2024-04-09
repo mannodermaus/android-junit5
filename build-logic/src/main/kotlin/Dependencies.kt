@@ -2,21 +2,36 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.8.21"
-        const val junitJupiter = "5.10.0"
-        const val junitVintage = "5.10.0"
-        const val junitPlatform = "1.10.0"
-        const val truth = "1.1.3"
-        const val androidXTest = "1.4.0"
-        const val composeCompiler = "1.4.7"
-        const val composeBom = "2023.05.01"
+        const val kotlin = "1.9.23"
+        const val junitJupiter = "5.10.2"
+        const val junitVintage = "5.10.2"
+        const val junitPlatform = "1.10.2"
+
+        const val composeBom = "2024.04.00"
+        const val androidXTest = "1.5.0"
+        const val composeCompiler = "1.5.11"
+
+        const val activityCompose = "1.8.2"
+        const val apiGuardian = "1.1.2"
+        const val coroutines = "1.8.0"
+        const val dokka = "1.9.20"
+        const val espresso = "3.5.1"
+        const val javaSemver = "0.10.2"
+        const val junit4 = "4.13.2"
+        const val konfToml = "1.1.2"
+        const val korte = "2.4.12"
+        const val mockitoCore = "5.11.0"
+        const val mockitoKotlin = "5.2.1"
+        const val robolectric = "4.12"
+        const val shadow = "8.1.1"
+        const val truth = "1.4.2"
     }
 
     object plugins {
         fun android(version: SupportedAgp) = "com.android.tools.build:gradle:${version.version}"
         const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
-        const val shadow = "com.github.jengelman.gradle.plugins:shadow:6.1.0"
-        const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.7.0"
+        const val shadow = "com.github.johnrengelman:shadow:${libs.versions.shadow}"
+        const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:${libs.versions.dokka}"
     }
 
     // Libraries
@@ -29,8 +44,8 @@ object libs {
     }
 
     const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
-    const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
-    const val javaSemver = "com.github.zafarkhaja:java-semver:0.9.0"
+    const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}"
+    const val javaSemver = "com.github.zafarkhaja:java-semver:${versions.javaSemver}"
 
     const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitJupiter}"
     const val junitJupiterParams = "org.junit.jupiter:junit-jupiter-params:${versions.junitJupiter}"
@@ -38,29 +53,29 @@ object libs {
     const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:${versions.junitVintage}"
     const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
-    const val apiguardianApi = "org.apiguardian:apiguardian-api:1.1.2"
+    const val apiguardianApi = "org.apiguardian:apiguardian-api:${versions.apiGuardian}"
 
     const val composeBom = "androidx.compose:compose-bom:${versions.composeBom}"
     const val composeUi = "androidx.compose.ui:ui"
     const val composeUiTooling = "androidx.compose.ui:ui-tooling"
     const val composeFoundation = "androidx.compose.foundation:foundation"
     const val composeMaterial = "androidx.compose.material:material"
-    const val composeActivity = "androidx.activity:activity-compose:1.7.1"
+    const val composeActivity = "androidx.activity:activity-compose:${versions.activityCompose}"
 
     // Testing
-    const val junit4 = "junit:junit:4.13.2"
-    const val korte = "com.soywiz.korlibs.korte:korte:2.2.0"
-    const val konfToml = "com.uchuhimo:konf-toml:1.1.2"
-    const val mockitoCore = "org.mockito:mockito-core:3.11.1"
-    const val mockitoKotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    const val junit4 = "junit:junit:${versions.junit4}"
+    const val korte = "com.soywiz.korlibs.korte:korte:${versions.korte}"
+    const val konfToml = "com.uchuhimo:konf-toml:${versions.konfToml}"
+    const val mockitoCore = "org.mockito:mockito-core:${versions.mockitoCore}"
+    const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:${versions.mockitoKotlin}"
     const val truth = "com.google.truth:truth:${versions.truth}"
     const val truthJava8Extensions = "com.google.truth.extensions:truth-java8-extension:${versions.truth}"
-    const val robolectric = "org.robolectric:robolectric:4.8.1"
+    const val robolectric = "org.robolectric:robolectric:${versions.robolectric}"
 
     const val androidXTestCore = "androidx.test:core:${versions.androidXTest}"
     const val androidXTestRunner = "androidx.test:runner:${versions.androidXTest}"
     const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTest}"
-    const val espressoCore = "androidx.test.espresso:espresso-core:3.4.0"
+    const val espressoCore = "androidx.test.espresso:espresso-core:${versions.espresso}"
 
     const val composeUiTest = "androidx.compose.ui:ui-test"
     const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4"

@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Instrumentation
 import android.content.Context
 import android.content.res.Resources
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.doThrow
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
 
 internal class StubInstrumentation : Instrumentation() {
     private val targetContext = createMockTargetContext()

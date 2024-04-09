@@ -200,7 +200,7 @@ Then, add the integration library for Jetpack Compose to the `androidTestImpleme
 
 [The wiki][wiki-home] includes a section on how to test your Composables with JUnit 5.
 
-# Official Support
+## Official Support
 
 At this time, Google hasn't shared any immediate plans to bring first-party support for JUnit 5 to Android. The following list is an aggregation of pending feature requests:
 
@@ -208,12 +208,26 @@ At this time, Google hasn't shared any immediate plans to bring first-party supp
 - [Add support for JUnit 5 (issuetracker.google.com)](https://issuetracker.google.com/issues/127100532)
 - [JUnit 5 support (github.com/android/android-test)](https://github.com/android/android-test/issues/224)
 
-# Building Locally
+## Building Locally
 
 This repository contains multiple modules, divided into two sub-projects. The repository's root directory contains build logic shared across the sub-projects, which in turn use symlinks to connect to the common build scripts in their parent folder.
 
 - `instrumentation`: The root folder for Android-based modules, namely the instrumentation libraries & a sample application. After cloning, open this project in Android Studio.
 - `plugin`: The root folder for Java-based modules, namely the Gradle plugin for JUnit 5 on Android, as well as its test module. After cloning, open this project in IntelliJ IDEA.
+
+## Plugin Compatibility Map
+
+For users that cannot match the current minimum version requirement of the Android Gradle Plugin requested by this plugin,
+refer to the table below to find a suitable alternative version. Note that **no active development will go into these
+legacy versions**, so please consider upgrading to at least Android Gradle Plugin ${constants.minimumRequiredAgpVersion}
+before filing an issue with the latest one.
+
+|Your AGP Version|Suggested JUnit5 Plugin Version|
+|---|---|
+|`7.0.0` - `7.4.2`|`1.10.0.0`|
+|`4.0.0` - `4.2.2`|`1.8.2.1`|
+|`3.5.0` - `3.6.4`|`1.7.1.1`|
+|`< 3.5.0`|none; you should **really** update your build env, bro|
 
 ## License
 

@@ -1,4 +1,4 @@
-@file:Suppress("removal")
+@file:Suppress("removal", "DEPRECATION")
 
 package de.mannodermaus.junit5.testutil.reflect
 

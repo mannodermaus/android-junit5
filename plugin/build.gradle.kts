@@ -1,7 +1,6 @@
 plugins {
-    id("io.github.gradle-nexus.publish-plugin").version("1.1.0")
-    id("com.github.ben-manes.versions").version("0.42.0")
-    id("org.jetbrains.kotlinx.binary-compatibility-validator").version("0.11.0")
+    id("io.github.gradle-nexus.publish-plugin").version("2.0.0")
+    id("org.jetbrains.kotlinx.binary-compatibility-validator").version("0.14.0")
 }
 
 buildscript {
@@ -9,7 +8,6 @@ buildscript {
         google()
         mavenCentral()
         gradlePluginPortal()
-        jitpack()
     }
 
     dependencies {

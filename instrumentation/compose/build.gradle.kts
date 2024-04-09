@@ -11,11 +11,11 @@ plugins {
 val javaVersion = JavaVersion.VERSION_11
 
 android {
+  namespace = "de.mannodermaus.junit5.compose"
   compileSdk = Android.compileSdkVersion
 
   defaultConfig {
     minSdk = Android.testComposeMinSdkVersion
-    targetSdk = Android.targetSdkVersion
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
@@ -42,9 +42,14 @@ android {
 
   testOptions {
     unitTests.isReturnDefaultValues = true
+    targetSdk = Android.targetSdkVersion
   }
 
-  packagingOptions {
+  lint {
+    targetSdk = Android.targetSdkVersion
+  }
+
+  packaging {
     resources.excludes.add("META-INF/AL2.0")
     resources.excludes.add("META-INF/LGPL2.1")
   }

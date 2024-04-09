@@ -45,14 +45,14 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
         private var applyKotlinPlugin = false
 
         private val project = ProjectBuilder.builder()
-                .withParent(parent)
-                .run {
-                    if (name != null) {
-                        this.withName(name)
-                    }
-
-                    build()
+            .withParent(parent)
+            .run {
+                if (name != null) {
+                    this.withName(name)
                 }
+
+                build()
+            }
 
         fun asAndroidApplication() = setProjectTypeIfUnsetTo(Type.Application)
 
@@ -79,7 +79,7 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
             val manifestFile = project.file("src/main/AndroidManifest.xml")
             if (!manifestFile.exists()) {
-                manifestFile.writeText(androidManifestString())
+                manifestFile.writeText("<manifest/>")
             }
 
             // Apply required plugins
@@ -100,6 +100,7 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
             // Add default configuration
             try {
                 project.android.compileSdkVersion(environment.compileSdkVersion)
+                project.android.namespace = appId
 
                 if (projectType == Type.Application) {
                     project.android.defaultConfig.apply {
@@ -133,13 +134,5 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
             this.projectType = type
         }
-
-        private fun androidManifestString() =
-                """
-        <manifest
-            xmlns:android="schemas.android.com/apk/res/android"
-            package="$appId">
-        </manifest>
-    """.trimIndent()
     }
 }

@@ -25,14 +25,14 @@ apply {
   plugin("de.mannodermaus.android-junit5")
 }
 
-val javaVersion = JavaVersion.VERSION_1_8
+val javaVersion = JavaVersion.VERSION_11
 
 android {
+  namespace = "de.mannodermaus.junit5.runner"
   compileSdk = Android.compileSdkVersion
 
   defaultConfig {
     minSdk = Android.testRunnerMinSdkVersion
-    targetSdk = Android.targetSdkVersion
   }
 
   compileOptions {
@@ -47,16 +47,18 @@ android {
 
   lint {
     // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
-    warning("InvalidPackage")
+    warning.add("InvalidPackage")
+    targetSdk = Android.targetSdkVersion
   }
 
-  packagingOptions {
+  packaging {
     resources.excludes.add("META-INF/LICENSE.md")
     resources.excludes.add("META-INF/LICENSE-notice.md")
   }
 
   testOptions {
     unitTests.isReturnDefaultValues = true
+    targetSdk = Android.targetSdkVersion
   }
 }
 

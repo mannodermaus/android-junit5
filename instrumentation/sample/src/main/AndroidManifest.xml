@@ -1,8 +1,14 @@
 <!-- Nothing to see here, check out the "test" source set instead! -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.mannodermaus.junit5.sample">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <application>
-    <activity android:name=".ActivityOne"/>
-  </application>
+    <application android:label="JUnit5Sample">
+        <activity
+            android:name=".ActivityOne"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>
