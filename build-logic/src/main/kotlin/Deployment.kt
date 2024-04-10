@@ -52,11 +52,8 @@ fun Project.configureDeployment(deployConfig: Deployed) {
     }
 
     val javadocJar = tasks.create("javadocJar", Jar::class.java) {
+        from(tasks.getByName("dokkaHtml"))
         archiveClassifier.set("javadoc")
-
-        val dokkaJavadoc = tasks.getByName("dokkaJavadoc")
-        dependsOn(dokkaJavadoc)
-        from(dokkaJavadoc.property("outputDirectory"))
     }
 
     artifacts {
@@ -158,11 +155,13 @@ private fun MavenPublication.applyPublicationDetails(
     artifactId = deployConfig.artifactId
     version = deployConfig.currentVersion
 
+    // Attach artifacts
     artifacts.clear()
+    val buildDir = project.layout.buildDirectory
     if (isAndroid) {
-        artifact("${project.buildDir}/outputs/aar/${project.name}-release.aar")
+        artifact(buildDir.file("outputs/aar/${project.name}-release.aar").get().asFile)
     } else {
-        artifact("${project.buildDir}/libs/${project.name}-${version}.jar")
+        artifact(buildDir.file("libs/${project.name}-$version.jar"))
     }
     artifact(androidSourcesJar)
     artifact(javadocJar)
