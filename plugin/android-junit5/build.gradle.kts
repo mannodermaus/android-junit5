@@ -3,6 +3,7 @@ import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -79,9 +80,10 @@ tasks.withType<Test> {
 project.configureTestResources()
 
 // Generate a file with the latest versions of the plugin & instrumentation
+val genFolder = "build/generated/sources/plugin"
 val versionClassTask = tasks.register<Copy>("createVersionClass") {
     from("src/main/templates/Libraries.kt")
-    into("build/generated/sources/plugin/de/mannodermaus")
+    into("$genFolder/de/mannodermaus")
     filter(
         mapOf(
             "tokens" to mapOf(
@@ -97,8 +99,12 @@ val versionClassTask = tasks.register<Copy>("createVersionClass") {
 }
 sourceSets {
     main {
-        java.srcDir("build/generated/sources/plugin")
+        java.srcDir(genFolder)
     }
+}
+tasks.withType<DokkaTask> {
+    // Connect additional source folder to Dokka generation task
+    dependsOn(versionClassTask)
 }
 
 // ------------------------------------------------------------------------------------------------
