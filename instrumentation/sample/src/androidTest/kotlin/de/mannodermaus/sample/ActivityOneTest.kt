@@ -11,6 +11,7 @@ import de.mannodermaus.junit5.condition.EnabledIfBuildConfigValue
 import de.mannodermaus.junit5.sample.ActivityOne
 import de.mannodermaus.junit5.sample.R
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.RepetitionInfo
 import org.junit.jupiter.api.Tag
@@ -24,6 +25,12 @@ class ActivityOneTest {
   @JvmField
   @RegisterExtension
   val scenarioExtension = ActivityScenarioExtension.launch<ActivityOne>()
+
+  @DisplayName("test with pretty display name")
+  @Test
+  fun testDisplayName() {
+    onView(withId(R.id.textView)).check(matches(withText("0")))
+  }
 
   @EnabledIfBuildConfigValue(named = "MY_VALUE", matches = "true")
   @Test

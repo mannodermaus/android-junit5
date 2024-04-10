@@ -13,7 +13,7 @@ import org.junit.platform.launcher.TestPlan
 import org.junit.platform.suite.api.SuiteDisplayName
 import org.junit.platform.suite.api.UseTechnicalNames
 import org.junit.runner.Description
-import java.util.*
+import java.util.Optional
 import java.util.function.Predicate
 
 /**
@@ -52,7 +52,6 @@ internal class AndroidJUnitPlatformTestTree(
                     nameComponents.add(formatTestName(currentNode))
                     currentNode = modifiedTestPlan.getRealParent(currentNode).orElse(null)
                 }
-
                 nameComponents.reverse()
 
                 // Android's Unified Test Platform (AGP 7.0+) is using literal test names
@@ -66,12 +65,15 @@ internal class AndroidJUnitPlatformTestTree(
         }
 
     private fun formatTestName(identifier: TestIdentifier): String {
-        // During isolated executions, construct a technical version of the test name
-        // for backwards compatibility with the JUnit 4-based instrumentation of Android,
-        // stripping the brackets and parameters completely.
-        // If we didn't, then running them from the IDE doesn't work for @Test methods with parameters
-        // (See AndroidX's TestRequestBuilder$MethodFilter for where this is cross-referenced).
-        if (isIsolatedMethodRun) {
+        // During isolated executions of non-dynamic @Test methods,
+        // construct a technical version of the test name for backwards compatibility
+        // with the JUnit 4-based instrumentation of Android by stripping the brackets and parameters completely.
+        // If this didn't happen, running them from the IDE will cause "No tests found" errors.
+        // See AndroidX's TestRequestBuilder$MethodFilter for where this is cross-referenced in the instrumentation!
+        //
+        // Ref issues #199 & #207 (the original unearthing of this behavior),
+        // as well as #317 (making an exception for dynamic tests).
+        if (isIsolatedMethodRun && !identifier.isDynamicTest) {
             val reportName = identifier.legacyReportingName
             val bracketIndex = reportName.indexOf('(')
             if (bracketIndex > -1) {
