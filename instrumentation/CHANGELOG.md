@@ -4,6 +4,8 @@ Change Log
 ## Unreleased
 
 - Fix inheritance hierarchy of `ComposeExtension` to avoid false-positive warning regarding `@RegisterExtension` (#318)
+- Improve parallel test execution for Android instrumentation tests
+- Fix invalid naming of dynamic tests when executing only a singular test method from the IDE (#317)
 
 ## 1.4.0 (2023-11-05)
 
