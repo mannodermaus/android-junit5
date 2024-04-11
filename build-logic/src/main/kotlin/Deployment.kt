@@ -45,9 +45,11 @@ fun Project.configureDeployment(deployConfig: Deployed) {
         archiveClassifier.set("sources")
 
         if (isAndroid) {
-            from(android.sourceSets.main.java.srcDirs)
+            // This declaration includes Java source directories
+            from(android.sourceSets.main.kotlin.srcDirs)
         } else {
-            from(sourceSets.main.java.srcDirs)
+            // This declaration includes Kotlin & Groovy source directories
+            from(sourceSets.main.allJava.srcDirs)
         }
     }
 
@@ -294,11 +296,11 @@ private class AndroidDsl(project: Project) {
         class MainDsl(sourceSets: NamedDomainObjectCollection<Any>) {
             private val delegate = sourceSets.named("main").get()
 
-            val java = JavaDsl(delegate)
+            val kotlin = KotlinDsl(delegate)
 
-            class JavaDsl(main: Any) {
+            class KotlinDsl(main: Any) {
                 val srcDirs = main.javaClass
-                    .getDeclaredMethod("getJavaDirectories")
+                    .getDeclaredMethod("getKotlinDirectories")
                     .invoke(main) as Set<File>
             }
         }
