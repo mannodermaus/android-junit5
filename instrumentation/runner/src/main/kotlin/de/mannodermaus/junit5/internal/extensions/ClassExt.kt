@@ -3,6 +3,7 @@ package de.mannodermaus.junit5.internal.extensions
 import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 private val jupiterTestAnnotations = listOf(
     "org.junit.jupiter.api.Test",
@@ -38,6 +39,12 @@ private fun Class<*>.jupiterTestMethods(includeInherited: Boolean): Set<Method> 
 
 private fun Array<Method>.filterAnnotatedByJUnitJupiter(): List<Method> =
     filter { method ->
+        // The method must not be static...
+        if (method.isStatic) return@filter false
+
+        // ...and have at least one of the recognized JUnit 5 annotations
         val names = method.declaredAnnotations.map { it.annotationClass.qualifiedName }
-        jupiterTestAnnotations.any { it in names }
+        jupiterTestAnnotations.any(names::contains)
     }
+
+private val Method.isStatic get() = Modifier.isStatic(modifiers)
