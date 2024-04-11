@@ -99,7 +99,7 @@ val versionClassTask = tasks.register<Copy>("createVersionClass") {
 }
 sourceSets {
     main {
-        java.srcDir(genFolder)
+        kotlin.srcDir(genFolder)
     }
 }
 tasks.withType<DokkaTask> {
