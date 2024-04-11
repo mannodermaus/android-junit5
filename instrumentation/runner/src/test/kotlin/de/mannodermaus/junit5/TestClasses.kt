@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.extension.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.util.stream.Stream
 
 class DoesntHaveTestMethods
@@ -101,3 +102,25 @@ class HasInheritedTestsFromClass : AbstractTestClass() {
 }
 
 class HasInheritedTestsFromInterface : AbstractTestInterface
+
+// These tests should not be acknowledged,
+// as classes with legacy tests & top-level tests
+// are unsupported by JUnit 5
+
+class HasJUnit4Tests {
+  @org.junit.Test
+  fun method() {}
+}
+
+@RepeatedTest(2)
+fun topLevelRepeatedTest(unused: RepetitionInfo) {}
+
+@ValueSource(strings = ["a", "b"])
+@ParameterizedTest
+fun topLevelParameterizedTest(unused: String) {}
+
+@TestTemplate
+fun topLevelTestTemplate() {}
+
+@TestFactory
+fun topLevelTestFactory(): Stream<DynamicNode> = Stream.empty()
