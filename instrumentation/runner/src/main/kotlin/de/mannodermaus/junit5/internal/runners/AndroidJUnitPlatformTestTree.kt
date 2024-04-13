@@ -131,12 +131,19 @@ internal class AndroidJUnitPlatformTestTree(
         parent: Description,
         testPlan: TestPlan
     ) {
-        val newDescription = createJUnit4Description(identifier, testPlan)
-        parent.addChild(newDescription)
-        descriptions[identifier] = newDescription
+        val newDescription = createJUnit4Description(identifier, testPlan).also {
+            descriptions[identifier] = it
+        }
+
+        val newParent = if (identifier.isTest || identifier.isDynamicTest) {
+            parent.addChild(newDescription)
+            newDescription
+        } else {
+            parent
+        }
 
         testPlan.getChildren(identifier).forEach { child ->
-            buildDescription(child, newDescription, testPlan)
+            buildDescription(child, newParent, testPlan)
         }
     }
 

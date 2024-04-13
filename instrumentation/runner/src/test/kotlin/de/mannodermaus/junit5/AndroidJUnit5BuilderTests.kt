@@ -1,60 +1,71 @@
 package de.mannodermaus.junit5
 
+import android.os.Build
 import com.google.common.truth.Truth.assertThat
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
+import de.mannodermaus.junit5.testutil.AndroidBuildUtils.withApiLevel
+import de.mannodermaus.junit5.testutil.AndroidBuildUtils.withMockedInstrumentation
+import org.junit.jupiter.api.DynamicContainer.dynamicContainer
+import org.junit.jupiter.api.DynamicNode
+import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.TestFactory
 
 class AndroidJUnit5BuilderTests {
 
     private val builder = AndroidJUnit5Builder()
 
-    @Test
-    fun `no runner is created if class only contains top-level test methods`() {
+    @TestFactory
+    fun `no runner is created if class only contains top-level test methods`() = runTest(
+        expectSuccess = false,
         // In Kotlin, a 'Kt'-suffixed class of top-level functions cannot be referenced
         // via the ::class syntax, so construct a reference to the class directly
-        val cls = Class.forName(javaClass.packageName + ".TestClassesKt")
-
-        // Top-level tests should be discarded, so no runner must be created for this class
-        runTest(cls, expectSuccess = false)
-    }
-
-    @ValueSource(
-        classes = [
-            HasTest::class,
-            HasRepeatedTest::class,
-            HasTestFactory::class,
-            HasTestTemplate::class,
-            HasParameterizedTest::class,
-            HasInnerClassWithTest::class,
-            HasTaggedTest::class,
-            HasInheritedTestsFromClass::class,
-            HasInheritedTestsFromInterface::class,
-        ]
+        Class.forName(javaClass.packageName + ".TestClassesKt")
     )
-    @ParameterizedTest
-    fun `runner is created correctly for classes with valid jupiter test methods`(cls: Class<*>) =
-        runTest(cls, expectSuccess = true)
 
-    @ValueSource(
-        classes = [
-            DoesntHaveTestMethods::class,
-            HasJUnit4Tests::class,
-            kotlin.time.Duration::class,
-        ]
+    @TestFactory
+    fun `runner is created correctly for classes with valid jupiter test methods`() = runTest(
+        expectSuccess = true,
+        HasTest::class.java,
+        HasRepeatedTest::class.java,
+        HasTestFactory::class.java,
+        HasTestTemplate::class.java,
+        HasParameterizedTest::class.java,
+        HasInnerClassWithTest::class.java,
+        HasTaggedTest::class.java,
+        HasInheritedTestsFromClass::class.java,
+        HasInheritedTestsFromInterface::class.java,
     )
-    @ParameterizedTest
-    fun `no runner is created if class has no jupiter test methods`(cls: Class<*>) =
-        runTest(cls, expectSuccess = false)
+
+    @TestFactory
+    fun `no runner is created if class has no jupiter test methods`() = runTest(
+        expectSuccess = false,
+        DoesntHaveTestMethods::class.java,
+        HasJUnit4Tests::class.java,
+        kotlin.time.Duration::class.java,
+    )
 
     /* Private */
 
-    private fun runTest(cls: Class<*>, expectSuccess: Boolean) {
-        val runner = builder.runnerForClass(cls)
-        if (expectSuccess) {
-            assertThat(runner).isNotNull()
-        } else {
-            assertThat(runner).isNull()
+    private fun runTest(expectSuccess: Boolean, vararg classes: Class<*>): List<DynamicNode> {
+        // Generate a test container for each given class,
+        // then create two sub-variants for testing both DummyJUnit5 and AndroidJUnit5
+        return classes.map { cls ->
+            dynamicContainer(
+                /* displayName = */ cls.name,
+                /* dynamicNodes = */ setOf(Build.VERSION_CODES.M, Build.VERSION_CODES.TIRAMISU).map { apiLevel ->
+                    dynamicTest("API Level $apiLevel") {
+                        withMockedInstrumentation {
+                            withApiLevel(apiLevel) {
+                                val runner = builder.runnerForClass(cls)
+                                if (expectSuccess) {
+                                    assertThat(runner).isNotNull()
+                                } else {
+                                    assertThat(runner).isNull()
+                                }
+                            }
+                        }
+                    }
+                }
+            )
         }
     }
 }

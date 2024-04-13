@@ -1,9 +1,8 @@
 package de.mannodermaus.junit5
 
 import android.util.Log
-import de.mannodermaus.junit5.internal.runners.JUnit5RunnerFactory.createJUnit5Runner
 import de.mannodermaus.junit5.internal.LOG_TAG
-import de.mannodermaus.junit5.internal.extensions.jupiterTestMethods
+import de.mannodermaus.junit5.internal.runners.tryCreateJUnit5Runner
 import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
 
@@ -60,16 +59,11 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
     @Throws(Throwable::class)
     override fun runnerForClass(testClass: Class<*>): Runner? {
         try {
-            if (!junit5Available) {
-                return null
+            return if (junit5Available) {
+                tryCreateJUnit5Runner(testClass)
+            } else {
+                null
             }
-
-            if (testClass.jupiterTestMethods().isEmpty()) {
-                return null
-            }
-
-            return createJUnit5Runner(testClass)
-
         } catch (e: NoClassDefFoundError) {
             Log.e(LOG_TAG, "JUnitPlatform not found on runtime classpath")
             throw IllegalStateException(
