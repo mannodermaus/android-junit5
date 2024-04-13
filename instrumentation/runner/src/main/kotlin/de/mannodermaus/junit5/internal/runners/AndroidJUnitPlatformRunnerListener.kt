@@ -63,11 +63,14 @@ internal class AndroidJUnitPlatformRunnerListener(
     ) {
         val description = testTree.getDescription(testIdentifier)
         val status = testExecutionResult.status
-        if (status == TestExecutionResult.Status.ABORTED) {
-            notifier.fireTestAssumptionFailed(toFailure(testExecutionResult, description))
-        } else if (status == TestExecutionResult.Status.FAILED) {
-            notifier.fireTestFailure(toFailure(testExecutionResult, description))
-        } else if (testIdentifier.isTest) {
+
+        if (testIdentifier.isTest) {
+            if (status == TestExecutionResult.Status.ABORTED) {
+                notifier.fireTestAssumptionFailed(toFailure(testExecutionResult, description))
+            } else if (status == TestExecutionResult.Status.FAILED) {
+                notifier.fireTestFailure(toFailure(testExecutionResult, description))
+            }
+
             notifier.fireTestFinished(description)
         }
     }
