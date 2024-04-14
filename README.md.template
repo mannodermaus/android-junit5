@@ -149,8 +149,8 @@ Can you think of more? Let's discuss in the issues section!
   <summary>Kotlin</summary>
 
   ```kotlin
-  dependencies {
-    androidTestImplementation("de.mannodermaus.junit5:android-test-extensions:${instrumentationVersion}")
+  junitPlatform {
+    instrumentationTests.includeExtensions.set(true)
   }
   ```
 </details>
@@ -159,8 +159,8 @@ Can you think of more? Let's discuss in the issues section!
   <summary>Groovy</summary>
 
   ```groovy
-  dependencies {
-    androidTestImplementation "de.mannodermaus.junit5:android-test-extensions:${instrumentationVersion}"
+  junitPlatform {
+    instrumentationTests.includeExtensions.set(true)
   }
   ```
 </details>
@@ -168,15 +168,16 @@ Can you think of more? Let's discuss in the issues section!
 ### Jetpack Compose
 
 To test `@Composable` functions on device with JUnit 5, first enable support for instrumentation tests as described above.
-Then, add the integration library for Jetpack Compose to the `androidTestImplementation` configuration:
+Then, add the Compose test dependency to your `androidTestImplementation` configuration
+and the plugin will autoconfigure JUnit 5 Compose support for you!
 
 <details open>
   <summary>Kotlin</summary>
   
   ```kotlin
   dependencies {
-    // Test extension & transitive dependencies
-    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:${instrumentationVersion}")
+    // Compose test framework
+    androidTestImplementation("androidx.compose.ui:ui-test-android:$compose_version")
 
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
@@ -189,8 +190,8 @@ Then, add the integration library for Jetpack Compose to the `androidTestImpleme
 
   ```groovy
   dependencies {
-    // Test extension & transitive dependencies
-    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:${instrumentationVersion}"
+    // Compose test framework
+    androidTestImplementation "androidx.compose.ui:ui-test-android:$compose_version"
 
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
@@ -199,6 +200,31 @@ Then, add the integration library for Jetpack Compose to the `androidTestImpleme
 </details>
 
 [The wiki][wiki-home] includes a section on how to test your Composables with JUnit 5.
+
+### Override the version of instrumentation test libraries
+
+By default, the plugin will make sure to use a compatible version of the instrumentation test libraries
+when it sets up the artifacts automatically. However, it is possible to choose a custom version instead via its DSL:
+
+<details open>
+  <summary>Kotlin</summary>
+
+  ```kotlin
+  junitPlatform {
+    instrumentationTests.version.set("${instrumentationVersion}")
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```groovy
+  junitPlatform {
+    instrumentationTests.version.set("${instrumentationVersion}")
+  }
+  ```
+</details>
 
 ## Official Support
 

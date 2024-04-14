@@ -5,6 +5,7 @@ import de.mannodermaus.Libraries
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
+import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import org.gradle.api.Project
 import org.junit.jupiter.api.BeforeEach
@@ -67,14 +68,15 @@ class InstrumentationSupportTests {
     /* Dependencies */
 
     @Test
-    fun `add the dependencies`() {
+    fun `add only the main dependencies`() {
         project.addJUnitJupiterApi()
         project.evaluate()
 
-        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core"))
-            .isEqualTo("${Libraries.instrumentationCore}:${Libraries.instrumentationVersion}")
-        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner"))
-            .isEqualTo("${Libraries.instrumentationRunner}:${Libraries.instrumentationVersion}")
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary())
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(composeLibrary())
     }
 
     @Test
@@ -83,8 +85,8 @@ class InstrumentationSupportTests {
         project.junitPlatform.instrumentationTests.version.set("1.3.3.7")
         project.evaluate()
 
-        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).endsWith("1.3.3.7")
-        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).endsWith("1.3.3.7")
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary("1.3.3.7"))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary("1.3.3.7"))
     }
 
     @Test
@@ -96,8 +98,8 @@ class InstrumentationSupportTests {
         project.dependencies.add("androidTestRuntimeOnly", addedRunner)
         project.evaluate()
 
-        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).isEqualTo(addedCore)
-        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).isEqualTo(addedRunner)
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary("0.1.3.3.7"))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary("0.1.3.3.7"))
     }
 
     @Test
@@ -106,16 +108,61 @@ class InstrumentationSupportTests {
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
-        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).isNull()
-        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).isNull()
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(null))
+        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(null))
     }
 
     @Test
     fun `do not add the dependencies when Jupiter is not added`() {
         project.evaluate()
 
-        assertThat(project.dependencyNamed("androidTestImplementation", "android-test-core")).isNull()
-        assertThat(project.dependencyNamed("androidTestRuntimeOnly", "android-test-runner")).isNull()
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(null))
+        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(null))
+    }
+
+    @Test
+    fun `do not add the dependencies when Jupiter is not added, even if extension is configured to be added`() {
+        project.junitPlatform.instrumentationTests.includeExtensions.set(true)
+        project.evaluate()
+
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(null))
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary(null))
+        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(null))
+    }
+
+    @Test
+    fun `add the extension library if configured`() {
+        project.addJUnitJupiterApi()
+        project.junitPlatform.instrumentationTests.includeExtensions.set(true)
+        project.evaluate()
+
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary())
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+    }
+
+    @Test
+    fun `add the compose library if configured`() {
+        project.addJUnitJupiterApi()
+        project.addCompose()
+        project.evaluate()
+
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary())
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+    }
+
+    @Test
+    fun `add the extensions and compose libraries if configured`() {
+        project.addJUnitJupiterApi()
+        project.addCompose()
+        project.junitPlatform.instrumentationTests.includeExtensions.set(true)
+        project.evaluate()
+
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary())
+        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary())
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
     }
 
     /* Private */
@@ -124,10 +171,27 @@ class InstrumentationSupportTests {
         dependencies.add("androidTestImplementation", "org.junit.jupiter:junit-jupiter-api:+")
     }
 
-    private fun Project.dependencyNamed(configurationName: String, name: String): String? {
-        return configurations.getByName(configurationName)
-            .dependencies
-            .firstOrNull { it.name == name }
-            ?.run { "$group:$name:$version" }
+    private fun Project.addCompose() {
+        dependencies.add("androidTestImplementation", "androidx.compose.ui:ui-test-android:+")
+    }
+
+    private fun composeLibrary(withVersion: String? = Libraries.instrumentationVersion) =
+        library(Libraries.instrumentationCompose, withVersion)
+
+    private fun coreLibrary(withVersion: String? = Libraries.instrumentationVersion) =
+        library(Libraries.instrumentationCore, withVersion)
+
+    private fun extensionsLibrary(withVersion: String? = Libraries.instrumentationVersion) =
+        library(Libraries.instrumentationExtensions, withVersion)
+
+    private fun runnerLibrary(withVersion: String? = Libraries.instrumentationVersion) =
+        library(Libraries.instrumentationRunner, withVersion)
+
+    private fun library(artifactId: String, version: String?) = buildString {
+        append(artifactId)
+        if (version != null) {
+            append(':')
+            append(version)
+        }
     }
 }
