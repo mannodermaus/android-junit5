@@ -7,6 +7,8 @@ Change Log
 - Allow overriding the version of the instrumentation libraries applied with the plugin
 - Update Jacoco & instrumentation test DSLs of the plugin to use Gradle Providers for their input parameters (e.g. `instrumentationTests.enabled.set(true)` instead of `instrumentationTests.enabled = true`)
 - Removed deprecated `integrityCheckEnabled` flag from the plugin DSL's instrumentation test options
+- Allow opt-in usage of extension library via the plugin's DSL
+- Allow autoconfiguration of compose library if Compose is used in the androidTest dependency list 
 
 ## 1.10.0.0 (2023-11-05)
 - JUnit 5.10.0

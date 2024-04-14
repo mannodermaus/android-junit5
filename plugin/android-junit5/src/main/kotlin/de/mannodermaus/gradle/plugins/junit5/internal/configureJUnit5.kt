@@ -14,12 +14,16 @@ import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.hasDependency
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Warn
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesComposeIn
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesJUnitJupiterIn
 import de.mannodermaus.gradle.plugins.junit5.internal.utils.excludedPackagingOptions
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.tasks.testing.Test
 
 internal fun configureJUnit5(
@@ -109,11 +113,7 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
     if (!instrumentationTests.enabled.get()) return
 
     // Automatically configure instrumentation tests when JUnit 5 is detected in that configuration
-    val hasJupiterApi = project.configurations
-        .getByName("androidTestImplementation")
-        .dependencies
-        .any { it.group == "org.junit.jupiter" && it.name == "junit-jupiter-api" }
-    if (!hasJupiterApi) return
+    if (!project.usesJUnitJupiterIn("androidTestImplementation")) return
 
     // Attach the JUnit 5 RunnerBuilder to the list, unless it's already added
     val runnerBuilders = android.defaultConfig.testInstrumentationRunnerArguments.getAsList("runnerBuilder")
@@ -139,6 +139,13 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
         project.dependencies.add(
             "androidTestImplementation",
             "${Libraries.instrumentationExtensions}:$version"
+        )
+    }
+
+    if (project.usesComposeIn("androidTestImplementation")) {
+        project.dependencies.add(
+            "androidTestImplementation",
+            "${Libraries.instrumentationCompose}:$version"
         )
     }
 }
