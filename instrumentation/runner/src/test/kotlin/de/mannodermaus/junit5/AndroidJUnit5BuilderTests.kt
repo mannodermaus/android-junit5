@@ -33,6 +33,7 @@ class AndroidJUnit5BuilderTests {
         HasTaggedTest::class.java,
         HasInheritedTestsFromClass::class.java,
         HasInheritedTestsFromInterface::class.java,
+        HasMultipleInheritancesAndOverrides::class.java,
     )
 
     @TestFactory
