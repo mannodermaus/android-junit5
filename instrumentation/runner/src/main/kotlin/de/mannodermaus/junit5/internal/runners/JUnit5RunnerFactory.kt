@@ -1,8 +1,10 @@
 package de.mannodermaus.junit5.internal.runners
 
 import android.os.Build
-import de.mannodermaus.junit5.internal.extensions.jupiterTestMethods
+import de.mannodermaus.junit5.internal.extensions.JupiterTestMethodFinderApi26
+import de.mannodermaus.junit5.internal.extensions.JupiterTestMethodFinderLegacy
 import org.junit.runner.Runner
+import java.lang.reflect.Method
 
 /**
  * Since we can't reference AndroidJUnit5 directly, use this factory for instantiation.
@@ -12,13 +14,13 @@ import org.junit.runner.Runner
  * which will highlight these tests as ignored.
  */
 internal fun tryCreateJUnit5Runner(klass: Class<*>): Runner? {
-    val testMethods = klass.jupiterTestMethods()
+    val testMethods = klass.findJupiterTestMethods()
 
     if (testMethods.isEmpty()) {
         return null
     }
 
-    val runner = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    val runner = if (Build.VERSION.SDK_INT >= 26) {
         AndroidJUnit5(klass)
     } else {
         DummyJUnit5(klass, testMethods)
@@ -34,3 +36,10 @@ internal fun tryCreateJUnit5Runner(klass: Class<*>): Runner? {
 
 private fun Runner.hasExecutableTests() =
     this.description.children.isNotEmpty()
+
+private fun Class<*>.findJupiterTestMethods(): Set<Method> =
+    if (Build.VERSION.SDK_INT >= 26) {
+        JupiterTestMethodFinderApi26.find(this)
+    } else {
+        JupiterTestMethodFinderLegacy.find(this)
+    }

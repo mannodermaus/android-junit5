@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.api.function.Executable
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.FieldSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 
@@ -51,6 +53,8 @@ class ExampleKotlinTest {
     
     @JvmStatic
     fun getNames() = listOf("Alice" to "ALICE", "Bob" to "BOB", "Carol" to "CAROL")
+
+    val somePrimeNumbers = intArrayOf(2, 3, 5, 7, 11, 13, 17, 19, 23, 29)
   }
 
   @BeforeEach
@@ -107,8 +111,16 @@ class ExampleKotlinTest {
   
   @ParameterizedTest(name = "Upper case for {0}")
   @MethodSource("getNames")
-  fun parameterizedMethodTest (names: Pair<String, String>) {
+  fun parameterizedMethodTest(names: Pair<String, String>) {
       assertEquals(names.second, names.first.uppercase())
+  }
+
+  @ParameterizedTest(name = "New FieldSource from 5.11")
+  @FieldSource("somePrimeNumbers")
+  fun parameterizedFieldTest(number: Int) {
+      for (i in 2 until number) {
+          assertNotEquals(0, number % i)
+      }
   }
 
   @Nested
