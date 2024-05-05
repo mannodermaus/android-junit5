@@ -2,6 +2,8 @@ package de.mannodermaus.junit5
 
 import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
+import de.mannodermaus.junit5.internal.LibcoreAccess
+import de.mannodermaus.junit5.internal.runners.AndroidJUnit5RunnerParams
 import de.mannodermaus.junit5.internal.runners.tryCreateJUnit5Runner
 import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
@@ -56,11 +58,23 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         }
     }
 
+    // One-time parsing setup for runner params, taken from instrumentation arguments
+    private val params by lazy {
+        AndroidJUnit5RunnerParams.create().also { params ->
+            // Apply all environment variables & system properties to the running process
+            params.registerEnvironmentVariables()
+            params.registerSystemProperties()
+        }
+    }
+
     @Throws(Throwable::class)
     override fun runnerForClass(testClass: Class<*>): Runner? {
+        // Ignore a bunch of class in internal packages
+        if (testClass.isInIgnorablePackage) return null
+
         try {
             return if (junit5Available) {
-                tryCreateJUnit5Runner(testClass)
+                tryCreateJUnit5Runner(testClass) { params }
             } else {
                 null
             }
@@ -74,6 +88,40 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         } catch (e: Throwable) {
             Log.e(LOG_TAG, "Error constructing runner", e)
             throw e
+        }
+    }
+
+    /* Private */
+
+    private val ignorablePackages = setOf(
+        "java.",
+        "javax.",
+        "androidx.",
+        "com.android.",
+        "kotlin.",
+    )
+
+    private val Class<*>.isInIgnorablePackage: Boolean get() {
+        return ignorablePackages.any { name.startsWith(it) }
+    }
+
+    private fun AndroidJUnit5RunnerParams.registerEnvironmentVariables() {
+        environmentVariables.forEach { (key, value) ->
+            try {
+                LibcoreAccess.setenv(key, value)
+            } catch (t: Throwable) {
+                Log.w(LOG_TAG, "Error while setting up environment variables.", t)
+            }
+        }
+    }
+
+    private fun AndroidJUnit5RunnerParams.registerSystemProperties() {
+        systemProperties.forEach { (key, value) ->
+            try {
+                System.setProperty(key, value)
+            } catch (t: Throwable) {
+                Log.w(LOG_TAG, "Error while setting up system properties.", t)
+            }
         }
     }
 }
