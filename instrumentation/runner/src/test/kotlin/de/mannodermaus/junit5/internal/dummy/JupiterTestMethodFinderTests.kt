@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package de.mannodermaus.junit5.internal
+package de.mannodermaus.junit5.internal.dummy
 
 import androidx.annotation.CheckResult
 import com.google.common.truth.Truth.assertThat
@@ -16,9 +16,6 @@ import de.mannodermaus.junit5.HasTaggedTest
 import de.mannodermaus.junit5.HasTest
 import de.mannodermaus.junit5.HasTestFactory
 import de.mannodermaus.junit5.HasTestTemplate
-import de.mannodermaus.junit5.internal.extensions.JupiterTestMethodFinder
-import de.mannodermaus.junit5.internal.extensions.JupiterTestMethodFinderApi26
-import de.mannodermaus.junit5.internal.extensions.JupiterTestMethodFinderLegacy
 import de.mannodermaus.junit5.internal.runners.AndroidJUnit5
 import de.mannodermaus.junit5.internal.runners.AndroidJUnit5RunnerParams
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
@@ -27,7 +24,6 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.platform.engine.Filter
-import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.TagFilter
 import org.junit.runner.Description
 import org.junit.runner.notification.RunListener
@@ -49,7 +45,7 @@ class JupiterTestMethodFinderTests {
         HasMultipleInheritancesAndOverrides::class.java to 3,
     )
 
-    private val allFinders = setOf(JupiterTestMethodFinderLegacy, JupiterTestMethodFinderApi26)
+    private val allFinders = setOf(JupiterTestMethodFinder)
 
     @TestFactory
     fun `check number of jupiter test methods`() = testForEachFinder { finder ->
@@ -104,10 +100,10 @@ class JupiterTestMethodFinderTests {
         notifier.addListener(listener)
 
         val params = AndroidJUnit5RunnerParams(
-            selectors = listOf(DiscoverySelectors.selectClass(cls)),
+//            selectors = listOf(DiscoverySelectors.selectClass(cls)),
             filters = listOfNotNull(filter),
         )
-        AndroidJUnit5(cls, params).run(notifier)
+        AndroidJUnit5(cls) { params }.run(notifier)
 
         return listener
     }

@@ -21,20 +21,16 @@ import org.junit.runner.notification.RunNotifier
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 internal class AndroidJUnit5(
     private val testClass: Class<*>,
-    private val runnerParams: AndroidJUnit5RunnerParams = createRunnerParams(testClass),
+    paramsSupplier: () -> AndroidJUnit5RunnerParams = AndroidJUnit5RunnerParams.Companion::create,
 ) : Runner() {
 
     private val launcher = LauncherFactory.create()
-    private val testTree by lazy { generateTestTree(runnerParams) }
+    private val testTree by lazy { generateTestTree(paramsSupplier()) }
 
     override fun getDescription() =
         testTree.suiteDescription
 
     override fun run(notifier: RunNotifier) {
-        // Apply all environment variables & system properties to the running process
-        registerEnvironmentVariables()
-        registerSystemProperties()
-
         // Finally, launch the test plan on the JUnit Platform
         launcher.execute(
             testTree.testPlan,
@@ -44,33 +40,16 @@ internal class AndroidJUnit5(
 
     /* Private */
 
-    private fun registerEnvironmentVariables() {
-        runnerParams.environmentVariables.forEach { (key, value) ->
-            try {
-                LibcoreAccess.setenv(key, value)
-            } catch (t: Throwable) {
-                Log.w(LOG_TAG, "Error while setting up environment variables.", t)
-            }
-        }
-    }
+    private fun generateTestTree(params: AndroidJUnit5RunnerParams): AndroidJUnitPlatformTestTree {
+        val request = params.createDiscoveryRequest(testClass)
 
-    private fun registerSystemProperties() {
-        runnerParams.systemProperties.forEach { (key, value) ->
-            try {
-                System.setProperty(key, value)
-            } catch (t: Throwable) {
-                Log.w(LOG_TAG, "Error while setting up system properties.", t)
-            }
-        }
-    }
-
-    private fun generateTestTree(params: AndroidJUnit5RunnerParams) =
-        AndroidJUnitPlatformTestTree(
-            testPlan = launcher.discover(params.createDiscoveryRequest()),
+        return AndroidJUnitPlatformTestTree(
+            testPlan = launcher.discover(request),
             testClass = testClass,
-            isIsolatedMethodRun = params.isIsolatedMethodRun,
+            isIsolatedMethodRun = request.isIsolatedMethodRun,
             isParallelExecutionEnabled = params.isParallelExecutionEnabled,
         )
+    }
 
     private fun createNotifier(nextNotifier: RunNotifier) =
         if (testTree.isParallelExecutionEnabled) {
