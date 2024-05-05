@@ -99,10 +99,7 @@ class JupiterTestMethodFinderTests {
         val listener = CountingRunListener()
         notifier.addListener(listener)
 
-        val params = AndroidJUnit5RunnerParams(
-//            selectors = listOf(DiscoverySelectors.selectClass(cls)),
-            filters = listOfNotNull(filter),
-        )
+        val params = AndroidJUnit5RunnerParams(filters = listOfNotNull(filter))
         AndroidJUnit5(cls) { params }.run(notifier)
 
         return listener
