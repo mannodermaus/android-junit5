@@ -153,7 +153,8 @@ internal class AndroidJUnitPlatformTestTree(
     ): Description {
         val name = nameExtractor(identifier)
 
-        return if (identifier.isTest) {
+
+        return if (identifier.isTest || identifier.isDynamicTest) {
             Description.createTestDescription(
                 /* className = */ testPlan.getParent(identifier)
                     .map(nameExtractor)
@@ -190,10 +191,8 @@ internal class AndroidJUnitPlatformTestTree(
         return testIdentifier.displayName
     }
 
-    fun getTestsInSubtree(ancestor: TestIdentifier): Set<TestIdentifier> {
-        return modifiedTestPlan.getDescendants(ancestor)
-            .filter { it.isTest }
-            .toSet()
+    fun getChildren(testIdentifier: TestIdentifier): Set<TestIdentifier> {
+        return modifiedTestPlan.getDescendants(testIdentifier)
     }
 
     /**
