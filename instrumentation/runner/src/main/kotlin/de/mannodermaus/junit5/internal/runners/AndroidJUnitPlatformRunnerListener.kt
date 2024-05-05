@@ -3,6 +3,7 @@ package de.mannodermaus.junit5.internal.runners
 import android.annotation.SuppressLint
 import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
+import de.mannodermaus.junit5.internal.extensions.isDynamicTest
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.launcher.TestExecutionListener
@@ -41,13 +42,15 @@ internal class AndroidJUnitPlatformRunnerListener(
     }
 
     override fun executionSkipped(testIdentifier: TestIdentifier, reason: String) {
-        if (testIdentifier.isTest) {
-            fireTestIgnored(testIdentifier, reason)
-        } else {
-            testTree.getTestsInSubtree(testIdentifier)
-                .forEach { identifier ->
-                    fireTestIgnored(identifier, reason)
+        when {
+            testIdentifier.isTest -> fireTestIgnored(testIdentifier, reason)
+            testIdentifier.isDynamicTest -> fireTestIgnored(testIdentifier, reason)
+            testIdentifier.isContainer -> testTree.getChildren(testIdentifier).forEach { childIdentifier ->
+                // Only report leaf tests as skipped
+                if (childIdentifier.isTest || childIdentifier.isDynamicTest) {
+                    fireTestIgnored(childIdentifier, reason)
                 }
+            }
         }
     }
 
