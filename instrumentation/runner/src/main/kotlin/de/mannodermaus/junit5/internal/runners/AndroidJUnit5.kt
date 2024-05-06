@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting
 import de.mannodermaus.junit5.internal.LOG_TAG
 import de.mannodermaus.junit5.internal.LibcoreAccess
 import de.mannodermaus.junit5.internal.runners.notification.ParallelRunNotifier
+import org.junit.platform.engine.discovery.MethodSelector
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
@@ -41,12 +42,14 @@ internal class AndroidJUnit5(
     /* Private */
 
     private fun generateTestTree(params: AndroidJUnit5RunnerParams): AndroidJUnitPlatformTestTree {
-        val request = params.createDiscoveryRequest(testClass)
+        val selectors = params.createSelectors(testClass)
+        val isIsolatedMethodRun = selectors.size == 1 && selectors.first() is MethodSelector
+        val request = params.createDiscoveryRequest(selectors)
 
         return AndroidJUnitPlatformTestTree(
             testPlan = launcher.discover(request),
             testClass = testClass,
-            isIsolatedMethodRun = request.isIsolatedMethodRun,
+            isIsolatedMethodRun = isIsolatedMethodRun,
             isParallelExecutionEnabled = params.isParallelExecutionEnabled,
         )
     }
