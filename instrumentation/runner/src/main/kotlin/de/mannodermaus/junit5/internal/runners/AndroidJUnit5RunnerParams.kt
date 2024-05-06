@@ -6,8 +6,9 @@ import de.mannodermaus.junit5.internal.discovery.GeneratedFilters
 import de.mannodermaus.junit5.internal.discovery.ParsedSelectors
 import de.mannodermaus.junit5.internal.discovery.PropertiesParser
 import de.mannodermaus.junit5.internal.discovery.ShardingFilter
+import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.Filter
-import org.junit.platform.engine.discovery.MethodSelector
+import org.junit.platform.launcher.LauncherDiscoveryRequest
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 
 internal data class AndroidJUnit5RunnerParams(
@@ -17,18 +18,16 @@ internal data class AndroidJUnit5RunnerParams(
     val systemProperties: Map<String, String> = emptyMap(),
     private val configurationParameters: Map<String, String> = emptyMap()
 ) {
-    fun createDiscoveryRequest(testClass: Class<*>): AndroidLauncherDiscoveryRequest {
-        val selectors = ParsedSelectors.fromBundle(testClass, arguments)
-        val isIsolatedMethodRun = selectors.size == 1 && selectors.first() is MethodSelector
+    fun createSelectors(testClass: Class<*>): List<DiscoverySelector> {
+        return ParsedSelectors.fromBundle(testClass, arguments)
+    }
 
-        return AndroidLauncherDiscoveryRequest(
-            delegate = LauncherDiscoveryRequestBuilder.request()
-                .selectors(selectors)
-                .filters(*this.filters.toTypedArray())
-                .configurationParameters(this.configurationParameters)
-                .build(),
-            isIsolatedMethodRun = isIsolatedMethodRun,
-        )
+    fun createDiscoveryRequest(selectors: List<DiscoverySelector>): LauncherDiscoveryRequest {
+        return LauncherDiscoveryRequestBuilder.request()
+            .selectors(selectors)
+            .filters(*this.filters.toTypedArray())
+            .configurationParameters(this.configurationParameters)
+            .build()
     }
 
     val isParallelExecutionEnabled: Boolean
