@@ -61,13 +61,12 @@ class Deployed internal constructor(
     val currentVersion: String,
     val latestStableVersion: String,
     val description: String,
-    val license: String
 )
 
 object Artifacts {
-    val githubUrl = "https://github.com/mannodermaus/android-junit5"
-    val githubRepo = "mannodermaus/android-junit5"
-    val license = "Apache-2.0"
+    const val GITHUB_URL = "https://github.com/mannodermaus/android-junit5"
+    const val GITHUB_REPO = "mannodermaus/android-junit5"
+    const val LICENSE = "Apache-2.0"
 
     /**
      * Retrieve the artifact configuration based on a Gradle project reference.
@@ -90,7 +89,6 @@ object Artifacts {
         artifactId = "android-junit5",
         currentVersion = "1.11.0.0-SNAPSHOT",
         latestStableVersion = "1.10.3.0",
-        license = license,
         description = "Unit Testing with JUnit 5 for Android."
     )
 
@@ -108,7 +106,6 @@ object Artifacts {
             artifactId = "android-test-core",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            license = license,
             description = "Extensions for instrumented Android tests with JUnit 5."
         )
 
@@ -118,7 +115,6 @@ object Artifacts {
             artifactId = "android-test-extensions",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            license = license,
             description = "Optional extensions for instrumented Android tests with JUnit 5."
         )
 
@@ -128,7 +124,6 @@ object Artifacts {
             artifactId = "android-test-runner",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            license = license,
             description = "Runner for integration of instrumented Android tests with JUnit 5."
         )
 
@@ -138,7 +133,6 @@ object Artifacts {
             artifactId = "android-test-compose",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            license = license,
             description = "Extensions for Jetpack Compose tests with JUnit 5."
         )
     }
