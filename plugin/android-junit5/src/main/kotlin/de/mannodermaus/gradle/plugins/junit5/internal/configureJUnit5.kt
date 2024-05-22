@@ -14,7 +14,7 @@ import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.hasDependency
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.instrumentationTestVariant
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Warn
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesComposeIn
@@ -23,7 +23,6 @@ import de.mannodermaus.gradle.plugins.junit5.internal.utils.excludedPackagingOpt
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.tasks.testing.Test
 
 internal fun configureJUnit5(
@@ -51,7 +50,7 @@ internal fun configureJUnit5(
             variants.forEach { variant ->
                 configureUnitTests(it, variant)
                 configureJacoco(it, config, variant)
-                configureInstrumentationTests(it, config, variant)
+                configureInstrumentationTests(it, variant)
             }
         }
     }
@@ -197,12 +196,11 @@ private fun AndroidJUnitPlatformExtension.configureJacoco(
 
 private fun AndroidJUnitPlatformExtension.configureInstrumentationTests(
     project: Project,
-    config: PluginConfig,
     variant: Variant,
 ) {
     if (!instrumentationTests.enabled.get()) return
 
-    config.instrumentationTestVariantOf(variant)?.let { instrumentationTestVariant ->
-        AndroidJUnit5WriteFilters.register(project, variant, instrumentationTestVariant)
+    variant.instrumentationTestVariant?.sources?.res?.let { sourceDirs ->
+        AndroidJUnit5WriteFilters.register(project, variant, sourceDirs)
     }
 }

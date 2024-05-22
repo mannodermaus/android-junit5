@@ -72,6 +72,6 @@ class AndroidJUnit5WriteFiltersTests {
     private fun Project.runTaskAndGetOutputFolder(): File {
         val task = project.tasks.getByName("writeFiltersDebugAndroidTest") as AndroidJUnit5WriteFilters
         task.execute()
-        return requireNotNull(task.outputFolder)
+        return requireNotNull(task.outputFolder.get().asFile)
     }
 }
