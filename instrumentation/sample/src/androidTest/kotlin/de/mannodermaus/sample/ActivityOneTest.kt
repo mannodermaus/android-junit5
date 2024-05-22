@@ -18,9 +18,15 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.FieldSource
 import org.junit.jupiter.params.provider.ValueSource
+import java.util.function.Supplier
+import java.util.stream.Stream
 
 class ActivityOneTest {
+  companion object {
+    val someLettersOfTheAlphabet = Supplier { Stream.of("A", "B", "C") }
+  }
 
   @JvmField
   @RegisterExtension
@@ -58,6 +64,20 @@ class ActivityOneTest {
     onView(withId(R.id.button)).perform(click())
 
     scenario.onActivity {
+      assertEquals(1, it.getClickCount())
+    }
+  }
+
+  @FieldSource("someLettersOfTheAlphabet")
+  @ParameterizedTest
+  fun parameterizedTestWithFieldSource(letter: String) {
+    scenarioExtension.scenario.onActivity {
+      it.setButtonLabel(letter)
+    }
+
+    onView(withText(letter)).perform(click())
+
+    scenarioExtension.scenario.onActivity {
       assertEquals(1, it.getClickCount())
     }
   }

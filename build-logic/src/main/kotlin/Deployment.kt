@@ -243,12 +243,12 @@ private fun MavenPublication.configurePom(deployConfig: Deployed) = also {
             }
         }
 
-        url.set(Artifacts.githubUrl)
+        url.set(Artifacts.GITHUB_URL)
 
         licenses {
             license {
-                name.set(Artifacts.license)
-                url.set("${Artifacts.githubUrl}/blob/main/LICENSE")
+                name.set(Artifacts.LICENSE)
+                url.set("${Artifacts.GITHUB_URL}/blob/main/LICENSE")
             }
         }
 
@@ -260,9 +260,9 @@ private fun MavenPublication.configurePom(deployConfig: Deployed) = also {
         }
 
         scm {
-            connection.set("scm:git:${Artifacts.githubRepo}.git")
-            developerConnection.set("scm:git:ssh://github.com/${Artifacts.githubRepo}.git")
-            url.set("${Artifacts.githubUrl}/tree/main")
+            connection.set("scm:git:${Artifacts.GITHUB_REPO}.git")
+            developerConnection.set("scm:git:ssh://github.com/${Artifacts.GITHUB_REPO}.git")
+            url.set("${Artifacts.GITHUB_URL}/tree/main")
         }
     }
 }
