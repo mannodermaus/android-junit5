@@ -85,7 +85,7 @@ class HasTaggedTest {
 
 abstract class AbstractTestClass {
   @Test
-  fun abstractTest() {
+  open fun abstractTest() {
   }
 }
 
@@ -102,6 +102,16 @@ class HasInheritedTestsFromClass : AbstractTestClass() {
 }
 
 class HasInheritedTestsFromInterface : AbstractTestInterface
+
+class HasMultipleInheritancesAndOverrides : AbstractTestClass(), AbstractTestInterface {
+  @Test
+  override fun abstractTest() {
+  }
+
+  @Test
+  fun someOtherTest() {
+  }
+}
 
 // These tests should not be acknowledged,
 // as classes with legacy tests & top-level tests

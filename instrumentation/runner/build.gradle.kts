@@ -100,7 +100,6 @@ dependencies {
 
   testImplementation(project(":testutil"))
   testImplementation(libs.robolectric)
-  testRuntimeOnly(libs.junitVintageEngine)
   testRuntimeOnly(libs.junitJupiterEngine)
 }
 

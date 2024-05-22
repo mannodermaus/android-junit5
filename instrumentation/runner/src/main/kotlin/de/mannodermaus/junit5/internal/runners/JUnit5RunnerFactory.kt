@@ -1,7 +1,6 @@
 package de.mannodermaus.junit5.internal.runners
 
 import android.os.Build
-import de.mannodermaus.junit5.internal.extensions.jupiterTestMethods
 import org.junit.runner.Runner
 
 /**
@@ -11,17 +10,14 @@ import org.junit.runner.Runner
  * Below that however, they wouldn't work; for this case, delegate a dummy runner
  * which will highlight these tests as ignored.
  */
-internal fun tryCreateJUnit5Runner(klass: Class<*>): Runner? {
-    val testMethods = klass.jupiterTestMethods()
-
-    if (testMethods.isEmpty()) {
-        return null
-    }
-
-    val runner = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        AndroidJUnit5(klass)
+internal fun tryCreateJUnit5Runner(
+    klass: Class<*>,
+    paramsSupplier: () -> AndroidJUnit5RunnerParams
+): Runner? {
+    val runner = if (Build.VERSION.SDK_INT >= 26) {
+        AndroidJUnit5(klass, paramsSupplier)
     } else {
-        DummyJUnit5(klass, testMethods)
+        DummyJUnit5(klass)
     }
 
     // It's still possible for the runner to not be relevant to the test run,
