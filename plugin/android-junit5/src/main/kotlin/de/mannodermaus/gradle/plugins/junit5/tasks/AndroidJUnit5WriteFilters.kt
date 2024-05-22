@@ -83,8 +83,8 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
                     .bufferedWriter()
                     .use { writer ->
                         // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
-                        includeTags.forEach { tag -> writer.write("-t $tag") }
-                        excludeTags.forEach { tag -> writer.write("-T $tag") }
+                        includeTags.forEach { tag -> writer.appendLine("-t $tag") }
+                        excludeTags.forEach { tag -> writer.appendLine("-T $tag") }
                     }
             }
         }

@@ -3,8 +3,10 @@ package de.mannodermaus.gradle.plugins.junit5.util
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 
 /* Methods */
@@ -22,6 +24,10 @@ class ProjectSubject(
     fun configuration(name: String): ConfigurationSubject = check("configuration()")
         .about(::ConfigurationSubject)
         .that(actual?.configurations?.getByName(name))
+
+    fun task(name: String): TaskSubject = check("task()")
+        .about(::TaskSubject)
+        .that(actual?.tasks?.findByName(name))
 }
 
 class ConfigurationSubject(
@@ -64,5 +70,18 @@ class ConfigurationSubject(
         assertWithMessage(
             "$messagePrefix\nDependencies in this configuration: $dependencyNames"
         ).that(hasMatch).isEqualTo(expectExists)
+    }
+}
+
+class TaskSubject(
+    metadata: FailureMetadata,
+    private val actual: Task?,
+) : Subject(metadata, actual) {
+    fun exists() {
+        assertThat(actual).isNotNull()
+    }
+
+    fun doesNotExist() {
+        assertThat(actual).isNull()
     }
 }

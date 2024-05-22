@@ -1,6 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5.util.projects
 
+import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.applyPlugin
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
@@ -40,7 +42,7 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
         private var projectType = Type.Unset
         private var appId = "com.example.android"
-        private var applyJUnit5Plugin = true
+        private var applyJUnit5Plugin: ((AndroidJUnitPlatformExtension) -> Unit)? = {}
         private var applyJacocoPlugin = false
         private var applyKotlinPlugin = false
 
@@ -60,8 +62,12 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
         fun asAndroidLibrary() = setProjectTypeIfUnsetTo(Type.Library)
 
-        fun applyJUnit5Plugin(state: Boolean = true) = apply {
-            this.applyJUnit5Plugin = state
+        fun applyJUnit5Plugin(state: Boolean = true, configuration: ((AndroidJUnitPlatformExtension) -> Unit)? = null) = apply {
+            this.applyJUnit5Plugin = if (state) {
+                configuration ?: {}
+            } else {
+                null
+            }
         }
 
         fun applyJacocoPlugin(state: Boolean = true) = apply {
@@ -93,7 +99,7 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
                 project.applyPlugin("kotlin-android")
             }
 
-            if (applyJUnit5Plugin) {
+            if (applyJUnit5Plugin != null) {
                 project.applyPlugin("de.mannodermaus.android-junit5")
             }
 
@@ -113,6 +119,14 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
                 }
             } catch (e: UnknownDomainObjectException) {
                 // Expected when the Android plugin is not applied to a project;
+                // swallow this particular error
+            }
+
+            // Configure JUnit 5 with custom configuration clause, if any
+            try {
+                applyJUnit5Plugin?.invoke(project.junitPlatform)
+            } catch (e: UnknownDomainObjectException) {
+                // Expected when the JUnit 5 plugin is not applied to a project;
                 // swallow this particular error
             }
 

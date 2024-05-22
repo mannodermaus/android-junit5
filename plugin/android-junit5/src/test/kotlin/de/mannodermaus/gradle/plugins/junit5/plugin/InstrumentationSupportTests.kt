@@ -165,6 +165,16 @@ class InstrumentationSupportTests {
         assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
     }
 
+    @Test
+    fun `register the filter-write tasks`() {
+        project.addJUnitJupiterApi()
+        project.evaluate()
+
+        // AGP only registers androidTest tasks for the debug build type
+        assertThat(project).task("writeFiltersDebugAndroidTest").exists()
+        assertThat(project).task("writeFiltersReleaseAndroidTest").doesNotExist()
+    }
+
     /* Private */
 
     private fun Project.addJUnitJupiterApi() {
