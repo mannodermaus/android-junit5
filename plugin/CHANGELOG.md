@@ -9,6 +9,9 @@ Change Log
 - Removed deprecated `integrityCheckEnabled` flag from the plugin DSL's instrumentation test options
 - Allow opt-in usage of extension library via the plugin's DSL
 - Allow autoconfiguration of compose library if Compose is used in the androidTest dependency list 
+- Decouple discovery of instrumentation tests from Jupiter, allowing non-Jupiter test engines to be discovered as well
+- Update lifecycle of instrumentation runner params to only be set once, instead of once per test
+- Properly reported disabled dynamic tests to Android instrumentation
 
 ## 1.10.0.0 (2023-11-05)
 - JUnit 5.10.0
