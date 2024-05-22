@@ -12,6 +12,7 @@ Change Log
 - Decouple discovery of instrumentation tests from Jupiter, allowing non-Jupiter test engines to be discovered as well
 - Update lifecycle of instrumentation runner params to only be set once, instead of once per test
 - Properly reported disabled dynamic tests to Android instrumentation
+- Use new Variant API to register generated resource folder for instrumentation filters file
 
 ## 1.10.0.0 (2023-11-05)
 - JUnit 5.10.0

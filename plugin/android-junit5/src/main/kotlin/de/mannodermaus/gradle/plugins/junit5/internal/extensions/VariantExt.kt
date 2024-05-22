@@ -1,5 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.extensions
 
+import com.android.build.api.variant.AndroidTest
+import com.android.build.api.variant.HasAndroidTest
 import com.android.build.api.variant.Variant
 
 internal fun Variant.getTaskName(prefix: String = "", suffix: String = ""): String {
@@ -18,3 +20,6 @@ internal fun Variant.getTaskName(prefix: String = "", suffix: String = ""): Stri
         append(suffix.capitalized())
     }.toString()
 }
+
+internal val Variant.instrumentationTestVariant: AndroidTest?
+    get() = (this as? HasAndroidTest)?.androidTest

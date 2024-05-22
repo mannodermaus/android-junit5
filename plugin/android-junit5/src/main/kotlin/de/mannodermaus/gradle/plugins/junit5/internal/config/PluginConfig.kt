@@ -13,8 +13,6 @@ import com.android.build.gradle.DynamicFeaturePlugin
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.api.TestVariant
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.instrumentationTestVariant
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.DirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.JavaDirectoryProvider
 import de.mannodermaus.gradle.plugins.junit5.internal.providers.KotlinDirectoryProvider
@@ -66,11 +64,6 @@ private constructor(
         return legacyVariants.firstOrNull { it.name == variant.name }
             ?.run { directoryProvidersOf(this) }
             ?: emptySet()
-    }
-
-    fun instrumentationTestVariantOf(variant: Variant): TestVariant? {
-        return legacyVariants.firstOrNull { it.name == variant.name }
-            ?.run { this.instrumentationTestVariant }
     }
 
     /* Private */

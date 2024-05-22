@@ -61,11 +61,8 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/tasks/AndroidJUnit5J
 public abstract class de/mannodermaus/gradle/plugins/junit5/tasks/AndroidJUnit5WriteFilters : org/gradle/api/DefaultTask {
 	public fun <init> ()V
 	public final fun execute ()V
-	public final fun getExcludeTags ()Ljava/util/List;
-	public final fun getIncludeTags ()Ljava/util/List;
-	public final fun getOutputFolder ()Ljava/io/File;
-	public final fun setExcludeTags (Ljava/util/List;)V
-	public final fun setIncludeTags (Ljava/util/List;)V
-	public final fun setOutputFolder (Ljava/io/File;)V
+	public abstract fun getExcludeTags ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getIncludeTags ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getOutputFolder ()Lorg/gradle/api/file/DirectoryProperty;
 }
 

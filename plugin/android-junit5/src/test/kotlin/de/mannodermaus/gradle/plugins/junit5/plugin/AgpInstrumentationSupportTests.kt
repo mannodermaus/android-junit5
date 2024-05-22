@@ -45,8 +45,8 @@ interface AgpInstrumentationSupportTests : AgpVariantAwareTests {
                     val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersDebugAndroidTest")
                     assertAll(
                             { assertThat(task).isNotNull() },
-                            { assertThat(task.includeTags).containsExactly("global-include-tag") },
-                            { assertThat(task.excludeTags).containsExactly("debug-exclude-tag") }
+                            { assertThat(task.includeTags.get()).containsExactly("global-include-tag") },
+                            { assertThat(task.excludeTags.get()).containsExactly("debug-exclude-tag") }
                     )
                 },
 
@@ -99,15 +99,15 @@ interface AgpInstrumentationSupportTests : AgpVariantAwareTests {
                 dynamicTest("has a task for writing the freeDebug filters DSL to a resource file") {
                     val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersFreeDebugAndroidTest")
                     assertThat(task).isNotNull()
-                    assertThat(task.includeTags).containsExactly("global-include-tag", "freeDebug-include-tag")
-                    assertThat(task.excludeTags).containsExactly("global-exclude-tag")
+                    assertThat(task.includeTags.get()).containsExactly("global-include-tag", "freeDebug-include-tag")
+                    assertThat(task.excludeTags.get()).containsExactly("global-exclude-tag")
                 },
 
                 dynamicTest("has a task for writing the paidDebug filters DSL to a resource file") {
                     val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersPaidDebugAndroidTest")
                     assertThat(task).isNotNull()
-                    assertThat(task.includeTags).containsExactly("global-include-tag")
-                    assertThat(task.excludeTags).containsExactly("global-exclude-tag")
+                    assertThat(task.includeTags.get()).containsExactly("global-include-tag")
+                    assertThat(task.excludeTags.get()).containsExactly("global-exclude-tag")
                 },
 
                 dynamicTest("doesn't have tasks for writing the release filters DSL to a resource file") {
