@@ -2,8 +2,11 @@
 .gradle
 local.properties
 */.idea/*
+!*/.idea/codeStyles/
 !*/.idea/runConfigurations
-!*/.idea/codeStyleSettings.xml
+!*/.idea/scopes/
+!*/.idea/fileColors.xml
+!*/.idea/icon.*
 .DS_Store
 build/
 out/
