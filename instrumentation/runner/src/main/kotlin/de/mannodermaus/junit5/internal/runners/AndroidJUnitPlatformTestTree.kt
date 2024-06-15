@@ -12,7 +12,6 @@ import org.junit.platform.engine.support.descriptor.MethodSource
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import org.junit.platform.suite.api.SuiteDisplayName
-import org.junit.platform.suite.api.UseTechnicalNames
 import org.junit.runner.Description
 import java.util.Optional
 import java.util.function.Predicate
@@ -26,7 +25,7 @@ import java.util.function.Predicate
 internal class AndroidJUnitPlatformTestTree(
     testPlan: TestPlan,
     testClass: Class<*>,
-    private val isIsolatedMethodRun: Boolean,
+    private val needLegacyFormat: Boolean,
     val isParallelExecutionEnabled: Boolean,
 ) {
 
@@ -39,7 +38,7 @@ internal class AndroidJUnitPlatformTestTree(
     // Order matters here, since all dynamic tests are also containers,
     // but not all containers are dynamic tests
     fun getTestName(identifier: TestIdentifier): String = when {
-        identifier.isDynamicTest -> if (isIsolatedMethodRun) {
+        identifier.isDynamicTest -> if (needLegacyFormat) {
             // In isolated method runs, there is no need to compose
             // dynamic test names from multiple pieces, as the
             // Android Instrumentation only looks at the raw method name
@@ -69,7 +68,7 @@ internal class AndroidJUnitPlatformTestTree(
 
         identifier.isContainer -> getTechnicalName(identifier)
 
-        else -> identifier.format(isIsolatedMethodRun)
+        else -> identifier.format(needLegacyFormat)
     }
 
     // Do not expose our custom TestPlan, because JUnit Platform wouldn't like that very much.
@@ -82,13 +81,7 @@ internal class AndroidJUnitPlatformTestTree(
     }
 
     private fun generateSuiteDescription(testPlan: TestPlan, testClass: Class<*>): Description {
-        val displayName = if (testClass.isAnnotationPresent(UseTechnicalNames::class.java)) {
-            testClass.name
-        } else {
-            getSuiteDisplayName(testClass)
-        }
-
-        return Description.createSuiteDescription(displayName).also {
+        return Description.createSuiteDescription(getSuiteDisplayName(testClass)).also {
             buildDescriptionTree(it, testPlan)
         }
     }

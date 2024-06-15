@@ -116,7 +116,7 @@ class AndroidJUnitPlatformTestTreeTests {
         val tree = AndroidJUnitPlatformTestTree(
             testPlan = plan,
             testClass = cls.java,
-            isIsolatedMethodRun = isIsolatedMethodRun,
+            needLegacyFormat = isIsolatedMethodRun,
             isParallelExecutionEnabled = false,
         )
 

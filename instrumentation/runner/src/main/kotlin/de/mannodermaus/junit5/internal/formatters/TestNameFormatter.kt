@@ -8,8 +8,8 @@ import org.junit.platform.launcher.TestIdentifier
  * Android instrumentation (e.g. on isolated test runs).
  */
 internal object TestNameFormatter {
-    fun format(identifier: TestIdentifier, isIsolatedMethodRun: Boolean = false): String {
-        // During isolated executions of a single test method,
+    fun format(identifier: TestIdentifier, legacyFormat: Boolean = false): String {
+        // When requesting the legacy format of the formatter,
         // construct a technical version of its name for backwards compatibility
         // with the JUnit 4-based instrumentation of Android by stripping the brackets of parameterized tests completely.
         // If this didn't happen, running them from the IDE will cause "No tests found" errors.
@@ -19,7 +19,7 @@ internal object TestNameFormatter {
         // - #199 & #207 (the original unearthing of this behavior)
         // - #317 (making an exception for dynamic tests)
         // - #339 (retain indices of parameterized methods to avoid premature filtering by JUnit 4's test discovery)
-        if (isIsolatedMethodRun) {
+        if (legacyFormat) {
             val reportName = identifier.legacyReportingName
             val paramStartIndex = reportName.indexOf('(')
             if (paramStartIndex > -1) {
