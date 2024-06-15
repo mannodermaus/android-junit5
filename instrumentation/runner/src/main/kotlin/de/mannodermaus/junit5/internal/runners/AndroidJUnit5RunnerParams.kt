@@ -33,6 +33,9 @@ internal data class AndroidJUnit5RunnerParams(
     val isParallelExecutionEnabled: Boolean
         get() = configurationParameters["junit.jupiter.execution.parallel.enabled"] == "true"
 
+    val isUsingOrchestrator: Boolean
+        get() = arguments.getString("orchestratorService") != null
+
     internal companion object {
         fun create(): AndroidJUnit5RunnerParams {
             val instrumentation = InstrumentationRegistry.getInstrumentation()

@@ -34,8 +34,8 @@ internal val TestIdentifier.isDynamicTest: Boolean
 /**
  * Returns a formatted version of this identifier's name,
  * which is compatible with the quirks and limitations
- * of the Android Instrumentation, esp. when the [isIsolatedMethodRun]
+ * of the Android Instrumentation, esp. when the [legacyFormat]
  * flag is enabled.
  */
-internal fun TestIdentifier.format(isIsolatedMethodRun: Boolean = false): String =
-    TestNameFormatter.format(this, isIsolatedMethodRun)
+internal fun TestIdentifier.format(legacyFormat: Boolean = false): String =
+    TestNameFormatter.format(this, legacyFormat)
