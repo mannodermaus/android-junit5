@@ -5,7 +5,7 @@ Change Log
 
 - Fix inheritance hierarchy of `ComposeExtension` to avoid false-positive warning regarding `@RegisterExtension` (#318)
 - Improve parallel test execution for Android instrumentation tests
-- Fix invalid naming of dynamic tests when executing only a singular test method from the IDE (#317)
+- Fix invalid naming of dynamic tests when executing only a singular test method from the IDE (#317, #339)
 - Prevent test methods incorrectly defined as Kotlin top-level functions from messing up Android's internal test counting, causing issues like "Expected N+1 tests, received N" (#316)
 - Prevent test classes ignored by a tag from being considered for test execution, causing issues like "Expected N+1 tests, received N" (#298)
 
