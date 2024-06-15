@@ -3,6 +3,7 @@
 package de.mannodermaus.junit5.internal.runners
 
 import android.annotation.SuppressLint
+import de.mannodermaus.junit5.internal.extensions.format
 import de.mannodermaus.junit5.internal.extensions.isDynamicTest
 import org.junit.platform.commons.util.AnnotationUtils
 import org.junit.platform.engine.UniqueId
@@ -35,53 +36,40 @@ internal class AndroidJUnitPlatformTestTree(
 
     val suiteDescription = generateSuiteDescription(testPlan, testClass)
 
-    fun getTestName(identifier: TestIdentifier): String =
-        when {
-            identifier.isContainer -> getTechnicalName(identifier)
-
-            identifier.isDynamicTest -> {
-                // Collect all dynamic tests' IDs from this identifier,
-                // all the way up to the first non-dynamic test.
-                // Collect the name of all these into a list, then finally
-                // compose the final name from this list. Note that, because we
-                // move upwards the test plan, the elements must be reversed
-                // before the final name can be composed.
-                val nameComponents = mutableListOf<String>()
-                var currentNode: TestIdentifier? = identifier
-                while (currentNode != null && currentNode.isDynamicTest) {
-                    nameComponents.add(formatTestName(currentNode))
-                    currentNode = modifiedTestPlan.getRealParent(currentNode).orElse(null)
-                }
-                nameComponents.reverse()
-
-                // Android's Unified Test Platform (AGP 7.0+) is using literal test names
-                // to create files when capturing Logcat output during execution.
-                // Ergo, make sure that only legal characters are being used in the test names
-                // (ref. https://github.com/mannodermaus/android-junit5/issues/263)
-                nameComponents.joinToString(" - ")
+    // Order matters here, since all dynamic tests are also containers,
+    // but not all containers are dynamic tests
+    fun getTestName(identifier: TestIdentifier): String = when {
+        identifier.isDynamicTest -> if (isIsolatedMethodRun) {
+            // In isolated method runs, there is no need to compose
+            // dynamic test names from multiple pieces, as the
+            // Android Instrumentation only looks at the raw method name
+            // anyway and all information about parameter types is lost
+            identifier.format(true)
+        } else {
+            // Collect all dynamic tests' IDs from this identifier,
+            // all the way up to the first non-dynamic test.
+            // Collect the name of all these into a list, then finally
+            // compose the final name from this list. Note that, because we
+            // move upwards the test plan, the elements must be reversed
+            // before the final name can be composed.
+            val nameComponents = mutableListOf<String>()
+            var currentNode: TestIdentifier? = identifier
+            while (currentNode != null && currentNode.isDynamicTest) {
+                nameComponents.add(currentNode.format(false))
+                currentNode = modifiedTestPlan.getRealParent(currentNode).orElse(null)
             }
+            nameComponents.reverse()
 
-            else -> formatTestName(identifier)
+            // Android's Unified Test Platform (AGP 7.0+) is using literal test names
+            // to create files when capturing Logcat output during execution.
+            // Ergo, make sure that only legal characters are being used in the test names
+            // (ref. https://github.com/mannodermaus/android-junit5/issues/263)
+            nameComponents.joinToString(" - ")
         }
 
-    private fun formatTestName(identifier: TestIdentifier): String {
-        // During isolated executions of non-dynamic @Test methods,
-        // construct a technical version of the test name for backwards compatibility
-        // with the JUnit 4-based instrumentation of Android by stripping the brackets and parameters completely.
-        // If this didn't happen, running them from the IDE will cause "No tests found" errors.
-        // See AndroidX's TestRequestBuilder$MethodFilter for where this is cross-referenced in the instrumentation!
-        //
-        // Ref issues #199 & #207 (the original unearthing of this behavior),
-        // as well as #317 (making an exception for dynamic tests).
-        if (isIsolatedMethodRun && !identifier.isDynamicTest) {
-            val reportName = identifier.legacyReportingName
-            val bracketIndex = reportName.indexOf('(')
-            if (bracketIndex > -1) {
-                return reportName.substring(0, bracketIndex)
-            }
-        }
+        identifier.isContainer -> getTechnicalName(identifier)
 
-        return identifier.displayName.replace("()", "")
+        else -> identifier.format(isIsolatedMethodRun)
     }
 
     // Do not expose our custom TestPlan, because JUnit Platform wouldn't like that very much.

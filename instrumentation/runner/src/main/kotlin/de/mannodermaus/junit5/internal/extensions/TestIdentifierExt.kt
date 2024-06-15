@@ -1,5 +1,6 @@
 package de.mannodermaus.junit5.internal.extensions
 
+import de.mannodermaus.junit5.internal.formatters.TestNameFormatter
 import org.junit.platform.launcher.TestIdentifier
 
 private val DYNAMIC_TEST_PREFIXES = listOf(
@@ -29,3 +30,12 @@ internal val TestIdentifier.isDynamicTest: Boolean
         val shortId = this.shortId
         return DYNAMIC_TEST_PREFIXES.any { shortId.startsWith(it) }
     }
+
+/**
+ * Returns a formatted version of this identifier's name,
+ * which is compatible with the quirks and limitations
+ * of the Android Instrumentation, esp. when the [isIsolatedMethodRun]
+ * flag is enabled.
+ */
+internal fun TestIdentifier.format(isIsolatedMethodRun: Boolean = false): String =
+    TestNameFormatter.format(this, isIsolatedMethodRun)

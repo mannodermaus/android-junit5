@@ -46,6 +46,8 @@ class HasTestTemplate {
 
     private fun context(param: String): TestTemplateInvocationContext =
         object : TestTemplateInvocationContext {
+          override fun getDisplayName(invocationIndex: Int): String = param
+
           override fun getAdditionalExtensions() = listOf(
               object : ParameterResolver {
                 override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext) =
