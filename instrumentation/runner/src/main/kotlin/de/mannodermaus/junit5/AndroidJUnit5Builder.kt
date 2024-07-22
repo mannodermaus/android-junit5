@@ -42,15 +42,8 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
             // AND that integration with applications NOT using JUnit 5 for UI tests still works.
             //
             // First, verify the existence of junit-jupiter-api on the classpath.
-            // Then, verify that the JUnitPlatform Runner is available on the classpath.
-            // It is VERY important to perform this check BEFORE verifying the existence
-            // of the AndroidJUnit5 Runner, which inherits from JUnitPlatform. If this is omitted,
-            // an uncatchable verification error will be raised, rendering instrumentation testing
-            // for applications without the desire to include JUnit 5 effectively useless.
-            // The simple Class.forName() check however will catch this allowed inconsistency,
-            // and gracefully abort.
+            // Then, verify that the Android JUnit 5 Runner is available.
             Class.forName("org.junit.jupiter.api.Test")
-            Class.forName("org.junit.platform.runner.JUnitPlatform")
             Class.forName("de.mannodermaus.junit5.internal.runners.AndroidJUnit5")
             true
         } catch (e: Throwable) {
@@ -69,7 +62,7 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
 
     @Throws(Throwable::class)
     override fun runnerForClass(testClass: Class<*>): Runner? {
-        // Ignore a bunch of class in internal packages
+        // Ignore a bunch of classes in internal packages
         if (testClass.isInIgnorablePackage) return null
 
         try {
@@ -99,6 +92,7 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         "androidx.",
         "com.android.",
         "kotlin.",
+        "kotlinx.",
     )
 
     private val Class<*>.isInIgnorablePackage: Boolean get() {

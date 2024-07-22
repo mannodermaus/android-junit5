@@ -1,12 +1,16 @@
 package de.mannodermaus.junit5.internal.runners
 
-import android.annotation.SuppressLint
+import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import de.mannodermaus.junit5.internal.runners.notification.ParallelRunNotifier
+import org.junit.platform.commons.JUnitException
+import org.junit.platform.engine.ConfigurationParameters
 import org.junit.platform.engine.discovery.MethodSelector
+import org.junit.platform.launcher.TestPlan
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
+import java.util.Optional
 
 /**
  * JUnit Runner implementation using the JUnit Platform as its backbone.
@@ -15,18 +19,29 @@ import org.junit.runner.notification.RunNotifier
  *
  * @see org.junit.platform.runner.JUnitPlatform
  */
-@SuppressLint("NewApi")
+@RequiresApi(26)
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 internal class AndroidJUnit5(
     private val testClass: Class<*>,
     paramsSupplier: () -> AndroidJUnit5RunnerParams = AndroidJUnit5RunnerParams.Companion::create,
 ) : Runner() {
+    private companion object {
+        private val emptyConfigurationParameters = object : ConfigurationParameters {
+            override fun get(key: String?) = Optional.empty<String>()
+            override fun getBoolean(key: String?) = Optional.empty<Boolean>()
+            override fun keySet() = emptySet<String>()
+
+            @Deprecated("Deprecated in Java", ReplaceWith("keySet().size"))
+            override fun size() = 0
+        }
+
+        private val emptyTestPlan = TestPlan.from(emptyList(), emptyConfigurationParameters)
+    }
 
     private val launcher = LauncherFactory.create()
     private val testTree by lazy { generateTestTree(paramsSupplier()) }
 
-    override fun getDescription() =
-        testTree.suiteDescription
+    override fun getDescription() = testTree.suiteDescription
 
     override fun run(notifier: RunNotifier) {
         // Finally, launch the test plan on the JUnit Platform
@@ -56,8 +71,20 @@ internal class AndroidJUnit5(
             )
         }
 
+        val testPlan = try {
+            launcher.discover(request)
+        } catch (e: JUnitException) {
+            // Each class in scope is given to the runner,
+            // but some may fail to be loaded by the class loader
+            // (e.g. when they are tailored to JVM work and reference sun.* classes
+            // or anything else not present in the Android runtime).
+            // Log those to console, but discard them from being considered at all
+            e.printStackTrace()
+            emptyTestPlan
+        }
+
         return AndroidJUnitPlatformTestTree(
-            testPlan = launcher.discover(request),
+            testPlan = testPlan,
             testClass = testClass,
             needLegacyFormat = isIsolatedMethodRun || isUsingOrchestrator,
             isParallelExecutionEnabled = params.isParallelExecutionEnabled,

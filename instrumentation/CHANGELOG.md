@@ -9,6 +9,8 @@ Change Log
 - Prevent test methods incorrectly defined as Kotlin top-level functions from messing up Android's internal test counting, causing issues like "Expected N+1 tests, received N" (#316)
 - Prevent test classes ignored by a tag from being considered for test execution, causing issues like "Expected N+1 tests, received N" (#298)
 - Improve integration with Android Test Orchestrator and remove the need for `@UseTechnicalNames` (#337)
+- Raise minimum supported API level of `core`, `extensions` and `runner` modules from 14 to 19
+- Gracefully ignore unloadable classes during test discovery, e.g. those that access JVM-only APIs like `sun.*`
 
 ## 1.4.0 (2023-11-05)
 

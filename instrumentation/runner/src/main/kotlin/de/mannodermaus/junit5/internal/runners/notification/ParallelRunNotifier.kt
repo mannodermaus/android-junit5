@@ -21,12 +21,11 @@ import java.util.concurrent.TimeUnit
  * Wrapping implementation of JUnit 4's run notifier for parallel test execution
  * (i.e. when "junit.jupiter.execution.parallel.enabled" is active during the run).
  * It unpacks the singular 'instrumentation result printer' assigned by AndroidX
- * and reroutes its notification mechanism a way that makes parallel
- * tests still execute in parallel, but allowing their results to be reported back
- * in the strictly sequential order required by the instrumentation.
+ * and reroutes its notification mechanism. This allows parallel tests to still execute in parallel,
+ * but also allows their results to be reported back in the strictly sequential order required by the instrumentation.
  */
 internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotifier() {
-    companion object {
+    private companion object {
         private val doneLock = Object()
         private val nopPrinter = InstrumentationResultPrinter()
         private val nopTestState = TestState("", Bundle(), 0)

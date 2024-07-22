@@ -102,7 +102,7 @@ object Artifacts {
         const val latestStableVersion = "1.4.0"
 
         val Core = Deployed(
-            platform = Android(minSdk = 14),
+            platform = Android(minSdk = 19),
             groupId = groupId,
             artifactId = "android-test-core",
             currentVersion = currentVersion,
@@ -112,7 +112,7 @@ object Artifacts {
         )
 
         val Extensions = Deployed(
-            platform = Android(minSdk = 14),
+            platform = Android(minSdk = 19),
             groupId = groupId,
             artifactId = "android-test-extensions",
             currentVersion = currentVersion,
@@ -122,7 +122,7 @@ object Artifacts {
         )
 
         val Runner = Deployed(
-            platform = Android(minSdk = 14),
+            platform = Android(minSdk = 19),
             groupId = groupId,
             artifactId = "android-test-runner",
             currentVersion = currentVersion,

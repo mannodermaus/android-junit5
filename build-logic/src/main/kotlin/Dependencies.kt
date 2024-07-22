@@ -8,23 +8,25 @@ object libs {
         const val junitPlatform = "1.10.2"
 
         const val composeBom = "2024.04.00"
-        const val androidXTest = "1.5.0"
+        const val androidXTest = "1.6.1"
+        const val androidXTestAnnotation = "1.0.1"
+        const val androidXTestMonitor = "1.7.1"
         const val composeCompiler = "1.5.11"
 
-        const val activityCompose = "1.8.2"
+        const val activityCompose = "1.9.0"
         const val apiGuardian = "1.1.2"
-        const val coroutines = "1.8.0"
+        const val coroutines = "1.8.1"
         const val dokka = "1.9.20"
-        const val espresso = "3.5.1"
+        const val espresso = "3.6.1"
         const val javaSemver = "0.10.2"
         const val junit4 = "4.13.2"
         const val konfToml = "1.1.2"
         const val korte = "2.4.12"
-        const val mockitoCore = "5.11.0"
-        const val mockitoKotlin = "5.2.1"
-        const val robolectric = "4.12"
+        const val mockitoCore = "5.12.0"
+        const val mockitoKotlin = "5.4.0"
+        const val robolectric = "4.13"
         const val shadow = "8.1.1"
-        const val truth = "1.4.2"
+        const val truth = "1.4.4"
     }
 
     object plugins {
@@ -72,9 +74,10 @@ object libs {
     const val truthJava8Extensions = "com.google.truth.extensions:truth-java8-extension:${versions.truth}"
     const val robolectric = "org.robolectric:robolectric:${versions.robolectric}"
 
+    const val androidXTestAnnotation = "androidx.test:annotation:${versions.androidXTestAnnotation}"
     const val androidXTestCore = "androidx.test:core:${versions.androidXTest}"
     const val androidXTestRunner = "androidx.test:runner:${versions.androidXTest}"
-    const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTest}"
+    const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTestMonitor}"
     const val espressoCore = "androidx.test.espresso:espresso-core:${versions.espresso}"
 
     const val composeUiTest = "androidx.compose.ui:ui-test"

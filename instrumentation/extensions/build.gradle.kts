@@ -85,6 +85,7 @@ configurations.all {
 }
 
 dependencies {
+  implementation(libs.androidXTestAnnotation)
   implementation(libs.androidXTestRunner)
   implementation(libs.junitJupiterApi)
 
