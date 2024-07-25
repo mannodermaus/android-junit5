@@ -5,7 +5,7 @@
 -->
 # <img src=".images/logo.png" align="right" width="100">android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 7.0.0 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 8.0.0 or later.**
 
 ## How?
 
@@ -22,20 +22,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```kotlin
   plugins {
-    id("de.mannodermaus.android-junit5") version "1.10.0.0"
+    id("de.mannodermaus.android-junit5") version "1.10.2.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
   }
   ```
 </details>
@@ -45,20 +45,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```groovy
   plugins {
-    id "de.mannodermaus.android-junit5" version "1.10.0.0"
+    id "de.mannodermaus.android-junit5" version "1.10.2.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.2"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.10.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.10.2"
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "junit:junit:4.13.2"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.10.0"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.10.2"
   }
   ```
 </details>
@@ -76,7 +76,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle.kts:
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.10.0.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.10.2.0")
     }
   }
 
@@ -94,7 +94,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle:
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.10.0.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.10.2.0"
     }
   }
 
@@ -110,8 +110,8 @@ More information on Getting Started can be found [on the wiki][wiki-gettingstart
 ## Requirements
 
 The latest version of this plugin requires:
-* Android Gradle Plugin `7.0.0` or above
-* Gradle `7.0` or above
+* Android Gradle Plugin `8.0.0` or above
+* Gradle `8.0` or above
 
 ## Instrumentation Test Support
 
@@ -124,7 +124,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
   
   ```kotlin
   dependencies {
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
   }
   ```
 </details>
@@ -134,7 +134,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
 
   ```groovy
   dependencies {
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.10.0"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
   }
   ```
 </details>
@@ -154,8 +154,8 @@ Can you think of more? Let's discuss in the issues section!
   <summary>Kotlin</summary>
 
   ```kotlin
-  dependencies {
-    androidTestImplementation("de.mannodermaus.junit5:android-test-extensions:1.4.0")
+  junitPlatform {
+    instrumentationTests.includeExtensions.set(true)
   }
   ```
 </details>
@@ -164,8 +164,8 @@ Can you think of more? Let's discuss in the issues section!
   <summary>Groovy</summary>
 
   ```groovy
-  dependencies {
-    androidTestImplementation "de.mannodermaus.junit5:android-test-extensions:1.4.0"
+  junitPlatform {
+    instrumentationTests.includeExtensions.set(true)
   }
   ```
 </details>
@@ -173,15 +173,16 @@ Can you think of more? Let's discuss in the issues section!
 ### Jetpack Compose
 
 To test `@Composable` functions on device with JUnit 5, first enable support for instrumentation tests as described above.
-Then, add the integration library for Jetpack Compose to the `androidTestImplementation` configuration:
+Then, add the Compose test dependency to your `androidTestImplementation` configuration
+and the plugin will autoconfigure JUnit 5 Compose support for you!
 
 <details open>
   <summary>Kotlin</summary>
   
   ```kotlin
   dependencies {
-    // Test extension & transitive dependencies
-    androidTestImplementation("de.mannodermaus.junit5:android-test-compose:1.4.0")
+    // Compose test framework
+    androidTestImplementation("androidx.compose.ui:ui-test-android:$compose_version")
 
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
@@ -194,8 +195,8 @@ Then, add the integration library for Jetpack Compose to the `androidTestImpleme
 
   ```groovy
   dependencies {
-    // Test extension & transitive dependencies
-    androidTestImplementation "de.mannodermaus.junit5:android-test-compose:1.4.0"
+    // Compose test framework
+    androidTestImplementation "androidx.compose.ui:ui-test-android:$compose_version"
 
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
@@ -205,7 +206,32 @@ Then, add the integration library for Jetpack Compose to the `androidTestImpleme
 
 [The wiki][wiki-home] includes a section on how to test your Composables with JUnit 5.
 
-# Official Support
+### Override the version of instrumentation test libraries
+
+By default, the plugin will make sure to use a compatible version of the instrumentation test libraries
+when it sets up the artifacts automatically. However, it is possible to choose a custom version instead via its DSL:
+
+<details open>
+  <summary>Kotlin</summary>
+
+  ```kotlin
+  junitPlatform {
+    instrumentationTests.version.set("1.5.0")
+  }
+  ```
+</details>
+
+<details>
+  <summary>Groovy</summary>
+
+  ```groovy
+  junitPlatform {
+    instrumentationTests.version.set("1.5.0")
+  }
+  ```
+</details>
+
+## Official Support
 
 At this time, Google hasn't shared any immediate plans to bring first-party support for JUnit 5 to Android. The following list is an aggregation of pending feature requests:
 
@@ -213,12 +239,26 @@ At this time, Google hasn't shared any immediate plans to bring first-party supp
 - [Add support for JUnit 5 (issuetracker.google.com)](https://issuetracker.google.com/issues/127100532)
 - [JUnit 5 support (github.com/android/android-test)](https://github.com/android/android-test/issues/224)
 
-# Building Locally
+## Building Locally
 
 This repository contains multiple modules, divided into two sub-projects. The repository's root directory contains build logic shared across the sub-projects, which in turn use symlinks to connect to the common build scripts in their parent folder.
 
 - `instrumentation`: The root folder for Android-based modules, namely the instrumentation libraries & a sample application. After cloning, open this project in Android Studio.
 - `plugin`: The root folder for Java-based modules, namely the Gradle plugin for JUnit 5 on Android, as well as its test module. After cloning, open this project in IntelliJ IDEA.
+
+## Plugin Compatibility Map
+
+For users that cannot match the current minimum version requirement of the Android Gradle Plugin requested by this plugin,
+refer to the table below to find a suitable alternative version. Note that **no active development will go into these
+legacy versions**, so please consider upgrading to at least Android Gradle Plugin 8.0.0
+before filing an issue with the latest one.
+
+|Your AGP Version|Suggested JUnit5 Plugin Version|
+|---|---|
+|`7.0.0` - `7.4.2`|`1.10.0.0`|
+|`4.0.0` - `4.2.2`|`1.8.2.1`|
+|`3.5.0` - `3.6.4`|`1.7.1.1`|
+|`< 3.5.0`|none; you should **really** update your build env, bro|
 
 ## License
 

@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 1.10.2.0 (2024-07-25)
 - JUnit 5.10.2
 - Raise minimum supported versions for AGP and Gradle to 8.0.x and 8.0, respectively
 - Allow overriding the version of the instrumentation libraries applied with the plugin
