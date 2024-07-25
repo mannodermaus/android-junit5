@@ -222,7 +222,7 @@ private fun Node.appendProjectDependencyCoordinates(dep: ProjectDependency) {
 
     appendNode("groupId", config.groupId)
     appendNode("artifactId", config.artifactId)
-    appendNode("version", config.latestStableVersion)
+    appendNode("version", config.currentVersion)
 }
 
 private fun Node.appendExternalDependencyCoordinates(dep: Dependency) {
