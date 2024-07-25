@@ -34,6 +34,7 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationT
 	public fun <init> ()V
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public abstract fun getIncludeExtensions ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUseConfigurationParameters ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
 }
 
