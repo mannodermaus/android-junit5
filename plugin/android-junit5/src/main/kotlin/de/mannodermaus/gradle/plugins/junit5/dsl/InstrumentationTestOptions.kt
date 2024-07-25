@@ -27,4 +27,11 @@ public abstract class InstrumentationTestOptions {
      */
     @get:Input
     public abstract val includeExtensions: Property<Boolean>
+
+    /**
+     * Whether to use configuration parameters configured via the plugin DSL
+     * for instrumentation tests, too.
+     */
+    @get:Input
+    public abstract val useConfigurationParameters: Property<Boolean>
 }

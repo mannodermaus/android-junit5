@@ -92,7 +92,7 @@ private fun AndroidJUnitPlatformExtension.prepareVariantDsl(variant: Variant) {
     }
 }
 
-private fun prepareUnitTests(project: Project, android: AndroidExtension) {
+private fun AndroidJUnitPlatformExtension.prepareUnitTests(project: Project, android: AndroidExtension) {
     // Add default ignore rules for JUnit 5 metadata files to the packaging options of the plugin,
     // so that consumers don't need to do this explicitly
     val options = excludedPackagingOptions()
@@ -106,6 +106,8 @@ private fun prepareUnitTests(project: Project, android: AndroidExtension) {
         //  Fall back to the old DSL when this happens
         options.forEach(project.android.packagingOptions::exclude)
     }
+
+    attachDependencies(project, "testImplementation", includeRunner = false)
 }
 
 private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: Project, android: AndroidExtension) {
@@ -123,29 +125,47 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
             .joinToString(",")
     }
 
-    val version = instrumentationTests.version.get()
+    // Copy over configuration parameters to instrumentation tests
+    if (instrumentationTests.useConfigurationParameters.get()) {
+        val instrumentationParams = android.defaultConfig.testInstrumentationRunnerArguments
+            .getAsList("configurationParameters")
+            .toMutableList()
 
-    project.dependencies.add(
-        "androidTestImplementation",
-        "${Libraries.instrumentationCore}:$version"
-    )
-    project.dependencies.add(
-        "androidTestRuntimeOnly",
-        "${Libraries.instrumentationRunner}:$version"
-    )
+        this.configurationParameters.get().forEach { (key, value) ->
+            instrumentationParams.add("$key=$value")
+        }
 
-    if (instrumentationTests.includeExtensions.get()) {
-        project.dependencies.add(
-            "androidTestImplementation",
-            "${Libraries.instrumentationExtensions}:$version"
-        )
+        android.defaultConfig.testInstrumentationRunnerArguments["configurationParameters"] =
+            instrumentationParams.joinToString(",")
     }
 
-    if (project.usesComposeIn("androidTestImplementation")) {
-        project.dependencies.add(
-            "androidTestImplementation",
-            "${Libraries.instrumentationCompose}:$version"
-        )
+    attachDependencies(project, "androidTestImplementation", includeRunner = true)
+}
+
+private fun AndroidJUnitPlatformExtension.attachDependencies(
+    project: Project,
+    configurationName: String,
+    includeRunner: Boolean,
+) {
+    if (project.usesJUnitJupiterIn(configurationName)) {
+        val version = instrumentationTests.version.get()
+
+        project.dependencies.add(configurationName, "${Libraries.instrumentationCore}:$version")
+
+        if (includeRunner) {
+            project.dependencies.add(
+                configurationName.replace("Implementation", "RuntimeOnly"),
+                "${Libraries.instrumentationRunner}:$version",
+            )
+        }
+
+        if (instrumentationTests.includeExtensions.get()) {
+            project.dependencies.add(configurationName, "${Libraries.instrumentationExtensions}:$version")
+        }
+
+        if (project.usesComposeIn(configurationName)) {
+            project.dependencies.add(configurationName, "${Libraries.instrumentationCompose}:$version")
+        }
     }
 }
 

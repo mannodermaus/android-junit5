@@ -32,7 +32,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the RunnerBuilder`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.evaluate()
 
         assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
@@ -41,7 +41,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `maintain any existing RunnerBuilder`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"] = "something.else"
         project.evaluate()
 
@@ -51,7 +51,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `do not add the RunnerBuilder when disabled`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
@@ -65,11 +65,52 @@ class InstrumentationSupportTests {
         assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]).isNull()
     }
 
+    /* Configuration parameters */
+
+    @Test
+    fun `copy configuration parameters to test runner arguments`() {
+        project.addJUnitJupiterApi("androidTest")
+        with (project.junitPlatform) {
+            configurationParameter("my.parameter1", "true")
+            configurationParameter("my.parameter2", "1234")
+        }
+        project.evaluate()
+
+        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["configurationParameters"])
+            .isEqualTo("my.parameter1=true,my.parameter2=1234")
+    }
+
+    @Test
+    fun `do not copy configuration parameters if disabled via dsl`() {
+        project.addJUnitJupiterApi("androidTest")
+        with (project.junitPlatform) {
+            configurationParameter("my.parameter1", "true")
+            configurationParameter("my.parameter2", "1234")
+            instrumentationTests.useConfigurationParameters.set(false)
+        }
+        project.evaluate()
+
+        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["configurationParameters"])
+            .isNull()
+    }
+
     /* Dependencies */
 
     @Test
-    fun `add only the main dependencies`() {
-        project.addJUnitJupiterApi()
+    fun `add only the main dependencies (test)`() {
+        project.addJUnitJupiterApi("test")
+        project.evaluate()
+
+        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("testRuntimeOnly").doesNotHaveDependency(runnerLibrary())
+
+        assertThat(project).configuration("testImplementation").doesNotHaveDependency(extensionsLibrary())
+        assertThat(project).configuration("testImplementation").doesNotHaveDependency(composeLibrary())
+    }
+
+    @Test
+    fun `add only the main dependencies (androidTest)`() {
+        project.addJUnitJupiterApi("androidTest")
         project.evaluate()
 
         assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
@@ -81,7 +122,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `allow overriding the version`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.junitPlatform.instrumentationTests.version.set("1.3.3.7")
         project.evaluate()
 
@@ -91,7 +132,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `allow overriding the dependencies`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         val addedCore = "de.mannodermaus.junit5:android-test-core:0.1.3.3.7"
         val addedRunner = "de.mannodermaus.junit5:android-test-runner:0.1.3.3.7"
         project.dependencies.add("androidTestImplementation", addedCore)
@@ -104,7 +145,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `do not add the dependencies when disabled`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
@@ -132,7 +173,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the extension library if configured`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
@@ -143,10 +184,14 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the compose library if configured`() {
-        project.addJUnitJupiterApi()
-        project.addCompose()
+        project.addJUnitJupiterApi("test")
+        project.addJUnitJupiterApi("androidTest")
+        project.addCompose("test")
+        project.addCompose("androidTest")
         project.evaluate()
 
+        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("testImplementation").hasDependency(composeLibrary())
         assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
         assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary())
         assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
@@ -154,11 +199,16 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the extensions and compose libraries if configured`() {
-        project.addJUnitJupiterApi()
-        project.addCompose()
+        project.addJUnitJupiterApi("test")
+        project.addJUnitJupiterApi("androidTest")
+        project.addCompose("test")
+        project.addCompose("androidTest")
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
+        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary())
+        assertThat(project).configuration("testImplementation").hasDependency(composeLibrary())
+        assertThat(project).configuration("testImplementation").hasDependency(extensionsLibrary())
         assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
         assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary())
         assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary())
@@ -167,7 +217,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `register the filter-write tasks`() {
-        project.addJUnitJupiterApi()
+        project.addJUnitJupiterApi("androidTest")
         project.evaluate()
 
         // AGP only registers androidTest tasks for the debug build type
@@ -177,12 +227,14 @@ class InstrumentationSupportTests {
 
     /* Private */
 
-    private fun Project.addJUnitJupiterApi() {
-        dependencies.add("androidTestImplementation", "org.junit.jupiter:junit-jupiter-api:+")
+    private fun Project.addJUnitJupiterApi(prefix: String) {
+        val configuration = if (prefix.isEmpty()) "implementation" else "${prefix}Implementation"
+        dependencies.add(configuration, "org.junit.jupiter:junit-jupiter-api:+")
     }
 
-    private fun Project.addCompose() {
-        dependencies.add("androidTestImplementation", "androidx.compose.ui:ui-test-android:+")
+    private fun Project.addCompose(prefix: String) {
+        val configuration = if (prefix.isEmpty()) "implementation" else "${prefix}Implementation"
+        dependencies.add(configuration, "androidx.compose.ui:ui-test-android:+")
     }
 
     private fun composeLibrary(withVersion: String? = Libraries.instrumentationVersion) =

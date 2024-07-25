@@ -98,6 +98,7 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
             enabled.convention(true)
             version.convention(Libraries.instrumentationVersion)
             includeExtensions.convention(false)
+            useConfigurationParameters.convention(true)
         }
 
     public fun instrumentationTests(action: Action<InstrumentationTestOptions>) {
