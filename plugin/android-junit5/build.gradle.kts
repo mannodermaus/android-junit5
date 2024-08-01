@@ -1,8 +1,5 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -81,23 +78,10 @@ project.configureTestResources()
 
 // Generate a file with the latest versions of the plugin & instrumentation
 val genFolder = "build/generated/sources/plugin"
-val versionClassTask = tasks.register<Copy>("createVersionClass") {
-    from("src/main/templates/Libraries.kt")
-    into("$genFolder/de/mannodermaus")
-    filter(
-        mapOf(
-            "tokens" to mapOf(
-                "INSTRUMENTATION_GROUP" to Artifacts.Instrumentation.groupId,
-                "INSTRUMENTATION_COMPOSE" to Artifacts.Instrumentation.Compose.artifactId,
-                "INSTRUMENTATION_CORE" to Artifacts.Instrumentation.Core.artifactId,
-                "INSTRUMENTATION_EXTENSIONS" to Artifacts.Instrumentation.Extensions.artifactId,
-                "INSTRUMENTATION_RUNNER" to Artifacts.Instrumentation.Runner.artifactId,
-                "INSTRUMENTATION_VERSION" to Artifacts.Instrumentation.latestStableVersion,
-            )
-        ), ReplaceTokens::class.java
-    )
-    outputs.upToDateWhen { false }
-}
+val versionClassTask = tasks.register<Copy>(
+    "createVersionClass",
+    Copy::configureCreateVersionClassTask,
+)
 sourceSets {
     main {
         kotlin.srcDir(genFolder)

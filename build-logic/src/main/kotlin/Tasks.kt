@@ -30,7 +30,7 @@ fun Project.configureTestResources() {
 
                 "KOTLIN_VERSION" to libs.versions.kotlin,
                 "JUNIT_JUPITER_VERSION" to libs.versions.junitJupiter,
-                "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.latestStableVersion,
+                "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
                 // Collect all supported AGP versions into a single string.
                 // This string is delimited with semicolons, and each of the separated values itself is a 3-tuple.
@@ -132,6 +132,43 @@ fun Project.configureTestResources() {
             }
         }
     }
+}
+
+fun findInstrumentationVersion(
+    pluginVersion: String = Artifacts.Plugin.currentVersion,
+    currentInstrumentationVersion: String = Artifacts.Instrumentation.Core.currentVersion,
+    stableInstrumentationVersion: String = Artifacts.Instrumentation.Core.latestStableVersion
+    ): String {
+    return when {
+        pluginVersion.endsWith("-SNAPSHOT") -> currentInstrumentationVersion
+        currentInstrumentationVersion.endsWith("-SNAPSHOT") -> stableInstrumentationVersion
+        else -> currentInstrumentationVersion
+    }
+}
+
+fun Copy.configureCreateVersionClassTask(
+    instrumentationVersion: String = findInstrumentationVersion(),
+    fromPath: String = "src/main/templates/Libraries.kt",
+    intoPath: String = "build/generated/sources/plugin/de/mannodermaus",
+) {
+    from(fromPath)
+    into(intoPath)
+    filter(
+        mapOf(
+            "tokens" to mapOf(
+                "INSTRUMENTATION_GROUP" to Artifacts.Instrumentation.groupId,
+                "INSTRUMENTATION_COMPOSE" to Artifacts.Instrumentation.Compose.artifactId,
+                "INSTRUMENTATION_CORE" to Artifacts.Instrumentation.Core.artifactId,
+                "INSTRUMENTATION_EXTENSIONS" to Artifacts.Instrumentation.Extensions.artifactId,
+                "INSTRUMENTATION_RUNNER" to Artifacts.Instrumentation.Runner.artifactId,
+
+                // Find an appropriate version of the instrumentation library,
+                // depending on the version of how the plugin is configured
+                "INSTRUMENTATION_VERSION" to instrumentationVersion,
+            )
+        ), ReplaceTokens::class.java
+    )
+    outputs.upToDateWhen { false }
 }
 
 /**
