@@ -11,6 +11,7 @@ import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMEN
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 import java.io.File
 import java.time.ZonedDateTime
@@ -176,8 +177,7 @@ fun Copy.configureCreateVersionClassTask(
  * Using a template file, the plugin's version constants & other dependency versions
  * are automatically injected into the README.
  */
-open class GenerateReadme : DefaultTask() {
-
+abstract class GenerateReadme : DefaultTask() {
     companion object {
         private val PLACEHOLDER_REGEX = Regex("\\\$\\{(.+)}")
         private val EXTERNAL_DEP_REGEX = Regex("libs\\.(.+)")
@@ -204,18 +204,19 @@ open class GenerateReadme : DefaultTask() {
     """.trimIndent()
     }
 
-    @InputFile
-    lateinit var inputTemplateFile: File
+    @get:InputFile
+    abstract val inputTemplateFile: RegularFileProperty
 
-    @OutputFile
-    lateinit var outputFile: File
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
 
     @TaskAction
     fun doWork() {
-        val templateText = inputTemplateFile.readText()
+        val templateText = inputTemplateFile.asFile.get().readText()
         val constants = parseConstantsFile()
         val replacedText = replacePlaceholdersInTemplate(templateText, constants)
-        outputFile.writeText(replacedText)
+
+        outputFile.asFile.get().writeText(replacedText)
     }
 
     /* Private */
