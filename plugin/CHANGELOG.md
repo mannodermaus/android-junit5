@@ -6,6 +6,7 @@ Change Log
 - Updates to the `jacocoOptions` DSL
   - Change the return type of each report type to match Jacoco expectations (html -> Directory; csv & xml -> File)
   - Turn off generation of csv & xml reports by default, matching Jacoco default configuration
+- Fix: Use the correct version of the instrumentation libraries with the plugin (#345)
 
 ## 1.10.2.0 (2024-07-25)
 - JUnit 5.10.2

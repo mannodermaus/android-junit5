@@ -4,25 +4,10 @@ plugins {
 }
 
 buildscript {
-  repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-    jitpack()
-  }
-
   dependencies {
     classpath(libs.plugins.kotlin)
     classpath(libs.plugins.dokka)
     classpath(libs.plugins.android(SupportedAgp.newestStable))
-  }
-}
-
-allprojects {
-  repositories {
-    google()
-    mavenCentral()
-    sonatypeSnapshots()
   }
 }
 
