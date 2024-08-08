@@ -5,7 +5,7 @@ public final class de/mannodermaus/gradle/plugins/junit5/AndroidJUnitPlatformPlu
 }
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/AndroidJUnitPlatformExtension : groovy/lang/GroovyObjectSupport {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/gradle/api/Project;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun configurationParameter (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun configurationParameters (Ljava/util/Map;)V
 	public final fun filters (Ljava/lang/String;Lorg/gradle/api/Action;)V
@@ -40,19 +40,29 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationT
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getCsv ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
+	public final fun getCsv ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$FileReport;
 	public abstract fun getExcludedClasses ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getHtml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
+	public final fun getHtml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$DirectoryReport;
 	public abstract fun getOnlyGenerateTasksForVariants ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getTaskGenerationEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getXml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report;
+	public final fun getXml ()Lde/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$FileReport;
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$DirectoryReport : de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report {
+	public fun <init> ()V
+	public abstract fun getDestination ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$FileReport : de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report {
+	public fun <init> ()V
+	public abstract fun getDestination ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report {
-	public fun <init> ()V
-	public abstract fun getDestination ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getDestination ()Lorg/gradle/api/file/FileSystemLocationProperty;
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun invoke (Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/tasks/AndroidJUnit5JacocoReport : org/gradle/testing/jacoco/tasks/JacocoReport {

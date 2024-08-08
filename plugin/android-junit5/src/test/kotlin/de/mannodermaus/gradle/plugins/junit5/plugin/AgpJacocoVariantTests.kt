@@ -212,4 +212,14 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
             }
         }
     }
+
+    @Test
+    fun `can override destination directory of jacoco report`() {
+        val project = createProject().applyJacocoPlugin().build()
+
+        project.junitPlatform.jacocoOptions.html {
+            destination.set(project.layout.buildDirectory.dir("customReports"))
+        }
+        project.evaluate()
+    }
 }

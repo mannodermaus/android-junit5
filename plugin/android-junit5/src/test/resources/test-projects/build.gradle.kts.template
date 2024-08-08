@@ -120,7 +120,7 @@ junitPlatform {
     jacocoOptions {
       html {
         enabled.set(true)
-        destination.set(layout.buildDirectory.file("reports/jacoco/${name}.html"))
+        destination.set(layout.buildDirectory.dir("reports/jacocoCustom"))
       }
     }
   {% endif %}
