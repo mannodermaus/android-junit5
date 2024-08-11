@@ -14,6 +14,7 @@ import java.io.File
 import javax.inject.Inject
 
 public abstract class AndroidJUnitPlatformExtension @Inject constructor(
+    project: Project,
     private val objects: ObjectFactory
 ) : GroovyObjectSupport() {
 
@@ -110,18 +111,23 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
     /**
      * Options for controlling Jacoco reporting
      */
-    @Suppress("CAST_NEVER_SUCCEEDS")
     public val jacocoOptions: JacocoOptions =
         objects.newInstance(JacocoOptions::class.java).apply {
             taskGenerationEnabled.convention(true)
             onlyGenerateTasksForVariants.convention(emptySet())
             excludedClasses.set(listOf("**/R.class", "**/R$*.class", "**/BuildConfig.*"))
+
+            // Just like Jacoco itself, enable only HTML by default.
+            // We have to supply an output location for all reports though,
+            // as keeping this unset would lead to issues
+            // (ref. https://github.com/mannodermaus/android-junit5/issues/346)
+            val defaultReportDir = project.layout.buildDirectory.dir("reports/jacoco")
             html.enabled.convention(true)
-            html.destination.set(null as? File)
-            csv.enabled.convention(true)
-            csv.destination.set(null as? File)
-            xml.enabled.convention(true)
-            xml.destination.set(null as? File)
+            html.destination.convention(defaultReportDir.map { it.dir("html") })
+            csv.enabled.convention(false)
+            csv.destination.convention(defaultReportDir.map { it.file("jacoco.csv") })
+            xml.enabled.convention(false)
+            xml.destination.convention(defaultReportDir.map { it.file("jacoco.xml") })
         }
 
     public fun jacocoOptions(action: Action<JacocoOptions>) {
