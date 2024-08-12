@@ -37,6 +37,14 @@ internal object TestNameFormatter {
             }
         }
 
-        return identifier.displayName.replace("()", "")
+        // Process the display name before handing it out,
+        // maintaining compatibility with the expectations of Android's instrumentation:
+        // - Cut off no-parameter brackets '()'
+        // - Replace any other round brackets with square brackets (for parameterized tests)
+        //   to ensure that logs are displayed in the test results window (ref. #350)
+        return identifier.displayName
+            .replace("()", "")
+            .replace('(', '[')
+            .replace(')', ']')
     }
 }
