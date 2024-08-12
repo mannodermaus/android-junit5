@@ -8,7 +8,7 @@ defaults: &defaults
         GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
 
 cache_key: &cache_key
-  key: jars-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/core/build.gradle.kts" }}-{{ checksum "instrumentation/compose/build.gradle.kts" }}-{{ checksum "instrumentation/extensions/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
+  key: jars-{{ checksum "build-logic/build.gradle.kts" }}-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/core/build.gradle.kts" }}-{{ checksum "instrumentation/compose/build.gradle.kts" }}-{{ checksum "instrumentation/extensions/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
 
 commands:
   construct_signing_key:
@@ -24,14 +24,12 @@ jobs:
       - checkout
       - restore_cache:
           <<: *cache_key
-
       - run:
           name: (Plugin) Build
           command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace
       - run:
           name: (Plugin) Test
-          command: cd plugin && ./gradlew :android-junit5:check --stacktrace
-
+          command: cd plugin && ./gradlew :build-logic:test :android-junit5:check --stacktrace
       - run:
           name: (Instrumentation) Download Dependencies
           command: cd instrumentation && ./gradlew androidDependencies
@@ -48,13 +46,11 @@ jobs:
       - run:
           name: (Instrumentation) Test
           command: cd instrumentation && ./gradlew :core:check :extensions:check :runner:check :compose:check --stacktrace
-
       - save_cache:
           <<: *cache_key
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
-
       - run:
           name: Store Google Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
@@ -63,7 +59,6 @@ jobs:
           command: |
             sudo gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             sudo gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-
       - run:
           name: Test with Firebase Test Lab
           command: >
@@ -82,7 +77,6 @@ jobs:
           command: |
             mkdir test-lab-results
             sudo gsutil -m cp -r -U `sudo gsutil ls gs://cloud-test-${GOOGLE_PROJECT_ID} | tail -1` test-lab-results/ | true
-
       - persist_to_workspace:
           root: ~/root
           paths:
@@ -115,14 +109,14 @@ jobs:
           <<: *cache_key
       - construct_signing_key
       - run:
-          name: (Plugin) Build & Deploy
-          command: |
-            cd plugin
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
-      - run:
           name: (Instrumentation) Build & Deploy
           command: |
             cd instrumentation
+            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
+      - run:
+          name: (Plugin) Build & Deploy
+          command: |
+            cd plugin
             ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
       - store_artifacts:
           path: plugin/android-junit5/build/publications
