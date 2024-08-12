@@ -26,7 +26,7 @@ class TestNameFormatterTests {
 
     @Test
     fun `repeated test`() = runTestWith(HasRepeatedTest::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method(RepetitionInfo)")
+        assertThat(identifier.format(false)).isEqualTo("method[RepetitionInfo]")
         assertThat(identifier.format(true)).isEqualTo("method")
 
         // Inspect individual executions, too
@@ -52,7 +52,7 @@ class TestNameFormatterTests {
 
     @Test
     fun `test template`() = runTestWith(HasTestTemplate::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method(String)")
+        assertThat(identifier.format(false)).isEqualTo("method[String]")
         assertThat(identifier.format(true)).isEqualTo("method")
 
         // Inspect individual executions, too
@@ -65,7 +65,7 @@ class TestNameFormatterTests {
 
     @Test
     fun `parameterized test`() = runTestWith(HasParameterizedTest::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method(String)")
+        assertThat(identifier.format(false)).isEqualTo("method[String]")
         assertThat(identifier.format(true)).isEqualTo("method")
 
         // Inspect individual executions, too

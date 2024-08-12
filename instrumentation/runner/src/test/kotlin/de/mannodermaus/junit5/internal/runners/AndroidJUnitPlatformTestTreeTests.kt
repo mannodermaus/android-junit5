@@ -27,7 +27,7 @@ class AndroidJUnitPlatformTestTreeTests {
         }
 
     @CsvSource(
-        "false, method(RepetitionInfo) - repetition %d of 5",
+        "false, method[RepetitionInfo] - repetition %d of 5",
         "true, method[%d]",
     )
     @ParameterizedTest
@@ -62,7 +62,7 @@ class AndroidJUnitPlatformTestTreeTests {
         }
 
     @CsvSource(
-        "false, method(String) - %s",
+        "false, method[String] - %s",
         "true, method[%d]",
     )
     @ParameterizedTest
@@ -83,7 +83,7 @@ class AndroidJUnitPlatformTestTreeTests {
         }
 
     @CsvSource(
-        "false, method(String) - [%d] %s",
+        "false, method[String] - [%d] %s",
         "true, method[%d]",
     )
     @ParameterizedTest
