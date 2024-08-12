@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+- Use square brackets for parameterized tests to ensure that their logs show correctly in the IDE (#350)
+
 ## 1.5.0 (2024-07-25)
 
 - Fix inheritance hierarchy of `ComposeExtension` to avoid false-positive warning regarding `@RegisterExtension` (#318)
