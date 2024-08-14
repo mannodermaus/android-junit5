@@ -4,7 +4,7 @@ plugins {
   id("com.android.application")
   kotlin("android")
   id("jacoco")
-  id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.currentVersion)
+  id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
 }
 
 val javaVersion = JavaVersion.VERSION_11
