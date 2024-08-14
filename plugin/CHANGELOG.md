@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 1.10.3.0 (2024-08-14)
 - JUnit 5.10.3
 - Updates to the `jacocoOptions` DSL
   - Change the return type of each report type to match Jacoco expectations (html -> Directory; csv & xml -> File)
