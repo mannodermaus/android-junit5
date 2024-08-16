@@ -19,6 +19,11 @@ buildscript {
   repositories {
     google()
     mavenCentral()
+    maven("https://oss.sonatype.org/content/repositories/snapshots") {
+      mavenContent {
+        snapshotsOnly()
+      }
+    }
   }
 }
 
@@ -45,6 +50,11 @@ if (version != "${androidGradlePluginVersion}") {
 repositories {
   google()
   mavenCentral()
+  maven("https://oss.sonatype.org/content/repositories/snapshots") {
+    mavenContent {
+      snapshotsOnly()
+    }
+  }
 }
 
 android {
