@@ -2,16 +2,17 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.9.23"
+        const val kotlin = "1.9.25"
         const val junitJupiter = "5.11.0"
         const val junitVintage = "5.11.0"
         const val junitPlatform = "1.11.0"
 
-        const val composeBom = "2024.04.00"
-        const val androidXTest = "1.6.1"
+        const val composeBom = "2024.08.00"
         const val androidXTestAnnotation = "1.0.1"
-        const val androidXTestMonitor = "1.7.1"
-        const val composeCompiler = "1.5.11"
+        const val androidXTestCore = "1.6.1"
+        const val androidXTestMonitor = "1.7.2"
+        const val androidXTestRunner = "1.6.2"
+        const val composeCompiler = "1.5.15"
 
         const val activityCompose = "1.9.0"
         const val apiGuardian = "1.1.2"
@@ -75,9 +76,9 @@ object libs {
     const val robolectric = "org.robolectric:robolectric:${versions.robolectric}"
 
     const val androidXTestAnnotation = "androidx.test:annotation:${versions.androidXTestAnnotation}"
-    const val androidXTestCore = "androidx.test:core:${versions.androidXTest}"
-    const val androidXTestRunner = "androidx.test:runner:${versions.androidXTest}"
+    const val androidXTestCore = "androidx.test:core:${versions.androidXTestCore}"
     const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTestMonitor}"
+    const val androidXTestRunner = "androidx.test:runner:${versions.androidXTestRunner}"
     const val espressoCore = "androidx.test.espresso:espresso-core:${versions.espresso}"
 
     const val composeUiTest = "androidx.compose.ui:ui-test"
