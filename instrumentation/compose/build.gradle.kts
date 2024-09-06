@@ -87,6 +87,10 @@ dependencies {
   api(libs.composeUiTestJUnit4)
   implementation(libs.composeUiTestManifest)
 
+  testImplementation(libs.junitJupiterApi)
+  testImplementation(libs.junitJupiterParams)
+  testRuntimeOnly(libs.junitJupiterEngine)
+
   androidTestImplementation(libs.junitJupiterApi)
   androidTestImplementation(libs.junitJupiterParams)
   androidTestImplementation(libs.espressoCore)

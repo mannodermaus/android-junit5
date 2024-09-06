@@ -7,7 +7,7 @@ object libs {
         const val junitVintage = "5.11.0"
         const val junitPlatform = "1.11.0"
 
-        const val composeBom = "2024.08.00"
+        const val composeBom = "2024.09.00"
         const val androidXTestAnnotation = "1.0.1"
         const val androidXTestCore = "1.6.1"
         const val androidXTestMonitor = "1.7.2"
