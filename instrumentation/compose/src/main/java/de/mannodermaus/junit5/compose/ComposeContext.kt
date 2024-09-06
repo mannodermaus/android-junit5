@@ -31,7 +31,7 @@ public sealed interface ComposeContext : SemanticsNodeInteractionsProvider {
     public fun waitUntil(timeoutMillis: Long = 1_000, condition: () -> Boolean)
     public fun waitUntil(
         conditionDescription: String,
-        timeoutMillis: Long = 1_000,
+        timeoutMillis: Long = 1_000L,
         condition: () -> Boolean
     )
 
