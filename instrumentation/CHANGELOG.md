@@ -4,6 +4,7 @@ Change Log
 ## Unreleased
 
 - Use square brackets for parameterized tests to ensure that their logs show correctly in the IDE (#350)
+- Add missing API methods from JUnit 4's ComposeTestRule to JUnit 5's ComposeContext (#353)
 
 ## 1.5.0 (2024-07-25)
 
