@@ -84,4 +84,8 @@ object libs {
     const val composeUiTest = "androidx.compose.ui:ui-test"
     const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4"
     const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest"
+
+    // Documentation
+    // For the latest version refer to GitHub repo neboskreb/instant-task-executor-extension
+    const val instantTaskExecutorExtension = "io.github.neboskreb:instant-task-executor-extension:1.0.0"
 }
