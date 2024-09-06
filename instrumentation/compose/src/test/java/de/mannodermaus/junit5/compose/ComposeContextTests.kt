@@ -25,7 +25,7 @@ class ComposeContextTests {
         try {
             ComposeContext::class.java.getDeclaredMethod(method.name, *method.parameterTypes)
         } catch (ignored: NoSuchMethodException) {
-            fail("ComposeContext does not define method ${method.name}(${method.parameterTypes.joinToString { it.name }})")
+            fail("ComposeContext does not define method $method")
         }
     }
 }
