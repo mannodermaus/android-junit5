@@ -28,7 +28,7 @@ public sealed interface ComposeContext : SemanticsNodeInteractionsProvider {
     public fun <T> runOnIdle(action: () -> T): T
     public fun waitForIdle()
     public suspend fun awaitIdle()
-    public fun waitUntil(timeoutMillis: Long = 1_000, condition: () -> Boolean)
+    public fun waitUntil(timeoutMillis: Long = 1_000L, condition: () -> Boolean)
     public fun waitUntil(
         conditionDescription: String,
         timeoutMillis: Long = 1_000L,
