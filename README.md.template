@@ -235,6 +235,7 @@ At this time, Google hasn't shared any immediate plans to bring first-party supp
 - [JUnit 5 support (github.com/android/android-test)](https://github.com/android/android-test/issues/224)
 
 ## Support for @Rules
+
 Since JUnit 5 has replaced the `@Rule` mechanism with Extensions, the following artifacts help bridge the gap until Android officially transitions to JUnit 5.
 
 ### InstantExecutorExtension
