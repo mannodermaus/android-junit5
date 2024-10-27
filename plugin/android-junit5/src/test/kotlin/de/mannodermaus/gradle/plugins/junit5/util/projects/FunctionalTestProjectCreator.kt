@@ -61,6 +61,9 @@ class FunctionalTestProjectCreator(
     projectFolder.mkdirs()
 
     // Set up static files
+    File(projectFolder, "local.properties").bufferedWriter().use { file ->
+      file.write("sdk.dir = ${environment.androidSdkFolder.absolutePath}")
+    }
     File(projectFolder, "gradle.properties").bufferedWriter().use { file ->
       file.write("android.useAndroidX = true")
     }
