@@ -16,8 +16,8 @@ enum class SupportedAgp(
     AGP_8_5("8.5.2", gradle = "8.7"),
     AGP_8_6("8.6.1", gradle = "8.7"),
     AGP_8_7("8.7.3", gradle = "8.9"),
-    AGP_8_8("8.8.0-rc01", gradle = "8.10.2"),
-    AGP_8_9("8.9.0-alpha05", gradle = "8.11.1"),
+    AGP_8_8("8.8.0-rc02", gradle = "8.10.2"),
+    AGP_8_9("8.9.0-alpha06", gradle = "8.11.1"),
     ;
 
     companion object {
