@@ -59,7 +59,7 @@ class TestEnvironment {
           TestedAgp(
               shortVersion = values[0],
               version = values[1],
-              requiresGradle = values[2].run { if (isEmpty()) null else this }
+              requiresGradle = values[2].ifEmpty { null }
           )
         }
   }

@@ -121,7 +121,8 @@ class FunctionalTests {
     private fun List<TestedAgp>.filterAgpVersions(): List<TestedAgp> =
         if (testedAgpVersions.isEmpty()) {
             // Nothing to do, exercise functional tests on all AGP versions
-            this
+            // (but in reverse order, so that the newest AGP is tested first)
+            reversed()
         } else {
             filter { agp ->
                 testedAgpVersions.any { it == agp.shortVersion }
