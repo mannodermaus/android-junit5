@@ -13,6 +13,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
@@ -216,7 +217,7 @@ private fun Node.appendProjectDependencyCoordinates(dep: ProjectDependency) {
     val projectName = dep.name
 
     val config = Artifacts.Instrumentation::class.java
-        .getMethod("get${projectName.capitalized()}")
+        .getMethod("get${projectName.uppercaseFirstChar()}")
         .invoke(Artifacts.Instrumentation)
         as Deployed
 
