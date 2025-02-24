@@ -91,7 +91,7 @@ object Artifacts {
         platform = Java,
         groupId = "de.mannodermaus.gradle.plugins",
         artifactId = "android-junit5",
-        currentVersion = "1.11.4.0-SNAPSHOT",
+        currentVersion = "1.12.0.0-SNAPSHOT",
         latestStableVersion = "1.11.3.0",
         description = "Unit Testing with JUnit 5 for Android."
     )
@@ -101,7 +101,7 @@ object Artifacts {
      */
     object Instrumentation {
         const val groupId = "de.mannodermaus.junit5"
-        private const val currentVersion = "1.6.1-SNAPSHOT"
+        private const val currentVersion = "1.7.0-SNAPSHOT"
         private const val latestStableVersion = "1.6.0"
 
         val Core = Deployed(
@@ -156,6 +156,7 @@ class DeployedCredentials(private val project: Project) {
         //
         // * Local development:
         //      Stored in local.properties file on the machine
+        //      (in the root folder of the project – the one containing "plugin/" and "instrumentation/")
         // * CI Server:
         //      Stored in environment variables before launch
         val properties = Properties().apply {

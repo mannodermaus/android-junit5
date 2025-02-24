@@ -15,6 +15,7 @@ import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.kotlin.dsl.withGroovyBuilder
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
 
@@ -111,6 +112,12 @@ fun Project.configureDeployment(deployConfig: Deployed) {
     ext["signing.secretKeyRingFile"] = credentials.signingKeyRingFile
     signing {
         sign(publishing.publications)
+    }
+
+    // Connect signing task to artifact-producing task
+    // (build an AAR for Android modules, assemble a JAR for other modules)
+    tasks.withType(Sign::class.java).configureEach {
+        dependsOn(if (isAndroid) "bundleReleaseAar" else "assemble")
     }
 }
 
