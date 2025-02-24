@@ -148,13 +148,15 @@ private fun AndroidJUnitPlatformExtension.attachDependencies(
     includeRunner: Boolean,
 ) {
     if (project.usesJUnitJupiterIn(configurationName)) {
+        val runtimeOnlyConfigurationName = configurationName.replace("Implementation", "RuntimeOnly")
         val version = instrumentationTests.version.get()
 
+        project.dependencies.add(runtimeOnlyConfigurationName, Libraries.junitPlatformLauncher)
         project.dependencies.add(configurationName, "${Libraries.instrumentationCore}:$version")
 
         if (includeRunner) {
             project.dependencies.add(
-                configurationName.replace("Implementation", "RuntimeOnly"),
+                runtimeOnlyConfigurationName,
                 "${Libraries.instrumentationRunner}:$version",
             )
         }
