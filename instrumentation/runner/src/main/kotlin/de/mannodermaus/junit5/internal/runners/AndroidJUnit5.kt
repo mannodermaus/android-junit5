@@ -2,6 +2,7 @@ package de.mannodermaus.junit5.internal.runners
 
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
+import de.mannodermaus.junit5.internal.discovery.EmptyTestPlan
 import de.mannodermaus.junit5.internal.runners.notification.ParallelRunNotifier
 import org.junit.platform.commons.JUnitException
 import org.junit.platform.engine.ConfigurationParameters
@@ -25,19 +26,6 @@ internal class AndroidJUnit5(
     private val testClass: Class<*>,
     paramsSupplier: () -> AndroidJUnit5RunnerParams = AndroidJUnit5RunnerParams.Companion::create,
 ) : Runner() {
-    private companion object {
-        private val emptyConfigurationParameters = object : ConfigurationParameters {
-            override fun get(key: String?) = Optional.empty<String>()
-            override fun getBoolean(key: String?) = Optional.empty<Boolean>()
-            override fun keySet() = emptySet<String>()
-
-            @Deprecated("Deprecated in Java", ReplaceWith("keySet().size"))
-            override fun size() = 0
-        }
-
-        private val emptyTestPlan = TestPlan.from(emptyList(), emptyConfigurationParameters)
-    }
-
     private val launcher = LauncherFactory.create()
     private val testTree by lazy { generateTestTree(paramsSupplier()) }
 
@@ -80,7 +68,7 @@ internal class AndroidJUnit5(
             // or anything else not present in the Android runtime).
             // Log those to console, but discard them from being considered at all
             e.printStackTrace()
-            emptyTestPlan
+            EmptyTestPlan
         }
 
         return AndroidJUnitPlatformTestTree(
