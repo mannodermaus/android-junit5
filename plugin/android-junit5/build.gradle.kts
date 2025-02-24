@@ -114,6 +114,7 @@ dependencies {
     testImplementation(libs.junitJupiterApi)
     testImplementation(libs.junitJupiterParams)
     testRuntimeOnly(libs.junitJupiterEngine)
+    testRuntimeOnly(libs.junitPlatformLauncher)
 }
 
 project.configureDeployment(Artifacts.Plugin)
