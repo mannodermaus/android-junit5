@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+- JUnit 5.12.0
+- Add dependency on JUnit Platform Launcher to runtime classpath, accommodating an upstream change
 
 ## 1.11.3.0 (2024-12-23)
 - JUnit 5.11.3

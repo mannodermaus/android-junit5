@@ -3,9 +3,9 @@
 object libs {
     object versions {
         const val kotlin = "1.9.25"
-        const val junitJupiter = "5.11.4"
-        const val junitVintage = "5.11.4"
-        const val junitPlatform = "1.11.4"
+        const val junitJupiter = "5.12.0"
+        const val junitVintage = "5.12.0"
+        const val junitPlatform = "1.12.0"
 
         const val composeBom = "2024.09.00"
         const val androidXTestAnnotation = "1.0.1"
@@ -55,6 +55,7 @@ object libs {
     const val junitJupiterEngine = "org.junit.jupiter:junit-jupiter-engine:${versions.junitJupiter}"
     const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:${versions.junitVintage}"
     const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
+    const val junitPlatformLauncher = "org.junit.platform:junit-platform-launcher:${versions.junitPlatform}"
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
     const val apiguardianApi = "org.apiguardian:apiguardian-api:${versions.apiGuardian}"
 

@@ -166,6 +166,10 @@ fun Copy.configureCreateVersionClassTask(
                 // Find an appropriate version of the instrumentation library,
                 // depending on the version of how the plugin is configured
                 "INSTRUMENTATION_VERSION" to instrumentationVersion,
+
+                // JUnit 5.12+ requires the platform launcher on the runtime classpath;
+                // to prevent issues with version mismatching, the plugin applies this for users
+                "JUNIT_PLATFORM_LAUNCHER" to libs.junitPlatformLauncher
             )
         ), ReplaceTokens::class.java
     )

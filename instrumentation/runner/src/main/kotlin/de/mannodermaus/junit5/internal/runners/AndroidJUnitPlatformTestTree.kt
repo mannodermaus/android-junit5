@@ -137,7 +137,8 @@ internal class AndroidJUnitPlatformTestTree(
 
         return if (identifier.isTest || identifier.isDynamicTest) {
             Description.createTestDescription(
-                /* className = */ testPlan.getParent(identifier)
+                /* className = */
+                testPlan.getParent(identifier)
                     .map(nameExtractor)
                     .orElse("<unrooted>"),
                 /* name = */ name,
@@ -180,7 +181,11 @@ internal class AndroidJUnitPlatformTestTree(
      * Custom drop-in TestPlan for Android purposes.
      */
     private class ModifiedTestPlan(val delegate: TestPlan) :
-        TestPlan(delegate.containsTests(), delegate.configurationParameters) {
+        TestPlan(
+            /* containsTests = */ delegate.containsTests(),
+            /* configurationParameters = */ delegate.configurationParameters,
+            /* outputDirectoryProvider = */ delegate.outputDirectoryProvider
+        ) {
 
         fun getRealParent(child: TestIdentifier?): Optional<TestIdentifier> {
             // Because the overridden "getParent()" from the superclass is modified,

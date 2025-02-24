@@ -3,6 +3,9 @@ Change Log
 
 ## Unreleased
 
+- **This version requires (at least) android-junit5 1.12.0.0 and JUnit 5.12.0.**
+- Migrate to new TestPlan API in JUnit 5.12, which changed in a binary-incompatible fashion
+
 ## 1.6.0 (2024-10-05)
 
 - Use square brackets for parameterized tests to ensure that their logs show correctly in the IDE (#350)
