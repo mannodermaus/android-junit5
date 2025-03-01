@@ -101,7 +101,7 @@ object Artifacts {
      */
     object Instrumentation {
         const val groupId = "de.mannodermaus.junit5"
-        private const val currentVersion = "1.7.0-SNAPSHOT"
+        private const val currentVersion = "1.7.0"
         private const val latestStableVersion = "1.6.0"
 
         val Core = Deployed(
