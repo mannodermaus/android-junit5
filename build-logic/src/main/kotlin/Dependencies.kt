@@ -2,30 +2,30 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.9.25"
+        const val kotlin = "1.9.25" // Can only once minimum supported AGP is >= 8.2
         const val junitJupiter = "5.12.0"
         const val junitVintage = "5.12.0"
         const val junitPlatform = "1.12.0"
 
-        const val composeBom = "2024.09.00"
+        const val composeBom = "2025.03.00"
         const val androidXTestAnnotation = "1.0.1"
         const val androidXTestCore = "1.6.1"
         const val androidXTestMonitor = "1.7.2"
         const val androidXTestRunner = "1.6.2"
         const val composeCompiler = "1.5.15"
 
-        const val activityCompose = "1.9.0"
+        const val activityCompose = "1.10.1"
         const val apiGuardian = "1.1.2"
-        const val coroutines = "1.8.1"
+        const val coroutines = "1.8.1" // Can only update once minimum supported AGP is >= 8.2
         const val dokka = "1.9.20"
         const val espresso = "3.6.1"
         const val javaSemver = "0.10.2"
         const val junit4 = "4.13.2"
         const val konfToml = "1.1.2"
         const val korte = "2.4.12"
-        const val mockitoCore = "5.12.0"
+        const val mockitoCore = "5.16.0"
         const val mockitoKotlin = "5.4.0"
-        const val robolectric = "4.13"
+        const val robolectric = "4.14.1"
         const val shadow = "8.1.1"
         const val truth = "1.4.4"
     }
