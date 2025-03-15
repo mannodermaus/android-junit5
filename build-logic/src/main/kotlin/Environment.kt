@@ -40,14 +40,13 @@ enum class SupportedAgp(
 }
 
 object Android {
-    const val compileSdkVersion = 34
-    const val targetSdkVersion = 34
+    const val compileSdkVersion = 35
+    const val targetSdkVersion = 35
     const val sampleMinSdkVersion = 21
     val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
     val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Android).minSdk
     val testComposeMinSdkVersion = (Artifacts.Instrumentation.Compose.platform as Android).minSdk
 }
-
 
 sealed class Platform(val name: String) {
     object Java : Platform("java")

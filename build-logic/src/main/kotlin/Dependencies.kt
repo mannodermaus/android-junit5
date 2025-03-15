@@ -8,6 +8,7 @@ object libs {
         const val junitPlatform = "1.12.0"
 
         const val composeBom = "2025.03.00"
+        const val androidXMultidex = "2.0.1"
         const val androidXTestAnnotation = "1.0.1"
         const val androidXTestCore = "1.6.1"
         const val androidXTestMonitor = "1.7.2"
@@ -76,6 +77,7 @@ object libs {
     const val truthJava8Extensions = "com.google.truth.extensions:truth-java8-extension:${versions.truth}"
     const val robolectric = "org.robolectric:robolectric:${versions.robolectric}"
 
+    const val androidXMultidex = "androidx.multidex:multidex:${versions.androidXMultidex}"
     const val androidXTestAnnotation = "androidx.test:annotation:${versions.androidXTestAnnotation}"
     const val androidXTestCore = "androidx.test:core:${versions.androidXTestCore}"
     const val androidXTestMonitor = "androidx.test:monitor:${versions.androidXTestMonitor}"

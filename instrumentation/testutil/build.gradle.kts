@@ -14,7 +14,8 @@ android {
   compileSdk = Android.compileSdkVersion
 
   defaultConfig {
-    minSdk = 4
+    minSdk = 19
+    multiDexEnabled = true
   }
 
   compileOptions {
@@ -58,6 +59,7 @@ tasks.withType<Test> {
 
 dependencies {
   implementation(project(":testutil-reflect"))
+  implementation(libs.androidXMultidex)
 
   api(libs.androidXTestMonitor)
   api(libs.truth)
