@@ -18,7 +18,7 @@ enum class SupportedAgp(
     AGP_8_7("8.7.3", gradle = "8.9"),
     AGP_8_8("8.8.2", gradle = "8.10.2"),
     AGP_8_9("8.9.0", gradle = "8.11.1"),
-    AGP_8_10("8.10.0-alpha08", gradle = "8.11.1"),
+    AGP_8_10("8.10.0-alpha07", gradle = "8.11.1"),
     ;
 
     companion object {
@@ -40,14 +40,13 @@ enum class SupportedAgp(
 }
 
 object Android {
-    const val compileSdkVersion = 34
-    const val targetSdkVersion = 34
+    const val compileSdkVersion = 35
+    const val targetSdkVersion = 35
     const val sampleMinSdkVersion = 21
     val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
     val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Android).minSdk
     val testComposeMinSdkVersion = (Artifacts.Instrumentation.Compose.platform as Android).minSdk
 }
-
 
 sealed class Platform(val name: String) {
     object Java : Platform("java")
@@ -91,7 +90,7 @@ object Artifacts {
         platform = Java,
         groupId = "de.mannodermaus.gradle.plugins",
         artifactId = "android-junit5",
-        currentVersion = "1.12.0.1-SNAPSHOT",
+        currentVersion = "1.12.1.0-SNAPSHOT",
         latestStableVersion = "1.12.0.0",
         description = "Unit Testing with JUnit 5 for Android."
     )
@@ -101,7 +100,7 @@ object Artifacts {
      */
     object Instrumentation {
         const val groupId = "de.mannodermaus.junit5"
-        private const val currentVersion = "1.7.1-SNAPSHOT"
+        private const val currentVersion = "1.8.0-SNAPSHOT"
         private const val latestStableVersion = "1.7.0"
 
         val Core = Deployed(

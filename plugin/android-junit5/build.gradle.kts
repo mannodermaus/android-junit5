@@ -87,10 +87,6 @@ sourceSets {
         kotlin.srcDir(genFolder)
     }
 }
-tasks.withType<DokkaTask> {
-    // Connect additional source folder to Dokka generation task
-    dependsOn(versionClassTask)
-}
 
 // ------------------------------------------------------------------------------------------------
 // Dependency Definitions
@@ -120,7 +116,7 @@ dependencies {
 project.configureDeployment(Artifacts.Plugin)
 
 // Register source-processing tasks as dependants of the custom source generation task
-listOf("compileKotlin", "androidSourcesJar", "dokkaJavadoc").forEach { taskName ->
+listOf("compileKotlin", "androidSourcesJar", "dokkaGeneratePublicationHtml").forEach { taskName ->
     tasks.named(taskName).configure {
         dependsOn(versionClassTask)
     }
