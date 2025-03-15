@@ -16,9 +16,9 @@ internal fun requireGradle(version: String, message: () -> String) {
 }
 
 internal fun requireVersion(actual: String, required: String, message: () -> String) {
-    val actualVersion = Version.valueOf(actual)
-    val requiredVersion = Version.valueOf(required)
-    require(actualVersion.greaterThanOrEqualTo(requiredVersion)) {
+    val actualVersion = Version.parse(actual)
+    val requiredVersion = Version.parse(required)
+    require(actualVersion.isHigherThanOrEquivalentTo(requiredVersion)) {
         throw GradleException(message())
     }
 }

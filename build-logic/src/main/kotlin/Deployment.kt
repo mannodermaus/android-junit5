@@ -11,8 +11,9 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.plugins.signing.Sign
@@ -43,7 +44,7 @@ fun Project.configureDeployment(deployConfig: Deployed) {
     }
 
     // Create artifact tasks
-    val androidSourcesJar = tasks.create("androidSourcesJar", Jar::class.java) {
+    val androidSourcesJar = tasks.register<Jar>("androidSourcesJar") {
         archiveClassifier.set("sources")
 
         if (isAndroid) {
@@ -55,9 +56,12 @@ fun Project.configureDeployment(deployConfig: Deployed) {
         }
     }
 
-    val javadocJar = tasks.create("javadocJar", Jar::class.java) {
-        from(tasks.getByName("dokkaHtml"))
+    val javadocJar = tasks.register<Jar>("javadocJar") {
         archiveClassifier.set("javadoc")
+
+        // Connect to Dokka for generation of docs
+        from(layout.buildDirectory.dir("dokka/html"))
+        dependsOn("dokkaGenerate")
     }
 
     artifacts {
@@ -158,8 +162,8 @@ private fun MavenPublication.applyPublicationDetails(
         project: Project,
         deployConfig: Deployed,
         isAndroid: Boolean,
-        androidSourcesJar: Jar,
-        javadocJar: Jar
+        androidSourcesJar: TaskProvider<Jar>,
+        javadocJar: TaskProvider<Jar>
 ) = also {
     groupId = deployConfig.groupId
     artifactId = deployConfig.artifactId

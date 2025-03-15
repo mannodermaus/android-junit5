@@ -17,7 +17,7 @@ object libs {
         const val activityCompose = "1.10.1"
         const val apiGuardian = "1.1.2"
         const val coroutines = "1.8.1" // Can only update once minimum supported AGP is >= 8.2
-        const val dokka = "1.9.20"
+        const val dokka = "2.0.0"
         const val espresso = "3.6.1"
         const val javaSemver = "0.10.2"
         const val junit4 = "4.13.2"
