@@ -58,9 +58,15 @@ repositories {
 }
 
 android {
-  val compileSdk: String = "{{ COMPILE_SDK_VERSION }}"
   val minSdk: Int = {{ MIN_SDK_VERSION }}
-  val targetSdk: Int = {{ TARGET_SDK_VERSION }}
+
+  {% if OVERRIDE_SDK_VERSION %}
+    val compileSdk: String = "android-{{ OVERRIDE_SDK_VERSION }}"
+    val targetSdk: Int = {{ OVERRIDE_SDK_VERSION }}
+  {% else %}
+    val compileSdk: String = "{{ COMPILE_SDK_VERSION }}"
+    val targetSdk: Int = {{ TARGET_SDK_VERSION }}
+  {% endif %}
 
   compileSdkVersion("${compileSdk}")
 

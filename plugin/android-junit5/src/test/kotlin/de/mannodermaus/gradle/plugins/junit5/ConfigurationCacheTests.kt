@@ -69,7 +69,7 @@ class ConfigurationCacheTests {
     private fun runGradle(project: File, task: String, expectSuccess: Boolean) =
         GradleRunner.create()
             .withProjectDir(project)
-            .apply { agp.requiresGradle?.let(::withGradleVersion) }
+            .withGradleVersion(agp.requiresGradle)
             .withArguments("--configuration-cache", "--stacktrace", task)
             .withPrunedPluginClasspath(agp)
             .run {

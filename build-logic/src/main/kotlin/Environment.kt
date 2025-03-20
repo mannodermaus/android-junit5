@@ -6,9 +6,10 @@ import java.util.Properties
 
 enum class SupportedAgp(
     val version: String,
-    val gradle: String? = null
+    val gradle: String,
+    val compileSdk: Int? = null
 ) {
-    AGP_8_0("8.0.2", gradle = "8.0"),
+    AGP_8_0("8.0.2", gradle = "8.0", compileSdk = 33),
     AGP_8_1("8.1.4", gradle = "8.0"),
     AGP_8_2("8.2.2", gradle = "8.2"),
     AGP_8_3("8.3.2", gradle = "8.4"),
