@@ -34,21 +34,28 @@ fun Project.configureTestResources() {
                 "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
                 // Collect all supported AGP versions into a single string.
-                // This string is delimited with semicolons, and each of the separated values itself is a 3-tuple.
+                // This string is delimited with semicolons, and each of the separated values itself is a 4-tuple.
                 //
                 // Example:
-                // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4
+                // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4;3.7|3.7.0|8.0|33
                 //
                 // Can be parsed into this list of values:
                 // |___> Short: "3.5"
                 //       Full: "3.5.3"
-                //       Gradle Requirement: null
+                //       Gradle Requirement: ""
+                //       Compile SDK: null
                 //
                 // |___> Short: "3.6"
                 //       Full: "3.6.3"
                 //       Gradle Requirement: "6.4"
+                //       Compile SDK: null
+                //
+                // |___> Short: "3.7"
+                //       Full: "3.7.0"
+                //       Gradle Requirement: "8.0"
+                //       Compile SDK: 33
                 "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator = ";") { plugin ->
-                    "${plugin.shortVersion}|${plugin.version}|${plugin.gradle ?: ""}"
+                    "${plugin.shortVersion}|${plugin.version}|${plugin.gradle}|${plugin.compileSdk ?: ""}"
                 }
         )
 

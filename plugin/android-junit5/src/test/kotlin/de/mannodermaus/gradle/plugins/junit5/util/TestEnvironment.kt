@@ -51,7 +51,7 @@ class TestEnvironment {
     junit5AndroidLibsVersion = envProps.getProperty(JUNIT5_ANDROID_PROP_NAME)
 
     // Each entry in this string is separated by semicolon.
-    // Within each entry, the pipe ("|") divides it into three properties
+    // Within each entry, the pipe ("|") divides it into four properties
     val agpVersionsString = envProps.getProperty(AGP_VERSIONS_PROP_NAME)
     supportedAgpVersions = agpVersionsString.split(";")
         .map { entry -> entry.split("|") }
@@ -59,7 +59,8 @@ class TestEnvironment {
           TestedAgp(
               shortVersion = values[0],
               version = values[1],
-              requiresGradle = values[2].ifEmpty { null }
+              requiresGradle = values[2],
+              requiresCompileSdk = values[3].toIntOrNull()
           )
         }
   }

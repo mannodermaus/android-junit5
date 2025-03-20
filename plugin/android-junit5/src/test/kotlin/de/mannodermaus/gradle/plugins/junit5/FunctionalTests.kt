@@ -72,7 +72,12 @@ class FunctionalTests {
                 projectCreator.allSpecs.filterSpecs().map { spec ->
                     dynamicTest(spec.name) {
                         // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
-                        println("AGP: ${agp.version}, Project: ${spec.name}, Forced Gradle: ${agp.requiresGradle ?: "no"}")
+                        println(buildList {
+                            add("AGP: ${agp.version}")
+                            add("Project: ${spec.name}")
+                            add("Gradle: ${agp.requiresGradle}")
+                            agp.requiresCompileSdk?.let { add("SDK: $it") }
+                        }.joinToString(", "))
 
                         // Create a virtual project with the given settings & AGP version.
                         // This call will throw a TestAbortedException if the spec is not eligible for this version,
@@ -147,11 +152,7 @@ class FunctionalTests {
         }
 
         return GradleRunner.create()
-            .apply {
-                if (agpVersion.requiresGradle != null) {
-                    withGradleVersion(agpVersion.requiresGradle)
-                }
-            }
+            .withGradleVersion(agpVersion.requiresGradle)
             .withArguments(arguments)
             .withPrunedPluginClasspath(agpVersion)
     }
