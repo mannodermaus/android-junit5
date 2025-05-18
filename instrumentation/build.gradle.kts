@@ -7,6 +7,7 @@ buildscript {
   dependencies {
     classpath(libs.plugins.kotlin)
     classpath(libs.plugins.dokka)
+    classpath(libs.plugins.composeCompiler)
     classpath(libs.plugins.android(SupportedAgp.newestStable))
   }
 }

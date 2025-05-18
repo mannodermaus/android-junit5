@@ -13,7 +13,6 @@ object libs {
         const val androidXTestCore = "1.6.1"
         const val androidXTestMonitor = "1.7.2"
         const val androidXTestRunner = "1.6.2"
-        const val composeCompiler = "1.5.15"
 
         const val activityCompose = "1.10.1"
         const val apiGuardian = "1.1.2"
@@ -33,6 +32,7 @@ object libs {
 
     object plugins {
         fun android(version: SupportedAgp) = "com.android.tools.build:gradle:${version.version}"
+        const val composeCompiler = "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${versions.kotlin}"
         const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
         const val shadow = "com.github.johnrengelman:shadow:${libs.versions.shadow}"
         const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:${libs.versions.dokka}"
