@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+- Compile with SDK 35
+
 ## 1.7.0 (2025-03-01)
 
 - **This version requires (at least) android-junit5 1.12.0.0 and JUnit 5.12.0.**
