@@ -22,6 +22,8 @@ object libs {
         const val javaSemver = "0.10.2"
         const val junit4 = "4.13.2"
         const val konfToml = "1.1.2"
+        const val kotlinxBinaryCompatibilityValidator = "0.17.0"
+        const val nexusPublish = "2.0.0"
         const val korte = "2.4.12"
         const val mockitoCore = "5.16.0"
         const val mockitoKotlin = "5.4.0"
