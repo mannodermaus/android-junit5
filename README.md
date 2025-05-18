@@ -22,20 +22,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```kotlin
   plugins {
-    id("de.mannodermaus.android-junit5") version "1.12.0.0"
+    id("de.mannodermaus.android-junit5") version "1.12.1.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.12.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.12.1")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.12.0")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.12.1")
   }
   ```
 </details>
@@ -45,20 +45,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```groovy
   plugins {
-    id "de.mannodermaus.android-junit5" version "1.12.0.0"
+    id "de.mannodermaus.android-junit5" version "1.12.1.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.12.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.1"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.12.1"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.12.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.12.1"
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "junit:junit:4.13.2"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.12.0"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.12.1"
   }
   ```
 </details>
@@ -76,7 +76,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle.kts:
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.12.0.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.12.1.0")
     }
   }
 
@@ -94,7 +94,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle:
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.12.0.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.12.1.0"
     }
   }
 
@@ -124,7 +124,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
   
   ```kotlin
   dependencies {
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.12.0")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
   }
   ```
 </details>
@@ -134,7 +134,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
 
   ```groovy
   dependencies {
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.12.0"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.12.1"
   }
   ```
 </details>
@@ -285,7 +285,7 @@ before filing an issue with the latest one.
 
 |Your AGP Version|Suggested JUnit5 Plugin Version|
 |---|---|
-|`>= 8.0.0`|`1.12.0.0`|
+|`>= 8.0.0`|`1.12.1.0`|
 |`7.0.0` - `7.4.2`|`1.10.0.0`|
 |`4.0.0` - `4.2.2`|`1.8.2.1`|
 |`3.5.0` - `3.6.4`|`1.7.1.1`|
