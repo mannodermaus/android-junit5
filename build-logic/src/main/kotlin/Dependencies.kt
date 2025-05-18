@@ -2,10 +2,10 @@
 
 object libs {
     object versions {
-        const val kotlin = "1.9.25" // Can only once minimum supported AGP is >= 8.2
-        const val junitJupiter = "5.12.2"
-        const val junitVintage = "5.12.2"
-        const val junitPlatform = "1.12.2"
+        const val kotlin = "2.1.21"
+        const val junitJupiter = "5.13.0-RC1"
+        const val junitVintage = "5.13.0-RC1"
+        const val junitPlatform = "1.13.0-RC1"
 
         const val composeBom = "2025.03.00"
         const val androidXMultidex = "2.0.1"
@@ -17,7 +17,7 @@ object libs {
 
         const val activityCompose = "1.10.1"
         const val apiGuardian = "1.1.2"
-        const val coroutines = "1.8.1" // Can only update once minimum supported AGP is >= 8.2
+        const val coroutines = "1.10.2"
         const val dokka = "2.0.0"
         const val espresso = "3.6.1"
         const val javaSemver = "0.10.2"
