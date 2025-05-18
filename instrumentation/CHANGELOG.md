@@ -4,6 +4,7 @@ Change Log
 ## Unreleased
 
 - Compile with SDK 35
+- Update to Kotlin 2.x
 
 ## 1.7.0 (2025-03-01)
 

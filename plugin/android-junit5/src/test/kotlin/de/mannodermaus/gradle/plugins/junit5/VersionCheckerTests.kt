@@ -20,14 +20,18 @@ class VersionCheckerTests {
             "7.0.0-rc01, false",
             "7.0.0, false",
             "8.0.0-beta01, false",
-            "8.0.0, true",
-            "8.0.1, true",
-            "8.0.1-alpha01, true",
-            "8.1.0, true",
-            "8.1.0-beta01, true",
+            "8.0.0, false",
+            "8.0.1, false",
+            "8.0.1-alpha01, false",
+            "8.1.0, false",
+            "8.1.0-beta01, false",
             "8.2.0, true",
             "8.3.0-rc01, true",
             "8.4.0-alpha05, true",
+            "8.10.1-alpha01, true",
+            "8.10.0, true",
+            "8.11.0-beta01, true",
+            "8.11.0, true",
     )
     @ParameterizedTest
     fun `check AGP compatibility`(version: String, compatible: Boolean) {

@@ -2,6 +2,9 @@ Change Log
 ==========
 
 ## Unreleased
+- JUnit 5.13.0
+- Update to Kotlin 2.x
+- Raise minimum supported versions for AGP and Gradle to 8.2.x and 8.2, respectively
 
 ## 1.12.2.0 (2025-05-18)
 - JUnit 5.12.2

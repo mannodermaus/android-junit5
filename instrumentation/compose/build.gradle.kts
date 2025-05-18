@@ -6,6 +6,7 @@ plugins {
   kotlin("android")
   id("explicit-api-mode")
   id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
+  id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val javaVersion = JavaVersion.VERSION_11
@@ -34,10 +35,6 @@ android {
 
   kotlinOptions {
     jvmTarget = javaVersion.toString()
-  }
-
-  composeOptions {
-    kotlinCompilerExtensionVersion = libs.versions.composeCompiler
   }
 
   testOptions {

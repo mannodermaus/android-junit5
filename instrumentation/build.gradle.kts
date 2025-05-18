@@ -1,12 +1,13 @@
 plugins {
-  id("io.github.gradle-nexus.publish-plugin").version("2.0.0")
-  id("org.jetbrains.kotlinx.binary-compatibility-validator").version("0.14.0")
+  id("io.github.gradle-nexus.publish-plugin").version(libs.versions.nexusPublish)
+  id("org.jetbrains.kotlinx.binary-compatibility-validator").version(libs.versions.kotlinxBinaryCompatibilityValidator)
 }
 
 buildscript {
   dependencies {
     classpath(libs.plugins.kotlin)
     classpath(libs.plugins.dokka)
+    classpath(libs.plugins.composeCompiler)
     classpath(libs.plugins.android(SupportedAgp.newestStable))
   }
 }
