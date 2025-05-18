@@ -17,7 +17,7 @@ import java.io.File
 import java.time.ZonedDateTime
 import java.util.*
 
-private const val minimumGradleVersion = "8.0"
+private const val minimumGradleVersion = "8.2"
 
 @Suppress("DEPRECATION")
 fun Project.configureTestResources() {

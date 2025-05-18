@@ -58,7 +58,7 @@ internal fun configureJUnit5(
 
 /* Private */
 
-private typealias AndroidExtension = CommonExtension<*, *, *, *>
+private typealias AndroidExtension = CommonExtension<*, *, *, *, *>
 
 private fun AndroidJUnitPlatformExtension.prepareBuildTypeDsl(android: AndroidExtension) {
     // This will add filters for build types (e.g. "debug" or "release")
