@@ -50,6 +50,8 @@ private constructor(
     val hasJacocoPlugin get() = project.plugins.hasPlugin("jacoco")
     private val hasKotlinPlugin get() = project.plugins.findPlugin("kotlin-android") != null
 
+    val currentAgpVersion get() = componentsExtension.pluginVersion
+
     fun finalizeDsl(block: (CommonExtension<*, *, *, *, *>) -> Unit) {
         componentsExtension.finalizeDsl(block)
     }
