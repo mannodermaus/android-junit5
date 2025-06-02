@@ -99,7 +99,6 @@ dependencies {
 
     implementation(gradleApi())
     implementation(libs.kotlinStdLib)
-    implementation(libs.javaSemver)
     implementation(libs.junitPlatformCommons)
 
     testImplementation(gradleTestKit())

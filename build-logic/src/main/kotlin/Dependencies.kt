@@ -3,9 +3,9 @@
 object libs {
     object versions {
         const val kotlin = "2.1.21"
-        const val junitJupiter = "5.13.0-RC1"
-        const val junitVintage = "5.13.0-RC1"
-        const val junitPlatform = "1.13.0-RC1"
+        const val junitJupiter = "5.13.0"
+        const val junitVintage = "5.13.0"
+        const val junitPlatform = "1.13.0"
 
         const val composeBom = "2025.03.00"
         const val androidXMultidex = "2.0.1"
@@ -19,7 +19,6 @@ object libs {
         const val coroutines = "1.10.2"
         const val dokka = "2.0.0"
         const val espresso = "3.6.1"
-        const val javaSemver = "0.10.2"
         const val junit4 = "4.13.2"
         const val konfToml = "1.1.2"
         const val kotlinxBinaryCompatibilityValidator = "0.17.0"
@@ -51,7 +50,6 @@ object libs {
 
     const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
     const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}"
-    const val javaSemver = "com.github.zafarkhaja:java-semver:${versions.javaSemver}"
 
     const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitJupiter}"
     const val junitJupiterParams = "org.junit.jupiter:junit-jupiter-params:${versions.junitJupiter}"

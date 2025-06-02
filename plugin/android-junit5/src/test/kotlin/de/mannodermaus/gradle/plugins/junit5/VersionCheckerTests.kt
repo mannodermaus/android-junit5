@@ -1,8 +1,9 @@
 package de.mannodermaus.gradle.plugins.junit5
 
+import com.android.build.api.AndroidPluginVersion
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.gradle.plugins.junit5.internal.config.MIN_REQUIRED_AGP_VERSION
-import de.mannodermaus.gradle.plugins.junit5.internal.utils.requireVersion
+import de.mannodermaus.gradle.plugins.junit5.internal.utils.requireAgp
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
@@ -14,39 +15,71 @@ import org.junit.jupiter.params.provider.CsvSource
 class VersionCheckerTests {
 
     @CsvSource(
-            "7.0.0-alpha01, false",
-            "7.0.0-alpha01, false",
-            "7.0.0-beta01, false",
-            "7.0.0-rc01, false",
-            "7.0.0, false",
-            "8.0.0-beta01, false",
-            "8.0.0, false",
-            "8.0.1, false",
-            "8.0.1-alpha01, false",
-            "8.1.0, false",
-            "8.1.0-beta01, false",
-            "8.2.0, true",
-            "8.3.0-rc01, true",
-            "8.4.0-alpha05, true",
-            "8.10.1-alpha01, true",
-            "8.10.0, true",
-            "8.11.0-beta01, true",
-            "8.11.0, true",
+        "7.0.0-alpha1, false",
+        "7.0.0-alpha1, false",
+        "7.0.0-beta1, false",
+        "7.0.0-rc1, false",
+        "7.0.0, false",
+        "8.0.0-beta1, false",
+        "8.0.0, false",
+        "8.0.1, false",
+        "8.0.1-alpha1, false",
+        "8.1.0, false",
+        "8.1.0-beta1, false",
+        "8.2.0, true",
+        "8.3.0-rc1, true",
+        "8.4.0-alpha5, true",
+        "8.10.1-alpha11, true",
+        "8.10.0, true",
+        "8.11.0-beta1, true",
+        "8.11.0, true",
     )
     @ParameterizedTest
     fun `check AGP compatibility`(version: String, compatible: Boolean) {
-        assertThat(versionCompatible(version)).isEqualTo(compatible)
+        val pluginVersion = version.toAndroidPluginVersion()
+        assertThat(versionCompatible(pluginVersion)).isEqualTo(compatible)
     }
 
-    private fun versionCompatible(version: String): Boolean {
+    private fun versionCompatible(version: AndroidPluginVersion): Boolean {
         return try {
-            requireVersion(
-                    actual = version,
-                    required = MIN_REQUIRED_AGP_VERSION,
-                    message = { "" })
+            requireAgp(
+                actual = version,
+                required = MIN_REQUIRED_AGP_VERSION,
+                message = { "" }
+            )
             true
-        } catch (error: Throwable) {
+        } catch (_: Throwable) {
             false
         }
+    }
+
+    private fun String.toAndroidPluginVersion(): AndroidPluginVersion {
+        // Split into stable and optional preview parts
+        val firstSplit = split('-')
+
+        // Split first part further into major, minor, patch
+        val stableComponents = firstSplit[0].split('.')
+
+        var version = AndroidPluginVersion(
+            major = stableComponents[0].toInt(),
+            minor = stableComponents[1].toInt(),
+            micro = stableComponents.getOrNull(2)?.toInt() ?: 0
+        )
+
+        // Attach preview part
+        val preview = firstSplit.getOrNull(1)
+
+        version = when {
+            preview == null -> version
+            preview.startsWith("alpha") -> version.alpha(preview.substringAfter("alpha").toInt())
+            preview.startsWith("beta") -> version.beta(preview.substringAfter("beta").toInt())
+            preview.startsWith("rc") -> version.rc(preview.substringAfter("rc").toInt())
+            else -> version
+        }
+
+        // Validate correctness
+        assertThat(version.toString()).endsWith(this)
+
+        return version
     }
 }

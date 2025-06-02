@@ -2,8 +2,12 @@
 
 package de.mannodermaus.gradle.plugins.junit5.internal.config
 
-internal const val MIN_REQUIRED_GRADLE_VERSION = "8.2" // When updating this, check buildSrc/Tasks.kt and update it there, too
-internal const val MIN_REQUIRED_AGP_VERSION = "8.2.0"
+import com.android.build.api.AndroidPluginVersion
+import org.gradle.util.GradleVersion
+
+// When updating this, check buildSrc/Tasks.kt and update it there, too
+internal val MIN_REQUIRED_GRADLE_VERSION = GradleVersion.version("8.2")
+internal val MIN_REQUIRED_AGP_VERSION = AndroidPluginVersion(8, 2)
 
 internal const val EXTENSION_NAME = "junitPlatform"
 
