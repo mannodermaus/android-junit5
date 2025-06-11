@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -22,7 +23,7 @@ plugins {
 // ------------------------------------------------------------------------------------------------
 val javaVersion = JavaVersion.VERSION_11.toString()
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = javaVersion
+    compilerOptions.jvmTarget.set(JvmTarget.fromTarget(javaVersion))
 }
 tasks.withType<JavaCompile> {
     sourceCompatibility = javaVersion

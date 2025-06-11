@@ -5,7 +5,7 @@
 -->
 # <img src=".images/logo.png" align="right" width="100">android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 8.0.0 or later.**
+A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 8.2 or later.**
 
 ## How?
 
@@ -22,20 +22,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```kotlin
   plugins {
-    id("de.mannodermaus.android-junit5") version "1.12.2.0"
+    id("de.mannodermaus.android-junit5") version "1.13.0.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.12.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.13.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.13.0")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.0")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.12.2")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.13.0")
   }
   ```
 </details>
@@ -45,20 +45,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```groovy
   plugins {
-    id "de.mannodermaus.android-junit5" version "1.12.2.0"
+    id "de.mannodermaus.android-junit5" version "1.13.0.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.12.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.13.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.13.0"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.12.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.13.0"
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "junit:junit:4.13.2"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.12.2"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.13.0"
   }
   ```
 </details>
@@ -76,7 +76,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle.kts:
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.12.2.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.13.0.0")
     }
   }
 
@@ -94,7 +94,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle:
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.12.2.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.13.0.0"
     }
   }
 
@@ -110,8 +110,8 @@ More information on Getting Started can be found [on the wiki][wiki-gettingstart
 ## Requirements
 
 The latest version of this plugin requires:
-* Android Gradle Plugin `8.0.0` or above
-* Gradle `8.0` or above
+* Android Gradle Plugin `8.2` or above
+* Gradle `8.2` or above
 
 ## Instrumentation Test Support
 
@@ -124,7 +124,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
   
   ```kotlin
   dependencies {
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.12.2")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.0")
   }
   ```
 </details>
@@ -134,7 +134,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
 
   ```groovy
   dependencies {
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.12.2"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.13.0"
   }
   ```
 </details>
@@ -216,7 +216,7 @@ when it sets up the artifacts automatically. However, it is possible to choose a
 
   ```kotlin
   junitPlatform {
-    instrumentationTests.version.set("1.7.0")
+    instrumentationTests.version.set("1.8.0")
   }
   ```
 </details>
@@ -226,7 +226,7 @@ when it sets up the artifacts automatically. However, it is possible to choose a
 
   ```groovy
   junitPlatform {
-    instrumentationTests.version.set("1.7.0")
+    instrumentationTests.version.set("1.8.0")
   }
   ```
 </details>
@@ -280,12 +280,13 @@ This repository contains multiple modules, divided into two sub-projects. The re
 
 For users that cannot match the current minimum version requirement of the Android Gradle Plugin requested by this plugin,
 refer to the table below to find a suitable alternative version. Note that **no active development will go into these
-legacy versions**, so please consider upgrading to at least Android Gradle Plugin 8.0.0
+legacy versions**, so please consider upgrading to at least Android Gradle Plugin 8.2
 before filing an issue with the latest one.
 
 |Your AGP Version|Suggested JUnit5 Plugin Version|
 |---|---|
-|`>= 8.0.0`|`1.12.2.0`|
+|`>= 8.2.0`|`1.13.0.0`|
+|`8.0.0` - `8.1.4`|`1.12.2.0`|
 |`7.0.0` - `7.4.2`|`1.10.0.0`|
 |`4.0.0` - `4.2.2`|`1.8.2.1`|
 |`3.5.0` - `3.6.4`|`1.7.1.1`|

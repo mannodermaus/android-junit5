@@ -12,10 +12,14 @@ import org.gradle.api.attributes.plugin.GradlePluginApiVersion
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.Locale
 
 private const val minimumGradleVersion = "8.2"
 
@@ -25,38 +29,38 @@ fun Project.configureTestResources() {
     // for different versions of the Android Gradle Plugin
     tasks.named("processTestResources", Copy::class.java).configure {
         val tokens = mapOf(
-                "COMPILE_SDK_VERSION" to Android.compileSdkVersion.toString(),
-                "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
-                "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
+            "COMPILE_SDK_VERSION" to Android.compileSdkVersion.toString(),
+            "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
+            "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
-                "KOTLIN_VERSION" to libs.versions.kotlin,
-                "JUNIT_JUPITER_VERSION" to libs.versions.junitJupiter,
-                "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
+            "KOTLIN_VERSION" to libs.versions.kotlin,
+            "JUNIT_JUPITER_VERSION" to libs.versions.junitJupiter,
+            "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
-                // Collect all supported AGP versions into a single string.
-                // This string is delimited with semicolons, and each of the separated values itself is a 4-tuple.
-                //
-                // Example:
-                // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4;3.7|3.7.0|8.0|33
-                //
-                // Can be parsed into this list of values:
-                // |___> Short: "3.5"
-                //       Full: "3.5.3"
-                //       Gradle Requirement: ""
-                //       Compile SDK: null
-                //
-                // |___> Short: "3.6"
-                //       Full: "3.6.3"
-                //       Gradle Requirement: "6.4"
-                //       Compile SDK: null
-                //
-                // |___> Short: "3.7"
-                //       Full: "3.7.0"
-                //       Gradle Requirement: "8.0"
-                //       Compile SDK: 33
-                "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator = ";") { plugin ->
-                    "${plugin.shortVersion}|${plugin.version}|${plugin.gradle}|${plugin.compileSdk ?: ""}"
-                }
+            // Collect all supported AGP versions into a single string.
+            // This string is delimited with semicolons, and each of the separated values itself is a 4-tuple.
+            //
+            // Example:
+            // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4;3.7|3.7.0|8.0|33
+            //
+            // Can be parsed into this list of values:
+            // |___> Short: "3.5"
+            //       Full: "3.5.3"
+            //       Gradle Requirement: ""
+            //       Compile SDK: null
+            //
+            // |___> Short: "3.6"
+            //       Full: "3.6.3"
+            //       Gradle Requirement: "6.4"
+            //       Compile SDK: null
+            //
+            // |___> Short: "3.7"
+            //       Full: "3.7.0"
+            //       Gradle Requirement: "8.0"
+            //       Compile SDK: 33
+            "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator = ";") { plugin ->
+                "${plugin.shortVersion}|${plugin.version}|${plugin.gradle}|${plugin.compileSdk ?: ""}"
+            }
         )
 
         inputs.properties(tokens)
@@ -125,17 +129,19 @@ fun Project.configureTestResources() {
                     // 2) Use resources from the plugin (i.e. plugin IDs etc.)
                     // 3) Use AGP-specific dependencies
                     val classesDirs = file("$buildDir/classes").listFiles()
-                            ?.filter { it.isDirectory }
-                            ?.map { File(it, "main") }
-                            ?.filter { it.exists() && it.isDirectory && it.list()?.isEmpty() == false }
-                            ?: emptyList()
+                        ?.filter { it.isDirectory }
+                        ?.map { File(it, "main") }
+                        ?.filter { it.exists() && it.isDirectory && it.list()?.isEmpty() == false }
+                        ?: emptyList()
                     val resourcesDirs = file("$buildDir/resources").listFiles()
-                            ?.filter { it.isDirectory }
-                            ?: emptyList()
+                        ?.filter { it.isDirectory }
+                        ?: emptyList()
 
                     writer.write("implementation-classpath=")
-                    writer.write((classesDirs + resourcesDirs + configuration)
-                            .joinToString(separator = "\\:"))
+                    writer.write(
+                        (classesDirs + resourcesDirs + configuration)
+                            .joinToString(separator = "\\:")
+                    )
                 }
             }
         }
@@ -146,7 +152,7 @@ fun findInstrumentationVersion(
     pluginVersion: String = Artifacts.Plugin.currentVersion,
     currentInstrumentationVersion: String = Artifacts.Instrumentation.Core.currentVersion,
     stableInstrumentationVersion: String = Artifacts.Instrumentation.Core.latestStableVersion
-    ): String {
+): String {
     return when {
         pluginVersion.endsWith("-SNAPSHOT") -> currentInstrumentationVersion
         currentInstrumentationVersion.endsWith("-SNAPSHOT") -> stableInstrumentationVersion
@@ -197,12 +203,14 @@ abstract class GenerateReadme : DefaultTask() {
         private const val PLUGIN_VERSION = "pluginVersion"
         private const val INSTRUMENTATION_VERSION = "instrumentationVersion"
 
-        private const val CONSTANTS_FILE = "android-junit5/src/main/kotlin/de/mannodermaus/gradle/plugins/junit5/internal/config/Constants.kt"
-        private val CONSTANTS_FILE_REGEX = Regex("const val (.*) = \"(.*)\"")
+        private const val CONSTANTS_FILE =
+            "android-junit5/src/main/kotlin/de/mannodermaus/gradle/plugins/junit5/internal/config/Constants.kt"
+        private val CONSTANTS_FILE_REGEX1 = Regex("""val (.*)\s*=\s*.+"(.*)".+""")
+        private val CONSTANTS_FILE_REGEX2 = Regex("""val (.*)\s*=\s*AndroidPluginVersion\((\d+)\s*,\s*(\d+)\)""")
         private val CONSTANT_MAPPINGS = mapOf(
-                "minimumRequiredGradleVersion" to "MIN_REQUIRED_GRADLE_VERSION",
-                "minimumRequiredAgpVersion" to "MIN_REQUIRED_AGP_VERSION",
-                "currentYear" to "CURRENT_YEAR",
+            "minimumRequiredGradleVersion" to "MIN_REQUIRED_GRADLE_VERSION",
+            "minimumRequiredAgpVersion" to "MIN_REQUIRED_AGP_VERSION",
+            "currentYear" to "CURRENT_YEAR",
         )
 
         private val GENERATED_HEADER_COMMENT = """
@@ -241,7 +249,7 @@ abstract class GenerateReadme : DefaultTask() {
 
         PLACEHOLDER_REGEX.findAll(templateText).forEach { match ->
             val placeholder = match.groups.last()?.value
-                    ?: throw InvalidPlaceholder(match)
+                ?: throw InvalidPlaceholder(match)
 
             // Local versions (plugin, instrumentation)
             val replacement = when (placeholder) {
@@ -251,14 +259,16 @@ abstract class GenerateReadme : DefaultTask() {
                     val match2 = CONSTANT_REGEX.find(placeholder)
                     if (match2 != null) {
                         val key = match2.groups.last()?.value
+                        val constantKey1 = CONSTANT_MAPPINGS[key]
+                        println("Constant key. placeholder=$placeholder, match2=$match2, constantKey1=$constantKey1, constants=$constants")
                         val constantKey = CONSTANT_MAPPINGS[key] ?: throw InvalidPlaceholder(match2)
                         constants[constantKey] ?: throw InvalidPlaceholder(match2)
 
                     } else {
                         val match3 = EXTERNAL_DEP_REGEX.find(placeholder)
-                                ?: throw InvalidPlaceholder(match)
+                            ?: throw InvalidPlaceholder(match)
                         val externalDependency = match3.groups.last()?.value
-                                ?: throw InvalidPlaceholder(match3)
+                            ?: throw InvalidPlaceholder(match3)
 
                         val field = libs.javaClass.getField(externalDependency)
                         field.get(null) as String
@@ -284,15 +294,27 @@ abstract class GenerateReadme : DefaultTask() {
         // Add hardcoded constants
         constants["CURRENT_YEAR"] = ZonedDateTime.now().year.toString()
 
-        CONSTANTS_FILE_REGEX.findAll(text).forEach { match ->
-            constants[match.groups[1]!!.value] = match.groups[2]!!.value
+        CONSTANTS_FILE_REGEX1.findAll(text).forEach { match ->
+            constants[match[1]] = match[2]
+        }
+
+        // Special case for AGP version
+        CONSTANTS_FILE_REGEX2.findAll(text).forEach { match ->
+            constants[match[1]] = match.groupValues
+                .drop(2)
+                .joinToString(separator = ".", transform = String::trim)
         }
 
         return constants
     }
+
+    private operator fun MatchResult.get(index: Int): String {
+        return this.groups[index]!!.value.trim()
+    }
 }
 
-private class InvalidPlaceholder(matchResult: MatchResult) : Exception("Invalid match result: '${matchResult.groupValues}'")
+private class InvalidPlaceholder(matchResult: MatchResult) :
+    Exception("Invalid match result: '${matchResult.groupValues}'")
 
 private val Deployed.anyStableVersion: String
     get() = if (currentVersion.endsWith("-SNAPSHOT")) {
