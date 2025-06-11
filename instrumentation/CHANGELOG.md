@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+## 1.8.0 (2025-06-11)
+
 - Compile with SDK 35
 - Update to Kotlin 2.x
 
