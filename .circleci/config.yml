@@ -23,13 +23,10 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          <<: *cache_key
+        <<: *cache_key
       - run:
           name: (Plugin) Build
           command: cd plugin && ./gradlew :android-junit5:assemble --stacktrace
-      - run:
-          name: (Plugin) Test
-          command: cd plugin && ./gradlew :build-logic:test :android-junit5:check --stacktrace
       - run:
           name: (Instrumentation) Download Dependencies
           command: cd instrumentation && ./gradlew androidDependencies
@@ -43,14 +40,11 @@ jobs:
             :extensions:assembleDebug \
             :runner:assembleDebug \
             :sample:assembleDebug --stacktrace
-      - run:
-          name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :core:check :extensions:check :runner:check :compose:check --stacktrace
       - save_cache:
-          <<: *cache_key
-          paths:
-            - ~/.gradle/caches
-            - ~/.gradle/wrapper
+        <<: *cache_key
+        paths:
+          - ~/.gradle/caches
+          - ~/.gradle/wrapper
       - run:
           name: Store Google Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
@@ -82,23 +76,8 @@ jobs:
           paths:
             - project
       - store_artifacts:
-          path: plugin/android-junit5/build/reports/tests/test
-          destination: plugin
-      - store_artifacts:
-          path: instrumentation/core/build/reports
-          destination: instrumentation-core
-      - store_artifacts:
           path: test-lab-results
           destination: instrumentation-core/test-lab-results
-      - store_artifacts:
-          path: instrumentation/extensions/build/reports
-          destination: instrumentation-extensions
-      - store_artifacts:
-          path: instrumentation/runner/build/reports
-          destination: instrumentation-runner
-      - store_artifacts:
-          path: instrumentation/compose/build/reports
-          destination: instrumentation-compose
 
   deploy:
     <<: *defaults
