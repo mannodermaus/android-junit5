@@ -7,13 +7,16 @@
 // The individual configuration of each test depends on the config.toml file,
 // located in the sub-folder next to its source code.
 
+import com.android.build.api.variant.HasUnitTestBuilder
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val androidGradlePluginVersion: String = "{{ AGP_VERSION }}"
 val kotlinVersion: String = "{{ KOTLIN_VERSION }}"
 val junitJupiterVersion: String = "{{ JUNIT_JUPITER_VERSION }}"
 val junit5AndroidLibsVersion: String = "{{ JUNIT5_ANDROID_LIBS_VERSION }}"
+val javaVersion = JavaVersion.VERSION_17
 
 buildscript {
   repositories {
@@ -42,7 +45,7 @@ plugins {
 }
 
 // Double-checking the integrity of the AGP version under test
-val version = com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+val version = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
 if (version != "${androidGradlePluginVersion}") {
   throw IllegalStateException("Incorrect AGP version. Expected ${androidGradlePluginVersion}, got $version")
 }
@@ -58,14 +61,14 @@ repositories {
 }
 
 android {
-  val minSdk: Int = {{ MIN_SDK_VERSION }}
+  val minSdkVersion: Int = {{ MIN_SDK_VERSION }}
 
   {% if OVERRIDE_SDK_VERSION %}
     val compileSdk: String = "android-{{ OVERRIDE_SDK_VERSION }}"
-    val targetSdk: Int = {{ OVERRIDE_SDK_VERSION }}
+    val targetSdkVersion: Int = {{ OVERRIDE_SDK_VERSION }}
   {% else %}
     val compileSdk: String = "{{ COMPILE_SDK_VERSION }}"
-    val targetSdk: Int = {{ TARGET_SDK_VERSION }}
+    val targetSdkVersion: Int = {{ TARGET_SDK_VERSION }}
   {% endif %}
 
   compileSdkVersion("${compileSdk}")
@@ -73,8 +76,8 @@ android {
   defaultConfig {
     namespace = "de.mannodermaus.app"
 
-    minSdkVersion(minSdk)
-    targetSdkVersion(targetSdk)
+    minSdk = minSdkVersion
+    targetSdk = targetSdkVersion
 
     {% if INCLUDE_ANDROID_RESOURCES %}
       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -88,27 +91,19 @@ android {
     {% endif %}
   }
 
-  val javaVersion = JavaVersion.VERSION_17
-
   compileOptions {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
   }
 
-  {% if USE_KOTLIN %}
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      kotlinOptions.jvmTarget = javaVersion.toString()
-    }
-  {% endif %}
-
   {% if USE_FLAVORS %}
     flavorDimensions("environment")
     productFlavors {
       register("free") {
-        setDimension("environment")
+        dimension = "environment"
       }
       register("paid") {
-        setDimension("environment")
+        dimension = "environment"
       }
     }
   {% endif %}
@@ -131,6 +126,14 @@ android {
   }
 }
 
+{% if USE_KOTLIN %}
+  kotlin {
+    compilerOptions {
+      jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
+    }
+  }
+{% endif %}
+
 junitPlatform {
   {% if USE_JACOCO %}
     jacocoOptions {
@@ -144,8 +147,8 @@ junitPlatform {
 
 {% for type in DISABLE_TESTS_FOR_BUILD_TYPES %}
   androidComponents {
-    beforeVariants(selector().withBuildType("{{ type }}")) { variant ->
-      variant.enableUnitTest = false
+    beforeVariants(selector().withBuildType("{{ type }}")) { variantBuilder ->
+      (variantBuilder as HasUnitTestBuilder).enableUnitTest = false
     }
   }
 {% end %}
