@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -57,9 +58,11 @@ junitPlatform {
   }
 }
 
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = javaVersion.toString()
-  kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all")
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
+    freeCompilerArgs.add("-Xjvm-default=all")
+  }
 }
 
 tasks.withType<Test> {

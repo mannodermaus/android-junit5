@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -62,8 +63,10 @@ android {
   }
 }
 
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = javaVersion.toString()
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
+  }
 }
 
 tasks.withType<Test> {
