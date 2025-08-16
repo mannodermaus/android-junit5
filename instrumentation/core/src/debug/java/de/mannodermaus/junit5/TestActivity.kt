@@ -4,7 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
 
-class TestActivity : Activity() {
+internal class TestActivity : Activity() {
 
   private val textView by lazy { findViewById<TextView>(R.id.textView) }
 
