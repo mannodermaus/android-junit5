@@ -1,0 +1,118 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  # '>' join lines by a space
+  GRADLE_OPTS: >
+    -XX:+HeapDumpOnOutOfMemoryError
+    -Dorg.gradle.jvmargs=-Xmx4g
+    -Dorg.gradle.daemon=false
+    -Dorg.gradle.caching=true
+    -Dorg.gradle.configureondemand=true
+    -Dkotlin.compiler.execution.strategy=in-process
+    -Dkotlin.incremental=false
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: 'zulu'
+          java-version-file: .java-version
+
+      - uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
+
+      - name: (Plugin) Build
+        run: ./gradlew :android-junit5:assemble --stacktrace
+        working-directory: plugin
+
+      - name: (Plugin) Test
+        run: ./gradlew :build-logic:test :android-junit5:check --stacktrace
+        working-directory: plugin
+      - name: Save test reports of plugins
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: test-reports-plugin
+          path: plugin/android-junit5/build/reports/tests/test
+          retention-days: 3
+          if-no-files-found: error
+  build-instrumentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: 'zulu'
+          java-version-file: .java-version
+
+      - uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
+
+      - name: (Instrumentation) Download Dependencies
+        run: ./gradlew androidDependencies
+        working-directory: instrumentation
+      - name: (Instrumentation) Build
+        run: |
+          ./gradlew assembleRelease :core:assembleDebug \
+            :core:assembleDebugAndroidTest \
+            :compose:assembleDebugAndroidTest \
+            :extensions:assembleDebug \
+            :runner:assembleDebug \
+            :sample:assembleDebug --stacktrace
+        working-directory: instrumentation
+      - name: (Instrumentation) Test
+        run: ./gradlew :core:check :extensions:check :runner:check :compose:check --stacktrace
+        working-directory: instrumentation
+
+      - name: Save instrumentation test reports of core
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: instrumentation-test-reports-core
+          path: instrumentation/core/build/reports
+          retention-days: 3
+          if-no-files-found: error
+      - name: Save instrumentation test reports of extensions
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: instrumentation-test-reports-extensions
+          path: instrumentation/extensions/build/reports
+          retention-days: 3
+          if-no-files-found: error
+      - name: Save instrumentation test reports of runner
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: instrumentation-test-reports-runner
+          path: instrumentation/runner/build/reports
+          retention-days: 3
+          if-no-files-found: error
+      - name: Save instrumentation test reports of compose
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: instrumentation-test-reports-compose
+          path: instrumentation/compose/build/reports
+          retention-days: 3
+          if-no-files-found: error
