@@ -19,8 +19,6 @@ internal val Project.android
 
 @OptIn(ExperimentalContracts::class)
 internal fun Project.whenAndroidPluginAdded(block: (BasePlugin) -> Unit) {
-    contract { callsInPlace(block, InvocationKind.AT_MOST_ONCE) }
-
     val configured = AtomicBoolean(false)
     plugins.withType(BasePlugin::class.java) { plugin ->
         // Prevent duplicate configuration

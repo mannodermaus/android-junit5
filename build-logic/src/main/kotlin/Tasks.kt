@@ -85,28 +85,30 @@ fun Project.configureTestResources() {
                 val agpDependency = libs.plugins.android(plugin).substringBeforeLast(":")
                 project.dependencies.add(this.name, "${agpDependency}:${plugin.version}")
 
-                // Add the Kotlin Gradle Plugin explicitly,
+                // For Android Gradle Plugins before 9.x, add the Kotlin Gradle Plugin explicitly,
                 // acknowledging the different plugin variants introduced in Kotlin 1.7.
-                // Acknowleding the minimum required Gradle version, request the correct variant for KGP
+                // Acknowledging the minimum required Gradle version, request the correct variant for KGP
                 // (see https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#plugin-with-variants)
-                project.dependencies.add(
-                    this.name,
-                    "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
-                ).apply {
-                    with(this as ExternalModuleDependency) {
-                        attributes {
-                            attribute(
-                                TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
-                                objects.named(TargetJvmEnvironment::class.java, STANDARD_JVM)
-                            )
-                            attribute(
-                                USAGE_ATTRIBUTE,
-                                objects.named(Usage::class.java, JAVA_RUNTIME)
-                            )
-                            attribute(
-                                GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
-                                objects.named(GradlePluginApiVersion::class.java, minimumGradleVersion)
-                            )
+                if (plugin < SupportedAgp.AGP_9_0) {
+                    project.dependencies.add(
+                        this.name,
+                        "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
+                    ).apply {
+                        with(this as ExternalModuleDependency) {
+                            attributes {
+                                attribute(
+                                    TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
+                                    objects.named(TargetJvmEnvironment::class.java, STANDARD_JVM)
+                                )
+                                attribute(
+                                    USAGE_ATTRIBUTE,
+                                    objects.named(Usage::class.java, JAVA_RUNTIME)
+                                )
+                                attribute(
+                                    GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+                                    objects.named(GradlePluginApiVersion::class.java, minimumGradleVersion)
+                                )
+                            }
                         }
                     }
                 }
@@ -128,12 +130,12 @@ fun Project.configureTestResources() {
                     // 1) Use output classes from the plugin itself
                     // 2) Use resources from the plugin (i.e. plugin IDs etc.)
                     // 3) Use AGP-specific dependencies
-                    val classesDirs = file("$buildDir/classes").listFiles()
+                    val classesDirs = layout.buildDirectory.dir("classes").get().asFile.listFiles()
                         ?.filter { it.isDirectory }
                         ?.map { File(it, "main") }
                         ?.filter { it.exists() && it.isDirectory && it.list()?.isEmpty() == false }
                         ?: emptyList()
-                    val resourcesDirs = file("$buildDir/resources").listFiles()
+                    val resourcesDirs = layout.buildDirectory.dir("resources").get().asFile.listFiles()
                         ?.filter { it.isDirectory }
                         ?: emptyList()
 

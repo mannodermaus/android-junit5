@@ -3,7 +3,7 @@ useCustomBuildType = "staging"
 
 [[expectations]]
 buildType = "debug"
-tests = "JavaTest"
+tests = "JavaTest,JavaDebugTest"
 
 [[expectations]]
 buildType = "release"

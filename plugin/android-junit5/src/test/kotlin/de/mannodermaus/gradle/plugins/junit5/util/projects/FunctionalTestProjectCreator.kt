@@ -65,7 +65,10 @@ class FunctionalTestProjectCreator(
             file.write("sdk.dir = ${environment.androidSdkFolder.absolutePath}")
         }
         File(projectFolder, "gradle.properties").bufferedWriter().use { file ->
-            file.write("android.useAndroidX = true")
+            file.appendLine("android.useAndroidX = true")
+
+            // From AGP 9, test components are only generated for the debug build type; disable this behavior
+            file.appendLine("android.onlyEnableUnitTestForTheTestedBuildType = false")
         }
 
         // Copy over the source folders
