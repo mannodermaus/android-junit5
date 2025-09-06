@@ -5,6 +5,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
+import de.mannodermaus.gradle.plugins.junit5.util.splitToArray
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -29,6 +30,10 @@ class ConfigurationCacheTests {
     fun beforeAll(@TempDir folder: File) {
         projectCreator = FunctionalTestProjectCreator(folder, environment)
         println("Running configuration cache tests against latest AGP ($agp)...")
+
+        // Ensure that no ADB device is connected before starting these tests,
+        // as they have a certain expectation of "no device connected" for asserting their output
+        Runtime.getRuntime().exec("adb disconnect".splitToArray(" "))
     }
 
     @Test
