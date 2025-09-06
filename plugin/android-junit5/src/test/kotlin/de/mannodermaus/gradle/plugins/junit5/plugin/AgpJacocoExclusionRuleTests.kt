@@ -8,6 +8,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory

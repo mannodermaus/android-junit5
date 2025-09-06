@@ -196,10 +196,48 @@ private fun AndroidJUnitPlatformExtension.configureJacoco(
             // Create a Jacoco friend task
             val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants.get()
             if (enabledVariants.isEmpty() || variant.name in enabledVariants) {
+                // Capture an empty return value here and highlight
+                // the unavailability of Jacoco integration on certain AGP versions
+                // (namely, AGP 9.0.0+ with the new DSL). This feature is effectively deprecated
                 val directoryProviders = config.directoryProvidersOf(variant)
-                val registered = AndroidJUnit5JacocoReport.register(project, variant, testTask, directoryProviders)
-                if (!registered) {
-                    project.logger.junit5Warn("Jacoco task for variant '${variant.name}' already exists. Disabling customization for JUnit 5...")
+                val registeredTask = AndroidJUnit5JacocoReport.register(
+                    project = project,
+                    variant = variant,
+                    testTask = testTask,
+                    directoryProviders = directoryProviders
+                )
+
+                if (directoryProviders.isNotEmpty()) {
+                    // Log a warning if Jacoco tasks already existed
+                    if (registeredTask == null) {
+                        project.logger.junit5Warn(
+                            "Jacoco task for variant '${variant.name}' already exists." +
+                                    "Disabling customization for JUnit 5..."
+                        )
+                    }
+                } else {
+                    // Disable any task that may have been registered above
+                    registeredTask?.configure { it.enabled = false }
+
+                    project.logger.junit5Warn(
+                        buildString {
+                            append(
+                                "Cannot configure Jacoco for this project because directory providers cannot be found."
+                            )
+
+                            if (config.currentAgpVersion.major >= 9) {
+                                append(
+                                    " This integration is deprecated from AGP 9.0.0 onwards because of the new DSL."
+                                )
+                                append(
+                                    " Please consult the link below for more information: "
+                                )
+                                append(
+                                    "https://developer.android.com/build/releases/agp-preview"
+                                )
+                            }
+                        }
+                    )
                 }
             }
         }

@@ -40,11 +40,11 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
             variant: Variant,
             testTask: Test,
             directoryProviders: Collection<DirectoryProvider>
-        ): Boolean {
+        ): TaskProvider<AndroidJUnit5JacocoReport>? {
             val configAction = ConfigAction(project, variant, testTask, directoryProviders)
-            if (project.tasks.namedOrNull<Task>(configAction.name) != null) {
+            project.tasks.namedOrNull<Task>(configAction.name)?.let {
                 // Already exists; abort
-                return false
+                return null
             }
 
             val provider = project.tasks.register(
@@ -57,7 +57,7 @@ public abstract class AndroidJUnit5JacocoReport : JacocoReport() {
             provider.dependsOn(testTask.name)
             findOrRegisterDefaultJacocoTask(project).dependsOn(provider)
 
-            return true
+            return provider
         }
 
         private fun findOrRegisterDefaultJacocoTask(project: Project): TaskProvider<Task> =
