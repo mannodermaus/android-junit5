@@ -2,6 +2,7 @@ Change Log
 ==========
 
 ## Unreleased
+- JUnit 5.13.4
 
 ## 1.13.3.0 (2025-09-07)
 - JUnit 5.13.3
