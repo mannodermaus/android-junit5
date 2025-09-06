@@ -261,8 +261,6 @@ abstract class GenerateReadme : DefaultTask() {
                     val match2 = CONSTANT_REGEX.find(placeholder)
                     if (match2 != null) {
                         val key = match2.groups.last()?.value
-                        val constantKey1 = CONSTANT_MAPPINGS[key]
-                        println("Constant key. placeholder=$placeholder, match2=$match2, constantKey1=$constantKey1, constants=$constants")
                         val constantKey = CONSTANT_MAPPINGS[key] ?: throw InvalidPlaceholder(match2)
                         constants[constantKey] ?: throw InvalidPlaceholder(match2)
 
