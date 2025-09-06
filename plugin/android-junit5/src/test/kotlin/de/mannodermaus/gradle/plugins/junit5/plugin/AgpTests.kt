@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.projects.PluginSpecProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.times
@@ -18,9 +19,9 @@ interface AgpVariantAwareTests : AgpTests {
     fun defaultProductFlavors(): List<FlavorSpec>
 
     fun forEachBuildType(
-            beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
-            beforeEvaluate: (Project) -> Unit = {},
-            testBody: (Project, String) -> Unit
+        beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
+        beforeEvaluate: (Project) -> Unit = {},
+        testBody: (Project, String) -> Unit
     ): List<DynamicTest> {
         val parentTestName = parentTestName()
 
@@ -36,10 +37,10 @@ interface AgpVariantAwareTests : AgpTests {
     }
 
     fun forEachProductFlavor(
-            flavorCreator: () -> List<FlavorSpec> = { defaultProductFlavors() },
-            beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
-            beforeEvaluate: (Project) -> Unit = {},
-            testBody: (Project, String) -> Unit
+        flavorCreator: () -> List<FlavorSpec> = { defaultProductFlavors() },
+        beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
+        beforeEvaluate: (Project) -> Unit = {},
+        testBody: (Project, String) -> Unit
     ): List<DynamicTest> {
         val parentTestName = parentTestName()
         val flavors = flavorCreator()
@@ -57,10 +58,10 @@ interface AgpVariantAwareTests : AgpTests {
     }
 
     fun forEachVariant(
-            flavorCreator: () -> List<FlavorSpec> = { defaultProductFlavors() },
-            beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
-            beforeEvaluate: (Project) -> Unit = {},
-            testBody: (Project, String) -> Unit
+        flavorCreator: () -> List<FlavorSpec> = { defaultProductFlavors() },
+        beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
+        beforeEvaluate: (Project) -> Unit = {},
+        testBody: (Project, String) -> Unit
     ): List<DynamicTest> {
         val parentTestName = parentTestName()
         val flavors = flavorCreator()
@@ -71,7 +72,7 @@ interface AgpVariantAwareTests : AgpTests {
         project.evaluate()
 
         return (defaultBuildTypes() * flavors).map { (buildType, flavor) ->
-            val variantName = "${flavor.name}${buildType.capitalize()}"
+            val variantName = "${flavor.name}${buildType.capitalized()}"
 
             DynamicTest.dynamicTest("$parentTestName for '$variantName'") {
                 testBody(project, variantName)
@@ -87,14 +88,14 @@ interface AgpVariantAwareTests : AgpTests {
     }
 
     fun Project.registerProductFlavors(
-            flavors: List<FlavorSpec> = defaultProductFlavors()
+        flavors: List<FlavorSpec> = defaultProductFlavors()
     ) {
         val dimensions = flavors.map(FlavorSpec::dimension).distinct()
 
-        project.android.flavorDimensions(*dimensions.toTypedArray())
-        project.android.productFlavors { container ->
+        with(project.android) {
+            flavorDimensions.addAll(dimensions)
             flavors.forEach { flavor ->
-                container.create(flavor.name).dimension = flavor.dimension
+                productFlavors.create(flavor.name).dimension = flavor.dimension
             }
         }
     }

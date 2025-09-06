@@ -2,8 +2,8 @@ package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.Libraries
+import de.mannodermaus.gradle.plugins.junit5.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate

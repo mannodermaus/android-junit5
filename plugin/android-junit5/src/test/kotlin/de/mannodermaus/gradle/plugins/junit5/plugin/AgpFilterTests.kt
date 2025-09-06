@@ -1,7 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
@@ -35,7 +36,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
             }
         }
     ) { project, buildType ->
-        val task = project.tasks.get<Test>("test${buildType.capitalize()}UnitTest")
+        val task = project.tasks.get<Test>("test${buildType.capitalized()}UnitTest")
         assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
         assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
         assertThat(task.junitPlatformOptions.includeEngines).contains("global-include-engine")
@@ -48,8 +49,8 @@ interface AgpFilterTests : AgpVariantAwareTests {
     fun `using custom build types & multiple flavor dimensions`(): List<DynamicTest> {
         val project = createProject().build()
         project.registerProductFlavors(advancedFlavorList)
-        project.android.buildTypes { container ->
-            container.create("ci").initWith(container.getByName("debug"))
+        with(project.android.buildTypes) {
+            create("ci").initWith(getByName("debug"))
         }
         project.evaluate()
 

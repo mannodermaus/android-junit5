@@ -1,7 +1,8 @@
 package de.mannodermaus.gradle.plugins.junit5.util.projects
 
 import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.extensions.androidApp
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.applyPlugin
@@ -62,13 +63,14 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
         fun asAndroidLibrary() = setProjectTypeIfUnsetTo(Type.Library)
 
-        fun applyJUnit5Plugin(state: Boolean = true, configuration: ((AndroidJUnitPlatformExtension) -> Unit)? = null) = apply {
-            this.applyJUnit5Plugin = if (state) {
-                configuration ?: {}
-            } else {
-                null
+        fun applyJUnit5Plugin(state: Boolean = true, configuration: ((AndroidJUnitPlatformExtension) -> Unit)? = null) =
+            apply {
+                this.applyJUnit5Plugin = if (state) {
+                    configuration ?: {}
+                } else {
+                    null
+                }
             }
-        }
 
         fun applyJacocoPlugin(state: Boolean = true) = apply {
             this.applyJacocoPlugin = state
@@ -105,19 +107,21 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
             // Add default configuration
             try {
-                project.android.compileSdkVersion(environment.compileSdkVersion)
-                project.android.namespace = appId
+                with(project.android) {
+                    compileSdk = environment.compileSdkVersion
+                    namespace = appId
 
-                if (projectType == Type.Application) {
-                    project.android.defaultConfig.apply {
-                        applicationId = appId
-                        minSdkVersion(environment.minSdkVersion)
-                        targetSdkVersion(environment.targetSdkVersion)
-                        versionCode = 1
-                        versionName = "1.0"
+                    if (projectType == Type.Application) {
+                        project.androidApp.defaultConfig.apply {
+                            applicationId = appId
+                            minSdk = environment.minSdkVersion
+                            targetSdk = environment.targetSdkVersion
+                            versionCode = 1
+                            versionName = "1.0"
+                        }
                     }
                 }
-            } catch (e: UnknownDomainObjectException) {
+            } catch (_: UnknownDomainObjectException) {
                 // Expected when the Android plugin is not applied to a project;
                 // swallow this particular error
             }
@@ -125,7 +129,7 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
             // Configure JUnit 5 with custom configuration clause, if any
             try {
                 applyJUnit5Plugin?.invoke(project.junitPlatform)
-            } catch (e: UnknownDomainObjectException) {
+            } catch (_: UnknownDomainObjectException) {
                 // Expected when the JUnit 5 plugin is not applied to a project;
                 // swallow this particular error
             }

@@ -11,7 +11,6 @@ import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
 import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.instrumentationTestVariant
@@ -97,16 +96,7 @@ private fun AndroidJUnitPlatformExtension.prepareUnitTests(project: Project, and
     // so that consumers don't need to do this explicitly
     val options = excludedPackagingOptions()
 
-    try {
-        android.packaging.resources.excludes.addAll(options)
-    } catch (e: NoSuchMethodError) {
-        // TODO Because of https://issuetracker.google.com/issues/263387063,
-        //  there is a breaking API change in AGP 8.x that causes a NoSuchMethodError
-        //  (renaming PackagingOptions to Packaging without any fallback).
-        //  Fall back to the old DSL when this happens
-        options.forEach(project.android.packagingOptions::exclude)
-    }
-
+    android.packaging.resources.excludes.addAll(options)
     attachDependencies(project, "testImplementation", includeRunner = false)
 }
 
