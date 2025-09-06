@@ -315,7 +315,7 @@ See also the [full License text](LICENSE).
  [junit5gh]: https://github.com/junit-team/junit5
  [junit5ug]: https://junit.org/junit5/docs/current/user-guide
  [circleci]: https://circleci.com/gh/mannodermaus/android-junit5
- [sonatyperepo]: https://oss.sonatype.org/content/repositories/snapshots
+ [sonatyperepo]: https://central.sonatype.com/repository/maven-snapshots
  [sampletests]: instrumentation/sample
  [wiki-home]: https://github.com/mannodermaus/android-junit5/wiki
  [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration

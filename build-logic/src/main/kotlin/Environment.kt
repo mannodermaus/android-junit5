@@ -149,8 +149,8 @@ class DeployedCredentials(private val project: Project) {
     var signingKeyId: String?
     var signingPassword: String?
     var signingKeyRingFile: String?
-    var ossrhUsername: String?
-    var ossrhPassword: String?
+    var centralUsername: String?
+    var centralPassword: String?
     var sonatypeStagingProfileId: String?
 
     init {
@@ -171,8 +171,8 @@ class DeployedCredentials(private val project: Project) {
         this.signingKeyId = properties.getOrEnvvar("SIGNING_KEY_ID")
         this.signingPassword = properties.getOrEnvvar("SIGNING_PASSWORD")
         this.signingKeyRingFile = properties.getOrEnvvar("SIGNING_KEY_RING_FILE")
-        this.ossrhUsername = properties.getOrEnvvar("OSSRH_USERNAME")
-        this.ossrhPassword = properties.getOrEnvvar("OSSRH_PASSWORD")
+        this.centralUsername = properties.getOrEnvvar("CENTRAL_USERNAME")
+        this.centralPassword = properties.getOrEnvvar("CENTRAL_PASSWORD")
         this.sonatypeStagingProfileId = properties.getOrEnvvar("SONATYPE_STAGING_PROFILE_ID")
     }
 
