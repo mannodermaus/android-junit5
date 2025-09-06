@@ -34,7 +34,12 @@ plugins {
   id("com.android.application")
 
   {% if USE_KOTLIN %}
-    id("org.jetbrains.kotlin.android")
+    {% if atLeastAgp("9.0.0-alpha04") %}
+      // AGP 9 introduces a built-in Kotlin distribution,
+      // making it obsolete to declare Kotlin explicitly alongside it
+    {% else %}
+      id("org.jetbrains.kotlin.android")
+    {% endif %}
   {% endif %}
 
   {% if USE_JACOCO %}
@@ -64,20 +69,20 @@ android {
   val minSdkVersion: Int = {{ MIN_SDK_VERSION }}
 
   {% if OVERRIDE_SDK_VERSION %}
-    val compileSdk: String = "android-{{ OVERRIDE_SDK_VERSION }}"
-    val targetSdkVersion: Int = {{ OVERRIDE_SDK_VERSION }}
+    val usedCompileSdk: Int = {{ OVERRIDE_SDK_VERSION }}
+    val usedTargetSdkVersion: Int = {{ OVERRIDE_SDK_VERSION }}
   {% else %}
-    val compileSdk: String = "{{ COMPILE_SDK_VERSION }}"
-    val targetSdkVersion: Int = {{ TARGET_SDK_VERSION }}
+    val usedCompileSdk: Int = {{ COMPILE_SDK_VERSION }}
+    val usedTargetSdkVersion: Int = {{ TARGET_SDK_VERSION }}
   {% endif %}
 
-  compileSdkVersion("${compileSdk}")
+  compileSdk = usedCompileSdk
 
   defaultConfig {
     namespace = "de.mannodermaus.app"
 
     minSdk = minSdkVersion
-    targetSdk = targetSdkVersion
+    targetSdk = usedTargetSdkVersion
 
     {% if INCLUDE_ANDROID_RESOURCES %}
       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -97,7 +102,7 @@ android {
   }
 
   {% if USE_FLAVORS %}
-    flavorDimensions("environment")
+    flavorDimensions.add("environment")
     productFlavors {
       register("free") {
         dimension = "environment"

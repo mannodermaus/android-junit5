@@ -11,7 +11,6 @@ import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
 import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.instrumentationTestVariant
@@ -97,16 +96,7 @@ private fun AndroidJUnitPlatformExtension.prepareUnitTests(project: Project, and
     // so that consumers don't need to do this explicitly
     val options = excludedPackagingOptions()
 
-    try {
-        android.packaging.resources.excludes.addAll(options)
-    } catch (e: NoSuchMethodError) {
-        // TODO Because of https://issuetracker.google.com/issues/263387063,
-        //  there is a breaking API change in AGP 8.x that causes a NoSuchMethodError
-        //  (renaming PackagingOptions to Packaging without any fallback).
-        //  Fall back to the old DSL when this happens
-        options.forEach(project.android.packagingOptions::exclude)
-    }
-
+    android.packaging.resources.excludes.addAll(options)
     attachDependencies(project, "testImplementation", includeRunner = false)
 }
 
@@ -206,10 +196,48 @@ private fun AndroidJUnitPlatformExtension.configureJacoco(
             // Create a Jacoco friend task
             val enabledVariants = jacocoOptions.onlyGenerateTasksForVariants.get()
             if (enabledVariants.isEmpty() || variant.name in enabledVariants) {
+                // Capture an empty return value here and highlight
+                // the unavailability of Jacoco integration on certain AGP versions
+                // (namely, AGP 9.0.0+ with the new DSL). This feature is effectively deprecated
                 val directoryProviders = config.directoryProvidersOf(variant)
-                val registered = AndroidJUnit5JacocoReport.register(project, variant, testTask, directoryProviders)
-                if (!registered) {
-                    project.logger.junit5Warn("Jacoco task for variant '${variant.name}' already exists. Disabling customization for JUnit 5...")
+                val registeredTask = AndroidJUnit5JacocoReport.register(
+                    project = project,
+                    variant = variant,
+                    testTask = testTask,
+                    directoryProviders = directoryProviders
+                )
+
+                if (directoryProviders.isNotEmpty()) {
+                    // Log a warning if Jacoco tasks already existed
+                    if (registeredTask == null) {
+                        project.logger.junit5Warn(
+                            "Jacoco task for variant '${variant.name}' already exists." +
+                                    "Disabling customization for JUnit 5..."
+                        )
+                    }
+                } else {
+                    // Disable any task that may have been registered above
+                    registeredTask?.configure { it.enabled = false }
+
+                    project.logger.junit5Warn(
+                        buildString {
+                            append(
+                                "Cannot configure Jacoco for this project because directory providers cannot be found."
+                            )
+
+                            if (config.currentAgpVersion.major >= 9) {
+                                append(
+                                    " This integration is deprecated from AGP 9.0.0 onwards because of the new DSL."
+                                )
+                                append(
+                                    " Please consult the link below for more information: "
+                                )
+                                append(
+                                    "https://developer.android.com/build/releases/agp-preview"
+                                )
+                            }
+                        }
+                    )
                 }
             }
         }

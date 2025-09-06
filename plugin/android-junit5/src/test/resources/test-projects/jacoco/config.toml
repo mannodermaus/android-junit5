@@ -1,3 +1,4 @@
 [settings]
 useJacoco = true
+allowSkipped = true
 task = "jacocoTestReportDebug"

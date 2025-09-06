@@ -134,6 +134,7 @@ class FunctionalTestProjectCreator(
         val useCustomBuildType = config[TomlSpec.Settings.useCustomBuildType]
         val returnDefaultValues = config[TomlSpec.Settings.returnDefaultValues]
         val includeAndroidResources = config[TomlSpec.Settings.includeAndroidResources]
+        val allowSkipped = config[TomlSpec.Settings.allowSkipped]
         val expectedTests = config[TomlSpec.expectations]
 
         val disableTestsForBuildTypes = config[TomlSpec.Settings.disableTestsForBuildTypes]
@@ -172,6 +173,7 @@ class FunctionalTestProjectCreator(
             val useFlavors by optional(default = false)
             val useKotlin by optional(default = false)
             val useJacoco by optional(default = false)
+            val allowSkipped by optional<Boolean>(default = false)
             val useCustomBuildType by optional<String?>(default = null)
             val returnDefaultValues by optional(default = false)
             val includeAndroidResources by optional(default = false)

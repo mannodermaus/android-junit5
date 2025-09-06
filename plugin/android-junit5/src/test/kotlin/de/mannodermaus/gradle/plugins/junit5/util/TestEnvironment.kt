@@ -32,7 +32,7 @@ class TestEnvironment {
   val androidSdkFolder = loadAndroidSdkFolder()
   val envProps: Properties = loadAndroidEnvironment()
 
-  val compileSdkVersion: String
+  val compileSdkVersion: Int
   val minSdkVersion: Int
   val targetSdkVersion: Int
 
@@ -43,7 +43,7 @@ class TestEnvironment {
   val supportedAgpVersions: List<TestedAgp>
 
   init {
-    compileSdkVersion = envProps.getProperty(COMPILE_SDK_PROP_NAME)
+    compileSdkVersion = envProps.getProperty(COMPILE_SDK_PROP_NAME).toInt()
     minSdkVersion = envProps.getProperty(MIN_SDK_PROP_NAME).toInt()
     targetSdkVersion = envProps.getProperty(TARGET_SDK_PROP_NAME).toInt()
     kotlinVersion = envProps.getProperty(KOTLIN_VERSION_PROP_NAME)

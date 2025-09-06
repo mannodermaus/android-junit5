@@ -1,6 +1,5 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.extensions
 
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.BasePlugin
 import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
@@ -8,14 +7,9 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 internal val Project.junitPlatform
     get() = extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
-
-internal val Project.android
-    get() = extensionByName<BaseExtension>("android")
 
 @OptIn(ExperimentalContracts::class)
 internal fun Project.whenAndroidPluginAdded(block: (BasePlugin) -> Unit) {

@@ -90,14 +90,18 @@ class FunctionalTests {
                             .withProjectDir(project)
                             .build()
 
+                        // Print Gradle logs from the embedded invocation
+                        result.prettyPrint()
+
                         // Check that the task execution was successful in general
-                        when (val outcome = result.task(":$taskName")?.outcome) {
-                            TaskOutcome.UP_TO_DATE -> {
+                        val outcome = result.task(":$taskName")?.outcome
+                        when {
+                            outcome == TaskOutcome.UP_TO_DATE -> {
                                 // Nothing to do, a previous build already checked this
-                                println("Test task up-to-date; skipping assertions.")
+                                println("Task '$taskName' up-to-date; skipping assertions.")
                             }
 
-                            TaskOutcome.SUCCESS -> {
+                            outcome == TaskOutcome.SUCCESS -> {
                                 // Based on the spec's configuration in the test project,
                                 // assert that all test classes have been executed as expected
                                 for (expectation in spec.expectedTests) {
@@ -109,11 +113,14 @@ class FunctionalTests {
                                 }
                             }
 
+                            outcome == TaskOutcome.SKIPPED && spec.allowSkipped -> {
+                                // It might be acceptable to allow "skipped" as the result depending on the test spec
+                                println("Task '$taskName' was skipped.")
+                            }
+
                             else -> {
                                 // Unexpected result; fail
-                                fail {
-                                    "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}"
-                                }
+                                fail { "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}" }
                             }
                         }
                     }
@@ -164,8 +171,6 @@ class FunctionalTests {
         productFlavor: String? = null,
         tests: List<String>
     ) {
-        this.prettyPrint()
-
         // Construct task name from given build type and/or product flavor
         // Examples:
         // - buildType="debug", productFlavor=null --> ":testDebugUnitTest"

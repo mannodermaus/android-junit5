@@ -2,7 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.android.build.gradle.TestedExtension
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import de.mannodermaus.gradle.plugins.junit5.util.assertAll
@@ -41,19 +41,19 @@ interface AgpInstrumentationSupportTests : AgpVariantAwareTests {
         project.evaluate()
 
         return listOf(
-                dynamicTest("has a task for writing the debug filters DSL to a resource file") {
-                    val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersDebugAndroidTest")
-                    assertAll(
-                            { assertThat(task).isNotNull() },
-                            { assertThat(task.includeTags.get()).containsExactly("global-include-tag") },
-                            { assertThat(task.excludeTags.get()).containsExactly("debug-exclude-tag") }
-                    )
-                },
+            dynamicTest("has a task for writing the debug filters DSL to a resource file") {
+                val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersDebugAndroidTest")
+                assertAll(
+                    { assertThat(task).isNotNull() },
+                    { assertThat(task.includeTags.get()).containsExactly("global-include-tag") },
+                    { assertThat(task.excludeTags.get()).containsExactly("debug-exclude-tag") }
+                )
+            },
 
-                dynamicTest("has no task for writing the release DSL to a resource file") {
-                    val task = project.tasks.findByName("writeFiltersReleaseAndroidTest")
-                    assertThat(task).isNull()
-                }
+            dynamicTest("has no task for writing the release DSL to a resource file") {
+                val task = project.tasks.findByName("writeFiltersReleaseAndroidTest")
+                assertThat(task).isNull()
+            }
         )
     }
 
@@ -96,31 +96,31 @@ interface AgpInstrumentationSupportTests : AgpVariantAwareTests {
         project.evaluate()
 
         return listOf(
-                dynamicTest("has a task for writing the freeDebug filters DSL to a resource file") {
-                    val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersFreeDebugAndroidTest")
-                    assertThat(task).isNotNull()
-                    assertThat(task.includeTags.get()).containsExactly("global-include-tag", "freeDebug-include-tag")
-                    assertThat(task.excludeTags.get()).containsExactly("global-exclude-tag")
-                },
+            dynamicTest("has a task for writing the freeDebug filters DSL to a resource file") {
+                val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersFreeDebugAndroidTest")
+                assertThat(task).isNotNull()
+                assertThat(task.includeTags.get()).containsExactly("global-include-tag", "freeDebug-include-tag")
+                assertThat(task.excludeTags.get()).containsExactly("global-exclude-tag")
+            },
 
-                dynamicTest("has a task for writing the paidDebug filters DSL to a resource file") {
-                    val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersPaidDebugAndroidTest")
-                    assertThat(task).isNotNull()
-                    assertThat(task.includeTags.get()).containsExactly("global-include-tag")
-                    assertThat(task.excludeTags.get()).containsExactly("global-exclude-tag")
-                },
+            dynamicTest("has a task for writing the paidDebug filters DSL to a resource file") {
+                val task = project.tasks.get<AndroidJUnit5WriteFilters>("writeFiltersPaidDebugAndroidTest")
+                assertThat(task).isNotNull()
+                assertThat(task.includeTags.get()).containsExactly("global-include-tag")
+                assertThat(task.excludeTags.get()).containsExactly("global-exclude-tag")
+            },
 
-                dynamicTest("doesn't have tasks for writing the release filters DSL to a resource file") {
-                    assertThat(project.tasks.findByName("writeFiltersFreeReleaseAndroidTest")).isNull()
-                    assertThat(project.tasks.findByName("writeFiltersPaidReleaseAndroidTest")).isNull()
-                }
+            dynamicTest("doesn't have tasks for writing the release filters DSL to a resource file") {
+                assertThat(project.tasks.findByName("writeFiltersFreeReleaseAndroidTest")).isNull()
+                assertThat(project.tasks.findByName("writeFiltersPaidReleaseAndroidTest")).isNull()
+            }
         )
     }
 }
 
 private fun Project.setupInstrumentationTests() {
     android.defaultConfig {
-        it.testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+        testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
     }
     dependencies.add("androidTestRuntimeOnly", "de.mannodermaus.junit5:android-test-runner:+")
 }
