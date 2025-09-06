@@ -150,11 +150,11 @@ private fun Project.configureRootDeployment(deployConfig: Deployed, credentials:
     group = deployConfig.groupId
     version = deployConfig.currentVersion
 
-    nexusPublishing(
-            packageGroup = deployConfig.groupId,
-            stagingProfileId = credentials.sonatypeStagingProfileId,
-            sonatypeUsername = credentials.ossrhUsername,
-            sonatypePassword = credentials.ossrhPassword
+    centralPublishing(
+        packageGroup = deployConfig.groupId,
+        stagingProfileId = credentials.sonatypeStagingProfileId,
+        username = credentials.centralUsername,
+        password = credentials.centralPassword
     )
 }
 
@@ -348,11 +348,11 @@ private fun Project.signing(action: SigningExtension.() -> Unit) {
 
 // Nexus Staging & Publishing Plugins facade
 
-private fun Project.nexusPublishing(
-        packageGroup: String,
-        stagingProfileId: String?,
-        sonatypeUsername: String?,
-        sonatypePassword: String?
+private fun Project.centralPublishing(
+    packageGroup: String,
+    stagingProfileId: String?,
+    username: String?,
+    password: String?
 ) {
     extensions.getByName("nexusPublishing").withGroovyBuilder {
         setProperty("packageGroup", packageGroup)
@@ -368,11 +368,19 @@ private fun Project.nexusPublishing(
 
                 cls.getDeclaredMethod("setUsername", Any::class.java)
                         .also { it.isAccessible = true }
-                        .invoke(delegate, sonatypeUsername)
+                        .invoke(delegate, username)
 
                 cls.getDeclaredMethod("setPassword", Any::class.java)
                         .also { it.isAccessible = true }
-                        .invoke(delegate, sonatypePassword)
+                        .invoke(delegate, password)
+
+                cls.getDeclaredMethod("setNexusUrl", Any::class.java)
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+
+                cls.getDeclaredMethod("setSnapshotRepositoryUrl", Any::class.java)
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, uri("https://central.sonatype.com/repository/maven-snapshots/"))
             }
         }
     }
