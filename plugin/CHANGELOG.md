@@ -2,15 +2,17 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 1.13.4.0 (2025-09-07)
+- First considerations for Android Gradle Plugin 9.x
+  - Remove all usages of the old plugin & variant DSL
+  - **This means that Jacoco integration is effectively deprecated until further notice for users of AGP 9.0.0 and the new DSL**
 - JUnit 5.13.4
 
 ## 1.13.3.0 (2025-09-07)
 - JUnit 5.13.3
 
 ## 1.13.2.0 (2025-09-06)
-- First considerations for Android Gradle Plugin 9.x
-  - Remove all usages of the old plugin & variant DSL
-  - **This means that Jacoco integration is effectively deprecated until further notice for users of AGP 9.0.0 and the new DSL**
 - JUnit 5.13.2
 
 ## 1.13.1.0 (2025-06-29)
