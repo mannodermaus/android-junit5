@@ -34,7 +34,7 @@ fun Project.configureTestResources() {
             "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
             "KOTLIN_VERSION" to libs.versions.kotlin,
-            "JUNIT_JUPITER_VERSION" to libs.versions.junitJupiter,
+            "JUNIT_JUPITER_VERSION" to libs.versions.junitFramework,
             "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
             // Collect all supported AGP versions into a single string.

@@ -21,7 +21,7 @@ plugins {
 //
 // The other way around ("call Kotlin from Groovy") is prohibited explicitly.
 // ------------------------------------------------------------------------------------------------
-val javaVersion = JavaVersion.VERSION_11.toString()
+val javaVersion = JavaVersion.VERSION_17.toString()
 tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(JvmTarget.fromTarget(javaVersion))
 }

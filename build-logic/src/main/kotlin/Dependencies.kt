@@ -2,12 +2,10 @@
 
 object libs {
     object versions {
-        const val kotlin = "2.1.21"
-        const val junitJupiter = "5.14.0"
-        const val junitVintage = "5.14.0"
-        const val junitPlatform = "1.14.0"
+        const val kotlin = "2.2.20"
+        const val junitFramework = "6.0.0"
 
-        const val composeBom = "2025.03.00"
+        const val composeBom = "2025.09.01"
         const val androidXMultidex = "2.0.1"
         const val androidXTestAnnotation = "1.0.1"
         const val androidXTestCore = "1.6.1"
@@ -51,13 +49,13 @@ object libs {
     const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
     const val kotlinCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}"
 
-    const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitJupiter}"
-    const val junitJupiterParams = "org.junit.jupiter:junit-jupiter-params:${versions.junitJupiter}"
-    const val junitJupiterEngine = "org.junit.jupiter:junit-jupiter-engine:${versions.junitJupiter}"
-    const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:${versions.junitVintage}"
-    const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitPlatform}"
-    const val junitPlatformLauncher = "org.junit.platform:junit-platform-launcher:${versions.junitPlatform}"
-    const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
+    const val junitJupiterApi = "org.junit.jupiter:junit-jupiter-api:${versions.junitFramework}"
+    const val junitJupiterParams = "org.junit.jupiter:junit-jupiter-params:${versions.junitFramework}"
+    const val junitJupiterEngine = "org.junit.jupiter:junit-jupiter-engine:${versions.junitFramework}"
+    const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:${versions.junitFramework}"
+    const val junitPlatformCommons = "org.junit.platform:junit-platform-commons:${versions.junitFramework}"
+    const val junitPlatformLauncher = "org.junit.platform:junit-platform-launcher:${versions.junitFramework}"
+    const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitFramework}"
     const val apiguardianApi = "org.apiguardian:apiguardian-api:${versions.apiGuardian}"
 
     const val composeBom = "androidx.compose:compose-bom:${versions.composeBom}"
