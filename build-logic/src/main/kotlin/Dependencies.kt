@@ -3,9 +3,9 @@
 object libs {
     object versions {
         const val kotlin = "2.1.21"
-        const val junitJupiter = "5.13.4"
-        const val junitVintage = "5.13.4"
-        const val junitPlatform = "1.13.4"
+        const val junitJupiter = "5.14.0"
+        const val junitVintage = "5.14.0"
+        const val junitPlatform = "1.14.0"
 
         const val composeBom = "2025.03.00"
         const val androidXMultidex = "2.0.1"
