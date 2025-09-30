@@ -93,7 +93,7 @@ object Artifacts {
         platform = Java,
         groupId = "de.mannodermaus.gradle.plugins",
         artifactId = "android-junit5",
-        currentVersion = "1.14.0.0-SNAPSHOT",
+        currentVersion = "6.0.0.0-SNAPSHOT",
         latestStableVersion = "1.13.4.0",
         description = "Unit Testing with JUnit 5 for Android."
     )
@@ -103,7 +103,7 @@ object Artifacts {
      */
     object Instrumentation {
         const val groupId = "de.mannodermaus.junit5"
-        private const val currentVersion = "1.8.1-SNAPSHOT"
+        private const val currentVersion = "2.0.0-SNAPSHOT"
         private const val latestStableVersion = "1.8.0"
 
         val Core = Deployed(

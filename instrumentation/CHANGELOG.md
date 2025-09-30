@@ -3,6 +3,9 @@ Change Log
 
 ## Unreleased
 
+- Update to Kotlin 2.2
+- Raise minimum supported API level to 35, acknowledging the baseline shift to Java 17 in JUnit 6
+
 ## 1.8.0 (2025-06-11)
 
 - Compile with SDK 35

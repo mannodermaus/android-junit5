@@ -5,24 +5,21 @@ import androidx.annotation.VisibleForTesting
 import de.mannodermaus.junit5.internal.discovery.EmptyTestPlan
 import de.mannodermaus.junit5.internal.runners.notification.ParallelRunNotifier
 import org.junit.platform.commons.JUnitException
-import org.junit.platform.engine.ConfigurationParameters
 import org.junit.platform.engine.discovery.MethodSelector
-import org.junit.platform.launcher.TestPlan
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
-import java.util.Optional
 
 /**
  * JUnit Runner implementation using the JUnit Platform as its backbone.
- * Serves as an intermediate solution to writing JUnit 5-based instrumentation tests
+ * Serves as an intermediate solution to writing JUnit Framework-based instrumentation tests
  * until official support arrives for this.
  *
  * @see org.junit.platform.runner.JUnitPlatform
  */
-@RequiresApi(26)
+@RequiresApi(35)
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-internal class AndroidJUnit5(
+internal class AndroidJUnitFramework(
     private val testClass: Class<*>,
     paramsSupplier: () -> AndroidJUnit5RunnerParams = AndroidJUnit5RunnerParams.Companion::create,
 ) : Runner() {

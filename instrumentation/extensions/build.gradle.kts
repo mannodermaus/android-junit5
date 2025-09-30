@@ -27,7 +27,7 @@ apply {
   plugin("de.mannodermaus.android-junit5")
 }
 
-val javaVersion = JavaVersion.VERSION_11
+val javaVersion = JavaVersion.VERSION_17
 
 android {
   namespace = "de.mannodermaus.junit5.extensions"

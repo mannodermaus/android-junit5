@@ -161,7 +161,7 @@ internal class AndroidJUnitPlatformTestTree(
 
             } else if (source is MethodSource) {
                 val methodParameterTypes = source.methodParameterTypes
-                return if (methodParameterTypes.isBlank()) {
+                return if (methodParameterTypes.isNullOrBlank()) {
                     source.methodName
                 } else {
                     String.format("%s(%s)", source.methodName, methodParameterTypes)
@@ -184,10 +184,10 @@ internal class AndroidJUnitPlatformTestTree(
         TestPlan(
             /* containsTests = */ delegate.containsTests(),
             /* configurationParameters = */ delegate.configurationParameters,
-            /* outputDirectoryProvider = */ delegate.outputDirectoryProvider
+            /* outputDirectoryCreator = */ delegate.outputDirectoryCreator
         ) {
 
-        fun getRealParent(child: TestIdentifier?): Optional<TestIdentifier> {
+        fun getRealParent(child: TestIdentifier): Optional<TestIdentifier> {
             // Because the overridden "getParent()" from the superclass is modified,
             // expose this additional method to access the actual parent identifier of the given child.
             // This is needed when composing the display name of a dynamic test.
@@ -216,7 +216,7 @@ internal class AndroidJUnitPlatformTestTree(
 
         /* Unchanged */
 
-        override fun addInternal(testIdentifier: TestIdentifier?) {
+        override fun addInternal(testIdentifier: TestIdentifier) {
             delegate.addInternal(testIdentifier)
         }
 
@@ -229,11 +229,6 @@ internal class AndroidJUnitPlatformTestTree(
         }
 
         override fun getChildren(parentId: UniqueId): MutableSet<TestIdentifier> {
-            return delegate.getChildren(parentId)
-        }
-
-        @Suppress("OVERRIDE_DEPRECATION")
-        override fun getChildren(parentId: String): Set<TestIdentifier> {
             return delegate.getChildren(parentId)
         }
 

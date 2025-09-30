@@ -26,7 +26,7 @@ apply {
   plugin("de.mannodermaus.android-junit5")
 }
 
-val javaVersion = JavaVersion.VERSION_11
+val javaVersion = JavaVersion.VERSION_17
 
 android {
   namespace = "de.mannodermaus.junit5.runner"
@@ -99,10 +99,12 @@ dependencies {
   // by the "instrumentation" companion library instead.
   compileOnly(libs.junitJupiterApi)
   compileOnly(libs.junitJupiterParams)
-  compileOnly(libs.junitPlatformRunner)
+  compileOnly(libs.junitPlatformLauncher)
+  compileOnly(libs.junitPlatformSuiteApi)
 
   testImplementation(project(":testutil"))
   testImplementation(libs.robolectric)
+  testImplementation(libs.junitPlatformLauncher)
   testRuntimeOnly(libs.junitJupiterEngine)
 }
 

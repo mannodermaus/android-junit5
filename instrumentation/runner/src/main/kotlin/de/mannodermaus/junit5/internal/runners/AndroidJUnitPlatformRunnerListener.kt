@@ -22,7 +22,7 @@ internal class AndroidJUnitPlatformRunnerListener(
     private val notifier: RunNotifier
 ) : TestExecutionListener {
 
-    override fun reportingEntryPublished(testIdentifier: TestIdentifier?, entry: ReportEntry?) {
+    override fun reportingEntryPublished(testIdentifier: TestIdentifier, entry: ReportEntry) {
         // No-op, but must be declared to avoid AbstractMethodError
     }
 

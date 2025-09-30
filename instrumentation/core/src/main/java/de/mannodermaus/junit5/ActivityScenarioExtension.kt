@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.test.core.app.ActivityScenario
 import de.mannodermaus.junit5.ActivityScenarioExtension.Companion.launch
 import de.mannodermaus.junit5.internal.LOG_TAG
@@ -110,7 +111,7 @@ import java.util.concurrent.locks.ReentrantLock
  * ```
  *
  */
-@TargetApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.O)
 public class ActivityScenarioExtension<A : Activity>
 private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : BeforeEachCallback,
     AfterEachCallback, ParameterResolver {
@@ -194,7 +195,6 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
 
     /* Private */
 
-    @Suppress("InconsistentCommentForJavaParameter")
     private fun ExtensionContext.acquireLock(state: Boolean) {
         // No need to do anything unless parallelism is enabled
         if (executionMode != ExecutionMode.CONCURRENT) {
@@ -209,7 +209,7 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
         // Create a global lock for restricting test execution to one-by-one;
         // this is necessary to ensure that only one ActivityScenario is ever active at a time,
         // preventing violations of Android's instrumentation and Espresso
-        val lock = store.getOrComputeIfAbsent(
+        val lock = store.computeIfAbsent(
             /* key = */ LOCK_KEY,
             /* defaultCreator = */ { ReentrantLock() },
             /* requiredType = */ ReentrantLock::class.java,
@@ -223,7 +223,7 @@ private constructor(private val scenarioSupplier: () -> ActivityScenario<A>) : B
     }
 
     private fun logConcurrentExecutionWarningOnce(store: ExtensionContext.Store) {
-        store.getOrComputeIfAbsent(WARNING_KEY) {
+        store.computeIfAbsent(WARNING_KEY) {
             setOf(
                 "  [WARNING!] UI tests using ActivityScenarioExtension should not be executed in CONCURRENT mode.",
                 "  We will try to disable parallelism for Espresso tests, but this may be error-prone",

@@ -82,7 +82,7 @@ class GrantPermissionExtensionTests {
     private fun runExtension(vararg permissions: String) {
         val extension = GrantPermissionExtension(granter)
         extension.grantPermissions(permissions)
-        extension.beforeEach(null)
+        extension.beforeEach()
     }
 
     private class TestPermissionGranter : PermissionGranter {

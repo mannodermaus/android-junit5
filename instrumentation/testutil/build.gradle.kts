@@ -8,7 +8,7 @@ plugins {
   kotlin("android")
 }
 
-val javaVersion = JavaVersion.VERSION_11
+val javaVersion = JavaVersion.VERSION_17
 
 android {
   namespace = "de.mannodermaus.junit5.testutil"
@@ -71,5 +71,6 @@ dependencies {
   api(libs.mockitoKotlin)
   api(libs.junitJupiterApi)
   api(libs.junitJupiterParams)
-  api(libs.junitPlatformRunner)
+  api(libs.junitPlatformLauncher)
+  api(libs.junitPlatformSuiteApi)
 }

@@ -42,9 +42,11 @@ internal object TestNameFormatter {
         // - Cut off no-parameter brackets '()'
         // - Replace any other round brackets with square brackets (for parameterized tests)
         //   to ensure that logs are displayed in the test results window (ref. #350)
+        // - Remove quotation marks (for parameterized tests)
         return identifier.displayName
             .replace("()", "")
             .replace('(', '[')
             .replace(')', ']')
+            .replace("\"", "")
     }
 }

@@ -37,10 +37,10 @@ class EnabledOnSdkVersionConditionTests : AbstractExecutionConditionTests() {
    */
   @Test
   fun enabledBecauseMinApiIsMatched() {
-    withApiLevel(26) {
+    withApiLevel(35) {
       evaluateCondition()
       assertEnabled()
-      assertReasonEquals("Enabled on API 26")
+      assertReasonEquals("Enabled on API 35")
     }
   }
 
@@ -61,10 +61,10 @@ class EnabledOnSdkVersionConditionTests : AbstractExecutionConditionTests() {
    */
   @Test
   fun enabledBecauseApiIsInValidRange() {
-    withApiLevel(26) {
+    withApiLevel(35) {
       evaluateCondition()
       assertEnabled()
-      assertReasonEquals("Enabled on API 26")
+      assertReasonEquals("Enabled on API 35")
     }
   }
 
@@ -73,10 +73,10 @@ class EnabledOnSdkVersionConditionTests : AbstractExecutionConditionTests() {
    */
   @Test
   fun disabledBecauseMinApiTooLow() {
-    withApiLevel(26) {
+    withApiLevel(35) {
       evaluateCondition()
       assertDisabled()
-      assertReasonEquals("Disabled on API 26")
+      assertReasonEquals("Disabled on API 35")
     }
   }
 
@@ -97,10 +97,10 @@ class EnabledOnSdkVersionConditionTests : AbstractExecutionConditionTests() {
    */
   @Test
   fun disabledBecauseApiIsOutsideValidRange() {
-    withApiLevel(26) {
+    withApiLevel(35) {
       evaluateCondition()
       assertDisabled()
-      assertReasonEquals("Disabled on API 26")
+      assertReasonEquals("Disabled on API 35")
     }
   }
 }

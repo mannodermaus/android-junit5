@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("com.android.application")
@@ -7,7 +8,13 @@ plugins {
   id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
 }
 
-val javaVersion = JavaVersion.VERSION_11
+val javaVersion = JavaVersion.VERSION_17
+
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
+  }
+}
 
 android {
   namespace = "de.mannodermaus.junit5.sample"
@@ -47,10 +54,6 @@ android {
   compileOptions {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
-  }
-
-  kotlinOptions {
-    jvmTarget = javaVersion.toString()
   }
 }
 
