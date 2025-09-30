@@ -3,15 +3,15 @@
   To update the content of this README, please apply modifications
   to `README.md.template` instead, and run the `generateReadme` task from Gradle.
 -->
-# <img src=".images/logo.png" align="right" width="100">android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
+# <img src=".images/logo.png" align="right" width="100">JUnit Jupiter for Android [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
 
-A Gradle plugin that allows for the execution of [JUnit 5][junit5gh] tests in Android environments using **Android Gradle Plugin 8.2 or later.**
+A Gradle plugin that allows for the execution of [JUnit Jupiter][junitgh] tests in Android environments using **Android Gradle Plugin 8.2 or later.**
 
 ## How?
 
-This plugin configures the unit test tasks for each build variant of a project to run on the JUnit Platform. Furthermore, it provides additional configuration options for these tests [through a DSL][wiki-dsl] and facilitates the usage of JUnit 5 for instrumentation tests.
+This plugin configures the unit test tasks for each build variant of a project to run on the JUnit Platform. Furthermore, it provides additional configuration options for these tests [through a DSL][wiki-dsl] and facilitates the usage of JUnit Jupiter for instrumentation tests.
 
-Instructions on how to write tests with the JUnit 5 framework can be found [in their User Guide][junit5ug]. To get a first look at its features, a small showcase project can be found [here][sampletests].
+Instructions on how to write tests with the JUnit framework can be found [in their User Guide][junitug]. To get a first look at its features, a small showcase project can be found [here][sampletests].
 
 ## Setup
 
@@ -27,15 +27,15 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.13.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.0")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:6.0.0")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.13.4")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.0.0")
   }
   ```
 </details>
@@ -50,15 +50,15 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.13.4"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.13.4"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:6.0.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:6.0.0"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.13.4"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:6.0.0"
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "junit:junit:4.13.2"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.13.4"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:6.0.0"
   }
   ```
 </details>
@@ -115,16 +115,16 @@ The latest version of this plugin requires:
 
 ## Instrumentation Test Support
 
-You can use JUnit 5 to run instrumentation tests on emulators and physical devices, too. Because the framework is built on Java 8 from the ground up, these instrumentation tests will only run on devices running Android 8.0 (API 26) or newer – older phones will skip the execution of these tests completely, marking them as "ignored".
+You can use JUnit Jupiter to run instrumentation tests on emulators and physical devices, too. Because the framework is built on Java 8 from the ground up, these instrumentation tests will only run on devices running Android 8.0 (API 26) or newer – older phones will skip the execution of these tests completely, marking them as "ignored".
 
-Before you can write instrumentation tests with JUnit Jupiter, make sure that your module is using the `androidx.test.runner.AndroidJUnitRunner` (or a subclass of it) as its `testInstrumentationRunner`. Then, simply add a dependency on `junit-jupiter-api` to the `androidTestImplementation` configuration in your build script and the plugin will automatically configure JUnit 5 tests for you:
+Before you can write instrumentation tests with JUnit Jupiter, make sure that your module is using the `androidx.test.runner.AndroidJUnitRunner` (or a subclass of it) as its `testInstrumentationRunner`. Then, simply add a dependency on `junit-jupiter-api` to the `androidTestImplementation` configuration in your build script and the plugin will automatically configure JUnit Jupiter tests for you:
 
 <details open>
   <summary>Kotlin</summary>
   
   ```kotlin
   dependencies {
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:6.0.0")
   }
   ```
 </details>
@@ -134,12 +134,12 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
 
   ```groovy
   dependencies {
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.13.4"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:6.0.0"
   }
   ```
 </details>
 
-By enabling JUnit 5 for instrumentation tests, you will gain access to `ActivityScenarioExtension` (among other things), which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
+By enabling JUnit Jupiter for instrumentation tests, you will gain access to `ActivityScenarioExtension` (among other things), which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
 
 ### Extensions
 
@@ -172,9 +172,9 @@ Can you think of more? Let's discuss in the issues section!
 
 ### Jetpack Compose
 
-To test `@Composable` functions on device with JUnit 5, first enable support for instrumentation tests as described above.
+To test `@Composable` functions on device with JUnit Jupiter, first enable support for instrumentation tests as described above.
 Then, add the Compose test dependency to your `androidTestImplementation` configuration
-and the plugin will autoconfigure JUnit 5 Compose support for you!
+and the plugin will autoconfigure JUnit Jupiter Compose support for you!
 
 <details open>
   <summary>Kotlin</summary>
@@ -204,7 +204,7 @@ and the plugin will autoconfigure JUnit 5 Compose support for you!
   ```
 </details>
 
-[The wiki][wiki-home] includes a section on how to test your Composables with JUnit 5.
+[The wiki][wiki-home] includes a section on how to test your Composables with JUnit Jupiter.
 
 ### Override the version of instrumentation test libraries
 
@@ -233,7 +233,7 @@ when it sets up the artifacts automatically. However, it is possible to choose a
 
 ## Official Support
 
-At this time, Google hasn't shared any immediate plans to bring first-party support for JUnit 5 to Android. The following list is an aggregation of pending feature requests:
+At this time, Google hasn't shared any immediate plans to bring first-party support for JUnit Jupiter to Android. The following list is an aggregation of pending feature requests:
 
 - [InstantTaskExecutorRule uses @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) -- why? (issuetracker.google.com)](https://issuetracker.google.com/u/0/issues/79189568)
 - [Add support for JUnit 5 (issuetracker.google.com)](https://issuetracker.google.com/issues/127100532)
@@ -241,11 +241,11 @@ At this time, Google hasn't shared any immediate plans to bring first-party supp
 
 ## Support for @Rules
 
-Since JUnit 5 has replaced the `@Rule` mechanism with Extensions, the following artifacts help bridge the gap until Android officially transitions to JUnit 5.
+Since JUnit Jupiter has replaced the `@Rule` mechanism with Extensions, the following artifacts help bridge the gap until Android officially transitions to JUnit Jupiter.
 
 ### InstantExecutorExtension
 
-Replaces `InstantTaskExecutorRule` in JUnit 5.
+Replaces `InstantTaskExecutorRule` in JUnit Jupiter.
 
 <details>
   <summary>Kotlin</summary>
@@ -274,7 +274,7 @@ For more details see [instant-task-executor-extension](https://github.com/nebosk
 This repository contains multiple modules, divided into two sub-projects. The repository's root directory contains build logic shared across the sub-projects, which in turn use symlinks to connect to the common build scripts in their parent folder.
 
 - `instrumentation`: The root folder for Android-based modules, namely the instrumentation libraries & a sample application. After cloning, open this project in Android Studio.
-- `plugin`: The root folder for Java-based modules, namely the Gradle plugin for JUnit 5 on Android, as well as its test module. After cloning, open this project in IntelliJ IDEA.
+- `plugin`: The root folder for Java-based modules, namely the Gradle plugin for JUnit Jupiter on Android, as well as its test module. After cloning, open this project in IntelliJ IDEA.
 
 ## Plugin Compatibility Map
 
@@ -283,7 +283,7 @@ refer to the table below to find a suitable alternative version. Note that **no 
 legacy versions**, so please consider upgrading to at least Android Gradle Plugin 8.2
 before filing an issue with the latest one.
 
-|Your AGP Version|Suggested JUnit5 Plugin Version|
+|Your AGP Version|Suggested Plugin Version|
 |---|---|
 |`>= 8.2.0`|`1.13.4.0`|
 |`8.0.0` - `8.1.4`|`1.12.2.0`|
@@ -312,8 +312,8 @@ limitations under the License.
 
 See also the [full License text](LICENSE).
 
- [junit5gh]: https://github.com/junit-team/junit5
- [junit5ug]: https://junit.org/junit5/docs/current/user-guide
+ [junitgh]: https://github.com/junit-team/junit5
+ [junitug]: https://junit.org/junit5/docs/current/user-guide
  [circleci]: https://circleci.com/gh/mannodermaus/android-junit5
  [sonatyperepo]: https://central.sonatype.com/repository/maven-snapshots
  [sampletests]: instrumentation/sample
