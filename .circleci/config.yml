@@ -3,7 +3,7 @@ defaults: &defaults
   working_directory: ~/root/project
   resource_class: large
   docker:
-    - image: cimg/android:2023.04.1
+    - image: cimg/android:2025.09.1
       environment:
         GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
 
@@ -68,8 +68,8 @@ jobs:
               --test instrumentation/core/build/outputs/apk/androidTest/debug/core-debug-androidTest.apk \
               --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
               --test-runner-class androidx.test.runner.AndroidJUnitRunner \
-              --device model=redfin,version=30,locale=en_US,orientation=portrait \
-              --device model=oriole,version=33,locale=en_US,orientation=portrait \
+              --device model=pa3q,version=35,locale=en_US,orientation=portrait \
+              --device model=tokay,version=36,locale=en_US,orientation=portrait \
               --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
               --timeout 15m
       - run:
