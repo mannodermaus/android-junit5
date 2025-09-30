@@ -64,9 +64,13 @@ internal constructor(private val permissionGranter: PermissionGranter) : BeforeE
         permissionGranter.addPermissions(*permissionSet.toTypedArray())
     }
 
+    internal fun beforeEach() {
+        permissionGranter.requestPermissions()
+    }
+
     /* BeforeEachCallback */
 
-    override fun beforeEach(context: ExtensionContext?) {
-        permissionGranter.requestPermissions()
+    override fun beforeEach(context: ExtensionContext) {
+        beforeEach()
     }
 }

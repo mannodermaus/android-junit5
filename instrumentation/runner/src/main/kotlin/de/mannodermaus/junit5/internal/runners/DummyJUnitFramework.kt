@@ -10,19 +10,29 @@ import org.junit.runner.notification.RunNotifier
 import java.lang.reflect.Method
 
 /**
- * Fake Runner that marks all JUnit 5 methods as ignored,
- * used for old devices without Java 8 capabilities.
+ * Fake Runner that marks all JUnit Framework methods as ignored,
+ * used for old devices without Java 17 capabilities.
  */
-internal class DummyJUnit5(private val testClass: Class<*>) : Runner() {
+internal class DummyJUnitFramework(private val testClass: Class<*>) : Runner() {
 
     private val testMethods: Set<Method> = JupiterTestMethodFinder.find(testClass)
 
     override fun run(notifier: RunNotifier) {
         Log.w(
             LOG_TAG,
-            "JUnit 5 is not supported on this device: " +
-                    "API level ${Build.VERSION.SDK_INT} is less than 26, the minimum requirement. " +
-                    "All Jupiter tests for ${testClass.name} will be disabled."
+            buildString {
+                append("JUnit Framework is not supported on this device: ")
+                append("API level ${Build.VERSION.SDK_INT} is less than 35, ")
+                append("the minimum requirement. ")
+                append("All Jupiter tests for ${testClass.name} will be disabled.")
+
+                // Add a potential recourse for API levels >= 26, but <= 35
+                if (Build.VERSION.SDK_INT >= 26) {
+                    append(" You could downgrade to a previous version of the JUnit Framework ")
+                    append("(1.14.0.0) in order to use instrumentation tests for this device, ")
+                    append("as it meets the minimum API level requirement of that version.")
+                }
+            }
         )
 
         for (testMethod in testMethods) {

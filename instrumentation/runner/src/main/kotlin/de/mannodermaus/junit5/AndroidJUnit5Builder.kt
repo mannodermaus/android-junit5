@@ -4,7 +4,7 @@ import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
 import de.mannodermaus.junit5.internal.LibcoreAccess
 import de.mannodermaus.junit5.internal.runners.AndroidJUnit5RunnerParams
-import de.mannodermaus.junit5.internal.runners.tryCreateJUnit5Runner
+import de.mannodermaus.junit5.internal.runners.tryCreateJUnitFrameworkRunner
 import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
 
@@ -33,18 +33,18 @@ import org.junit.runners.model.RunnerBuilder
 @Suppress("unused")
 public class AndroidJUnit5Builder : RunnerBuilder() {
 
-    private val junit5Available by lazy {
+    private val junitFrameworkAvailable by lazy {
         try {
             // The verification order of this block is quite important.
             // Do not change it without thorough testing of potential consequences!
-            // After tampering with this, verify that integration
-            // with applications using JUnit 5 for UI tests still works,
-            // AND that integration with applications NOT using JUnit 5 for UI tests still works.
+            // After tampering with this, verify that integration with applications
+            // using JUnit Framework for UI tests AND applications NOT using JUnit Framework
+            // for UI tests still works.
             //
             // First, verify the existence of junit-jupiter-api on the classpath.
-            // Then, verify that the Android JUnit 5 Runner is available.
+            // Then, verify that the Android JUnit Framework Runner is available.
             Class.forName("org.junit.jupiter.api.Test")
-            Class.forName("de.mannodermaus.junit5.internal.runners.AndroidJUnit5")
+            Class.forName("de.mannodermaus.junit5.internal.runners.AndroidJUnitFramework")
             true
         } catch (e: Throwable) {
             false
@@ -66,8 +66,8 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         if (testClass.isInIgnorablePackage) return null
 
         try {
-            return if (junit5Available) {
-                tryCreateJUnit5Runner(testClass) { params }
+            return if (junitFrameworkAvailable) {
+                tryCreateJUnitFrameworkRunner(testClass) { params }
             } else {
                 null
             }

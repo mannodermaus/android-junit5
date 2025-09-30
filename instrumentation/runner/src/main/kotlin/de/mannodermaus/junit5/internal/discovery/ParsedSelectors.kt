@@ -1,7 +1,7 @@
 package de.mannodermaus.junit5.internal.discovery
 
 import android.os.Bundle
-import de.mannodermaus.junit5.internal.runners.AndroidJUnit5
+import de.mannodermaus.junit5.internal.runners.AndroidJUnitFramework
 import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.discovery.DiscoverySelectors
 
@@ -9,7 +9,7 @@ import org.junit.platform.engine.discovery.DiscoverySelectors
  * Holder object for the selectors of a test plan.
  * It converts the arguments handed to the Runner by the
  * Android instrumentation into JUnit Platform [DiscoverySelector] objects
- * for the [AndroidJUnit5] runner.
+ * for the [AndroidJUnitFramework] runner.
  */
 internal object ParsedSelectors {
 

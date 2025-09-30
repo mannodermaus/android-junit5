@@ -23,7 +23,7 @@ class DisabledOnSdkVersionIntegrationTests {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(until = 26)
+  @DisabledOnSdkVersion(until = 35)
   @Test
   fun disabledBecauseMaxApiIsMatched() {
   }

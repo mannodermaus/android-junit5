@@ -2,6 +2,7 @@ package de.mannodermaus.junit5.internal
 
 import android.annotation.TargetApi
 import android.os.Build
+import androidx.annotation.RequiresApi
 import de.mannodermaus.junit5.condition.EnabledOnSdkVersion
 import org.junit.jupiter.api.extension.ConditionEvaluationResult
 import org.junit.jupiter.api.extension.ExecutionCondition
@@ -24,7 +25,7 @@ internal class EnabledOnSdkVersionCondition : ExecutionCondition {
         }
     }
 
-    @TargetApi(24)
+    @RequiresApi(24)
     override fun evaluateExecutionCondition(context: ExtensionContext): ConditionEvaluationResult {
         val optional = findAnnotation(context.element, EnabledOnSdkVersion::class.java)
 

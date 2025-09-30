@@ -10,7 +10,7 @@ plugins {
   id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
 }
 
-val javaVersion = JavaVersion.VERSION_11
+val javaVersion = JavaVersion.VERSION_17
 
 android {
   namespace = "de.mannodermaus.junit5"
@@ -94,7 +94,8 @@ dependencies {
   // This is required by the "instrumentation-runner" companion library,
   // since it can't provide any JUnit 5 runtime libraries itself
   // due to fear of prematurely incrementing the minSdkVersion requirement.
-  runtimeOnly(libs.junitPlatformRunner)
+  runtimeOnly(libs.junitPlatformLauncher)
+  runtimeOnly(libs.junitPlatformSuiteApi)
   runtimeOnly(libs.junitJupiterEngine)
 
   // This transitive dependency of JUnit 5 is required to be on the runtime classpath,
