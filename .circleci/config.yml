@@ -69,7 +69,6 @@ jobs:
               --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
               --test-runner-class androidx.test.runner.AndroidJUnitRunner \
               --device model=pa3q,version=35,locale=en_US,orientation=portrait \
-              --device model=tokay,version=36,locale=en_US,orientation=portrait \
               --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
               --timeout 15m
       - run:
