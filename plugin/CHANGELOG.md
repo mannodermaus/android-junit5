@@ -2,6 +2,7 @@ Change Log
 ==========
 
 ## Unreleased
+- JUnit 5.14.0
 
 ## 1.13.4.0 (2025-09-07)
 - First considerations for Android Gradle Plugin 9.x
