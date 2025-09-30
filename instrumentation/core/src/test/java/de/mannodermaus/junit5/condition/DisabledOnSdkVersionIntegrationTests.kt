@@ -29,13 +29,13 @@ class DisabledOnSdkVersionIntegrationTests {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(from = 24, until = 29)
+  @DisabledOnSdkVersion(from = 24, until = 35)
   @Test
   fun disabledBecauseApiIsInValidRange() {
   }
 
   @Disabled("Used by DisabledOnSdkVersionConditionTests only")
-  @DisabledOnSdkVersion(from = 27)
+  @DisabledOnSdkVersion(from = 36)
   @Test
   fun enabledBecauseMinApiLowEnough() {
   }
