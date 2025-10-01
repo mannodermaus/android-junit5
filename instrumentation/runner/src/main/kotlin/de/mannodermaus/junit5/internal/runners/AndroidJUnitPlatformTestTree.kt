@@ -184,7 +184,7 @@ internal class AndroidJUnitPlatformTestTree(
         TestPlan(
             /* containsTests = */ delegate.containsTests(),
             /* configurationParameters = */ delegate.configurationParameters,
-            /* outputDirectoryProvider = */ delegate.outputDirectoryProvider
+            /* outputDirectoryCreator = */ delegate.outputDirectoryCreator
         ) {
 
         fun getRealParent(child: TestIdentifier?): Optional<TestIdentifier> {
