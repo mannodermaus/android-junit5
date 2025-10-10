@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+## 1.9.0 (2025-10-10)
+
 - Adjust constructor of `ModifiedTestPlan` to conform to newly added interface from JUnit 5.14 (#390)
 
 ## 1.8.0 (2025-06-11)
