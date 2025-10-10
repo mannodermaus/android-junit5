@@ -22,20 +22,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```kotlin
   plugins {
-    id("de.mannodermaus.android-junit5") version "1.13.4.0"
+    id("de.mannodermaus.android-junit5") version "1.14.0.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.13.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.14.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.14.0")
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.14.0")
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.13.4")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.14.0")
   }
   ```
 </details>
@@ -45,20 +45,20 @@ To get started, declare the plugin in your `app` module's build script alongside
 
   ```groovy
   plugins {
-    id "de.mannodermaus.android-junit5" version "1.13.4.0"
+    id "de.mannodermaus.android-junit5" version "1.14.0.0"
   }
 
   dependencies {
     // (Required) Writing and executing Unit Tests on the JUnit Platform
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.13.4"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.13.4"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.14.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.14.0"
 
     // (Optional) If you need "Parameterized Tests"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.13.4"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.14.0"
 
     // (Optional) If you also have JUnit 4-based tests
     testImplementation "junit:junit:4.13.2"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.13.4"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.14.0"
   }
   ```
 </details>
@@ -76,7 +76,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle.kts:
   buildscript {
     dependencies {
-      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.13.4.0")
+      classpath("de.mannodermaus.gradle.plugins:android-junit5:1.14.0.0")
     }
   }
 
@@ -94,7 +94,7 @@ If you prefer to use the legacy way to declare the dependency instead, remove th
   // In the root project's build.gradle:
   buildscript {
     dependencies {
-      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.13.4.0"
+      classpath "de.mannodermaus.gradle.plugins:android-junit5:1.14.0.0"
     }
   }
 
@@ -124,7 +124,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
   
   ```kotlin
   dependencies {
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.14.0")
   }
   ```
 </details>
@@ -134,7 +134,7 @@ Before you can write instrumentation tests with JUnit Jupiter, make sure that yo
 
   ```groovy
   dependencies {
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.13.4"
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:5.14.0"
   }
   ```
 </details>
@@ -216,7 +216,7 @@ when it sets up the artifacts automatically. However, it is possible to choose a
 
   ```kotlin
   junitPlatform {
-    instrumentationTests.version.set("1.8.0")
+    instrumentationTests.version.set("1.9.0")
   }
   ```
 </details>
@@ -226,7 +226,7 @@ when it sets up the artifacts automatically. However, it is possible to choose a
 
   ```groovy
   junitPlatform {
-    instrumentationTests.version.set("1.8.0")
+    instrumentationTests.version.set("1.9.0")
   }
   ```
 </details>
@@ -285,7 +285,7 @@ before filing an issue with the latest one.
 
 |Your AGP Version|Suggested JUnit5 Plugin Version|
 |---|---|
-|`>= 8.2.0`|`1.13.4.0`|
+|`>= 8.2.0`|`1.14.0.0`|
 |`8.0.0` - `8.1.4`|`1.12.2.0`|
 |`7.0.0` - `7.4.2`|`1.10.0.0`|
 |`4.0.0` - `4.2.2`|`1.8.2.1`|
