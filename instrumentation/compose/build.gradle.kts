@@ -74,7 +74,6 @@ dependencies {
   implementation(libs.junit4)
   implementation(libs.espressoCore)
 
-  implementation(platform(libs.composeBom))
   implementation(libs.composeActivity)
   implementation(libs.composeUi)
   implementation(libs.composeUiTooling)
