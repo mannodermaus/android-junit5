@@ -204,6 +204,17 @@ private fun MavenPublication.applyPublicationDetails(
                         .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
                         .forEach { (scope, dependencies) ->
                             dependencies.forEach { dep ->
+                                // Do not allow BOM dependencies for our own packaged libraries,
+                                // instead its artifact versions should be unrolled explicitly
+                                if ("-bom" in dep.name) {
+                                    throw IllegalArgumentException(
+                                        "Found a BOM declaration in the dependencies of project" +
+                                                "${project.path}: $dep. Prefer declaring its " +
+                                                "transitive artifacts explicitly by " +
+                                                "adding a version contraint to them."
+                                    )
+                                }
+
                                 with(dependenciesNode.appendNode("dependency")) {
                                     if (dep is ProjectDependency) {
                                         appendProjectDependencyCoordinates(dep)
@@ -211,9 +222,7 @@ private fun MavenPublication.applyPublicationDetails(
                                         appendExternalDependencyCoordinates(dep)
                                     }
 
-                                    // Rewrite scope definition for BOM dependencies
-                                    val isBom = "-bom" in dep.name
-                                    appendNode("scope", if (isBom) "import" else scope)
+                                    appendNode("scope", scope)
                                 }
                             }
                         }

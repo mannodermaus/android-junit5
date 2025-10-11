@@ -7,7 +7,7 @@ object libs {
         const val junitVintage = "5.14.0"
         const val junitPlatform = "1.14.0"
 
-        const val composeBom = "2025.03.00"
+        const val compose = "1.7.8"
         const val androidXMultidex = "2.0.1"
         const val androidXTestAnnotation = "1.0.1"
         const val androidXTestCore = "1.6.1"
@@ -60,11 +60,10 @@ object libs {
     const val junitPlatformRunner = "org.junit.platform:junit-platform-runner:${versions.junitPlatform}"
     const val apiguardianApi = "org.apiguardian:apiguardian-api:${versions.apiGuardian}"
 
-    const val composeBom = "androidx.compose:compose-bom:${versions.composeBom}"
-    const val composeUi = "androidx.compose.ui:ui"
-    const val composeUiTooling = "androidx.compose.ui:ui-tooling"
-    const val composeFoundation = "androidx.compose.foundation:foundation"
-    const val composeMaterial = "androidx.compose.material:material"
+    const val composeUi = "androidx.compose.ui:ui:${versions.compose}"
+    const val composeUiTooling = "androidx.compose.ui:ui-tooling:${versions.compose}"
+    const val composeFoundation = "androidx.compose.foundation:foundation:${versions.compose}"
+    const val composeMaterial = "androidx.compose.material:material:${versions.compose}"
     const val composeActivity = "androidx.activity:activity-compose:${versions.activityCompose}"
 
     // Testing
@@ -84,9 +83,9 @@ object libs {
     const val androidXTestRunner = "androidx.test:runner:${versions.androidXTestRunner}"
     const val espressoCore = "androidx.test.espresso:espresso-core:${versions.espresso}"
 
-    const val composeUiTest = "androidx.compose.ui:ui-test"
-    const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4"
-    const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest"
+    const val composeUiTest = "androidx.compose.ui:ui-test:${versions.compose}"
+    const val composeUiTestJUnit4 = "androidx.compose.ui:ui-test-junit4:${versions.compose}"
+    const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest:${versions.compose}"
 
     // Documentation
     // For the latest version refer to GitHub repo neboskreb/instant-task-executor-extension
