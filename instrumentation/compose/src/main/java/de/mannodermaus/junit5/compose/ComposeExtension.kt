@@ -26,9 +26,4 @@ public interface ComposeExtension : Extension {
      * With this function, you can pass an arbitrary composable tree to the extension and evaluate it afterwards.
      */
     public fun use(block: ComposeContext.() -> Unit)
-
-    @Deprecated(message = "Change to use()", replaceWith = ReplaceWith("use(block)"))
-    public fun runComposeTest(block: ComposeContext.() -> Unit) {
-        use(block)
-    }
 }
