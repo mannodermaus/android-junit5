@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+- Update to Kotlin 2.3
+- Internal: Replace deprecated `OutputDirectoryProvider` with its correct replacement
 
 ## 1.14.0.0 (2025-10-10)
 - JUnit 5.14.0

@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("com.android.application")
@@ -48,9 +49,11 @@ android {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
   }
+}
 
-  kotlinOptions {
-    jvmTarget = javaVersion.toString()
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
   }
 }
 

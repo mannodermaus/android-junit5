@@ -3,6 +3,10 @@ Change Log
 
 ## Unreleased
 
+- Removed deprecated `runComposeTest` API from `ComposeExtension`
+- Update to Kotlin 2.3
+- Update to Compose 1.10
+
 ## 1.9.0 (2025-10-10)
 
 - Adjust constructor of `ModifiedTestPlan` to conform to newly added interface from JUnit 5.14 (#390)

@@ -18,10 +18,11 @@ enum class SupportedAgp(
     AGP_8_8("8.8.2", gradle = "8.10.2"),
     AGP_8_9("8.9.3", gradle = "8.11.1"),
     AGP_8_10("8.10.1", gradle = "8.11.1"),
-    AGP_8_11("8.11.1", gradle = "8.13"),
-    AGP_8_12("8.12.2", gradle = "8.13"),
-    AGP_8_13("8.13.0", gradle = "8.13"),
-    AGP_9_0("9.0.0-alpha04", gradle = "9.0.0"),
+    AGP_8_11("8.11.2", gradle = "8.13"),
+    AGP_8_12("8.12.3", gradle = "8.13"),
+    AGP_8_13("8.13.2", gradle = "8.13"),
+    AGP_9_0("9.0.0-rc01", gradle = "9.1.0"),
+    AGP_9_1("9.1.0-alpha01", gradle = "9.1.0"),
     ;
 
     companion object {
@@ -45,7 +46,7 @@ enum class SupportedAgp(
 object Android {
     const val compileSdkVersion = 35
     const val targetSdkVersion = 35
-    const val sampleMinSdkVersion = 21
+    const val sampleMinSdkVersion = 23
     val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
     val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Android).minSdk
     val testComposeMinSdkVersion = (Artifacts.Instrumentation.Compose.platform as Android).minSdk
@@ -134,7 +135,7 @@ object Artifacts {
         )
 
         val Compose = Deployed(
-            platform = Android(minSdk = 21),
+            platform = Android(minSdk = 23),
             groupId = groupId,
             artifactId = "android-test-compose",
             currentVersion = currentVersion,

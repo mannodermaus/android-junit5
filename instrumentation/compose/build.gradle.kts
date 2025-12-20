@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("com.android.library")
@@ -33,10 +34,6 @@ android {
     targetCompatibility = javaVersion
   }
 
-  kotlinOptions {
-    jvmTarget = javaVersion.toString()
-  }
-
   testOptions {
     unitTests.isReturnDefaultValues = true
     targetSdk = Android.targetSdkVersion
@@ -49,6 +46,12 @@ android {
   packaging {
     resources.excludes.add("META-INF/AL2.0")
     resources.excludes.add("META-INF/LGPL2.1")
+  }
+}
+
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
   }
 }
 
