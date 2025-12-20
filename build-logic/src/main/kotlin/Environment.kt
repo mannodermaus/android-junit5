@@ -46,7 +46,7 @@ enum class SupportedAgp(
 object Android {
     const val compileSdkVersion = 35
     const val targetSdkVersion = 35
-    const val sampleMinSdkVersion = 21
+    const val sampleMinSdkVersion = 23
     val testRunnerMinSdkVersion = (Artifacts.Instrumentation.Runner.platform as Android).minSdk
     val testCoreMinSdkVersion = (Artifacts.Instrumentation.Core.platform as Android).minSdk
     val testComposeMinSdkVersion = (Artifacts.Instrumentation.Compose.platform as Android).minSdk
@@ -135,7 +135,7 @@ object Artifacts {
         )
 
         val Compose = Deployed(
-            platform = Android(minSdk = 21),
+            platform = Android(minSdk = 23),
             groupId = groupId,
             artifactId = "android-test-compose",
             currentVersion = currentVersion,
