@@ -4,6 +4,14 @@ import org.gradle.api.Project
 import java.io.File
 import java.util.Properties
 
+enum class SupportedJUnit(
+    val label: String,
+    val minSdk: Int
+) {
+    JUnit5(label = "five", minSdk = 26),
+    JUnit6(label = "six", minSdk = 35)
+}
+
 enum class SupportedAgp(
     val version: String,
     val gradle: String,

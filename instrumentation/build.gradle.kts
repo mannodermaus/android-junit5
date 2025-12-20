@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.gradle.BaseExtension
+import extensions.capitalized
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -32,9 +33,9 @@ apiValidation {
 subprojects {
     apply(plugin = "explicit-api-mode")
 
-    val jvmTarget = JvmTarget.JVM_17
-    val javaVersion = JavaVersion.VERSION_17
-
+    val jvmTarget = JvmTarget.JVM_21
+    val javaVersion = JavaVersion.toVersion(jvmTarget.target)
+    
     // Configure Kotlin
     plugins.withType<KotlinBasePlugin> {
         tasks.withType<KotlinCompilationTask<*>>().configureEach {
@@ -45,6 +46,13 @@ subprojects {
                     this.freeCompilerArgs.add("-Xjvm-default=all")
                 }
             }
+        }
+    }
+
+    // Configure Java
+    plugins.withId("java") {
+        configure<JavaPluginExtension> {
+            toolchain { languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion)) }
         }
     }
 
@@ -69,6 +77,48 @@ subprojects {
 
             testOptions {
                 unitTests.isReturnDefaultValues = true
+            }
+
+            // Create product flavors for each supported generation of JUnit,
+            // then declare the corresponding BOM for each of them
+            // to provide dependencies to each target
+            val supportedTargets = SupportedJUnit.values()
+
+            flavorDimensions("target")
+            productFlavors {
+                supportedTargets.forEachIndexed { index, junit ->
+                    register(junit.label) {
+                        dimension = "target"
+                        isDefault = index == supportedTargets.lastIndex
+                    }
+                }
+            }
+
+            dependencies {
+                supportedTargets.forEach { junit ->
+                    val configNames = listOf(
+                        "${junit.label}Api",
+                        "${junit.label}Implementation",
+                        "${junit.label}CompileOnly",
+                        "${junit.label}RuntimeOnly",
+                        "test${junit.label.capitalized()}Implementation",
+                        "test${junit.label.capitalized()}CompileOnly",
+                        "test${junit.label.capitalized()}RuntimeOnly",
+                        "androidTest${junit.label.capitalized()}Implementation",
+                        "androidTest${junit.label.capitalized()}CompileOnly",
+                        "androidTest${junit.label.capitalized()}RuntimeOnly",
+                    )
+
+                    configNames.forEach { configName ->
+                        add(
+                            configurationName = configName,
+                            dependencyNotation = when (junit) {
+                                SupportedJUnit.JUnit5 -> platform(libs.junit.framework.bom5)
+                                SupportedJUnit.JUnit6 -> platform(libs.junit.framework.bom6)
+                            }
+                        )
+                    }
+                }
             }
 
             if (this is LibraryExtension) {

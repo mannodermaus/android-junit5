@@ -7,9 +7,8 @@ import org.junit.runner.notification.RunListener
 /**
  * A JUnit 4 [RunListener] that collects information about executed and failed tests.
  */
-class CollectingRunListener : RunListener() {
-
-    data class Results(
+public class CollectingRunListener : RunListener() {
+    public data class Results(
         val successfulTests: List<Description>,
         val failedTests: List<Failure>,
         val ignoredTests: List<Description>
@@ -31,5 +30,5 @@ class CollectingRunListener : RunListener() {
         ignored += description
     }
 
-    fun getResults() = Results(success, failures, ignored)
+    public fun getResults(): Results = Results(success, failures, ignored)
 }
