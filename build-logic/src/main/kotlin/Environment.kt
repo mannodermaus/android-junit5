@@ -31,7 +31,7 @@ enum class SupportedAgp(
     }
 
     val shortVersion: String = run {
-        // Extract first two components of the Maven dependency's version string.
+        // Extract first two components of the Maven dependency's extensions.version string.
         val components = version.split('.')
         if (components.size < 2) {
             throw IllegalArgumentException("Cannot derive AGP configuration name from: $this")
@@ -58,7 +58,7 @@ sealed class Platform(val name: String) {
 }
 
 /**
- * Encapsulation for "deployable" library artifacts,
+ * Encapsulation for "deployable" extensions.library artifacts,
  * containing all sorts of configuration related to Maven coordinates, for instance.
  */
 class Deployed internal constructor(

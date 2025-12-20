@@ -1,0 +1,80 @@
+[versions]
+androidxActivity = "1.10.1"
+androidxMultidex = "2.0.1"
+androidxTestAnnotation = "1.0.1"
+androidxTestCore = "1.6.1"
+androidxTestMonitor = "1.7.2"
+androidxTestRunner = "1.6.2"
+apiguardian = "1.1.2"
+compose = "1.10.0"
+dokka = "2.0.0"
+espresso = "3.6.1"
+instantTaskExecutorExtension = "1.0.0"
+junit4 = "4.13.2"
+#noinspection NewerVersionAvailable
+junit5 = "5.14.1"
+junit6 = "6.0.1"
+konftoml = "1.1.2"
+korte = "2.4.12"
+kotlin = "2.3.0"
+kotlinBinaryCompValidator = "0.17.0"
+kotlinCoroutines = "1.10.2"
+mockitoCore = "5.16.0"
+mockitoKotlin = "5.4.0"
+nexusPublish = "2.0.0"
+robolectric = "4.14.1"
+shadow = "8.1.1"
+truth = "1.4.4"
+
+[plugins]
+# Intentionally missing version declaration, as different versions are applied depending on context
+android-app = { id = "com.android.application" }
+android-library = { id = "com.android.library" }
+android-junit = { id = "de.mannodermaus.android-junit5" }
+
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-binarycompvalidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompValidator" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPublish" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "androidxMultidex" }
+androidx-test-annotation = { module = "androidx.test:annotation", version.ref = "androidxTestAnnotation" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
+androidx-test-monitor = { module = "androidx.test:monitor", version.ref = "androidxTestMonitor" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+apiguardian = { module = "org.apiguardian:apiguardian-api", version.ref = "apiguardian" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-uitooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-test-core = { module = "androidx.compose.ui:ui-test", version.ref = "compose" }
+compose-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+compose-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
+espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+instanttaskexecutor-extension = { module = "io.github.neboskreb:instant-task-executor-extension", version.ref = "instantTaskExecutorExtension" }
+#noinspection SimilarGradleDependency
+junit-framework-bom5 = { module = "org.junit:junit-bom", version.ref = "junit5" }
+#noinspection SimilarGradleDependency
+junit-framework-bom6 = { module = "org.junit:junit-bom", version.ref = "junit6" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
+junit-platform-commons = { module = "org.junit.platform:junit-platform-commons" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+junit-platform-runner = { module = "org.junit.platform:junit-platform-runner" }
+junit-vintage-api = { module = "junit:junit", version.ref = "junit4" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
+konftoml = { module = "com.uchuhimo:konf-toml", version.ref = "konftoml" }
+korte = { module = "com.soywiz.korlibs.korte:korte", version.ref = "korte" }
+kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+truth-core = { module = "com.google.truth:truth", version.ref = "truth" }
+truth-extensions = { module = "com.google.truth.extensions:truth-java8-extension", version.ref = "truth" }

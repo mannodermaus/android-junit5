@@ -1,3 +1,8 @@
+import extensions.agp
+import extensions.kgp
+import extensions.library
+import extensions.libs
+import extensions.version
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -33,8 +38,8 @@ fun Project.configureTestResources() {
             "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
             "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
-            "KOTLIN_VERSION" to libs.versions.kotlin,
-            "JUNIT_JUPITER_VERSION" to libs.versions.junitJupiter,
+            "KOTLIN_VERSION" to libs.version("kotlin"),
+            "JUNIT_JUPITER_VERSION" to libs.version("junit5"), // TODO
             "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
             // Collect all supported AGP versions into a single string.
@@ -81,19 +86,14 @@ fun Project.configureTestResources() {
                 description = "Local dependencies used for compiling & running " +
                         "tests source code in Gradle functional tests against AGP ${plugin.version}"
                 extendsFrom(configurations.getByName("implementation"))
-
-                val agpDependency = libs.plugins.android(plugin).substringBeforeLast(":")
-                project.dependencies.add(this.name, "${agpDependency}:${plugin.version}")
+                project.dependencies.add(this.name, libs.agp(plugin))
 
                 // For Android Gradle Plugins before 9.x, add the Kotlin Gradle Plugin explicitly,
                 // acknowledging the different plugin variants introduced in Kotlin 1.7.
-                // Acknowledging the minimum required Gradle version, request the correct variant for KGP
+                // Acknowledging the minimum required Gradle extensions.version, request the correct variant for KGP
                 // (see https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#plugin-with-variants)
                 if (plugin < SupportedAgp.AGP_9_0) {
-                    project.dependencies.add(
-                        this.name,
-                        "org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin}"
-                    ).apply {
+                    project.dependencies.add(this.name, libs.kgp).apply {
                         with(this as ExternalModuleDependency) {
                             attributes {
                                 attribute(
@@ -178,13 +178,13 @@ fun Copy.configureCreateVersionClassTask(
                 "INSTRUMENTATION_EXTENSIONS" to Artifacts.Instrumentation.Extensions.artifactId,
                 "INSTRUMENTATION_RUNNER" to Artifacts.Instrumentation.Runner.artifactId,
 
-                // Find an appropriate version of the instrumentation library,
-                // depending on the version of how the plugin is configured
+                // Find an appropriate extensions.version of the instrumentation extensions.library,
+                // depending on the extensions.version of how the plugin is configured
                 "INSTRUMENTATION_VERSION" to instrumentationVersion,
 
                 // JUnit 5.12+ requires the platform launcher on the runtime classpath;
-                // to prevent issues with version mismatching, the plugin applies this for users
-                "JUNIT_PLATFORM_LAUNCHER" to libs.junitPlatformLauncher
+                // to prevent issues with extensions.version mismatching, the plugin applies this for users
+                "JUNIT_PLATFORM_LAUNCHER" to project.libs.library("junit-platform-launcher")
             )
         ), ReplaceTokens::class.java
     )
@@ -192,14 +192,14 @@ fun Copy.configureCreateVersionClassTask(
 }
 
 /**
- * Helper Task class for generating an up-to-date version of the project's README.md.
- * Using a template file, the plugin's version constants & other dependency versions
+ * Helper Task class for generating an up-to-date extensions.version of the project's README.md.
+ * Using a template file, the plugin's extensions.version constants & other dependency versions
  * are automatically injected into the README.
  */
 abstract class GenerateReadme : DefaultTask() {
     companion object {
         private val PLACEHOLDER_REGEX = Regex("\\\$\\{(.+)}")
-        private val EXTERNAL_DEP_REGEX = Regex("libs\\.(.+)")
+        private val EXTERNAL_DEP_REGEX = Regex("extensions.libs\\.(.+)")
         private val CONSTANT_REGEX = Regex("constants\\.(.+)")
 
         private const val PLUGIN_VERSION = "pluginVersion"
@@ -270,8 +270,9 @@ abstract class GenerateReadme : DefaultTask() {
                         val externalDependency = match3.groups.last()?.value
                             ?: throw InvalidPlaceholder(match3)
 
-                        val field = libs.javaClass.getField(externalDependency)
-                        field.get(null) as String
+//                        val field = extensions.libs.javaClass.getField(externalDependency)
+//                        field.get(null) as String
+                        "" // TODO: Connect this again
                     }
                 }
             }
@@ -298,7 +299,7 @@ abstract class GenerateReadme : DefaultTask() {
             constants[match[1]] = match[2]
         }
 
-        // Special case for AGP version
+        // Special case for AGP extensions.version
         CONSTANTS_FILE_REGEX2.findAll(text).forEach { match ->
             constants[match[1]] = match.groupValues
                 .drop(2)

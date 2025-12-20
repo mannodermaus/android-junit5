@@ -34,7 +34,7 @@ fun Project.configureDeployment(deployConfig: Deployed) {
     // and will raise an error on inconsistent data)
     rootProject.configureRootDeployment(deployConfig, credentials)
 
-    val isAndroid = plugins.findPlugin("com.android.library") != null
+    val isAndroid = plugins.findPlugin("com.android.extensions.library") != null
     val isGradlePlugin = plugins.hasPlugin("java-gradle-plugin")
 
     apply {
@@ -133,13 +133,13 @@ private fun Project.configureRootDeployment(deployConfig: Deployed, credentials:
     }
 
     // Validate the integrity of published versions
-    // (all subprojects must use the same group ID and version number or else an error is raised)
+    // (all subprojects must use the same group ID and extensions.version number or else an error is raised)
     if (version != "unspecified") {
         if (version != deployConfig.currentVersion || group != deployConfig.groupId) {
             throw IllegalStateException("A subproject tried to set '${deployConfig.groupId}:${deployConfig.currentVersion}' " +
                     "as the coordinates for the artifacts of the repository, but '$group:$version' was already set " +
                     "previously by a different subproject. As per the requirements of the Nexus Publishing plugin, " +
-                    "all subprojects must use the same version number! Please check Artifacts.kt for inconsistencies!")
+                    "all subprojects must use the same extensions.version number! Please check Artifacts.kt for inconsistencies!")
         } else {
             // Already configured and correct
             return
@@ -175,7 +175,7 @@ private fun MavenPublication.applyPublicationDetails(
     if (isAndroid) {
         artifact(buildDir.file("outputs/aar/${project.name}-release.aar").get().asFile)
     } else {
-        artifact(buildDir.file("libs/${project.name}-$version.jar"))
+        artifact(buildDir.file("extensions.libs/${project.name}-$version.jar"))
     }
     artifact(androidSourcesJar)
     artifact(javadocJar)
@@ -211,7 +211,7 @@ private fun MavenPublication.applyPublicationDetails(
                                         "Found a BOM declaration in the dependencies of project" +
                                                 "${project.path}: $dep. Prefer declaring its " +
                                                 "transitive artifacts explicitly by " +
-                                                "adding a version contraint to them."
+                                                "adding a extensions.version contraint to them."
                                     )
                                 }
 

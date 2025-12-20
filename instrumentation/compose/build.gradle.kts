@@ -1,101 +1,55 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-  id("com.android.library")
-  kotlin("android")
-  id("explicit-api-mode")
-  id("de.mannodermaus.android-junit5").version(Artifacts.Plugin.latestStableVersion)
-  id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.junit)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose)
 }
-
-val javaVersion = JavaVersion.VERSION_11
 
 android {
-  namespace = "de.mannodermaus.junit5.compose"
-  compileSdk = Android.compileSdkVersion
+    namespace = "de.mannodermaus.junit5.compose"
 
-  defaultConfig {
-    minSdk = Android.testComposeMinSdkVersion
+    defaultConfig {
+        minSdk = Android.testComposeMinSdkVersion
+    }
 
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
-  }
-
-  buildFeatures {
-    compose = true
-    buildConfig = false
-    resValues = false
-  }
-
-  compileOptions {
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-  }
-
-  testOptions {
-    unitTests.isReturnDefaultValues = true
-    targetSdk = Android.targetSdkVersion
-  }
-
-  lint {
-    targetSdk = Android.targetSdkVersion
-  }
-
-  packaging {
-    resources.excludes.add("META-INF/AL2.0")
-    resources.excludes.add("META-INF/LGPL2.1")
-  }
-}
-
-kotlin {
-  compilerOptions {
-    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
-  }
+    buildFeatures {
+        compose = true
+    }
 }
 
 junitPlatform {
-  // Using local dependency instead of Maven coordinates
-  instrumentationTests.enabled = false
-}
-
-tasks.withType<Test> {
-  failFast = true
-  testLogging {
-    events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-    exceptionFormat = TestExceptionFormat.FULL
-  }
+    // Using local dependency instead of Maven coordinates
+    instrumentationTests.enabled = false
 }
 
 dependencies {
-  implementation(project(":core"))
-  implementation(libs.kotlinStdLib)
-  implementation(libs.kotlinCoroutinesCore)
+    implementation(project(":core"))
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.coroutines)
 
-  implementation(libs.junitJupiterApi)
-  implementation(libs.junit4)
-  implementation(libs.espressoCore)
+    implementation(libs.junit.jupiter.api)
+    implementation(libs.junit.vintage.api)
+    implementation(libs.espresso)
 
-  implementation(libs.composeActivity)
-  implementation(libs.composeUi)
-  implementation(libs.composeUiTooling)
-  implementation(libs.composeFoundation)
-  implementation(libs.composeMaterial)
-  api(libs.composeUiTest)
-  api(libs.composeUiTestJUnit4)
-  implementation(libs.composeUiTestManifest)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.uitooling)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material)
+    api(libs.compose.test.core)
+    api(libs.compose.test.junit4)
+    implementation(libs.compose.test.manifest)
 
-  testImplementation(libs.junitJupiterApi)
-  testImplementation(libs.junitJupiterParams)
-  testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 
-  androidTestImplementation(libs.junitJupiterApi)
-  androidTestImplementation(libs.junitJupiterParams)
-  androidTestImplementation(libs.espressoCore)
+    androidTestImplementation(libs.junit.jupiter.api)
+    androidTestImplementation(libs.junit.jupiter.params)
+    androidTestImplementation(libs.espresso)
 
-  androidTestRuntimeOnly(project(":runner"))
-  androidTestRuntimeOnly(libs.androidXTestRunner)
+    androidTestRuntimeOnly(project(":runner"))
+    androidTestRuntimeOnly(libs.androidx.test.runner)
 }
 
-project.configureDeployment(Artifacts.Instrumentation.Compose)
+//project.configureDeployment(Artifacts.Instrumentation.Compose)
