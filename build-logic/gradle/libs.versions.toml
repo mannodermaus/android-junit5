@@ -66,7 +66,7 @@ junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 junit-platform-commons = { module = "org.junit.platform:junit-platform-commons" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-junit-platform-runner = { module = "org.junit.platform:junit-platform-runner" }
+junit-platform-suiteapi = { module = "org.junit.platform:junit-platform-suite-api" }
 junit-vintage-api = { module = "junit:junit", version.ref = "junit4" }
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
 konftoml = { module = "com.uchuhimo:konf-toml", version.ref = "konftoml" }

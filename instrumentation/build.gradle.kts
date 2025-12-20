@@ -35,7 +35,7 @@ subprojects {
 
     val jvmTarget = JvmTarget.JVM_21
     val javaVersion = JavaVersion.toVersion(jvmTarget.target)
-    
+
     // Configure Kotlin
     plugins.withType<KotlinBasePlugin> {
         tasks.withType<KotlinCompilationTask<*>>().configureEach {
@@ -43,7 +43,6 @@ subprojects {
                 this.progressiveMode.set(true)
                 if (this is KotlinJvmCompilerOptions) {
                     this.jvmTarget.set(jvmTarget)
-                    this.freeCompilerArgs.add("-Xjvm-default=all")
                 }
             }
         }

@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.mockito.Mockito.mock
 import java.lang.reflect.Modifier
 
 class GrantPermissionExtensionTests {
@@ -81,8 +83,10 @@ class GrantPermissionExtensionTests {
 
     private fun runExtension(vararg permissions: String) {
         val extension = GrantPermissionExtension(granter)
+        val context = mock<ExtensionContext>()
+
         extension.grantPermissions(permissions)
-        extension.beforeEach(null)
+        extension.beforeEach(context)
     }
 
     private class TestPermissionGranter : PermissionGranter {

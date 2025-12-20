@@ -66,7 +66,7 @@ internal constructor(private val permissionGranter: PermissionGranter) : BeforeE
 
     /* BeforeEachCallback */
 
-    override fun beforeEach(context: ExtensionContext?) {
+    override fun beforeEach(context: ExtensionContext) {
         permissionGranter.requestPermissions()
     }
 }

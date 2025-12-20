@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 
-class ActivityOne : Activity() {
+public class ActivityOne : Activity() {
 
   private val textView by lazy { findViewById<TextView>(R.id.textView) }
   private val button by lazy { findViewById<Button>(R.id.button) }
@@ -21,11 +21,11 @@ class ActivityOne : Activity() {
     }
   }
 
-  fun getClickCount(): Int {
+  public fun getClickCount(): Int {
     return textView.text.toString().toInt()
   }
 
-  fun setButtonLabel(newText: String) {
+  public fun setButtonLabel(newText: String) {
     button.text = newText
   }
 }

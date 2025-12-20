@@ -46,5 +46,6 @@ internal object TestNameFormatter {
             .replace("()", "")
             .replace('(', '[')
             .replace(')', ']')
+            .replace("\"", "")
     }
 }
