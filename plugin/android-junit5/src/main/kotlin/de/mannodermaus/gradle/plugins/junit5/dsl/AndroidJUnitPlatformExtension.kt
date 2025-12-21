@@ -9,8 +9,6 @@ import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
-import org.junit.platform.commons.util.Preconditions
-import java.io.File
 import javax.inject.Inject
 
 public abstract class AndroidJUnitPlatformExtension @Inject constructor(
@@ -34,9 +32,8 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
      * Add a configuration parameter
      */
     public fun configurationParameter(key: String, value: String) {
-        Preconditions.notBlank(key, "key must not be blank")
-        Preconditions.condition(!key.contains('=')) { "key must not contain '=': \"$key\"" }
-        Preconditions.notNull(value) { "value must not be null for key: \"$key\"" }
+        require(key.isNotBlank()) { "key must not be blank" }
+        require('=' !in key) { "key must not contain '=': \"$key\"" }
         configurationParameters.put(key, value)
     }
 

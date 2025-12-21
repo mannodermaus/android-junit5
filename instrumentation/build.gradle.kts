@@ -33,7 +33,7 @@ apiValidation {
 subprojects {
     apply(plugin = "explicit-api-mode")
 
-    val jvmTarget = JvmTarget.JVM_21
+    val jvmTarget = JvmTarget.JVM_17
     val javaVersion = JavaVersion.toVersion(jvmTarget.target)
 
     // Configure Kotlin
@@ -58,10 +58,13 @@ subprojects {
     // Configure Android
     plugins.withId("com.android.base") {
         configure<BaseExtension> {
+            val supportedTargets = SupportedJUnit.values()
+
             compileSdkVersion(Android.compileSdkVersion)
 
             defaultConfig {
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                minSdk = supportedTargets.minOf(SupportedJUnit::minSdk)
             }
 
             compileOptions {
@@ -81,8 +84,6 @@ subprojects {
             // Create product flavors for each supported generation of JUnit,
             // then declare the corresponding BOM for each of them
             // to provide dependencies to each target
-            val supportedTargets = SupportedJUnit.values()
-
             flavorDimensions("target")
             productFlavors {
                 supportedTargets.forEachIndexed { index, junit ->

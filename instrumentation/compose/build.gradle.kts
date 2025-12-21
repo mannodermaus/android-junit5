@@ -52,4 +52,4 @@ dependencies {
     androidTestRuntimeOnly(libs.androidx.test.runner)
 }
 
-//project.configureDeployment(Artifacts.Instrumentation.Compose)
+project.configureDeployment(Artifacts.Instrumentation.Compose)

@@ -1,13 +1,14 @@
 plugins {
-  `kotlin-dsl`
-  java
+    `kotlin-dsl`
+    java
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  implementation(gradleApi())
-  testImplementation("junit:junit:+")
+    implementation(gradleApi())
+
+    testImplementation(libs.junit.vintage.api)
 }

@@ -41,6 +41,9 @@ publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPu
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 [libraries]
+# Intentionally using dynamic version; it is substituted when creating test configurations for each AGP version
+agp = "com.android.tools.build:gradle:+"
+android-tools = "com.android.tools:common:+"
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
 androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "androidxMultidex" }
 androidx-test-annotation = { module = "androidx.test:annotation", version.ref = "androidxTestAnnotation" }
@@ -64,11 +67,11 @@ junit-framework-bom6 = { module = "org.junit:junit-bom", version.ref = "junit6" 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
-junit-platform-commons = { module = "org.junit.platform:junit-platform-commons" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-platform-suiteapi = { module = "org.junit.platform:junit-platform-suite-api" }
 junit-vintage-api = { module = "junit:junit", version.ref = "junit4" }
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine" }
+kgp = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 konftoml = { module = "com.uchuhimo:konf-toml", version.ref = "konftoml" }
 korte = { module = "com.soywiz.korlibs.korte:korte", version.ref = "korte" }
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }

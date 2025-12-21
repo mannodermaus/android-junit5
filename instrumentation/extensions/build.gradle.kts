@@ -21,4 +21,4 @@ dependencies {
     testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
-//project.configureDeployment(Artifacts.Instrumentation.Extensions)
+project.configureDeployment(Artifacts.Instrumentation.Extensions)

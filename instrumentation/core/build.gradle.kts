@@ -58,4 +58,4 @@ dependencies {
     testImplementation(project(":testutil"))
 }
 
-//project.configureDeployment(Artifacts.Instrumentation.Core)
+project.configureDeployment(Artifacts.Instrumentation.Core)

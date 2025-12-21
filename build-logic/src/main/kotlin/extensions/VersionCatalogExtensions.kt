@@ -9,7 +9,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.getByType
 
 val Project.libs: VersionCatalog
-    get() = extensions.getByType<VersionCatalogsExtension>().named("extensions.libs")
+    get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 fun VersionCatalog.agp(version: SupportedAgp): String {
     return "com.android.tools.build:gradle:${version.version}"

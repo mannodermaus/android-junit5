@@ -42,4 +42,4 @@ dependencies {
     testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
-//project.configureDeployment(Artifacts.Instrumentation.Runner)
+project.configureDeployment(Artifacts.Instrumentation.Runner)

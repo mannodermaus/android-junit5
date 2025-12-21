@@ -6,10 +6,15 @@ import java.util.Properties
 
 enum class SupportedJUnit(
     val label: String,
-    val minSdk: Int
+    val minSdk: Int,
+    val artifactIdSuffix: String? = null
 ) {
     JUnit5(label = "five", minSdk = 26),
-    JUnit6(label = "six", minSdk = 35)
+    JUnit6(label = "six", minSdk = 35, artifactIdSuffix = "junit6");
+
+    companion object {
+        fun fromLabel(label: String): SupportedJUnit = values().first { it.label == label }
+    }
 }
 
 enum class SupportedAgp(
@@ -39,11 +44,9 @@ enum class SupportedAgp(
     }
 
     val shortVersion: String = run {
-        // Extract first two components of the Maven dependency's extensions.version string.
+        // Extract first two components of the Maven dependency's version string.
         val components = version.split('.')
-        if (components.size < 2) {
-            throw IllegalArgumentException("Cannot derive AGP configuration name from: $this")
-        }
+        require(components.size >= 2) { "Cannot derive AGP configuration name from: $this" }
 
         "${components[0]}.${components[1]}"
     }
@@ -66,7 +69,7 @@ sealed class Platform(val name: String) {
 }
 
 /**
- * Encapsulation for "deployable" extensions.library artifacts,
+ * Encapsulation for "deployable" library artifacts,
  * containing all sorts of configuration related to Maven coordinates, for instance.
  */
 class Deployed internal constructor(

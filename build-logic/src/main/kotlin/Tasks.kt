@@ -24,131 +24,6 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.time.ZonedDateTime
-import java.util.Locale
-
-private const val minimumGradleVersion = "8.2"
-
-@Suppress("DEPRECATION")
-fun Project.configureTestResources() {
-    // Create a test resource task which will power the instrumented tests
-    // for different versions of the Android Gradle Plugin
-    tasks.named("processTestResources", Copy::class.java).configure {
-        val tokens = mapOf(
-            "COMPILE_SDK_VERSION" to Android.compileSdkVersion.toString(),
-            "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
-            "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
-
-            "KOTLIN_VERSION" to libs.version("kotlin"),
-            "JUNIT_JUPITER_VERSION" to libs.version("junit5"), // TODO
-            "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
-
-            // Collect all supported AGP versions into a single string.
-            // This string is delimited with semicolons, and each of the separated values itself is a 4-tuple.
-            //
-            // Example:
-            // AGP_VERSIONS = 3.5|3.5.3|;3.6|3.6.3|6.4;3.7|3.7.0|8.0|33
-            //
-            // Can be parsed into this list of values:
-            // |___> Short: "3.5"
-            //       Full: "3.5.3"
-            //       Gradle Requirement: ""
-            //       Compile SDK: null
-            //
-            // |___> Short: "3.6"
-            //       Full: "3.6.3"
-            //       Gradle Requirement: "6.4"
-            //       Compile SDK: null
-            //
-            // |___> Short: "3.7"
-            //       Full: "3.7.0"
-            //       Gradle Requirement: "8.0"
-            //       Compile SDK: 33
-            "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator = ";") { plugin ->
-                "${plugin.shortVersion}|${plugin.version}|${plugin.gradle}|${plugin.compileSdk ?: ""}"
-            }
-        )
-
-        inputs.properties(tokens)
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-        // Apply test environment to a resource file
-        val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
-        from(sourceSets.getByName("test").resources.srcDirs) {
-            include("**/testenv.properties")
-            filter(mapOf("tokens" to tokens), ReplaceTokens::class.java)
-        }
-    }
-
-    // Also, create a custom configuration for each of the supported Android Gradle Plugin versions
-    project.configurations.apply {
-        SupportedAgp.values().forEach { plugin ->
-            create(plugin.configurationName) {
-                description = "Local dependencies used for compiling & running " +
-                        "tests source code in Gradle functional tests against AGP ${plugin.version}"
-                extendsFrom(configurations.getByName("implementation"))
-                project.dependencies.add(this.name, libs.agp(plugin))
-
-                // For Android Gradle Plugins before 9.x, add the Kotlin Gradle Plugin explicitly,
-                // acknowledging the different plugin variants introduced in Kotlin 1.7.
-                // Acknowledging the minimum required Gradle extensions.version, request the correct variant for KGP
-                // (see https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#plugin-with-variants)
-                if (plugin < SupportedAgp.AGP_9_0) {
-                    project.dependencies.add(this.name, libs.kgp).apply {
-                        with(this as ExternalModuleDependency) {
-                            attributes {
-                                attribute(
-                                    TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
-                                    objects.named(TargetJvmEnvironment::class.java, STANDARD_JVM)
-                                )
-                                attribute(
-                                    USAGE_ATTRIBUTE,
-                                    objects.named(Usage::class.java, JAVA_RUNTIME)
-                                )
-                                attribute(
-                                    GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
-                                    objects.named(GradlePluginApiVersion::class.java, minimumGradleVersion)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Create slim plugin classpath for functional tests, using multiple flavors
-    tasks.named("pluginUnderTestMetadata").configure {
-        val defaultDirectory = outputs.files.singleFile
-
-        configurations.filter { it.name.startsWith("testAgp") }.forEach { configuration ->
-            val strippedName = configuration.name.substring(4).toLowerCase(Locale.ROOT)
-            val prunedFile = File(defaultDirectory, "pruned-plugin-metadata-$strippedName.properties")
-            outputs.file(prunedFile)
-
-            doLast {
-                prunedFile.writer().use { writer ->
-                    // 1) Use output classes from the plugin itself
-                    // 2) Use resources from the plugin (i.e. plugin IDs etc.)
-                    // 3) Use AGP-specific dependencies
-                    val classesDirs = layout.buildDirectory.dir("classes").get().asFile.listFiles()
-                        ?.filter { it.isDirectory }
-                        ?.map { File(it, "main") }
-                        ?.filter { it.exists() && it.isDirectory && it.list()?.isEmpty() == false }
-                        ?: emptyList()
-                    val resourcesDirs = layout.buildDirectory.dir("resources").get().asFile.listFiles()
-                        ?.filter { it.isDirectory }
-                        ?: emptyList()
-
-                    writer.write("implementation-classpath=")
-                    writer.write(
-                        (classesDirs + resourcesDirs + configuration)
-                            .joinToString(separator = "\\:")
-                    )
-                }
-            }
-        }
-    }
-}
 
 fun findInstrumentationVersion(
     pluginVersion: String = Artifacts.Plugin.currentVersion,
@@ -178,13 +53,13 @@ fun Copy.configureCreateVersionClassTask(
                 "INSTRUMENTATION_EXTENSIONS" to Artifacts.Instrumentation.Extensions.artifactId,
                 "INSTRUMENTATION_RUNNER" to Artifacts.Instrumentation.Runner.artifactId,
 
-                // Find an appropriate extensions.version of the instrumentation extensions.library,
-                // depending on the extensions.version of how the plugin is configured
+                // Find an appropriate version of the instrumentation library,
+                // depending on the version of how the plugin is configured
                 "INSTRUMENTATION_VERSION" to instrumentationVersion,
 
                 // JUnit 5.12+ requires the platform launcher on the runtime classpath;
-                // to prevent issues with extensions.version mismatching, the plugin applies this for users
-                "JUNIT_PLATFORM_LAUNCHER" to project.libs.library("junit-platform-launcher")
+                // to prevent issues with version mismatching, the plugin applies this for users
+                "JUNIT_PLATFORM_LAUNCHER" to project.libs.library("junit-platform-launcher").get().toString()
             )
         ), ReplaceTokens::class.java
     )
@@ -192,14 +67,14 @@ fun Copy.configureCreateVersionClassTask(
 }
 
 /**
- * Helper Task class for generating an up-to-date extensions.version of the project's README.md.
- * Using a template file, the plugin's extensions.version constants & other dependency versions
+ * Helper Task class for generating an up-to-date version of the project's README.md.
+ * Using a template file, the plugin's version constants & other dependency versions
  * are automatically injected into the README.
  */
 abstract class GenerateReadme : DefaultTask() {
     companion object {
         private val PLACEHOLDER_REGEX = Regex("\\\$\\{(.+)}")
-        private val EXTERNAL_DEP_REGEX = Regex("extensions.libs\\.(.+)")
+        private val EXTERNAL_DEP_REGEX = Regex("libs\\.(.+)")
         private val CONSTANT_REGEX = Regex("constants\\.(.+)")
 
         private const val PLUGIN_VERSION = "pluginVersion"
@@ -246,7 +121,7 @@ abstract class GenerateReadme : DefaultTask() {
         // Apply placeholders in the template with data from Versions.kt & Environment.kt:
         // ${pluginVersion}             Artifacts.Plugin.currentVersion
         // ${instrumentationVersion}    Artifacts.Instrumentation.Core.currentVersion
-        // ${Libs.<xxx>}                (A constant value taken from Dependencies.kt)
+        // ${libs.<xxx>}                (A constant value taken from the version catalog)
         val allPlaceholders = mutableMapOf<String, String>()
 
         PLACEHOLDER_REGEX.findAll(templateText).forEach { match ->
@@ -270,7 +145,7 @@ abstract class GenerateReadme : DefaultTask() {
                         val externalDependency = match3.groups.last()?.value
                             ?: throw InvalidPlaceholder(match3)
 
-//                        val field = extensions.libs.javaClass.getField(externalDependency)
+//                        val field = libs.javaClass.getField(externalDependency)
 //                        field.get(null) as String
                         "" // TODO: Connect this again
                     }
@@ -299,7 +174,7 @@ abstract class GenerateReadme : DefaultTask() {
             constants[match[1]] = match[2]
         }
 
-        // Special case for AGP extensions.version
+        // Special case for AGP version
         CONSTANTS_FILE_REGEX2.findAll(text).forEach { match ->
             constants[match[1]] = match.groupValues
                 .drop(2)
