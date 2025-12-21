@@ -2,6 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
+import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.io.File
 
 @TestInstance(PER_CLASS)
@@ -36,11 +39,12 @@ class ConfigurationCacheTests {
         Runtime.getRuntime().exec("adb disconnect".splitToArray(" "))
     }
 
-    @Test
-    fun `test instrumentation tasks`() {
+    @EnumSource(TestedJUnit::class)
+    @ParameterizedTest
+    fun `test instrumentation tasks`(junit: TestedJUnit) {
         // Test configuration cache with one specific project and AGP version
         val spec = projectCreator.specNamed("instrumentation-tests")
-        val project = projectCreator.createProject(spec, agp)
+        val project = projectCreator.createProject(spec, agp, junit)
 
         // Run it once; this is supposed to fail, but JUST because of 'no connected device',
         // not because of other errors including the configuration cache.
@@ -55,10 +59,11 @@ class ConfigurationCacheTests {
         }
     }
 
-    @Test
-    fun `test unit tasks`() {
+    @EnumSource(TestedJUnit::class)
+    @ParameterizedTest
+    fun `test unit tasks`(junit: TestedJUnit) {
         val spec = projectCreator.specNamed("product-flavors")
-        val project = projectCreator.createProject(spec, agp)
+        val project = projectCreator.createProject(spec, agp, junit)
 
         runGradle(project, "help", expectSuccess = true).assertWithLogging {
             assertThat(it).task(":help").hasOutcome(SUCCESS)

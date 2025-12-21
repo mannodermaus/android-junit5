@@ -13,7 +13,8 @@ private const val COMPILE_SDK_PROP_NAME = "COMPILE_SDK_VERSION"
 private const val MIN_SDK_PROP_NAME = "MIN_SDK_VERSION"
 private const val TARGET_SDK_PROP_NAME = "TARGET_SDK_VERSION"
 private const val KOTLIN_VERSION_PROP_NAME = "KOTLIN_VERSION"
-private const val JUNIT_JUPITER_PROP_NAME = "JUNIT_JUPITER_VERSION"
+private const val JUNIT5_PROP_NAME = "JUNIT5_VERSION"
+private const val JUNIT6_PROP_NAME = "JUNIT6_VERSION"
 private const val JUNIT5_ANDROID_PROP_NAME = "JUNIT5_ANDROID_LIBS_VERSION"
 private const val AGP_VERSIONS_PROP_NAME = "AGP_VERSIONS"
 
@@ -37,7 +38,8 @@ class TestEnvironment {
   val targetSdkVersion: Int
 
   val kotlinVersion: String
-  val junitJupiterVersion: String
+  val junit5Version: String
+  val junit6Version: String
   val junit5AndroidLibsVersion: String
 
   val supportedAgpVersions: List<TestedAgp>
@@ -47,7 +49,8 @@ class TestEnvironment {
     minSdkVersion = envProps.getProperty(MIN_SDK_PROP_NAME).toInt()
     targetSdkVersion = envProps.getProperty(TARGET_SDK_PROP_NAME).toInt()
     kotlinVersion = envProps.getProperty(KOTLIN_VERSION_PROP_NAME)
-    junitJupiterVersion = envProps.getProperty(JUNIT_JUPITER_PROP_NAME)
+    junit5Version = envProps.getProperty(JUNIT5_PROP_NAME)
+    junit6Version = envProps.getProperty(JUNIT6_PROP_NAME)
     junit5AndroidLibsVersion = envProps.getProperty(JUNIT5_ANDROID_PROP_NAME)
 
     // Each entry in this string is separated by semicolon.

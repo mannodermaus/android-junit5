@@ -5,6 +5,7 @@ import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.BuildResultSubject
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
+import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
@@ -67,60 +68,62 @@ class FunctionalTests {
 
             // Generate a container for all tests with this specific AGP/Language combination
             dynamicContainer("AGP ${agp.shortVersion}",
-
                 // Exercise each test project within the given environment
-                projectCreator.allSpecs.filterSpecs().map { spec ->
-                    dynamicTest(spec.name) {
-                        // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
-                        println(buildList {
-                            add("AGP: ${agp.version}")
-                            add("Project: ${spec.name}")
-                            add("Gradle: ${agp.requiresGradle}")
-                            agp.requiresCompileSdk?.let { add("SDK: $it") }
-                        }.joinToString(", "))
+                projectCreator.allSpecs.filterSpecs().flatMap { spec ->
+                    TestedJUnit.entries.map { junit ->
+                        dynamicTest("${spec.name} ($junit)") {
+                            // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
+                            println(buildList {
+                                add("AGP: ${agp.version}")
+                                add("Project: ${spec.name}")
+                                add("Gradle: ${agp.requiresGradle}")
+                                agp.requiresCompileSdk?.let { add("SDK: $it") }
+                                add(junit.name)
+                            }.joinToString())
 
-                        // Create a virtual project with the given settings & AGP version.
-                        // This call will throw a TestAbortedException if the spec is not eligible for this version,
-                        // marking the test as ignored in the process
-                        val project = projectCreator.createProject(spec, agp)
+                            // Create a virtual project with the given settings & AGP version.
+                            // This call will throw a TestAbortedException if the spec is not eligible for this version,
+                            // marking the test as ignored in the process
+                            val project = projectCreator.createProject(spec, agp, junit)
 
-                        // Execute the tests of the virtual project with Gradle
-                        val taskName = spec.task ?: "test"
-                        val result = runGradle(agp, taskName)
-                            .withProjectDir(project)
-                            .build()
+                            // Execute the tests of the virtual project with Gradle
+                            val taskName = spec.task ?: "test"
+                            val result = runGradle(agp, taskName)
+                                .withProjectDir(project)
+                                .build()
 
-                        // Print Gradle logs from the embedded invocation
-                        result.prettyPrint()
+                            // Print Gradle logs from the embedded invocation
+                            result.prettyPrint()
 
-                        // Check that the task execution was successful in general
-                        val outcome = result.task(":$taskName")?.outcome
-                        when {
-                            outcome == TaskOutcome.UP_TO_DATE -> {
-                                // Nothing to do, a previous build already checked this
-                                println("Task '$taskName' up-to-date; skipping assertions.")
-                            }
-
-                            outcome == TaskOutcome.SUCCESS -> {
-                                // Based on the spec's configuration in the test project,
-                                // assert that all test classes have been executed as expected
-                                for (expectation in spec.expectedTests) {
-                                    result.assertAgpTests(
-                                        buildType = expectation.buildType,
-                                        productFlavor = expectation.productFlavor,
-                                        tests = expectation.testsList
-                                    )
+                            // Check that the task execution was successful in general
+                            val outcome = result.task(":$taskName")?.outcome
+                            when {
+                                outcome == TaskOutcome.UP_TO_DATE -> {
+                                    // Nothing to do, a previous build already checked this
+                                    println("Task '$taskName' up-to-date; skipping assertions.")
                                 }
-                            }
 
-                            outcome == TaskOutcome.SKIPPED && spec.allowSkipped -> {
-                                // It might be acceptable to allow "skipped" as the result depending on the test spec
-                                println("Task '$taskName' was skipped.")
-                            }
+                                outcome == TaskOutcome.SUCCESS -> {
+                                    // Based on the spec's configuration in the test project,
+                                    // assert that all test classes have been executed as expected
+                                    for (expectation in spec.expectedTests) {
+                                        result.assertAgpTests(
+                                            buildType = expectation.buildType,
+                                            productFlavor = expectation.productFlavor,
+                                            tests = expectation.testsList
+                                        )
+                                    }
+                                }
 
-                            else -> {
-                                // Unexpected result; fail
-                                fail { "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}" }
+                                outcome == TaskOutcome.SKIPPED && spec.allowSkipped -> {
+                                    // It might be acceptable to allow "skipped" as the result depending on the test spec
+                                    println("Task '$taskName' was skipped.")
+                                }
+
+                                else -> {
+                                    // Unexpected result; fail
+                                    fail { "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}" }
+                                }
                             }
                         }
                     }

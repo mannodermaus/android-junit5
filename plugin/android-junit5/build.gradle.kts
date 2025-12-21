@@ -112,7 +112,8 @@ tasks.named("processTestResources", Copy::class.java).configure {
         "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
         "KOTLIN_VERSION" to libs.versions.kotlin.get(),
-        "JUNIT_JUPITER_VERSION" to libs.versions.junit5.get(), // TODO
+        "JUNIT5_VERSION" to libs.versions.junit5.get(),
+        "JUNIT6_VERSION" to libs.versions.junit6.get(),
         "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
         // Collect all supported AGP versions into a single string.

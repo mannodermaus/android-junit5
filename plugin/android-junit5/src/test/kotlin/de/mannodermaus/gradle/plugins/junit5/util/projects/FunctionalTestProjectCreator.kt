@@ -5,6 +5,7 @@ import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.toml
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
+import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import org.gradle.util.GradleVersion
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.opentest4j.TestAbortedException
@@ -43,7 +44,7 @@ class FunctionalTestProjectCreator(
             ?: throw IllegalAccessException("No test project named '$name' found in src/test/resources/test-projects")
 
     @Throws(TestAbortedException::class)
-    fun createProject(spec: Spec, agp: TestedAgp): File {
+    fun createProject(spec: Spec, agp: TestedAgp, junit: TestedJUnit): File {
         // Validate the spec requirement against the executing AGP version first
         validateSpec(spec, agp)
 
@@ -85,6 +86,11 @@ class FunctionalTestProjectCreator(
         replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
         replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
         replacements["DISABLE_TESTS_FOR_BUILD_TYPES"] = spec.disableTestsForBuildTypes
+
+        replacements["JUNIT_VERSION"] = when (junit) {
+            TestedJUnit.JUnit5 -> environment.junit5Version
+            TestedJUnit.JUnit6 -> environment.junit6Version
+        }
 
         agp.requiresCompileSdk?.let {
             replacements["OVERRIDE_SDK_VERSION"] = it
