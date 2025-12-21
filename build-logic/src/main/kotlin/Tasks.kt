@@ -1,29 +1,16 @@
-import extensions.agp
-import extensions.kgp
 import extensions.library
 import extensions.libs
-import extensions.version
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ExternalModuleDependency
-import org.gradle.api.attributes.Usage
-import org.gradle.api.attributes.Usage.JAVA_RUNTIME
-import org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE
-import org.gradle.api.attributes.java.TargetJvmEnvironment
-import org.gradle.api.attributes.java.TargetJvmEnvironment.STANDARD_JVM
-import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
-import org.gradle.api.attributes.plugin.GradlePluginApiVersion
-import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
 fun findInstrumentationVersion(
     pluginVersion: String = Artifacts.Plugin.currentVersion,
@@ -71,7 +58,9 @@ fun Copy.configureCreateVersionClassTask(
  * Using a template file, the plugin's version constants & other dependency versions
  * are automatically injected into the README.
  */
-abstract class GenerateReadme : DefaultTask() {
+abstract class GenerateReadme @Inject constructor(
+    private val project: Project
+) : DefaultTask() {
     companion object {
         private val PLACEHOLDER_REGEX = Regex("\\\$\\{(.+)}")
         private val EXTERNAL_DEP_REGEX = Regex("libs\\.(.+)")
@@ -142,12 +131,12 @@ abstract class GenerateReadme : DefaultTask() {
                     } else {
                         val match3 = EXTERNAL_DEP_REGEX.find(placeholder)
                             ?: throw InvalidPlaceholder(match)
-                        val externalDependency = match3.groups.last()?.value
+                        val externalDependency = match3.groups.last()
+                            ?.value
+                            ?.replace('.', '-')
                             ?: throw InvalidPlaceholder(match3)
 
-//                        val field = libs.javaClass.getField(externalDependency)
-//                        field.get(null) as String
-                        "" // TODO: Connect this again
+                        project.libs.library(externalDependency).get().toString()
                     }
                 }
             }
