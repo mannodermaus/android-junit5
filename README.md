@@ -3,7 +3,15 @@
   To update the content of this README, please apply modifications
   to `README.md.template` instead, and run the `generateReadme` task from Gradle.
 -->
-# <img src=".images/logo.png" align="right" width="100">android-junit5 [![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
+<h1>
+  <picture width="400">
+    <source media="(prefers-color-scheme: dark)" srcset=".images/logo-inverted.svg">
+    <source media="(prefers-color-scheme: light)" srcset=".images/logo.svg">
+    <img alt="Android JUnit" src=".images/logo.svg" width="400">
+  </picture>
+</h1>
+
+[![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
 
 A Gradle plugin that allows for the execution of [JUnit Framework][junit-framework-github] tests in Android environments using **Android Gradle Plugin 8.2 or later.**
 
