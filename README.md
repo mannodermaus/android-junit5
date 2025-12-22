@@ -29,16 +29,13 @@ To get a first look at its features, a small showcase project can be found [here
 To get started, declare the plugin in your `app` module's build script alongside the latest version.
 Snapshots of the development version are available through [Sonatype's `snapshots` repository][sonatyperepo].
 
-<details open>
-  <summary>Kotlin</summary>
-
-  ```kotlin
-  plugins {
+```kotlin
+plugins {
     // 1. Apply the plugin
     id("de.mannodermaus.android-junit5") version "1.14.0.0"
-  }
+}
 
-  dependencies {
+dependencies {
     // 2. Add JUnit Framework BOM and the required dependencies
     testImplementation(platform("org.junit:junit-bom:5.14.1"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
@@ -48,34 +45,8 @@ Snapshots of the development version are available through [Sonatype's `snapshot
     // 3. Add JUnit Vintage if you also have JUnit 4 tests (e.g. Robolectric)
     testImplementation("junit:junit:4.13.2")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-
-  ```groovy
-  plugins {
-    // 1. Apply the plugin
-    id "de.mannodermaus.android-junit5" version "1.14.0.0"
-  }
-
-  dependencies {
-    // 2. Add JUnit Framework BOM and the required dependencies
-    testImplementation platform("org.junit:junit-bom:5.14.1")
-    testImplementation "org.junit.jupiter:junit-jupiter-api"
-    testImplementation "org.junit.jupiter:junit-jupiter-params"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
-
-    // 3. Add JUnit Vintage if you also have JUnit 4 tests (e.g. Robolectric)
-    testImplementation "junit:junit:4.13.2"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
-  }
-  ```
-</details>
-
-<br/>
+}
+```
 
 More information on Getting Started can be found [on the wiki][wiki-gettingstarted].
 
@@ -100,27 +71,12 @@ make sure that your module is using the `androidx.test.runner.AndroidJUnitRunner
 to the `androidTestImplementation` configuration in your build script and the plugin will
 automatically configure JUnit 5 tests for you:
 
-<details open>
-  <summary>Kotlin</summary>
-  
-  ```kotlin
-  dependencies {
+```kotlin
+dependencies {
     androidTestImplementation(platform("org.junit:junit-bom:5.14.1"))
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api")
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-
-  ```groovy
-  dependencies {
-    androidTestImplementation platform("org.junit:junit-bom:5.14.1")
-    androidTestImplementation "org.junit.jupiter:junit-jupiter-api"
-  }
-  ```
-</details>
+}
+```
 
 By enabling JUnit Framework for instrumentation tests, you will gain access to `ActivityScenarioExtension` among other things,
 which helps with the orchestration of `Activity` classes. Check [the wiki][wiki-home] for more info.
@@ -133,25 +89,11 @@ An optional artifact with `extensions` is available for specific use cases. It c
 
 Can you think of more? Let's discuss in the issues section!
 
-<details open>
-  <summary>Kotlin</summary>
-
-  ```kotlin
-  junitPlatform {
+```kotlin
+junitPlatform {
     instrumentationTests.includeExtensions.set(true)
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-
-  ```groovy
-  junitPlatform {
-    instrumentationTests.includeExtensions.set(true)
-  }
-  ```
-</details>
+}
+```
 
 ### Jetpack Compose
 
@@ -159,11 +101,8 @@ To test `@Composable` functions on devices compatible with the JUnit Framework,
 enable support for instrumentation tests as described above. Then add the Compose test dependency
 to your `androidTestImplementation` configuration and the plugin will autoconfigure JUnit 5 Compose support for you.
 
-<details open>
-  <summary>Kotlin</summary>
-  
-  ```kotlin
-  dependencies {
+```kotlin
+dependencies {
     // Setup from the previous section for enabling instrumentation tests...
 
     // Compose test framework
@@ -171,25 +110,8 @@ to your `androidTestImplementation` configuration and the plugin will autoconfig
 
     // Needed for createComposeExtension() and createAndroidComposeExtension()
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-
-  ```groovy
-  dependencies {
-    // Setup from the previous section for enabling instrumentation tests...
-
-    // Compose test framework
-    androidTestImplementation "androidx.compose.ui:ui-test-android:$compose_version"
-
-    // Needed for createComposeExtension() and createAndroidComposeExtension()
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
-  }
-  ```
-</details>
+}
+```
 
 [The wiki][wiki-home] includes a section on how to test your Composables.
 
@@ -198,25 +120,9 @@ to your `androidTestImplementation` configuration and the plugin will autoconfig
 By default, the plugin will make sure to use a compatible version of the instrumentation test libraries
 when it sets up the artifacts automatically. However, it is possible to choose a custom version instead via its DSL:
 
-<details open>
-  <summary>Kotlin</summary>
-
-  ```kotlin
-  junitPlatform {
+junitPlatform {
     instrumentationTests.version.set("1.9.0")
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-
-  ```groovy
-  junitPlatform {
-    instrumentationTests.version.set("1.9.0")
-  }
-  ```
-</details>
+}
 
 ## Official Support
 
@@ -236,25 +142,11 @@ the following artifacts help bridge the gap until Android officially transitions
 
 Replaces `InstantTaskExecutorRule` in JUnit 5.
 
-<details>
-  <summary>Kotlin</summary>
-
-  ```kotlin
-  dependencies {
+```kotlin
+dependencies {
     testImplementation("io.github.neboskreb:instant-task-executor-extension:1.0.0")
-  }
-  ```
-</details>
-
-<details>
-  <summary>Groovy</summary>
-
-  ```groovy
-  dependencies {
-    testImplementation 'io.github.neboskreb:instant-task-executor-extension:1.0.0'
-  }
-  ```
-</details>
+}
+```
 
 For more details see [instant-task-executor-extension](https://github.com/neboskreb/instant-task-executor-extension) on GitHub.
 
