@@ -46,7 +46,22 @@ fun Copy.configureCreateVersionClassTask(
 
                 // JUnit 5.12+ requires the platform launcher on the runtime classpath;
                 // to prevent issues with version mismatching, the plugin applies this for users
-                "JUNIT_PLATFORM_LAUNCHER" to project.libs.library("junit-platform-launcher").get().toString()
+                "JUNIT_PLATFORM_LAUNCHER" to project.libs.library("junit-platform-launcher").get().toString(),
+
+                // Communicate all supported JUnit versions so the plugin can use them
+                "SUPPORTED_JUNIT_VERSIONS" to SupportedJUnit.values().joinToString { junit ->
+                    buildString {
+                        append(junit.name)
+                        append("(majorVersion=")
+                        append(junit.majorVersion)
+                        junit.artifactIdSuffix?.let {
+                            append(", artifactIdSuffix=\"")
+                            append(it)
+                            append('\"')
+                        }
+                        append(')')
+                    }
+                }
             )
         ), ReplaceTokens::class.java
     )

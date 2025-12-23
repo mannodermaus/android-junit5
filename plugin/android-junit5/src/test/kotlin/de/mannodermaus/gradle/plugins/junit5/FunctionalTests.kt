@@ -8,6 +8,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
 import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
+import de.mannodermaus.gradle.plugins.junit5.util.times
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testkit.runner.BuildResult
@@ -32,6 +33,10 @@ class FunctionalTests {
 
     // Test permutations for AGP (default: empty set, which will exercise all)
     private val testedAgpVersions: Set<String> = setOf(
+    )
+
+    // Test permutations for JUnit (default: empty set, which will exercise all)
+    private val testedJUnitVersions: Set<Int> = setOf(
     )
 
     // Test permutations for projects (default: empty set, which will exercise all)
@@ -60,25 +65,30 @@ class FunctionalTests {
     }
 
     @TestFactory
-    fun execute(): List<DynamicNode> = environment.supportedAgpVersions.filterAgpVersions()
-        .map { agp ->
-            // Create a matrix of permutations between the AGP versions to test
-            // and the language of the project's build script
-            val projectCreator = FunctionalTestProjectCreator(folder, environment)
+    fun execute(): Sequence<DynamicNode> {
+        val agpVersions = environment.supportedAgpVersions.filterAgpVersions()
+        val junitVersions = environment.supportedJUnitVersions.filterJUnitVersions()
 
-            // Generate a container for all tests with this specific AGP/Language combination
-            dynamicContainer("AGP ${agp.shortVersion}",
-                // Exercise each test project within the given environment
-                projectCreator.allSpecs.filterSpecs().flatMap { spec ->
-                    TestedJUnit.entries.map { junit ->
+        return (agpVersions * junitVersions)
+            .map { (agp, junit) ->
+                // Create a matrix of permutations between the AGP versions to test
+                // and the language of the project's build script
+                val projectCreator = FunctionalTestProjectCreator(folder, environment)
+
+                // Generate a container for all tests with this specific combination
+                dynamicContainer(
+                    "JUnit ${junit.majorVersion} & AGP ${agp.shortVersion}",
+                    // Exercise each test project within the given environment
+                    projectCreator.allSpecs.filterSpecs().map { spec ->
                         dynamicTest("${spec.name} ($junit)") {
-                            // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
+                            // Required for visibility inside the IntelliJ logging console
+                            // (display names are still bugged in the IDE)
                             println(buildList {
+                                add("JUnit ${junit.majorVersion}")
                                 add("AGP: ${agp.version}")
                                 add("Project: ${spec.name}")
                                 add("Gradle: ${agp.requiresGradle}")
                                 agp.requiresCompileSdk?.let { add("SDK: $it") }
-                                add(junit.name)
                             }.joinToString())
 
                             // Create a virtual project with the given settings & AGP version.
@@ -127,9 +137,9 @@ class FunctionalTests {
                             }
                         }
                     }
-                }
-            )
-        }
+                )
+            }
+    }
 
     /* Private */
 
@@ -141,6 +151,17 @@ class FunctionalTests {
         } else {
             filter { agp ->
                 testedAgpVersions.any { it == agp.shortVersion }
+            }
+        }
+
+    private fun List<TestedJUnit>.filterJUnitVersions(): List<TestedJUnit> =
+        if (testedJUnitVersions.isEmpty()) {
+            // Nothing to do, exercise functional tests on all JUnit versions
+            // (but in reverse order, so that the newest JUnit is tested first)
+            reversed()
+        } else {
+            filter { junit ->
+                testedJUnitVersions.any { it == junit.majorVersion }
             }
         }
 

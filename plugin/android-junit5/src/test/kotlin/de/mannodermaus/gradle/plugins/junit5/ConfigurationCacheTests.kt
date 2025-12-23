@@ -2,7 +2,6 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
-import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
@@ -13,12 +12,11 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome.FAILED
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.io.File
 
 @TestInstance(PER_CLASS)
@@ -39,29 +37,29 @@ class ConfigurationCacheTests {
         Runtime.getRuntime().exec("adb disconnect".splitToArray(" "))
     }
 
-    @EnumSource(TestedJUnit::class)
-    @ParameterizedTest
-    fun `test instrumentation tasks`(junit: TestedJUnit) {
-        // Test configuration cache with one specific project and AGP version
-        val spec = projectCreator.specNamed("instrumentation-tests")
-        val project = projectCreator.createProject(spec, agp, junit)
+    @TestFactory
+    fun `test instrumentation tasks`() = environment.supportedJUnitVersions.map { junit ->
+        dynamicTest("JUnit ${junit.majorVersion}") {
+            // Test configuration cache with one specific project and AGP version
+            val spec = projectCreator.specNamed("instrumentation-tests")
+            val project = projectCreator.createProject(spec, agp, junit)
 
-        // Run it once; this is supposed to fail, but JUST because of 'no connected device',
-        // not because of other errors including the configuration cache.
-        runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
-            assertThat(it).task(":connectedDebugAndroidTest").hasOutcome(FAILED)
-            assertThat(it).output().contains("DeviceException: No connected devices!")
-        }
+            // Run it once; this is supposed to fail, but JUST because of 'no connected device',
+            // not because of other errors including the configuration cache.
+            runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
+                assertThat(it).task(":connectedDebugAndroidTest").hasOutcome(FAILED)
+                assertThat(it).output().contains("DeviceException: No connected devices!")
+            }
 
-        // Run it again, expecting to see a successful reuse of the configuration cache
-        runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
-            assertThat(it).output().contains("Reusing configuration cache.")
+            // Run it again, expecting to see a successful reuse of the configuration cache
+            runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
+                assertThat(it).output().contains("Reusing configuration cache.")
+            }
         }
     }
 
-    @EnumSource(TestedJUnit::class)
-    @ParameterizedTest
-    fun `test unit tasks`(junit: TestedJUnit) {
+    @TestFactory
+    fun `test unit tasks`() = environment.supportedJUnitVersions.map { junit ->
         val spec = projectCreator.specNamed("product-flavors")
         val project = projectCreator.createProject(spec, agp, junit)
 

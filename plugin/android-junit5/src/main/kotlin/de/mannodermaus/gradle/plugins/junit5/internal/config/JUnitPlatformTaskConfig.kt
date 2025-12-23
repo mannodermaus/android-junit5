@@ -7,7 +7,7 @@ import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.dsl.FiltersExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.utils.IncludeExcludeContainer
 
-internal class JUnit5TaskConfig(
+internal class JUnitPlatformTaskConfig(
     private val variant: Variant,
     private val extension: AndroidJUnitPlatformExtension,
 ) {

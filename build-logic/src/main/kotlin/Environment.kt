@@ -5,12 +5,13 @@ import java.io.File
 import java.util.Properties
 
 enum class SupportedJUnit(
+    val majorVersion: Int,
     val label: String,
     val minSdk: Int,
     val artifactIdSuffix: String? = null
 ) {
-    JUnit5(label = "five", minSdk = 26),
-    JUnit6(label = "six", minSdk = 35, artifactIdSuffix = "junit6");
+    JUnit5(majorVersion = 5, label = "five", minSdk = 26),
+    JUnit6(majorVersion = 6, label = "six", minSdk = 35, artifactIdSuffix = "junit6");
 
     companion object {
         fun fromLabel(label: String): SupportedJUnit = values().first { it.label == label }
@@ -105,9 +106,9 @@ object Artifacts {
         platform = Java,
         groupId = "de.mannodermaus.gradle.plugins",
         artifactId = "android-junit5",
-        currentVersion = "1.14.0.1-SNAPSHOT",
+        currentVersion = "2.0.0-SNAPSHOT",
         latestStableVersion = "1.14.0.0",
-        description = "Unit Testing with JUnit 5 for Android."
+        description = "Unit Testing with the JUnit Framework for Android."
     )
 
     /**
@@ -115,7 +116,7 @@ object Artifacts {
      */
     object Instrumentation {
         const val groupId = "de.mannodermaus.junit5"
-        private const val currentVersion = "1.9.1-SNAPSHOT"
+        private const val currentVersion = "2.0.0-SNAPSHOT"
         private const val latestStableVersion = "1.9.0"
 
         val Core = Deployed(
@@ -124,7 +125,7 @@ object Artifacts {
             artifactId = "android-test-core",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Extensions for instrumented Android tests with JUnit 5."
+            description = "Extensions for instrumented Android tests with the JUnit Framework."
         )
 
         val Extensions = Deployed(
@@ -133,7 +134,7 @@ object Artifacts {
             artifactId = "android-test-extensions",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Optional extensions for instrumented Android tests with JUnit 5."
+            description = "Optional extensions for instrumented Android tests with the JUnit Framework."
         )
 
         val Runner = Deployed(
@@ -142,7 +143,7 @@ object Artifacts {
             artifactId = "android-test-runner",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Runner for integration of instrumented Android tests with JUnit 5."
+            description = "Runner for integration of instrumented Android tests with the JUnit Framework."
         )
 
         val Compose = Deployed(
@@ -151,13 +152,12 @@ object Artifacts {
             artifactId = "android-test-compose",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Extensions for Jetpack Compose tests with JUnit 5."
+            description = "Extensions for Jetpack Compose tests with the JUnit Framework."
         )
     }
 }
 
 class DeployedCredentials(private val project: Project) {
-
     var signingKeyId: String?
     var signingPassword: String?
     var signingKeyRingFile: String?

@@ -40,8 +40,13 @@ kotlin {
 // ------------------------------------------------------------------------------------------------
 gradlePlugin {
     plugins {
-        register("plugin") {
+        register("pluginOld") {
             id = "de.mannodermaus.android-junit5"
+            implementationClass = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
+        }
+
+        register("plugin") {
+            id = "de.mannodermaus.android-junit"
             implementationClass = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
         }
     }
@@ -105,15 +110,13 @@ sourceSets {
 
 // Create a test resource task which will power the instrumented tests
 // for different versions of the Android Gradle Plugin
-tasks.named("processTestResources", Copy::class.java).configure {
+tasks.named<Copy>("processTestResources").configure {
     val tokens = mapOf(
         "COMPILE_SDK_VERSION" to Android.compileSdkVersion.toString(),
         "MIN_SDK_VERSION" to Android.sampleMinSdkVersion.toString(),
         "TARGET_SDK_VERSION" to Android.targetSdkVersion.toString(),
 
         "KOTLIN_VERSION" to libs.versions.kotlin.get(),
-        "JUNIT5_VERSION" to libs.versions.junit5.get(),
-        "JUNIT6_VERSION" to libs.versions.junit6.get(),
         "JUNIT5_ANDROID_LIBS_VERSION" to Artifacts.Instrumentation.Core.latestStableVersion,
 
         // Collect all supported AGP versions into a single string.
@@ -139,6 +142,18 @@ tasks.named("processTestResources", Copy::class.java).configure {
         //       Compile SDK: 33
         "AGP_VERSIONS" to SupportedAgp.values().joinToString(separator = ";") { plugin ->
             "${plugin.shortVersion}|${plugin.version}|${plugin.gradle}|${plugin.compileSdk ?: ""}"
+        },
+
+        // Collect all supported JUnit versions into a single string.
+        // This string is delimited with semicolons, and each of the separated values is a 2-tuple.
+        // Example:
+        // JUNIT_VERSIONS = 5|5.14.1;6|6.0.1
+        "JUNIT_VERSIONS" to SupportedJUnit.values().joinToString(separator = ";") { junit ->
+            val fullVersion = when (junit) {
+                SupportedJUnit.JUnit5 -> libs.versions.junit5
+                SupportedJUnit.JUnit6 -> libs.versions.junit6
+            }
+            "${junit.majorVersion}|${fullVersion.get()}"
         }
     )
 
@@ -189,6 +204,15 @@ project.configurations.apply {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Attach Gradle Plugin API attribute to the created plugin artifacts
+    listOf("runtimeElements", "apiElements").forEach { configurationName ->
+        this.named(configurationName).configure {
+            attributes {
+                attribute(GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named(minimumGradleVersion))
             }
         }
     }

@@ -86,11 +86,7 @@ class FunctionalTestProjectCreator(
         replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
         replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
         replacements["DISABLE_TESTS_FOR_BUILD_TYPES"] = spec.disableTestsForBuildTypes
-
-        replacements["JUNIT_VERSION"] = when (junit) {
-            TestedJUnit.JUnit5 -> environment.junit5Version
-            TestedJUnit.JUnit6 -> environment.junit6Version
-        }
+        replacements["JUNIT_VERSION"] = junit.fullVersion
 
         agp.requiresCompileSdk?.let {
             replacements["OVERRIDE_SDK_VERSION"] = it
@@ -100,7 +96,8 @@ class FunctionalTestProjectCreator(
             folder = projectRootFolder,
             replacements = replacements,
             agpVersion = agp.version,
-            gradleVersion = agp.requiresGradle
+            gradleVersion = agp.requiresGradle,
+            junitVersion = junit.fullVersion,
         )
 
         processor.process(BUILD_GRADLE_TEMPLATE_NAME).also { result ->

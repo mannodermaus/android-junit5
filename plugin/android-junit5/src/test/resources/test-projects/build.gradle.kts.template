@@ -171,8 +171,5 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation(platform("org.junit:junit-bom:${junitVersion}"))
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api")
-
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:${junit5AndroidLibsVersion}")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:${junit5AndroidLibsVersion}")
   {% endif %}
 }

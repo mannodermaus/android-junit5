@@ -1,7 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.dsl
 
 import de.mannodermaus.Libraries
-import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
 import groovy.lang.Closure
 import groovy.lang.GroovyObjectSupport
 import org.gradle.api.Action
@@ -15,12 +14,6 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
     project: Project,
     private val objects: ObjectFactory
 ) : GroovyObjectSupport() {
-
-    internal companion object {
-        fun Project.createJUnit5Extension(): AndroidJUnitPlatformExtension =
-            extensions.create(EXTENSION_NAME, AndroidJUnitPlatformExtension::class.java)
-    }
-
     internal operator fun invoke(block: AndroidJUnitPlatformExtension.() -> Unit) {
         this.block()
     }
@@ -94,7 +87,7 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
     public val instrumentationTests: InstrumentationTestOptions =
         objects.newInstance(InstrumentationTestOptions::class.java).apply {
             enabled.convention(true)
-            version.convention(Libraries.instrumentationVersion)
+            version.convention(Libraries.Instrumentation.version)
             includeExtensions.convention(false)
             useConfigurationParameters.convention(true)
         }

@@ -237,17 +237,17 @@ class InstrumentationSupportTests {
         dependencies.add(configuration, "androidx.compose.ui:ui-test-android:+")
     }
 
-    private fun composeLibrary(withVersion: String? = Libraries.instrumentationVersion) =
-        library(Libraries.instrumentationCompose, withVersion)
+    private fun composeLibrary(withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.compose, withVersion)
 
-    private fun coreLibrary(withVersion: String? = Libraries.instrumentationVersion) =
-        library(Libraries.instrumentationCore, withVersion)
+    private fun coreLibrary(withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.core, withVersion)
 
-    private fun extensionsLibrary(withVersion: String? = Libraries.instrumentationVersion) =
-        library(Libraries.instrumentationExtensions, withVersion)
+    private fun extensionsLibrary(withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.extensions, withVersion)
 
-    private fun runnerLibrary(withVersion: String? = Libraries.instrumentationVersion) =
-        library(Libraries.instrumentationRunner, withVersion)
+    private fun runnerLibrary(withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.runner, withVersion)
 
     private fun library(artifactId: String, version: String?) = buildString {
         append(artifactId)

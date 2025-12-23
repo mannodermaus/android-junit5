@@ -7,9 +7,11 @@ import com.android.build.api.variant.Variant
 import com.android.builder.core.ComponentType.Companion.UNIT_TEST_PREFIX
 import com.android.builder.core.ComponentType.Companion.UNIT_TEST_SUFFIX
 import de.mannodermaus.Libraries
+import de.mannodermaus.Libraries.Instrumentation
 import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
-import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
+import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnitPlatformTaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.config.PluginConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getAsList
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
@@ -18,17 +20,16 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Warn
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesComposeIn
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesJUnitJupiterIn
-import de.mannodermaus.gradle.plugins.junit5.internal.utils.excludedPackagingOptions
+import de.mannodermaus.gradle.plugins.junit5.internal.usage.DependencyUsageDetector
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 
-internal fun configureJUnit5(
-    project: Project,
-    config: PluginConfig,
-    extension: AndroidJUnitPlatformExtension
-) {
+internal fun Project.configureJUnitFramework(config: PluginConfig) {
+    val project = this
+    val extension = extensions.create(EXTENSION_NAME, AndroidJUnitPlatformExtension::class.java)
+
     with(extension) {
         // General-purpose filters
         filters(qualifier = null)
@@ -94,22 +95,26 @@ private fun AndroidJUnitPlatformExtension.prepareVariantDsl(variant: Variant) {
 private fun AndroidJUnitPlatformExtension.prepareUnitTests(project: Project, android: AndroidExtension) {
     // Add default ignore rules for JUnit 5 metadata files to the packaging options of the plugin,
     // so that consumers don't need to do this explicitly
-    val options = excludedPackagingOptions()
-
-    android.packaging.resources.excludes.addAll(options)
-    attachDependencies(project, "testImplementation", includeRunner = false)
+    android.packaging.resources.excludes.addAll(
+        listOf(
+            "/META-INF/LICENSE.md",
+            "/META-INF/LICENSE-notice.md"
+        )
+    )
+    attachDependencies(project, "testImplementation")
 }
 
 private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: Project, android: AndroidExtension) {
-    if (!instrumentationTests.enabled.get()) return
-
     // Automatically configure instrumentation tests when JUnit 5 is detected in that configuration
+    if (!instrumentationTests.enabled.get()) return
     if (!project.usesJUnitJupiterIn("androidTestImplementation")) return
 
+    val runnerArgs = android.defaultConfig.testInstrumentationRunnerArguments
+
     // Attach the JUnit 5 RunnerBuilder to the list, unless it's already added
-    val runnerBuilders = android.defaultConfig.testInstrumentationRunnerArguments.getAsList("runnerBuilder")
+    val runnerBuilders = runnerArgs.getAsList("runnerBuilder")
     if (ANDROID_JUNIT5_RUNNER_BUILDER_CLASS !in runnerBuilders) {
-        android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"] = runnerBuilders
+        runnerArgs["runnerBuilder"] = runnerBuilders
             .toMutableList()
             .also { it.add(ANDROID_JUNIT5_RUNNER_BUILDER_CLASS) }
             .joinToString(",")
@@ -117,46 +122,59 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
 
     // Copy over configuration parameters to instrumentation tests
     if (instrumentationTests.useConfigurationParameters.get()) {
-        val instrumentationParams = android.defaultConfig.testInstrumentationRunnerArguments
-            .getAsList("configurationParameters")
-            .toMutableList()
+        val instrumentationParams = runnerArgs.getAsList("configurationParameters").toMutableList()
 
         this.configurationParameters.get().forEach { (key, value) ->
             instrumentationParams.add("$key=$value")
         }
 
-        android.defaultConfig.testInstrumentationRunnerArguments["configurationParameters"] =
-            instrumentationParams.joinToString(",")
+        runnerArgs["configurationParameters"] = instrumentationParams.joinToString(",")
     }
 
-    attachDependencies(project, "androidTestImplementation", includeRunner = true)
+    attachDependencies(project, "androidTestImplementation")
 }
 
-private fun AndroidJUnitPlatformExtension.attachDependencies(
-    project: Project,
-    configurationName: String,
-    includeRunner: Boolean,
-) {
-    if (project.usesJUnitJupiterIn(configurationName)) {
-        val runtimeOnlyConfigurationName = configurationName.replace("Implementation", "RuntimeOnly")
+/**
+ * Construct an artifact ID (i.e. `de.mannodermaus:hoge:1.2.3`) compatible with the given supported JUnit version.
+ * Depending on the JUnit version, the artifact ID may include a version-specific suffix string as well.
+ */
+private fun Libraries.JUnit.artifact(base: String, version: String) = buildString {
+    append(base)
+    this@artifact.artifactIdSuffix?.let { suffix -> append('-').append(suffix) }
+    append(':')
+    append(version)
+}
+
+private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, configurationName: String) {
+    DependencyUsageDetector(project).findJUnit(configurationName)?.let { usage ->
+        val includeRunner = "android" in configurationName
+        val runtimeOnly = configurationName.replace("Implementation", "RuntimeOnly")
         val version = instrumentationTests.version.get()
 
-        project.dependencies.add(runtimeOnlyConfigurationName, Libraries.junitPlatformLauncher)
-        project.dependencies.add(configurationName, "${Libraries.instrumentationCore}:$version")
+        // First, apply the core library
+        project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.core, version))
+
+        // Add some runtime dependencies, including a reference to the JUnit BOM
+        project.dependencies.add(
+            runtimeOnly,
+            project.dependencies.platform("org.junit:junit-bom:${usage.version}")
+        )
+        project.dependencies.add(runtimeOnly, Libraries.junitPlatformLauncher)
 
         if (includeRunner) {
             project.dependencies.add(
-                runtimeOnlyConfigurationName,
-                "${Libraries.instrumentationRunner}:$version",
+                runtimeOnly,
+                usage.junit.artifact(Instrumentation.runner, version)
             )
         }
 
+        // Add optional artifacts
         if (instrumentationTests.includeExtensions.get()) {
-            project.dependencies.add(configurationName, "${Libraries.instrumentationExtensions}:$version")
+            project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.extensions, version))
         }
 
         if (project.usesComposeIn(configurationName)) {
-            project.dependencies.add(configurationName, "${Libraries.instrumentationCompose}:$version")
+            project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.compose, version))
         }
     }
 }
@@ -164,7 +182,7 @@ private fun AndroidJUnitPlatformExtension.attachDependencies(
 private fun AndroidJUnitPlatformExtension.configureUnitTests(project: Project, variant: Variant) {
     val taskName = variant.getTaskName(prefix = UNIT_TEST_PREFIX, suffix = UNIT_TEST_SUFFIX)
     project.tasks.namedOrNull<Test>(taskName)?.configure { testTask ->
-        val taskConfig = JUnit5TaskConfig(variant, this)
+        val taskConfig = JUnitPlatformTaskConfig(variant, this)
 
         testTask.useJUnitPlatform { options ->
             options.includeTags(*taskConfig.combinedIncludeTags)
