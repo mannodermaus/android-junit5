@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(RobolectricTestRunner::class)
-class AndroidJUnit5Tests {
+class AndroidJUnitFrameworkTests {
 
     @org.junit.Test
     fun `successful tests are reported correctly`() {
@@ -80,7 +80,7 @@ class AndroidJUnit5Tests {
         val resultRef = AtomicReference<CollectingRunListener.Results>()
         val args = buildArgs(shardingConfig)
         withMockedInstrumentation(args) {
-            val runner = AndroidJUnit5(Sample_NormalTests::class.java)
+            val runner = AndroidJUnitFramework(Sample_NormalTests::class.java)
             val listener = CollectingRunListener()
             val notifier = RunNotifier().also { it.addListener(listener) }
             runner.run(notifier)

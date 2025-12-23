@@ -12,8 +12,8 @@ import java.lang.reflect.Modifier
 
 /**
  * Algorithm to find all methods annotated with a JUnit Jupiter annotation
- * for devices running below API level 26 (i.e. those that cannot run Jupiter).
- * We're unable to rely on JUnit Platform's own reflection utilities since they rely on Java 8 stuff
+ * for devices running below the API level requirement of the JUnit Framework.
+ * As they rely on Java 8 stuff, we're unable to rely on JUnit Platform's own reflection utilities.
  */
 internal object JupiterTestMethodFinder {
     private val jupiterTestAnnotations = listOf(

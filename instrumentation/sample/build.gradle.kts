@@ -21,7 +21,7 @@ android {
         // These two lines are not needed for a normal integration;
         // this sample project disables the automatic integration, so it must be done manually
         testInstrumentationRunnerArguments["runnerBuilder"] =
-            "de.mannodermaus.junit5.AndroidJUnit5Builder"
+            "de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder"
         testInstrumentationRunnerArguments["configurationParameters"] =
             "junit.jupiter.execution.parallel.enabled=true,junit.jupiter.execution.parallel.mode.default=concurrent"
 

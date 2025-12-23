@@ -9,9 +9,9 @@ import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 
-class AndroidJUnit5BuilderTests {
+class AndroidJUnitFrameworkBuilderTests {
 
-    private val builder = AndroidJUnit5Builder()
+    private val builder = AndroidJUnitFrameworkBuilder()
 
     @TestFactory
     fun `no runner is created if class only contains top-level test methods`() = runTest(

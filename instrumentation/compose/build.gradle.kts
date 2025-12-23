@@ -10,6 +10,9 @@ android {
 
     defaultConfig {
         minSdk = Android.testComposeMinSdkVersion
+
+        testInstrumentationRunnerArguments["runnerBuilder"] =
+            "de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder"
     }
 
     buildFeatures {

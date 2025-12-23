@@ -1,7 +1,6 @@
 package de.mannodermaus.junit5.internal.discovery
 
 internal object PropertiesParser {
-    @JvmStatic
     fun fromString(string: String) =
         string.split(",")
             .map { keyValuePair -> keyValuePair.split("=") }

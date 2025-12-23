@@ -12,17 +12,16 @@ import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
 /**
- * The [GrantPermissionExtension] allows granting of runtime permissions on Android M (API 23)
- * and above. Use this extension when a test requires a runtime permission to do its work.
+ * The [GrantPermissionExtension] allows granting of runtime permissions before a test.
+ * Use this extension when a test requires a runtime permission to do its work.
  *
  * This is a port of JUnit 4's GrantPermissionRule for JUnit 5.
  *
  * <p>When applied to a test class it attempts to grant all requested runtime permissions.
  * The requested permissions will then be granted on the device and will take immediate effect.
- * Permissions can only be requested on Android M (API 23) or above and will be ignored on all other
- * API levels. Once a permission is granted it will apply for all tests running in the current
- * Instrumentation. There is no way of revoking a permission after it was granted. Attempting to do
- * so will crash the Instrumentation process.
+ * Once a permission is granted it will apply for all tests running in the current Instrumentation.
+ * There is no way of revoking a permission after it was granted.
+ * Attempting to do so will crash the Instrumentation process.
  */
 @SuppressLint("RestrictedApi")
 public class GrantPermissionExtension
@@ -37,7 +36,6 @@ internal constructor(private val permissionGranter: PermissionGranter) : BeforeE
          *
          * @see android.Manifest.permission
          */
-        @ExperimentalTestApi
         @JvmStatic
         public fun grant(vararg permissions: String): GrantPermissionExtension {
             val granter = loadSingleService(PermissionGranter::class.java, ::PermissionRequester)
@@ -51,7 +49,7 @@ internal constructor(private val permissionGranter: PermissionGranter) : BeforeE
             val set = LinkedHashSet<String>(permissions.size + 1).also { it.addAll(permissions) }
 
             // Grant READ_EXTERNAL_STORAGE implicitly if its counterpart is present
-            if (Build.VERSION.SDK_INT >= 16 && Manifest.permission.WRITE_EXTERNAL_STORAGE in set) {
+            if (Manifest.permission.WRITE_EXTERNAL_STORAGE in set) {
                 set.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
 

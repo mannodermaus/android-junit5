@@ -16,8 +16,8 @@ import de.mannodermaus.junit5.HasTaggedTest
 import de.mannodermaus.junit5.HasTest
 import de.mannodermaus.junit5.HasTestFactory
 import de.mannodermaus.junit5.HasTestTemplate
-import de.mannodermaus.junit5.internal.runners.AndroidJUnit5
-import de.mannodermaus.junit5.internal.runners.AndroidJUnit5RunnerParams
+import de.mannodermaus.junit5.internal.runners.AndroidJUnitFramework
+import de.mannodermaus.junit5.internal.runners.JUnitFrameworkRunnerParams
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -99,8 +99,8 @@ class JupiterTestMethodFinderTests {
         val listener = CountingRunListener()
         notifier.addListener(listener)
 
-        val params = AndroidJUnit5RunnerParams(filters = listOfNotNull(filter))
-        AndroidJUnit5(cls) { params }.run(notifier)
+        val params = JUnitFrameworkRunnerParams(filters = listOfNotNull(filter))
+        AndroidJUnitFramework(cls) { params }.run(notifier)
 
         return listener
     }

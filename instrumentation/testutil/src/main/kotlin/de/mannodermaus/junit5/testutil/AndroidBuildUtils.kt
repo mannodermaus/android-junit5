@@ -28,7 +28,7 @@ public object AndroidBuildUtils {
     public fun withMockedInstrumentation(arguments: Bundle = Bundle(), block: () -> Unit) {
         val (oldInstrumentation, oldArguments) = try {
             InstrumentationRegistry.getInstrumentation() to InstrumentationRegistry.getArguments()
-        } catch (ignored: Throwable) {
+        } catch (_: Throwable) {
             null to null
         }
 

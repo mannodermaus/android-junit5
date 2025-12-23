@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit
  */
 internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotifier() {
     private companion object {
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         private val doneLock = Object()
         private val nopPrinter = InstrumentationResultPrinter()
         private val nopTestState = TestState("", Bundle(), 0)
@@ -258,7 +259,7 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
                     ignoreQueue.forEach(::sendEvent)
                     ignoreQueue.clear()
                 }
-            } catch (ignored: InterruptedException) {
+            } catch (_: InterruptedException) {
                 // OK
                 while (startQueue.isNotEmpty()) {
                     val startEvent = startQueue.take()

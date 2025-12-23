@@ -2,7 +2,7 @@ package de.mannodermaus.junit5.internal.discovery
 
 import android.content.Context
 import android.content.res.Resources
-import de.mannodermaus.junit5.internal.runners.AndroidJUnit5
+import de.mannodermaus.junit5.internal.runners.AndroidJUnitFramework
 import org.junit.platform.engine.Filter
 import org.junit.platform.launcher.TagFilter
 
@@ -11,11 +11,11 @@ private const val INSTRUMENTATION_FILTER_RES_FILE_NAME = "de_mannodermaus_junit5
 /**
  * Holder object for the filters of a test plan.
  * It converts the contents of a resource file into JUnit Platform [Filter] objects
- * for the [AndroidJUnit5] runner.
+ * for the [AndroidJUnitFramework] runner.
  */
 internal object GeneratedFilters {
 
-    @Suppress("FoldInitializerAndIfToElvis", "DiscouragedApi")
+    @Suppress("DiscouragedApi")
     @JvmStatic
     fun fromContext(context: Context): List<Filter<*>> {
         // Look up the resource file written by the Gradle plugin
@@ -29,7 +29,7 @@ internal object GeneratedFilters {
         val inputStream = if (identifier != 0) {
             try {
                 context.resources.openRawResource(identifier)
-            } catch (ignored: Resources.NotFoundException) {
+            } catch (_: Resources.NotFoundException) {
                 // Ignore
                 null
             }

@@ -5,26 +5,21 @@ import androidx.annotation.VisibleForTesting
 import de.mannodermaus.junit5.internal.discovery.EmptyTestPlan
 import de.mannodermaus.junit5.internal.runners.notification.ParallelRunNotifier
 import org.junit.platform.commons.JUnitException
-import org.junit.platform.engine.ConfigurationParameters
 import org.junit.platform.engine.discovery.MethodSelector
-import org.junit.platform.launcher.TestPlan
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
-import java.util.Optional
 
 /**
  * JUnit Runner implementation using the JUnit Platform as its backbone.
  * Serves as an intermediate solution to writing JUnit 5-based instrumentation tests
  * until official support arrives for this.
- *
- * @see org.junit.platform.runner.JUnitPlatform
  */
 @RequiresApi(26)
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-internal class AndroidJUnit5(
+internal class AndroidJUnitFramework(
     private val testClass: Class<*>,
-    paramsSupplier: () -> AndroidJUnit5RunnerParams = AndroidJUnit5RunnerParams.Companion::create,
+    paramsSupplier: () -> JUnitFrameworkRunnerParams = JUnitFrameworkRunnerParams::create,
 ) : Runner() {
     private val launcher = LauncherFactory.create()
     private val testTree by lazy { generateTestTree(paramsSupplier()) }
@@ -41,7 +36,7 @@ internal class AndroidJUnit5(
 
     /* Private */
 
-    private fun generateTestTree(params: AndroidJUnit5RunnerParams): AndroidJUnitPlatformTestTree {
+    private fun generateTestTree(params: JUnitFrameworkRunnerParams): AndroidJUnitPlatformTestTree {
         val selectors = params.createSelectors(testClass)
         val isIsolatedMethodRun = selectors.size == 1 && selectors.first() is MethodSelector
         val isUsingOrchestrator = params.isUsingOrchestrator

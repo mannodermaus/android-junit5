@@ -11,7 +11,7 @@ import org.junit.platform.engine.Filter
 import org.junit.platform.launcher.LauncherDiscoveryRequest
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 
-internal data class AndroidJUnit5RunnerParams(
+internal data class JUnitFrameworkRunnerParams(
     private val arguments: Bundle = Bundle(),
     private val filters: List<Filter<*>> = emptyList(),
     val environmentVariables: Map<String, String> = emptyMap(),
@@ -37,7 +37,7 @@ internal data class AndroidJUnit5RunnerParams(
         get() = arguments.getString("orchestratorService") != null
 
     internal companion object {
-        fun create(): AndroidJUnit5RunnerParams {
+        fun create(): JUnitFrameworkRunnerParams {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val arguments = InstrumentationRegistry.getArguments()
 
@@ -63,7 +63,7 @@ internal data class AndroidJUnit5RunnerParams(
             val filters = GeneratedFilters.fromContext(instrumentation.context) +
                     listOfNotNull(ShardingFilter.fromArguments(arguments))
 
-            return AndroidJUnit5RunnerParams(
+            return JUnitFrameworkRunnerParams(
                 arguments,
                 filters,
                 environmentVariables,

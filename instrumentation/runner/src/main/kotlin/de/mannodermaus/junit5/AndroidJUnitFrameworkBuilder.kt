@@ -3,8 +3,8 @@ package de.mannodermaus.junit5
 import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
 import de.mannodermaus.junit5.internal.LibcoreAccess
-import de.mannodermaus.junit5.internal.runners.AndroidJUnit5RunnerParams
-import de.mannodermaus.junit5.internal.runners.tryCreateJUnit5Runner
+import de.mannodermaus.junit5.internal.runners.JUnitFrameworkRunnerParams
+import de.mannodermaus.junit5.internal.runners.tryCreateJUnitFrameworkRunner
 import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
 
@@ -22,7 +22,7 @@ import org.junit.runners.model.RunnerBuilder
  *   android {
  *     defaultConfig {
  *       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
- *       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+ *       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder")
  *     }
  *   }
  * </pre>
@@ -30,10 +30,8 @@ import org.junit.runners.model.RunnerBuilder
  * (Suppressing unused, since this is hooked into the
  * project configuration via a Test Instrumentation Runner Argument.)
  */
-@Suppress("unused")
-public class AndroidJUnit5Builder : RunnerBuilder() {
-
-    private val junit5Available by lazy {
+public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBuilder() {
+    private val junitFrameworkAvailable by lazy {
         try {
             // The verification order of this block is quite important.
             // Do not change it without thorough testing of potential consequences!
@@ -42,18 +40,18 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
             // AND that integration with applications NOT using JUnit 5 for UI tests still works.
             //
             // First, verify the existence of junit-jupiter-api on the classpath.
-            // Then, verify that the Android JUnit 5 Runner is available.
+            // Then, verify that the Android JUnit Framework Runner is available.
             Class.forName("org.junit.jupiter.api.Test")
-            Class.forName("de.mannodermaus.junit5.internal.runners.AndroidJUnit5")
+            Class.forName("de.mannodermaus.junit5.internal.runners.AndroidJUnitFramework")
             true
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             false
         }
     }
 
     // One-time parsing setup for runner params, taken from instrumentation arguments
     private val params by lazy {
-        AndroidJUnit5RunnerParams.create().also { params ->
+        JUnitFrameworkRunnerParams.create().also { params ->
             // Apply all environment variables & system properties to the running process
             params.registerEnvironmentVariables()
             params.registerSystemProperties()
@@ -66,8 +64,8 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         if (testClass.isInIgnorablePackage) return null
 
         try {
-            return if (junit5Available) {
-                tryCreateJUnit5Runner(testClass) { params }
+            return if (junitFrameworkAvailable) {
+                tryCreateJUnitFrameworkRunner(testClass) { params }
             } else {
                 null
             }
@@ -99,7 +97,7 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         return ignorablePackages.any { name.startsWith(it) }
     }
 
-    private fun AndroidJUnit5RunnerParams.registerEnvironmentVariables() {
+    private fun JUnitFrameworkRunnerParams.registerEnvironmentVariables() {
         environmentVariables.forEach { (key, value) ->
             try {
                 LibcoreAccess.setenv(key, value)
@@ -109,7 +107,7 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         }
     }
 
-    private fun AndroidJUnit5RunnerParams.registerSystemProperties() {
+    private fun JUnitFrameworkRunnerParams.registerSystemProperties() {
         systemProperties.forEach { (key, value) ->
             try {
                 System.setProperty(key, value)
@@ -119,3 +117,31 @@ public class AndroidJUnit5Builder : RunnerBuilder() {
         }
     }
 }
+
+/**
+ * Custom RunnerBuilder hooked into the main Test Instrumentation Runner
+ * provided by the Android Test Support Library, which allows to run
+ * the JUnit Platform for instrumented tests. With this,
+ * the default JUnit 4-based Runner for Android instrumented tests is,
+ * in a way, tricked into detecting JUnit Jupiter tests as well.
+ *
+ * The RunnerBuilder is added to the instrumentation runner
+ * through a custom "testInstrumentationRunnerArgument" in the build.gradle script:
+ *
+ * <pre>
+ *   android {
+ *     defaultConfig {
+ *       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+ *       testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder")
+ *     }
+ *   }
+ * </pre>
+ *
+ * (Suppressing unused, since this is hooked into the
+ * project configuration via a Test Instrumentation Runner Argument.)
+ */
+@Deprecated(
+    message = "Renamed to AndroidJUnitFrameworkBuilder",
+    replaceWith = ReplaceWith("AndroidJUnitFrameworkBuilder")
+)
+public class AndroidJUnit5Builder : AndroidJUnitFrameworkBuilder()

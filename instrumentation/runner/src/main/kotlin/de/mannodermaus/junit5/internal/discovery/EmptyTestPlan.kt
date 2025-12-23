@@ -8,7 +8,7 @@ import java.io.File
 
 /**
  * A JUnit TestPlan that does absolutely nothing.
- * Used by [de.mannodermaus.junit5.internal.runners.AndroidJUnit5] whenever a class
+ * Used by [de.mannodermaus.junit5.internal.runners.AndroidJUnitFramework] whenever a class
  * is not loadable through the JUnit Platform and should be discarded.
  */
 @RequiresApi(26)
