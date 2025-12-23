@@ -1,7 +1,7 @@
 package de.mannodermaus
 
 internal object Libraries {
-    enum class JUnit(val majorVersion: Int, val artifactIdSuffix: String? = null) {
+    enum class JUnit(val majorVersion: Int, val fullVersion: String, val artifactIdSuffix: String? = null) {
         @SUPPORTED_JUNIT_VERSIONS@
     }
 

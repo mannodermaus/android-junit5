@@ -1,48 +1,44 @@
 package de.mannodermaus.gradle.plugins.junit5.internal.usage
 
-import de.mannodermaus.Libraries
 import de.mannodermaus.Libraries.JUnit
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import org.jetbrains.kotlin.gradle.targets.js.npm.SemVer
 
 /**
- * Helper class to locate the [Usage] of a particular library version in the project.
+ * Helper class to locate the usage of a particular library version in the project.
  */
 internal class DependencyUsageDetector(private val project: Project) {
-    sealed interface Usage {
-        val version: SemVer
-    }
+    data class JUnitUsage(val junit: JUnit)
 
-    data class JUnitUsage(override val version: SemVer, val junit: JUnit) : Usage
-    private data class DefaultUsage(override val version: SemVer) : Usage
-
-    fun findJUnit(configurationName: String): JUnitUsage? {
-        val version = find(
+    fun isUsingJUnit(configurationName: String): JUnitUsage? {
+        val match = find(
             configurationName,
+            { it.group == "org.junit" && it.name == "junit-bom" },
             { it.group == "org.junit.jupiter" && it.name == "junit-jupiter-api" },
-            { it.group == "org.junit" && it.name == "junit-bom" }
         ) ?: return null
 
-        // If found, identify a particular framework version
+        // If found, identify a particular framework version.
+        // For non-numeric versions (i.e. '+'), use the latest version instead
+        val majorVersion = match.version
+            ?.substringBefore('.')
+            ?.toIntOrNull()
         val junit = JUnit.entries
-            .firstOrNull { it.majorVersion == version.major.toInt() }
-            ?: return null
+            .firstOrNull { it.majorVersion == majorVersion }
+            ?: JUnit.entries.last()
 
-        return JUnitUsage(version, junit)
+        return JUnitUsage(junit)
     }
 
-    fun findCompose(configurationName: String): Usage? = find(
-        configurationName,
-        { it.group?.startsWith("androidx.compose") == true }
-    )?.let(::DefaultUsage)
+    fun isUsingCompose(configurationName: String): Boolean {
+        return find(
+            configurationName,
+            { it.group?.startsWith("androidx.compose") == true },
+        ) != null
+    }
 
-    private fun find(configurationName: String, vararg matchers: (Dependency) -> Boolean): SemVer? {
+    private fun find(configurationName: String, vararg matchers: (Dependency) -> Boolean): Dependency? {
         val configuration = project.configurations.getByName(configurationName)
 
-        val matchingDependency = configuration.dependencies
-            .firstOrNull { dependency -> matchers.any { it(dependency) } }
-
-        return matchingDependency?.version?.let { SemVer.from(it) }
+        return configuration.dependencies.firstOrNull { dependency -> matchers.any { it(dependency) } }
     }
 }

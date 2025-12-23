@@ -2,6 +2,8 @@ package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.Libraries
+import de.mannodermaus.Libraries.JUnit
+import de.mannodermaus.Libraries.JUnit.JUnit5
 import de.mannodermaus.gradle.plugins.junit5.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
@@ -11,8 +13,10 @@ import org.gradle.api.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
-class InstrumentationSupportTests {
+internal class InstrumentationSupportTests {
 
     @RegisterExtension
     @JvmField
@@ -32,7 +36,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `add the RunnerBuilder`() {
-        project.addJUnitJupiterApi("androidTest")
+        project.addJUnit(JUnit5, "androidTest")
         project.evaluate()
 
         assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
@@ -41,7 +45,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `maintain any existing RunnerBuilder`() {
-        project.addJUnitJupiterApi("androidTest")
+        project.addJUnit(JUnit5, "androidTest")
         project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"] = "something.else"
         project.evaluate()
 
@@ -51,7 +55,7 @@ class InstrumentationSupportTests {
 
     @Test
     fun `do not add the RunnerBuilder when disabled`() {
-        project.addJUnitJupiterApi("androidTest")
+        project.addJUnit(JUnit5, "androidTest")
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
@@ -69,8 +73,8 @@ class InstrumentationSupportTests {
 
     @Test
     fun `copy configuration parameters to test runner arguments`() {
-        project.addJUnitJupiterApi("androidTest")
-        with (project.junitPlatform) {
+        project.addJUnit(JUnit5, "androidTest")
+        with(project.junitPlatform) {
             configurationParameter("my.parameter1", "true")
             configurationParameter("my.parameter2", "1234")
         }
@@ -82,8 +86,8 @@ class InstrumentationSupportTests {
 
     @Test
     fun `do not copy configuration parameters if disabled via dsl`() {
-        project.addJUnitJupiterApi("androidTest")
-        with (project.junitPlatform) {
+        project.addJUnit(JUnit5, "androidTest")
+        with(project.junitPlatform) {
             configurationParameter("my.parameter1", "true")
             configurationParameter("my.parameter2", "1234")
             instrumentationTests.useConfigurationParameters.set(false)
@@ -96,128 +100,138 @@ class InstrumentationSupportTests {
 
     /* Dependencies */
 
-    @Test
-    fun `add only the main dependencies (test)`() {
-        project.addJUnitJupiterApi("test")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `add only the main dependencies (test)`(junit: JUnit) {
+        project.addJUnit(junit, "test")
         project.evaluate()
 
-        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("testRuntimeOnly").doesNotHaveDependency(runnerLibrary())
+        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("testRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
 
-        assertThat(project).configuration("testImplementation").doesNotHaveDependency(extensionsLibrary())
-        assertThat(project).configuration("testImplementation").doesNotHaveDependency(composeLibrary())
+        assertThat(project).configuration("testImplementation").doesNotHaveDependency(extensionsLibrary(junit))
+        assertThat(project).configuration("testImplementation").doesNotHaveDependency(composeLibrary(junit))
     }
 
-    @Test
-    fun `add only the main dependencies (androidTest)`() {
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `add only the main dependencies (androidTest)`(junit: JUnit) {
+        project.addJUnit(junit, "androidTest")
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary())
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(composeLibrary())
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(composeLibrary(junit))
     }
 
-    @Test
-    fun `allow overriding the version`() {
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `allow overriding the version`(junit: JUnit) {
+        project.addJUnit(junit, "androidTest")
         project.junitPlatform.instrumentationTests.version.set("1.3.3.7")
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary("1.3.3.7"))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary("1.3.3.7"))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit, "1.3.3.7"))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit, "1.3.3.7"))
     }
 
-    @Test
-    fun `allow overriding the dependencies`() {
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `allow overriding the dependencies`(junit: JUnit) {
+        project.addJUnit(junit, "androidTest")
         val addedCore = "de.mannodermaus.junit5:android-test-core:0.1.3.3.7"
         val addedRunner = "de.mannodermaus.junit5:android-test-runner:0.1.3.3.7"
         project.dependencies.add("androidTestImplementation", addedCore)
         project.dependencies.add("androidTestRuntimeOnly", addedRunner)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary("0.1.3.3.7"))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary("0.1.3.3.7"))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit, "0.1.3.3.7"))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit, "0.1.3.3.7"))
     }
 
-    @Test
-    fun `do not add the dependencies when disabled`() {
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `do not add the dependencies when disabled`(junit: JUnit) {
+        project.addJUnit(junit, "androidTest")
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(null))
-        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(null))
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
     }
 
-    @Test
-    fun `do not add the dependencies when Jupiter is not added`() {
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `do not add the dependencies when Jupiter is not added`(junit: JUnit) {
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(null))
-        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(null))
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
     }
 
-    @Test
-    fun `do not add the dependencies when Jupiter is not added, even if extension is configured to be added`() {
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `do not add the dependencies when Jupiter is not added, even if extension is configured to be added`(junit: JUnit) {
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(null))
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary(null))
-        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(null))
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
     }
 
-    @Test
-    fun `add the extension library if configured`() {
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `add the extension library if configured`(junit: JUnit) {
+        project.addJUnit(junit, "androidTest")
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary())
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
     }
 
-    @Test
-    fun `add the compose library if configured`() {
-        project.addJUnitJupiterApi("test")
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `add the compose library if configured`(junit: JUnit) {
+        project.addJUnit(junit, "test")
+        project.addJUnit(junit, "androidTest")
         project.addCompose("test")
         project.addCompose("androidTest")
         project.evaluate()
 
-        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("testImplementation").hasDependency(composeLibrary())
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary())
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("testImplementation").hasDependency(composeLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
     }
 
-    @Test
-    fun `add the extensions and compose libraries if configured`() {
-        project.addJUnitJupiterApi("test")
-        project.addJUnitJupiterApi("androidTest")
+    @EnumSource(JUnit::class)
+    @ParameterizedTest
+    fun `add the extensions and compose libraries if configured`(junit: JUnit) {
+        project.addJUnit(junit, "test")
+        project.addJUnit(junit, "androidTest")
         project.addCompose("test")
         project.addCompose("androidTest")
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
-        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("testImplementation").hasDependency(composeLibrary())
-        assertThat(project).configuration("testImplementation").hasDependency(extensionsLibrary())
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary())
-        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary())
-        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary())
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary())
+        assertThat(project).configuration("testImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("testImplementation").hasDependency(composeLibrary(junit))
+        assertThat(project).configuration("testImplementation").hasDependency(extensionsLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary(junit))
+        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary(junit))
+        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
     }
 
     @Test
     fun `register the filter-write tasks`() {
-        project.addJUnitJupiterApi("androidTest")
+        project.addJUnit(JUnit5, "androidTest")
         project.evaluate()
 
         // AGP only registers androidTest tasks for the debug build type
@@ -227,9 +241,9 @@ class InstrumentationSupportTests {
 
     /* Private */
 
-    private fun Project.addJUnitJupiterApi(prefix: String) {
+    private fun Project.addJUnit(junit: JUnit, prefix: String) {
         val configuration = if (prefix.isEmpty()) "implementation" else "${prefix}Implementation"
-        dependencies.add(configuration, "org.junit.jupiter:junit-jupiter-api:+")
+        dependencies.add(configuration, "org.junit.jupiter:junit-jupiter-api:${junit.fullVersion}")
     }
 
     private fun Project.addCompose(prefix: String) {
@@ -237,23 +251,27 @@ class InstrumentationSupportTests {
         dependencies.add(configuration, "androidx.compose.ui:ui-test-android:+")
     }
 
-    private fun composeLibrary(withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.compose, withVersion)
+    private fun composeLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.compose, junit, withVersion)
 
-    private fun coreLibrary(withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.core, withVersion)
+    private fun coreLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.core, junit, withVersion)
 
-    private fun extensionsLibrary(withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.extensions, withVersion)
+    private fun extensionsLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.extensions, junit, withVersion)
 
-    private fun runnerLibrary(withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.runner, withVersion)
+    private fun runnerLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
+        library(Libraries.Instrumentation.runner, junit, withVersion)
 
-    private fun library(artifactId: String, version: String?) = buildString {
+    private fun library(artifactId: String, junit: JUnit, version: String?) = buildString {
         append(artifactId)
-        if (version != null) {
+        junit.artifactIdSuffix?.let {
+            append('-')
+            append(it)
+        }
+        version?.let {
             append(':')
-            append(version)
+            append(it)
         }
     }
 }

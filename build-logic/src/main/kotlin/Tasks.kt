@@ -1,5 +1,6 @@
 import extensions.library
 import extensions.libs
+import extensions.version
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -50,12 +51,20 @@ fun Copy.configureCreateVersionClassTask(
 
                 // Communicate all supported JUnit versions so the plugin can use them
                 "SUPPORTED_JUNIT_VERSIONS" to SupportedJUnit.values().joinToString { junit ->
+                    val fullVersion = when (junit) {
+                        SupportedJUnit.JUnit5 -> project.libs.version("junit5")
+                        SupportedJUnit.JUnit6 -> project.libs.version("junit6")
+                    }
+
                     buildString {
                         append(junit.name)
-                        append("(majorVersion=")
+                        append("(majorVersion = ")
                         append(junit.majorVersion)
+                        append(", fullVersion = \"")
+                        append(fullVersion)
+                        append("\"")
                         junit.artifactIdSuffix?.let {
-                            append(", artifactIdSuffix=\"")
+                            append(", artifactIdSuffix = \"")
                             append(it)
                             append('\"')
                         }

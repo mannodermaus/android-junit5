@@ -6,15 +6,14 @@ import java.util.Properties
 
 enum class SupportedJUnit(
     val majorVersion: Int,
-    val label: String,
-    val minSdk: Int,
+    val variant: String,
     val artifactIdSuffix: String? = null
 ) {
-    JUnit5(majorVersion = 5, label = "five", minSdk = 26),
-    JUnit6(majorVersion = 6, label = "six", minSdk = 35, artifactIdSuffix = "junit6");
+    JUnit5(majorVersion = 5, variant = "five"),
+    JUnit6(majorVersion = 6, variant = "six", artifactIdSuffix = "junit6");
 
     companion object {
-        fun fromLabel(label: String): SupportedJUnit = values().first { it.label == label }
+        fun fromVariant(variant: String): SupportedJUnit = values().first { it.variant == variant }
     }
 }
 

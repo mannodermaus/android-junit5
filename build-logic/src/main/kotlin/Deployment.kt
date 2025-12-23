@@ -106,7 +106,7 @@ private fun Project.configureAndroidDeployment(
 
     // Create a publication for each variant
     SupportedJUnit.values().forEach { junit ->
-        val variantName = "${junit.label}Release"
+        val variantName = "${junit.variant}Release"
 
         android.publishing.singleVariant(variantName) {
             withSourcesJar()
@@ -116,7 +116,7 @@ private fun Project.configureAndroidDeployment(
         afterEvaluate {
             publishing {
                 publications {
-                    register<MavenPublication>(junit.label) {
+                    register<MavenPublication>(junit.variant) {
                         from(components.getByName(variantName))
                         groupId = deployConfig.groupId
                         artifactId = buildString {
@@ -441,7 +441,7 @@ private class AndroidDsl(project: Project) {
         fun all(block: SupportedJUnit.() -> Unit) {
             delegate.all {
                 val flavorName = this.javaClass.getDeclaredMethod("getName").invoke(this) as String
-                val junit = SupportedJUnit.fromLabel(flavorName)
+                val junit = SupportedJUnit.fromVariant(flavorName)
                 block(junit)
             }
         }

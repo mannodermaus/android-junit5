@@ -146,7 +146,9 @@ private fun Libraries.JUnit.artifact(base: String, version: String) = buildStrin
 }
 
 private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, configurationName: String) {
-    DependencyUsageDetector(project).findJUnit(configurationName)?.let { usage ->
+    val detector = DependencyUsageDetector(project)
+
+    detector.isUsingJUnit(configurationName)?.let { usage ->
         val includeRunner = "android" in configurationName
         val runtimeOnly = configurationName.replace("Implementation", "RuntimeOnly")
         val version = instrumentationTests.version.get()
@@ -157,7 +159,7 @@ private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, c
         // Add some runtime dependencies, including a reference to the JUnit BOM
         project.dependencies.add(
             runtimeOnly,
-            project.dependencies.platform("org.junit:junit-bom:${usage.version}")
+            project.dependencies.platform("org.junit:junit-bom:${usage.junit.fullVersion}")
         )
         project.dependencies.add(runtimeOnly, Libraries.junitPlatformLauncher)
 
@@ -173,7 +175,7 @@ private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, c
             project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.extensions, version))
         }
 
-        if (project.usesComposeIn(configurationName)) {
+        if (detector.isUsingCompose(configurationName)) {
             project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.compose, version))
         }
     }

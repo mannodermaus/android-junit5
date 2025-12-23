@@ -158,6 +158,19 @@ junitPlatform {
   }
 {% end %}
 
+// Replace instrumentation libraries with a dynamic version (to satisfy any version constraint for functional tests)
+// TODO: After the first deployment of the -junit6 instrumentation libraries, remove the replace() from here
+configurations.all {
+  resolutionStrategy.dependencySubstitution {
+    all {
+      if (requested.displayName.startsWith("de.mannodermaus.junit5")) {
+        val replacedModule = requested.displayName.substringBeforeLast(':').replace("-junit6", "") + ":+"
+        useTarget(replacedModule)
+      }
+    }
+  }
+}
+
 dependencies {
   {% if USE_KOTLIN %}
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")

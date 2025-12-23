@@ -52,7 +52,7 @@ class FunctionalTestProjectCreator(
         // If any Gradle or build caches already exist, we keep those around.
         // That's the reason for not doing "projectFolder.deleteRecursively()"
         // and nuking everything at once.
-        val projectName = "${spec.name}_${agp.shortVersion}"
+        val projectName = "${spec.name}_agp${agp.shortVersion}_junit${junit.majorVersion}"
         val projectFolder = File(outputFolder, projectName)
         if (projectFolder.exists()) {
             File(projectFolder, SRC_FOLDER_NAME).deleteRecursively()
