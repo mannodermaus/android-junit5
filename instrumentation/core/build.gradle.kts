@@ -1,3 +1,5 @@
+import java.util.concurrent.atomic.AtomicBoolean
+
 plugins {
     alias(libs.plugins.android.junit)
     alias(libs.plugins.android.library)
@@ -25,7 +27,7 @@ junitPlatform {
 val instrumentationLibraryRegex = Regex("de\\.mannodermaus\\.junit5:android-test-(.+):")
 
 configurations.all {
-    if ("debugAndroidTestRuntimeClasspath" in name) {
+    if ("DebugAndroidTestRuntimeClasspath" in name) {
         resolutionStrategy.dependencySubstitution.all {
             instrumentationLibraryRegex.find(requested.toString())?.let { result ->
                 useTarget(project(":${result.groupValues[1]}"))

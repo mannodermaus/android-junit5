@@ -87,7 +87,7 @@ subprojects {
             flavorDimensions("target")
             productFlavors {
                 supportedTargets.forEachIndexed { index, junit ->
-                    register(junit.label) {
+                    register(junit.variant) {
                         dimension = "target"
                         isDefault = index == supportedTargets.lastIndex
                     }
@@ -97,16 +97,16 @@ subprojects {
             dependencies {
                 supportedTargets.forEach { junit ->
                     val configNames = listOf(
-                        "${junit.label}Api",
-                        "${junit.label}Implementation",
-                        "${junit.label}CompileOnly",
-                        "${junit.label}RuntimeOnly",
-                        "test${junit.label.capitalized()}Implementation",
-                        "test${junit.label.capitalized()}CompileOnly",
-                        "test${junit.label.capitalized()}RuntimeOnly",
-                        "androidTest${junit.label.capitalized()}Implementation",
-                        "androidTest${junit.label.capitalized()}CompileOnly",
-                        "androidTest${junit.label.capitalized()}RuntimeOnly",
+                        "${junit.variant}Api",
+                        "${junit.variant}Implementation",
+                        "${junit.variant}CompileOnly",
+                        "${junit.variant}RuntimeOnly",
+                        "test${junit.variant.capitalized()}Implementation",
+                        "test${junit.variant.capitalized()}CompileOnly",
+                        "test${junit.variant.capitalized()}RuntimeOnly",
+                        "androidTest${junit.variant.capitalized()}Implementation",
+                        "androidTest${junit.variant.capitalized()}CompileOnly",
+                        "androidTest${junit.variant.capitalized()}RuntimeOnly",
                     )
 
                     configNames.forEach { configName ->
