@@ -1,6 +1,7 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import org.junit.jupiter.api.TestFactory
 
@@ -8,7 +9,7 @@ interface AgpVariantTests : AgpVariantAwareTests {
 
     @TestFactory
     fun `does not create a build-type-specific jacoco task`() = forEachBuildType { project, buildType ->
-        val buildTypeName = buildType.capitalize()
+        val buildTypeName = buildType.capitalized()
         val name = "jacocoTestReport$buildTypeName"
 
         assertThat(project.tasks.findByName(name)).isNull()

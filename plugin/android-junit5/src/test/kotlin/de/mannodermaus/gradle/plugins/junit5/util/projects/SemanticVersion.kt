@@ -1,6 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.util.projects
 
-import java.util.*
+import java.util.Locale
 
 private val NUMERICAL_REGEX = Regex("(\\d+)")
 
@@ -44,7 +44,7 @@ private fun String.extractSuffixValue(): Int {
   if ('-' in this) {
     val suffix = this
         .substringAfter('-')
-        .toLowerCase(Locale.ROOT)
+        .lowercase(Locale.ROOT)
 
     // Find known suffix types
     val suffixMultiplier = when {

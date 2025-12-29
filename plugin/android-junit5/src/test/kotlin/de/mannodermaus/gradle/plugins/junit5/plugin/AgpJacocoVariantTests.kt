@@ -3,6 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5.plugin
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.gradle.plugins.junit5.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.JACOCO_TASK_NAME
@@ -10,7 +11,6 @@ import de.mannodermaus.gradle.plugins.junit5.util.assertAll
 import de.mannodermaus.gradle.plugins.junit5.util.evaluate
 import de.mannodermaus.gradle.plugins.junit5.util.get
 import de.mannodermaus.gradle.plugins.junit5.util.getDependentTaskNames
-import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest

@@ -2,6 +2,7 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.util.BuildResultSubject
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
@@ -9,7 +10,6 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
-import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
