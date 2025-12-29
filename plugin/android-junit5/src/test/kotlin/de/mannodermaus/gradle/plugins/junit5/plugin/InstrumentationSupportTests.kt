@@ -2,9 +2,11 @@ package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.Libraries
+import de.mannodermaus.Libraries.Instrumentation
 import de.mannodermaus.Libraries.JUnit
 import de.mannodermaus.Libraries.JUnit.JUnit5
 import de.mannodermaus.gradle.plugins.junit5.extensions.android
+import de.mannodermaus.gradle.plugins.junit5.internal.artifact
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import de.mannodermaus.gradle.plugins.junit5.util.assertThat
@@ -141,8 +143,8 @@ internal class InstrumentationSupportTests {
     @ParameterizedTest
     fun `allow overriding the dependencies`(junit: JUnit) {
         project.addJUnit(junit, "androidTest")
-        val addedCore = "de.mannodermaus.junit5:android-test-core:0.1.3.3.7"
-        val addedRunner = "de.mannodermaus.junit5:android-test-runner:0.1.3.3.7"
+        val addedCore = junit.artifact(Instrumentation.core, "0.1.3.3.7")
+        val addedRunner = junit.artifact(Instrumentation.runner, "0.1.3.3.7")
         project.dependencies.add("androidTestImplementation", addedCore)
         project.dependencies.add("androidTestRuntimeOnly", addedRunner)
         project.evaluate()
@@ -251,27 +253,17 @@ internal class InstrumentationSupportTests {
         dependencies.add(configuration, "androidx.compose.ui:ui-test-android:+")
     }
 
-    private fun composeLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.compose, junit, withVersion)
+    private fun composeLibrary(junit: JUnit, withVersion: String? = Instrumentation.version) =
+        library(Instrumentation.compose, junit, withVersion)
 
-    private fun coreLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.core, junit, withVersion)
+    private fun coreLibrary(junit: JUnit, withVersion: String? = Instrumentation.version) =
+        library(Instrumentation.core, junit, withVersion)
 
-    private fun extensionsLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.extensions, junit, withVersion)
+    private fun extensionsLibrary(junit: JUnit, withVersion: String? = Instrumentation.version) =
+        library(Instrumentation.extensions, junit, withVersion)
 
-    private fun runnerLibrary(junit: JUnit, withVersion: String? = Libraries.Instrumentation.version) =
-        library(Libraries.Instrumentation.runner, junit, withVersion)
+    private fun runnerLibrary(junit: JUnit, withVersion: String? = Instrumentation.version) =
+        library(Instrumentation.runner, junit, withVersion)
 
-    private fun library(artifactId: String, junit: JUnit, version: String?) = buildString {
-        append(artifactId)
-        junit.artifactIdSuffix?.let {
-            append('-')
-            append(it)
-        }
-        version?.let {
-            append(':')
-            append(it)
-        }
-    }
+    private fun library(artifactId: String, junit: JUnit, version: String?) = junit.artifact(artifactId, version)
 }

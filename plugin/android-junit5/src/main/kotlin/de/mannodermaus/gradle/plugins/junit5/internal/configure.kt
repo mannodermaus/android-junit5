@@ -138,11 +138,13 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
  * Construct an artifact ID (i.e. `de.mannodermaus:hoge:1.2.3`) compatible with the given supported JUnit version.
  * Depending on the JUnit version, the artifact ID may include a version-specific suffix string as well.
  */
-private fun Libraries.JUnit.artifact(base: String, version: String) = buildString {
+internal fun Libraries.JUnit.artifact(base: String, version: String?) = buildString {
     append(base)
     this@artifact.artifactIdSuffix?.let { suffix -> append('-').append(suffix) }
-    append(':')
-    append(version)
+    version?.let {
+        append(':')
+        append(version)
+    }
 }
 
 private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, configurationName: String) {
