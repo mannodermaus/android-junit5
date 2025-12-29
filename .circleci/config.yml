@@ -117,7 +117,7 @@ jobs:
           name: (Instrumentation) Build & Deploy
           command: |
             cd instrumentation
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
+            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseStagingRepositories --stacktrace
       - run:
           name: (Plugin) Build & Deploy
           command: |

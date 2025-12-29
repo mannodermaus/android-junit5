@@ -6,17 +6,16 @@ import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.provider.Provider
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.closureOf
+import org.gradle.kotlin.dsl.maybeCreate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.kotlin.dsl.withGroovyBuilder
@@ -116,19 +115,22 @@ private fun Project.configureAndroidDeployment(
         afterEvaluate {
             publishing {
                 publications {
+                    // Declare an empty 'main' publication and mark the actual variant publications
+                    // as aliases to work around limitations of the Maven publication process.
+                    // We write parts of the POM file ourselves to use distinct coordinates
+                    // for project dependencies between instrumentation libraries
+                    maybeCreate<MavenPublication>("main")
+
                     register<MavenPublication>(junit.variant) {
                         from(components.getByName(variantName))
-                        groupId = deployConfig.groupId
-                        artifactId = buildString {
-                            // Attach optional suffix to Android artifacts
-                            // to distinguish between different JUnit targets
-                            append(deployConfig.artifactId)
-                            junit.artifactIdSuffix?.let {
-                                append('-')
-                                append(it)
-                            }
-                        }
-                        version = deployConfig.currentVersion
+
+                        applyPublicationDetails(
+                            project = this@afterEvaluate,
+                            deployConfig = deployConfig,
+                            junit = junit
+                        )
+
+                        (this as DefaultMavenPublication).isAlias = true
 
                         configurePom(deployConfig)
                     }
@@ -176,12 +178,15 @@ private fun Project.configurePluginDeployment(
             all {
                 if (this is MavenPublication) {
                     if (name == "pluginMaven") {
+                        // Attach artifacts
+                        artifacts.clear()
+                        artifact(layout.buildDirectory.file("libs/${project.name}-$version.jar"))
+                        artifact(sourcesJar)
+                        artifact(javadocJar)
+
                         applyPublicationDetails(
                             project = this@configurePluginDeployment,
-                            deployConfig = deployConfig,
-                            contentJar = layout.buildDirectory.file("libs/${project.name}-$version.jar"),
-                            sourcesJar = sourcesJar,
-                            javadocJar = javadocJar
+                            deployConfig = deployConfig
                         )
                     }
 
@@ -197,72 +202,64 @@ private fun Project.configurePluginDeployment(
 private fun MavenPublication.applyPublicationDetails(
     project: Project,
     deployConfig: Deployed,
-    contentJar: Provider<RegularFile>,
-    sourcesJar: TaskProvider<*>,
-    javadocJar: TaskProvider<*>
+    junit: SupportedJUnit? = null
 ) = also {
     groupId = deployConfig.groupId
-    artifactId = deployConfig.artifactId
+    artifactId = suffixedArtifactId(deployConfig.artifactId, junit)
     version = deployConfig.currentVersion
 
-    // Attach artifacts
-    artifacts.clear()
-    artifact(contentJar)
-    artifact(sourcesJar)
-    artifact(javadocJar)
-
-    // Attach dependency information
+    // Attach dependency information, rewriting it to work around certain inadequacies
+    // with the built-in maven publish POM generation
     pom {
         withXml {
             with(asNode()) {
-                // Only add dependencies manually if there aren't any already
-                if (children().filterIsInstance<Node>()
-                        .none { it.name().toString().endsWith("dependencies") }
-                ) {
-                    val dependenciesNode = appendNode("dependencies")
+                // Replace an existing node or just append a new one.
+                val dependenciesNode = replaceNode("dependencies")
 
-                    val compileDeps = project.configurations.getByName("api").allDependencies
-                    val runtimeDeps =
-                        project.configurations.getByName("implementation").allDependencies +
-                                project.configurations.getByName("runtimeOnly").allDependencies -
-                                compileDeps
+                val compileDeps = project.configurations.getByName("api").allDependencies
+                val runtimeDeps =
+                    project.configurations.getByName("implementation").allDependencies +
+                            project.configurations.getByName("runtimeOnly").allDependencies -
+                            compileDeps
 
-                    val dependencies = mapOf(
-                        "runtime" to runtimeDeps,
-                        "compile" to compileDeps
-                    )
+                val dependencies = mapOf(
+                    "runtime" to runtimeDeps,
+                    "compile" to compileDeps
+                )
 
-                    dependencies
-                        .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
-                        .forEach { (scope, dependencies) ->
-                            dependencies.forEach { dep ->
-                                // Do not allow BOM dependencies for our own packaged libraries,
-                                // instead its artifact versions should be unrolled explicitly
-                                require("-bom" !in dep.name) {
-                                    "Found a BOM declaration in the dependencies of project" +
-                                            "${project.path}: $dep. Prefer declaring its " +
-                                            "transitive artifacts explicitly by " +
-                                            "adding a version constraint to them."
+                dependencies
+                    .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
+                    .forEach { (scope, dependencies) ->
+                        dependencies.forEach { dep ->
+                            // Do not allow BOM dependencies for our own packaged libraries,
+                            // instead its artifact versions should be unrolled explicitly
+                            require("-bom" !in dep.name) {
+                                "Found a BOM declaration in the dependencies of project" +
+                                        "${project.path}: $dep. Prefer declaring its " +
+                                        "transitive artifacts explicitly by " +
+                                        "adding a version constraint to them."
+                            }
+
+                            with(dependenciesNode.appendNode("dependency")) {
+                                if (dep is ProjectDependency) {
+                                    appendProjectDependencyCoordinates(dep, junit)
+                                } else {
+                                    appendExternalDependencyCoordinates(dep)
                                 }
 
-                                with(dependenciesNode.appendNode("dependency")) {
-                                    if (dep is ProjectDependency) {
-                                        appendProjectDependencyCoordinates(dep)
-                                    } else {
-                                        appendExternalDependencyCoordinates(dep)
-                                    }
-
-                                    appendNode("scope", scope)
-                                }
+                                appendNode("scope", scope)
                             }
                         }
-                }
+                    }
             }
         }
     }
 }
 
-private fun Node.appendProjectDependencyCoordinates(dep: ProjectDependency) {
+private fun Node.appendProjectDependencyCoordinates(
+    dep: ProjectDependency,
+    junit: SupportedJUnit?
+) {
     // Find the external coordinates for the given project dependency
     val projectName = dep.name
 
@@ -272,8 +269,28 @@ private fun Node.appendProjectDependencyCoordinates(dep: ProjectDependency) {
             as Deployed
 
     appendNode("groupId", config.groupId)
-    appendNode("artifactId", config.artifactId)
+    appendNode("artifactId", suffixedArtifactId(config.artifactId, junit))
     appendNode("version", config.currentVersion)
+}
+
+private fun suffixedArtifactId(base: String, junit: SupportedJUnit? = null) = buildString {
+    append(base)
+
+    // Attach optional suffix to Android artifacts
+    // to distinguish between different JUnit targets
+    junit?.artifactIdSuffix?.let {
+        append('-')
+        append(it)
+    }
+}
+
+private fun Node.findNode(name: String): Node? =
+    // This method uses "endsWith()" to ignore XMLNS prefixes
+    children().firstOrNull { it is Node && it.name().toString().endsWith(name) } as? Node
+
+private fun Node.replaceNode(name: String): Node {
+    findNode(name)?.let { remove(it) }
+    return appendNode(name)
 }
 
 private fun Node.appendExternalDependencyCoordinates(dep: Dependency) {
@@ -364,7 +381,7 @@ private class AndroidDsl(project: Project) {
             .also { it.isAccessible = true }
             .invoke(android)
 
-        fun singleVariant(name: String, block: SingleVariantDsl.() -> Unit) {
+        fun singleVariant(name: String, block: SingleVariantDsl.() -> Unit = {}) {
             delegate.javaClass
                 .getDeclaredMethod("singleVariant", String::class.java, Closure::class.java)
                 .also { it.isAccessible = true }
@@ -373,8 +390,8 @@ private class AndroidDsl(project: Project) {
                 })
         }
 
-        fun multipleVariants(block: MultipleVariantsDsl.() -> Unit) {
-            MultipleVariantsDsl(delegate).block()
+        fun multipleVariants(name: String, block: MultipleVariantsDsl.() -> Unit) {
+            MultipleVariantsDsl(name, delegate).block()
         }
 
         class SingleVariantDsl(private val delegate: Any) {
@@ -393,14 +410,14 @@ private class AndroidDsl(project: Project) {
             }
         }
 
-        class MultipleVariantsDsl(publishing: Any) {
+        class MultipleVariantsDsl(name: String, publishing: Any) {
             private lateinit var delegate: Any
 
             init {
                 publishing.javaClass
-                    .getDeclaredMethod("multipleVariants", Closure::class.java)
+                    .getDeclaredMethod("multipleVariants", String::class.java, Closure::class.java)
                     .also { it.isAccessible = true }
-                    .invoke(publishing, closureOf<Any> { delegate = this })
+                    .invoke(publishing, name, closureOf<Any> { delegate = this })
             }
 
             fun allVariants() {
