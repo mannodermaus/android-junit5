@@ -35,7 +35,7 @@ jobs:
           command: cd instrumentation && ./gradlew androidDependencies
       - run:
           name: (Instrumentation) Build
-          command: cd instrumentation && ./gradlew assemble --stacktrace
+          command: cd instrumentation && ./gradlew assemble :core:assembleAndroidTest --stacktrace
       - run:
           name: (Instrumentation) Test
           command: cd instrumentation && ./gradlew check --stacktrace
