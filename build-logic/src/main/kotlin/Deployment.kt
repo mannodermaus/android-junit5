@@ -9,6 +9,8 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.internal.PublicationInternal
+import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication
 import org.gradle.api.tasks.SourceSet
@@ -19,6 +21,7 @@ import org.gradle.kotlin.dsl.maybeCreate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.kotlin.dsl.withGroovyBuilder
+import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
@@ -115,10 +118,9 @@ private fun Project.configureAndroidDeployment(
         afterEvaluate {
             publishing {
                 publications {
-                    // Declare an empty 'main' publication and mark the actual variant publications
-                    // as aliases to work around limitations of the Maven publication process.
-                    // We write parts of the POM file ourselves to use distinct coordinates
-                    // for project dependencies between instrumentation libraries
+                    // Declare an empty 'main' publication and mark the actual publication
+                    // for each variant as an 'alias'. This is done to work around limitations
+                    // of the Maven publication process
                     maybeCreate<MavenPublication>("main")
 
                     register<MavenPublication>(junit.variant) {
@@ -130,8 +132,11 @@ private fun Project.configureAndroidDeployment(
                             junit = junit
                         )
 
-                        (this as DefaultMavenPublication).isAlias = true
+                        (this as PublicationInternal<MavenArtifact>).isAlias = true
 
+                        // We have to write parts of the POM file ourselves, so that
+                        // project dependencies between instrumentation libraries use the correct
+                        // coordinates for each variant (e.g. "junit5" vs "junit6")
                         configurePom(deployConfig)
                     }
                 }
@@ -169,7 +174,7 @@ private fun Project.configurePluginDeployment(
     }
 
     // Connect signing task to the JAR produced by the artifact-producing task
-    tasks.withType(Sign::class.java).configureEach {
+    tasks.withType<Sign>().configureEach {
         dependsOn("assemble")
     }
 
@@ -346,35 +351,12 @@ private val Project.ext: ExtraPropertiesExtension
     get() = extensions.getByName("ext") as ExtraPropertiesExtension
 
 /**
- * Allows us to retain the untyped Groovy API even in the stricter Kotlin context
- * ("android.sourceSets.main.java.srcDirs")
+ * Allows us to access certain APIs without access to the actual plugins. Brittle, but works.
  */
 private class AndroidDsl(project: Project) {
     private val delegate = project.extensions.getByName("android") as ExtensionAware
 
-    val sourceSets = SourceSetDsl(delegate)
     val publishing = PublishingDsl(delegate)
-    val productFlavors = ProductFlavorsDsl(delegate)
-
-    class SourceSetDsl(android: ExtensionAware) {
-        private val delegate = android.javaClass.getDeclaredMethod("getSourceSets")
-            .also { it.isAccessible = true }
-            .invoke(android) as NamedDomainObjectCollection<Any>
-
-        val main = MainDsl(delegate)
-
-        class MainDsl(sourceSets: NamedDomainObjectCollection<Any>) {
-            private val delegate = sourceSets.named("main").get()
-
-            val kotlin = KotlinDsl(delegate)
-
-            class KotlinDsl(main: Any) {
-                val srcDirs = main.javaClass
-                    .getDeclaredMethod("getKotlinDirectories")
-                    .invoke(main) as Set<File>
-            }
-        }
-    }
 
     class PublishingDsl(android: ExtensionAware) {
         private val delegate = android.javaClass.getDeclaredMethod("getPublishing")
@@ -390,10 +372,6 @@ private class AndroidDsl(project: Project) {
                 })
         }
 
-        fun multipleVariants(name: String, block: MultipleVariantsDsl.() -> Unit) {
-            MultipleVariantsDsl(name, delegate).block()
-        }
-
         class SingleVariantDsl(private val delegate: Any) {
             fun withSourcesJar() {
                 delegate.javaClass.declaredMethods
@@ -407,59 +385,6 @@ private class AndroidDsl(project: Project) {
                     .first { it.name.startsWith("withJavadocJar") }
                     .also { it.isAccessible = true }
                     .invoke(delegate, true)
-            }
-        }
-
-        class MultipleVariantsDsl(name: String, publishing: Any) {
-            private lateinit var delegate: Any
-
-            init {
-                publishing.javaClass
-                    .getDeclaredMethod("multipleVariants", String::class.java, Closure::class.java)
-                    .also { it.isAccessible = true }
-                    .invoke(publishing, name, closureOf<Any> { delegate = this })
-            }
-
-            fun allVariants() {
-                delegate.javaClass.declaredMethods
-                    .first { it.name.startsWith("allVariants") }
-                    .also { it.isAccessible = true }
-                    .invoke(delegate, true)
-            }
-
-            fun includeBuildTypeValues(vararg buildTypes: String) {
-                delegate.javaClass.declaredMethods
-                    .first { it.name.startsWith("setIncludedBuildTypes") }
-                    .also { it.isAccessible = true }
-                    .invoke(delegate, buildTypes.toSet())
-            }
-
-            fun withSourcesJar() {
-                delegate.javaClass.declaredMethods
-                    .first { it.name.startsWith("withSourcesJar") }
-                    .also { it.isAccessible = true }
-                    .invoke(delegate, true)
-            }
-
-            fun withJavadocJar() {
-                delegate.javaClass.declaredMethods
-                    .first { it.name.startsWith("withJavadocJar") }
-                    .also { it.isAccessible = true }
-                    .invoke(delegate, true)
-            }
-        }
-    }
-
-    class ProductFlavorsDsl(android: ExtensionAware) {
-        private val delegate = android.javaClass.getDeclaredMethod("getProductFlavors")
-            .also { it.isAccessible = true }
-            .invoke(android) as NamedDomainObjectCollection<Any>
-
-        fun all(block: SupportedJUnit.() -> Unit) {
-            delegate.all {
-                val flavorName = this.javaClass.getDeclaredMethod("getName").invoke(this) as String
-                val junit = SupportedJUnit.fromVariant(flavorName)
-                block(junit)
             }
         }
     }
