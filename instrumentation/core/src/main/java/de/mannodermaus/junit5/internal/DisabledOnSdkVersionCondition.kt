@@ -1,6 +1,6 @@
 package de.mannodermaus.junit5.internal
 
-import android.annotation.TargetApi
+import androidx.annotation.RequiresApi
 import android.os.Build
 import de.mannodermaus.junit5.condition.DisabledOnSdkVersion
 import de.mannodermaus.junit5.internal.EnabledOnSdkVersionCondition.Companion.disabled
@@ -18,7 +18,7 @@ internal class DisabledOnSdkVersionCondition : ExecutionCondition {
             ConditionEvaluationResult.enabled("@DisabledOnSdkVersion is not present")
     }
 
-    @TargetApi(24)
+    @RequiresApi(24)
     override fun evaluateExecutionCondition(context: ExtensionContext): ConditionEvaluationResult {
         val optional = findAnnotation(context.element, DisabledOnSdkVersion::class.java)
 

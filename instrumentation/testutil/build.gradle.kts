@@ -1,75 +1,28 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-  id("com.android.library")
-  kotlin("android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
-
-val javaVersion = JavaVersion.VERSION_11
 
 android {
-  namespace = "de.mannodermaus.junit5.testutil"
-  compileSdk = Android.compileSdkVersion
+    namespace = "de.mannodermaus.junit5.testutil"
 
-  defaultConfig {
-    minSdk = 19
-    multiDexEnabled = true
-  }
-
-  compileOptions {
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-  }
-
-  buildFeatures {
-    buildConfig = false
-    resValues = false
-  }
-
-  lint {
-    // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
-    warning.add("InvalidPackage")
-    targetSdk = Android.targetSdkVersion
-  }
-
-  packaging {
-    resources.excludes.add("META-INF/LICENSE.md")
-    resources.excludes.add("META-INF/LICENSE-notice.md")
-  }
-
-  testOptions {
-    unitTests.isReturnDefaultValues = true
-    targetSdk = Android.targetSdkVersion
-  }
-}
-
-kotlin {
-  compilerOptions {
-    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
-  }
-}
-
-tasks.withType<Test> {
-  failFast = true
-  testLogging {
-    events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-    exceptionFormat = TestExceptionFormat.FULL
-  }
+    defaultConfig {
+        minSdk = 19
+        multiDexEnabled = true
+    }
 }
 
 dependencies {
-  implementation(project(":testutil-reflect"))
-  implementation(libs.androidXMultidex)
+    implementation(project(":testutil-reflect"))
+    implementation(libs.androidx.multidex)
 
-  api(libs.androidXTestMonitor)
-  api(libs.truth)
-  api(libs.truthJava8Extensions)
-  api(libs.mockitoCore)
-  api(libs.mockitoKotlin)
-  api(libs.junitJupiterApi)
-  api(libs.junitJupiterParams)
-  api(libs.junitPlatformRunner)
+    api(libs.androidx.test.monitor)
+    api(libs.truth.core)
+    api(libs.truth.extensions)
+    api(libs.mockito.core)
+    api(libs.mockito.kotlin)
+    api(libs.junit.jupiter.api)
+    api(libs.junit.jupiter.params)
+    api(libs.junit.platform.launcher)
+    api(libs.junit.platform.suiteapi)
 }

@@ -1,6 +1,6 @@
 package de.mannodermaus.junit5.internal
 
-import android.annotation.TargetApi
+import androidx.annotation.RequiresApi
 import de.mannodermaus.junit5.internal.utils.BuildConfigValueUtils
 import de.mannodermaus.junit5.condition.EnabledIfBuildConfigValue
 import org.junit.jupiter.api.extension.ConditionEvaluationResult
@@ -18,7 +18,7 @@ internal class EnabledIfBuildConfigValueCondition : ExecutionCondition {
             enabled("@EnabledIfBuildConfigValue is not present")
     }
 
-    @TargetApi(24)
+    @RequiresApi(24)
     override fun evaluateExecutionCondition(context: ExtensionContext): ConditionEvaluationResult {
         val optional = findAnnotation(context.element, EnabledIfBuildConfigValue::class.java)
 

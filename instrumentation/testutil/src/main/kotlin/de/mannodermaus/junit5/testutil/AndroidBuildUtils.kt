@@ -7,24 +7,28 @@ import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.testutil.reflect.getFieldReflectively
 import de.mannodermaus.junit5.testutil.reflect.setStaticValue
 
-object AndroidBuildUtils {
+public object AndroidBuildUtils {
 
-    fun withApiLevel(api: Int, block: () -> Unit) = withMockedStaticField<Build.VERSION>(
-        fieldName = "SDK_INT",
-        value = api,
-        block = block,
-    )
+    public fun withApiLevel(api: Int, block: () -> Unit) {
+        withMockedStaticField<Build.VERSION>(
+            fieldName = "SDK_INT",
+            value = api,
+            block = block,
+        )
+    }
 
-    fun withManufacturer(name: String, block: () -> Unit) = withMockedStaticField<Build>(
-        fieldName = "MANUFACTURER",
-        value = name,
-        block = block,
-    )
+    public fun withManufacturer(name: String, block: () -> Unit) {
+        withMockedStaticField<Build>(
+            fieldName = "MANUFACTURER",
+            value = name,
+            block = block,
+        )
+    }
 
-    fun withMockedInstrumentation(arguments: Bundle = Bundle(), block: () -> Unit) {
+    public fun withMockedInstrumentation(arguments: Bundle = Bundle(), block: () -> Unit) {
         val (oldInstrumentation, oldArguments) = try {
             InstrumentationRegistry.getInstrumentation() to InstrumentationRegistry.getArguments()
-        } catch (ignored: Throwable) {
+        } catch (_: Throwable) {
             null to null
         }
 

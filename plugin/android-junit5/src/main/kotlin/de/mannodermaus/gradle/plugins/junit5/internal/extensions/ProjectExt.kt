@@ -37,6 +37,7 @@ internal fun Project.hasDependency(configurationName: String, matching: (Depende
 
 internal fun Project.usesJUnitJupiterIn(configurationName: String): Boolean {
     return project.hasDependency(configurationName) {
+        // todo also check for org.junit:junit-bom
         it.group == "org.junit.jupiter" && it.name == "junit-jupiter-api"
     }
 }

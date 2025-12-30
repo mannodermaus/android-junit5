@@ -115,7 +115,7 @@ operator fun <T : Any, U : Any> Iterable<T>.times(other: Iterable<U>): Sequence<
         if (second.hasNext()) return Pair(a!!, second.next())
         if (first.hasNext()) {
             a = first.next(); second = other.iterator()
-            return Pair(a!!, second.next())
+            return Pair(a, second.next())
         }
         return null
     }

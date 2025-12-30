@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.mockito.Mockito.mock
 import java.lang.reflect.Modifier
 
 class GrantPermissionExtensionTests {
@@ -40,27 +42,18 @@ class GrantPermissionExtensionTests {
     @TestFactory
     fun `implicit addition of READ_EXTERNAL_STORAGE`(): List<DynamicTest> {
         // Run this test for every available Android OS version.
-        // For each version below API 16, no implicit addition of permissions should be done
         val latestApi = findLatestAndroidApiLevel()
-        val thresholdApi = 16
 
-        return (1..latestApi).map { api ->
-            val shouldAddPermission = api >= thresholdApi
-
+        return (26..latestApi).map { api ->
             dynamicTest("API $api") {
                 withApiLevel(api) {
                     runExtension(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-                    if (shouldAddPermission) {
-                        assertThat(granter.grantedPermissions)
-                            .containsExactly(
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                            ).inOrder()
-                    } else {
-                        assertThat(granter.grantedPermissions)
-                            .containsExactly(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    }
+                    assertThat(granter.grantedPermissions)
+                        .containsExactly(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                        ).inOrder()
                 }
             }
         }
@@ -81,8 +74,10 @@ class GrantPermissionExtensionTests {
 
     private fun runExtension(vararg permissions: String) {
         val extension = GrantPermissionExtension(granter)
+        val context = mock<ExtensionContext>()
+
         extension.grantPermissions(permissions)
-        extension.beforeEach(null)
+        extension.beforeEach(context)
     }
 
     private class TestPermissionGranter : PermissionGranter {

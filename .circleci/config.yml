@@ -3,12 +3,12 @@ defaults: &defaults
   working_directory: ~/root/project
   resource_class: large
   docker:
-    - image: cimg/android:2023.04.1
+    - image: cimg/android:2025.12.1
       environment:
         GRADLE_OPTS: -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
 
 cache_key: &cache_key
-  key: jars-{{ checksum "build-logic/build.gradle.kts" }}-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/core/build.gradle.kts" }}-{{ checksum "instrumentation/compose/build.gradle.kts" }}-{{ checksum "instrumentation/extensions/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/src/main/kotlin/Dependencies.kt" }}
+  key: jars-{{ checksum "build-logic/build.gradle.kts" }}-{{ checksum "plugin/build.gradle.kts" }}-{{ checksum "plugin/android-junit5/build.gradle.kts" }}-{{ checksum "plugin/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "instrumentation/build.gradle.kts" }}-{{ checksum "instrumentation/core/build.gradle.kts" }}-{{ checksum "instrumentation/compose/build.gradle.kts" }}-{{ checksum "instrumentation/extensions/build.gradle.kts" }}-{{ checksum "instrumentation/runner/build.gradle.kts" }}-{{ checksum "instrumentation/sample/build.gradle.kts" }}-{{ checksum "instrumentation/gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build-logic/src/main/kotlin/Environment.kt" }}-{{ checksum "build-logic/gradle/libs.versions.toml" }}
 
 commands:
   construct_signing_key:
@@ -35,17 +35,10 @@ jobs:
           command: cd instrumentation && ./gradlew androidDependencies
       - run:
           name: (Instrumentation) Build
-          command: |
-            cd instrumentation
-            ./gradlew assembleRelease :core:assembleDebug \
-            :core:assembleDebugAndroidTest \
-            :compose:assembleDebugAndroidTest \
-            :extensions:assembleDebug \
-            :runner:assembleDebug \
-            :sample:assembleDebug --stacktrace
+          command: cd instrumentation && ./gradlew assemble :core:assembleAndroidTest --stacktrace
       - run:
           name: (Instrumentation) Test
-          command: cd instrumentation && ./gradlew :core:check :extensions:check :runner:check :compose:check --stacktrace
+          command: cd instrumentation && ./gradlew check --stacktrace
       - save_cache:
           <<: *cache_key
           paths:
@@ -60,16 +53,28 @@ jobs:
             sudo gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             sudo gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
       - run:
-          name: Test with Firebase Test Lab
+          name: Test with Firebase Test Lab (JUnit 5)
           command: >
             sudo gcloud firebase test android run \
               --type instrumentation \
-              --app instrumentation/sample/build/outputs/apk/debug/sample-debug.apk \
-              --test instrumentation/core/build/outputs/apk/androidTest/debug/core-debug-androidTest.apk \
-              --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnit5Builder \
+              --app instrumentation/sample/build/outputs/apk/five/debug/sample-five-debug.apk \
+              --test instrumentation/core/build/outputs/apk/androidTest/five/debug/core-five-debug-androidTest.apk \
+              --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder \
               --test-runner-class androidx.test.runner.AndroidJUnitRunner \
               --device model=redfin,version=30,locale=en_US,orientation=portrait \
               --device model=oriole,version=33,locale=en_US,orientation=portrait \
+              --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
+              --timeout 15m
+      - run:
+          name: Test with Firebase Test Lab (JUnit 6)
+          command: >
+            sudo gcloud firebase test android run \
+              --type instrumentation \
+              --app instrumentation/sample/build/outputs/apk/six/debug/sample-six-debug.apk \
+              --test instrumentation/core/build/outputs/apk/androidTest/six/debug/core-six-debug-androidTest.apk \
+              --environment-variables runnerBuilder=de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder \
+              --test-runner-class androidx.test.runner.AndroidJUnitRunner \
+              --device model=pa3q,version=35,locale=en_US,orientation=portrait \
               --results-bucket cloud-test-${GOOGLE_PROJECT_ID} \
               --timeout 15m
       - run:
@@ -112,12 +117,12 @@ jobs:
           name: (Instrumentation) Build & Deploy
           command: |
             cd instrumentation
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
+            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseStagingRepositories --stacktrace
       - run:
           name: (Plugin) Build & Deploy
           command: |
             cd plugin
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --stacktrace
+            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseStagingRepositories --stacktrace
       - store_artifacts:
           path: plugin/android-junit5/build/publications
           destination: plugin/publications/snapshots

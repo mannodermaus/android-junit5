@@ -12,7 +12,8 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome.FAILED
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
@@ -36,29 +37,31 @@ class ConfigurationCacheTests {
         Runtime.getRuntime().exec("adb disconnect".splitToArray(" "))
     }
 
-    @Test
-    fun `test instrumentation tasks`() {
-        // Test configuration cache with one specific project and AGP version
-        val spec = projectCreator.specNamed("instrumentation-tests")
-        val project = projectCreator.createProject(spec, agp)
+    @TestFactory
+    fun `test instrumentation tasks`() = environment.supportedJUnitVersions.map { junit ->
+        dynamicTest("JUnit ${junit.majorVersion}") {
+            // Test configuration cache with one specific project and AGP version
+            val spec = projectCreator.specNamed("instrumentation-tests")
+            val project = projectCreator.createProject(spec, agp, junit)
 
-        // Run it once; this is supposed to fail, but JUST because of 'no connected device',
-        // not because of other errors including the configuration cache.
-        runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
-            assertThat(it).task(":connectedDebugAndroidTest").hasOutcome(FAILED)
-            assertThat(it).output().contains("DeviceException: No connected devices!")
-        }
+            // Run it once; this is supposed to fail, but JUST because of 'no connected device',
+            // not because of other errors including the configuration cache.
+            runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
+                assertThat(it).task(":connectedDebugAndroidTest").hasOutcome(FAILED)
+                assertThat(it).output().contains("DeviceException: No connected devices!")
+            }
 
-        // Run it again, expecting to see a successful reuse of the configuration cache
-        runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
-            assertThat(it).output().contains("Reusing configuration cache.")
+            // Run it again, expecting to see a successful reuse of the configuration cache
+            runGradle(project, "connectedCheck", expectSuccess = false).assertWithLogging {
+                assertThat(it).output().contains("Reusing configuration cache.")
+            }
         }
     }
 
-    @Test
-    fun `test unit tasks`() {
+    @TestFactory
+    fun `test unit tasks`() = environment.supportedJUnitVersions.map { junit ->
         val spec = projectCreator.specNamed("product-flavors")
-        val project = projectCreator.createProject(spec, agp)
+        val project = projectCreator.createProject(spec, agp, junit)
 
         runGradle(project, "help", expectSuccess = true).assertWithLogging {
             assertThat(it).task(":help").hasOutcome(SUCCESS)

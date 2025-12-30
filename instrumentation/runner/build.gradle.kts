@@ -1,109 +1,45 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-buildscript {
-  repositories {
-    google()
-    mavenCentral()
-    sonatypeSnapshots()
-  }
-
-  dependencies {
-    val latest = Artifacts.Plugin.latestStableVersion
-    classpath("de.mannodermaus.gradle.plugins:android-junit5:$latest")
-  }
-}
-
 plugins {
-  id("com.android.library")
-  kotlin("android")
-  id("explicit-api-mode")
+    alias(libs.plugins.android.junit)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
-
-apply {
-  plugin("de.mannodermaus.android-junit5")
-}
-
-val javaVersion = JavaVersion.VERSION_11
 
 android {
-  namespace = "de.mannodermaus.junit5.runner"
-  compileSdk = Android.compileSdkVersion
+    namespace = "de.mannodermaus.junit5.runner"
 
-  defaultConfig {
-    minSdk = Android.testRunnerMinSdkVersion
-  }
-
-  compileOptions {
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-  }
-
-  buildFeatures {
-    buildConfig = false
-    resValues = false
-  }
-
-  lint {
-    // JUnit 4 refers to java.lang.management APIs, which are absent on Android.
-    warning.add("InvalidPackage")
-    targetSdk = Android.targetSdkVersion
-  }
-
-  packaging {
-    resources.excludes.add("META-INF/LICENSE.md")
-    resources.excludes.add("META-INF/LICENSE-notice.md")
-  }
-
-  testOptions {
-    unitTests.isReturnDefaultValues = true
-    targetSdk = Android.targetSdkVersion
-  }
-}
-
-kotlin {
-  compilerOptions {
-    jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
-  }
-}
-
-tasks.withType<Test> {
-  failFast = true
-  testLogging {
-    events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-    exceptionFormat = TestExceptionFormat.FULL
-  }
+    defaultConfig {
+        minSdk = Android.testRunnerMinSdkVersion
+    }
 }
 
 configurations.all {
-  // The Instrumentation Test Runner uses the plugin,
-  // which in turn provides the Instrumentation Test Runner again -
-  // that's kind of deep.
-  // To avoid conflicts, prefer using the local classes
-  // and exclude the dependency from being pulled in externally.
-  exclude(module = Artifacts.Instrumentation.Runner.artifactId)
+    // The Instrumentation Test Runner uses the plugin,
+    // which in turn provides the Instrumentation Test Runner again -
+    // that's kind of deep.
+    // To avoid conflicts, prefer using the local classes
+    // and exclude the dependency from being pulled in externally.
+    exclude(module = Artifacts.Instrumentation.Runner.artifactId)
 }
 
 dependencies {
-  implementation(libs.androidXTestMonitor)
-  implementation(libs.androidXTestRunner)
-  implementation(libs.kotlinStdLib)
-  implementation(libs.junit4)
+    implementation(libs.androidx.test.monitor)
+    implementation(libs.androidx.test.runner)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.junit.vintage.api)
 
-  // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
-  // since that would prematurely raise the minSdkVersion requirement for target applications,
-  // even though not all product flavors might want to use JUnit 5.
-  // Therefore, only compile against those APIs, and have them provided at runtime
-  // by the "instrumentation" companion library instead.
-  compileOnly(libs.junitJupiterApi)
-  compileOnly(libs.junitJupiterParams)
-  compileOnly(libs.junitPlatformRunner)
+    // This module's JUnit 5 dependencies cannot be present on the runtime classpath,
+    // since that would prematurely raise the minSdkVersion requirement for target applications,
+    // even though not all product flavors might want to use JUnit 5.
+    // Therefore, only compile against those APIs, and have them provided at runtime
+    // by the "instrumentation" companion library instead.
+    compileOnly(libs.junit.jupiter.api)
+    compileOnly(libs.junit.jupiter.params)
+    compileOnly(libs.junit.platform.launcher)
+    compileOnly(libs.junit.platform.suiteapi)
 
-  testImplementation(project(":testutil"))
-  testImplementation(libs.robolectric)
-  testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(project(":testutil"))
+    testImplementation(libs.robolectric)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
 project.configureDeployment(Artifacts.Instrumentation.Runner)

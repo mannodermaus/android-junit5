@@ -223,11 +223,15 @@ class BuildScriptTemplateProcessorTests {
       {% if atLeastAgp("1000.0") %}println("AGP 2"){% endif %}
       {% if atLeastGradle("5.0") %}println("GRD 1"){% endif %}
       {% if atLeastGradle("1000.0") %}println("GRD 2"){% endif %}
+      {% if atLeastJUnit("5.10.0") %}println("JU 1"){% endif %}
+      {% if atLeastJUnit("1000.4.0") %}println("JU 2"){% endif %}
     """,
     expectedText = """
       println("AGP 1")
       
       println("GRD 1")
+      
+      println("JU 1")
       
     """
   )
@@ -242,7 +246,8 @@ class BuildScriptTemplateProcessorTests {
       folder = folder,
       replacements = replacements,
       agpVersion = "7.0",
-      gradleVersion = "6.7"
+      gradleVersion = "6.7",
+      junitVersion = "5.14.1",
     )
 
     // Replace pound-signs with dollar signs (the tests use the former

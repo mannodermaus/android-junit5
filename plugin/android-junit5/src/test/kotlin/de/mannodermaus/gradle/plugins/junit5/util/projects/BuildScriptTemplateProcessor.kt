@@ -16,7 +16,8 @@ class BuildScriptTemplateProcessor(
   folder: File,
   private val replacements: Map<String, Any>,
   private val agpVersion: String,
-  private val gradleVersion: String
+  private val gradleVersion: String,
+  private val junitVersion: String,
 ) {
 
   private val renderer = Templates(
@@ -30,6 +31,9 @@ class BuildScriptTemplateProcessor(
         },
         TeFunction("atLeastGradle") { args ->
           isVersionAtLeast(gradleVersion, args[0].toDynamicString())
+        },
+        TeFunction("atLeastJUnit") { args ->
+          isVersionAtLeast(junitVersion, args[0].toDynamicString())
         }
       )
     )

@@ -3,7 +3,7 @@ package de.mannodermaus.gradle.plugins.junit5.tasks
 import com.android.build.api.variant.SourceDirectories
 import com.android.build.api.variant.Variant
 import de.mannodermaus.gradle.plugins.junit5.internal.config.INSTRUMENTATION_FILTER_RES_FILE_NAME
-import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnit5TaskConfig
+import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnitPlatformTaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import org.gradle.api.DefaultTask
@@ -32,7 +32,6 @@ import java.io.File
 public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
 
     internal companion object {
-        @Suppress("UnstableApiUsage")
         fun register(
             project: Project,
             variant: Variant,
@@ -103,7 +102,7 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
 
         fun execute(task: AndroidJUnit5WriteFilters) {
             // Access filters for this particular variant & provide them to the task
-            val configuration = JUnit5TaskConfig(variant, project.junitPlatform)
+            val configuration = JUnitPlatformTaskConfig(variant, project.junitPlatform)
             task.includeTags.set(configuration.combinedIncludeTags.toList())
             task.excludeTags.set(configuration.combinedExcludeTags.toList())
 

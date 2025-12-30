@@ -2,13 +2,14 @@ package de.mannodermaus.gradle.plugins.junit5
 
 import com.google.common.truth.Truth.assertWithMessage
 import de.mannodermaus.gradle.plugins.junit5.annotations.DisabledOnCI
+import de.mannodermaus.gradle.plugins.junit5.internal.extensions.capitalized
 import de.mannodermaus.gradle.plugins.junit5.util.BuildResultSubject
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
+import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
-import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -31,6 +32,10 @@ class FunctionalTests {
 
     // Test permutations for AGP (default: empty set, which will exercise all)
     private val testedAgpVersions: Set<String> = setOf(
+    )
+
+    // Test permutations for JUnit (default: empty set, which will exercise all)
+    private val testedJUnitVersions: Set<Int> = setOf(
     )
 
     // Test permutations for projects (default: empty set, which will exercise all)
@@ -59,74 +64,85 @@ class FunctionalTests {
     }
 
     @TestFactory
-    fun execute(): List<DynamicNode> = environment.supportedAgpVersions.filterAgpVersions()
-        .map { agp ->
-            // Create a matrix of permutations between the AGP versions to test
-            // and the language of the project's build script
-            val projectCreator = FunctionalTestProjectCreator(folder, environment)
+    fun execute(): List<DynamicNode> {
+        val agpVersions = environment.supportedAgpVersions.filterAgpVersions()
+        val junitVersions = environment.supportedJUnitVersions.filterJUnitVersions()
 
-            // Generate a container for all tests with this specific AGP/Language combination
-            dynamicContainer("AGP ${agp.shortVersion}",
+        return junitVersions.map { junit ->
+            dynamicContainer(
+                "JUnit ${junit.majorVersion}",
+                agpVersions.map { agp ->
+                    // Create a matrix of permutations between the AGP versions to test
+                    // and the language of the project's build script
+                    val projectCreator = FunctionalTestProjectCreator(folder, environment)
 
-                // Exercise each test project within the given environment
-                projectCreator.allSpecs.filterSpecs().map { spec ->
-                    dynamicTest(spec.name) {
-                        // Required for visibility inside IJ's logging console (display names are still bugged in the IDE)
-                        println(buildList {
-                            add("AGP: ${agp.version}")
-                            add("Project: ${spec.name}")
-                            add("Gradle: ${agp.requiresGradle}")
-                            agp.requiresCompileSdk?.let { add("SDK: $it") }
-                        }.joinToString(", "))
+                    // Generate a container for all tests with this specific combination
+                    dynamicContainer(
+                        "AGP ${agp.shortVersion}",
+                        // Exercise each test project within the given environment
+                        projectCreator.allSpecs.filterSpecs().map { spec ->
+                            dynamicTest("${spec.name} ($junit)") {
+                                // Required for visibility inside the IntelliJ logging console
+                                // (display names are still bugged in the IDE)
+                                println(buildList {
+                                    add("JUnit ${junit.majorVersion}")
+                                    add("AGP: ${agp.version}")
+                                    add("Project: ${spec.name}")
+                                    add("Gradle: ${agp.requiresGradle}")
+                                    agp.requiresCompileSdk?.let { add("SDK: $it") }
+                                }.joinToString())
 
-                        // Create a virtual project with the given settings & AGP version.
-                        // This call will throw a TestAbortedException if the spec is not eligible for this version,
-                        // marking the test as ignored in the process
-                        val project = projectCreator.createProject(spec, agp)
+                                // Create a virtual project with the given settings & AGP version.
+                                // This call will throw a TestAbortedException if the spec is not eligible for this version,
+                                // marking the test as ignored in the process
+                                val project = projectCreator.createProject(spec, agp, junit)
 
-                        // Execute the tests of the virtual project with Gradle
-                        val taskName = spec.task ?: "test"
-                        val result = runGradle(agp, taskName)
-                            .withProjectDir(project)
-                            .build()
+                                // Execute the tests of the virtual project with Gradle
+                                val taskName = spec.task ?: "test"
+                                val result = runGradle(agp, taskName)
+                                    .withProjectDir(project)
+                                    .build()
 
-                        // Print Gradle logs from the embedded invocation
-                        result.prettyPrint()
+                                // Print Gradle logs from the embedded invocation
+                                result.prettyPrint()
 
-                        // Check that the task execution was successful in general
-                        val outcome = result.task(":$taskName")?.outcome
-                        when {
-                            outcome == TaskOutcome.UP_TO_DATE -> {
-                                // Nothing to do, a previous build already checked this
-                                println("Task '$taskName' up-to-date; skipping assertions.")
-                            }
+                                // Check that the task execution was successful in general
+                                val outcome = result.task(":$taskName")?.outcome
+                                when {
+                                    outcome == TaskOutcome.UP_TO_DATE -> {
+                                        // Nothing to do, a previous build already checked this
+                                        println("Task '$taskName' up-to-date; skipping assertions.")
+                                    }
 
-                            outcome == TaskOutcome.SUCCESS -> {
-                                // Based on the spec's configuration in the test project,
-                                // assert that all test classes have been executed as expected
-                                for (expectation in spec.expectedTests) {
-                                    result.assertAgpTests(
-                                        buildType = expectation.buildType,
-                                        productFlavor = expectation.productFlavor,
-                                        tests = expectation.testsList
-                                    )
+                                    outcome == TaskOutcome.SUCCESS -> {
+                                        // Based on the spec's configuration in the test project,
+                                        // assert that all test classes have been executed as expected
+                                        for (expectation in spec.expectedTests) {
+                                            result.assertAgpTests(
+                                                buildType = expectation.buildType,
+                                                productFlavor = expectation.productFlavor,
+                                                tests = expectation.testsList
+                                            )
+                                        }
+                                    }
+
+                                    outcome == TaskOutcome.SKIPPED && spec.allowSkipped -> {
+                                        // It might be acceptable to allow "skipped" as the result depending on the test spec
+                                        println("Task '$taskName' was skipped.")
+                                    }
+
+                                    else -> {
+                                        // Unexpected result; fail
+                                        fail { "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}" }
+                                    }
                                 }
                             }
-
-                            outcome == TaskOutcome.SKIPPED && spec.allowSkipped -> {
-                                // It might be acceptable to allow "skipped" as the result depending on the test spec
-                                println("Task '$taskName' was skipped.")
-                            }
-
-                            else -> {
-                                // Unexpected result; fail
-                                fail { "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}" }
-                            }
                         }
-                    }
+                    )
                 }
             )
         }
+    }
 
     /* Private */
 
@@ -138,6 +154,17 @@ class FunctionalTests {
         } else {
             filter { agp ->
                 testedAgpVersions.any { it == agp.shortVersion }
+            }
+        }
+
+    private fun List<TestedJUnit>.filterJUnitVersions(): List<TestedJUnit> =
+        if (testedJUnitVersions.isEmpty()) {
+            // Nothing to do, exercise functional tests on all JUnit versions
+            // (but in reverse order, so that the newest JUnit is tested first)
+            reversed()
+        } else {
+            filter { junit ->
+                testedJUnitVersions.any { it == junit.majorVersion }
             }
         }
 

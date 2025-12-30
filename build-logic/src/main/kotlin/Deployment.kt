@@ -1,5 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
+import groovy.lang.Closure
 import groovy.util.Node
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
@@ -8,14 +9,19 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.internal.PublicationInternal
+import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.closureOf
+import org.gradle.kotlin.dsl.maybeCreate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.kotlin.dsl.withGroovyBuilder
+import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
@@ -24,126 +30,38 @@ import java.io.File
  * Configure deployment tasks and properties for a project using the provided [deployConfig].
  */
 fun Project.configureDeployment(deployConfig: Deployed) {
-    if (this == rootProject) {
-        throw IllegalStateException("This method can not be called on the root project")
-    }
+    check(this != rootProject) { "This method can not be called on the root project" }
 
     val credentials = DeployedCredentials(this)
 
-    // Configure root project (this only happens once
-    // and will raise an error on inconsistent data)
+    // Configure root project (this only happens once and will raise an error on inconsistent data)
     rootProject.configureRootDeployment(deployConfig, credentials)
 
-    val isAndroid = plugins.findPlugin("com.android.library") != null
-    val isGradlePlugin = plugins.hasPlugin("java-gradle-plugin")
-
-    apply {
-        plugin("maven-publish")
-        plugin("signing")
-        plugin("org.jetbrains.dokka")
-    }
-
-    // Create artifact tasks
-    val androidSourcesJar = tasks.register<Jar>("androidSourcesJar") {
-        archiveClassifier.set("sources")
-
-        if (isAndroid) {
-            // This declaration includes Java source directories
-            from(android.sourceSets.main.kotlin.srcDirs)
-        } else {
-            // This declaration includes Kotlin & Groovy source directories
-            from(sourceSets.main.allJava.srcDirs)
-        }
-    }
-
-    val javadocJar = tasks.register<Jar>("javadocJar") {
-        archiveClassifier.set("javadoc")
-
-        // Connect to Dokka for generation of docs
-        from(layout.buildDirectory.dir("dokka/html"))
-        dependsOn("dokkaGenerate")
-    }
-
-    artifacts {
-        add("archives", androidSourcesJar)
-        add("archives", javadocJar)
-    }
-
-    // Setup publication details
-    group = deployConfig.groupId
-    version = deployConfig.currentVersion
-
-    publishing {
-        publications {
-            // For Gradle Plugin projects, there already is a 'pluginMaven' publication
-            // pre-configured by the Java Gradle plugin, which we will extend with more properties and details.
-            // For other projects, a new publication must be created instead
-            if (isGradlePlugin) {
-                all {
-                    if (this !is MavenPublication) return@all
-
-                    if (name == "pluginMaven") {
-                        applyPublicationDetails(
-                            project = this@configureDeployment,
-                            deployConfig = deployConfig,
-                            isAndroid = isAndroid,
-                            androidSourcesJar = androidSourcesJar,
-                            javadocJar = javadocJar
-                        )
-                    }
-
-                    // Always extend POM details to satisfy Maven Central's POM validation
-                    // (they require a bunch of metadata for each POM, which isn't filled out by default)
-                    configurePom(deployConfig)
-                }
-            } else {
-                create("release", MavenPublication::class.java)
-                        .applyPublicationDetails(
-                                project = this@configureDeployment,
-                                deployConfig = deployConfig,
-                                isAndroid = isAndroid,
-                                androidSourcesJar = androidSourcesJar,
-                                javadocJar = javadocJar
-                        )
-                        .configurePom(deployConfig)
-            }
-        }
-    }
-
-    // Setup code signing
-    ext["signing.keyId"] = credentials.signingKeyId
-    ext["signing.password"] = credentials.signingPassword
-    ext["signing.secretKeyRingFile"] = credentials.signingKeyRingFile
-    signing {
-        sign(publishing.publications)
-    }
-
-    // Connect signing task to artifact-producing task
-    // (build an AAR for Android modules, assemble a JAR for other modules)
-    tasks.withType(Sign::class.java).configureEach {
-        dependsOn(if (isAndroid) "bundleReleaseAar" else "assemble")
-    }
+    // Apply deployment config for each type of project
+    plugins.withId("com.android.library") { configureAndroidDeployment(deployConfig, credentials) }
+    plugins.withId("java-gradle-plugin") { configurePluginDeployment(deployConfig, credentials) }
 }
 
 /* Private */
 
-private fun Project.configureRootDeployment(deployConfig: Deployed, credentials: DeployedCredentials) {
-    if (this != rootProject) {
-        throw IllegalStateException("This method can only be called on the root project")
-    }
+private fun Project.configureRootDeployment(
+    deployConfig: Deployed,
+    credentials: DeployedCredentials
+) {
+    check(this == rootProject) { "This method can only be called on the root project" }
 
     // Validate the integrity of published versions
     // (all subprojects must use the same group ID and version number or else an error is raised)
     if (version != "unspecified") {
-        if (version != deployConfig.currentVersion || group != deployConfig.groupId) {
-            throw IllegalStateException("A subproject tried to set '${deployConfig.groupId}:${deployConfig.currentVersion}' " +
+        check(version == deployConfig.currentVersion && group == deployConfig.groupId) {
+            "A subproject tried to set '${deployConfig.groupId}:${deployConfig.currentVersion}' " +
                     "as the coordinates for the artifacts of the repository, but '$group:$version' was already set " +
                     "previously by a different subproject. As per the requirements of the Nexus Publishing plugin, " +
-                    "all subprojects must use the same version number! Please check Artifacts.kt for inconsistencies!")
-        } else {
-            // Already configured and correct
-            return
+                    "all subprojects must use the same version number! Please check Environment.kt for inconsistencies!"
         }
+
+        // Already configured and correct
+        return
     }
 
     // One-time initialization beyond this point
@@ -158,92 +76,226 @@ private fun Project.configureRootDeployment(deployConfig: Deployed, credentials:
     )
 }
 
-private fun MavenPublication.applyPublicationDetails(
-        project: Project,
-        deployConfig: Deployed,
-        isAndroid: Boolean,
-        androidSourcesJar: TaskProvider<Jar>,
-        javadocJar: TaskProvider<Jar>
-) = also {
-    groupId = deployConfig.groupId
-    artifactId = deployConfig.artifactId
+private fun Project.configureCommonDeployment(
+    deployConfig: Deployed,
+    credentials: DeployedCredentials
+) {
+    apply {
+        plugin("maven-publish")
+        plugin("signing")
+        plugin("org.jetbrains.dokka")
+    }
+
+    // Setup publication details
+    group = deployConfig.groupId
     version = deployConfig.currentVersion
 
-    // Attach artifacts
-    artifacts.clear()
-    val buildDir = project.layout.buildDirectory
-    if (isAndroid) {
-        artifact(buildDir.file("outputs/aar/${project.name}-release.aar").get().asFile)
-    } else {
-        artifact(buildDir.file("libs/${project.name}-$version.jar"))
+    // Setup code signing
+    ext["signing.keyId"] = credentials.signingKeyId
+    ext["signing.password"] = credentials.signingPassword
+    ext["signing.secretKeyRingFile"] = credentials.signingKeyRingFile
+    signing {
+        sign(publishing.publications)
     }
-    artifact(androidSourcesJar)
-    artifact(javadocJar)
+}
 
-    // Attach dependency information
-    pom {
-        withXml {
-            with(asNode()) {
-                // Only add dependencies manually if there aren't any already
-                if (children().filterIsInstance<Node>()
-                        .none { it.name().toString().endsWith("dependencies") }
-                ) {
-                    val dependenciesNode = appendNode("dependencies")
+private fun Project.configureAndroidDeployment(
+    deployConfig: Deployed,
+    credentials: DeployedCredentials
+) {
+    val android = AndroidDsl(this)
+    configureCommonDeployment(deployConfig, credentials)
 
-                    val compileDeps = project.configurations.getByName("api").allDependencies
-                    val runtimeDeps = project.configurations.getByName("implementation").allDependencies +
-                            project.configurations.getByName("runtimeOnly").allDependencies -
-                            compileDeps
+    // Create a publication for each variant
+    SupportedJUnit.values().forEach { junit ->
+        val variantName = "${junit.variant}Release"
 
-                    val dependencies = mapOf(
-                        "runtime" to runtimeDeps,
-                        "compile" to compileDeps
-                    )
+        android.publishing.singleVariant(variantName) {
+            withSourcesJar()
+            withJavadocJar()
+        }
 
-                    dependencies
-                        .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
-                        .forEach { (scope, dependencies) ->
-                            dependencies.forEach { dep ->
-                                // Do not allow BOM dependencies for our own packaged libraries,
-                                // instead its artifact versions should be unrolled explicitly
-                                if ("-bom" in dep.name) {
-                                    throw IllegalArgumentException(
-                                        "Found a BOM declaration in the dependencies of project" +
-                                                "${project.path}: $dep. Prefer declaring its " +
-                                                "transitive artifacts explicitly by " +
-                                                "adding a version contraint to them."
-                                    )
-                                }
+        afterEvaluate {
+            publishing {
+                publications {
+                    // Declare an empty 'main' publication and mark the actual publication
+                    // for each variant as an 'alias'. This is done to work around limitations
+                    // of the Maven publication process
+                    maybeCreate<MavenPublication>("main")
 
-                                with(dependenciesNode.appendNode("dependency")) {
-                                    if (dep is ProjectDependency) {
-                                        appendProjectDependencyCoordinates(dep)
-                                    } else {
-                                        appendExternalDependencyCoordinates(dep)
-                                    }
+                    register<MavenPublication>(junit.variant) {
+                        from(components.getByName(variantName))
 
-                                    appendNode("scope", scope)
-                                }
-                            }
-                        }
+                        applyPublicationDetails(
+                            project = this@afterEvaluate,
+                            deployConfig = deployConfig,
+                            junit = junit
+                        )
+
+                        (this as PublicationInternal<MavenArtifact>).isAlias = true
+
+                        // We have to write parts of the POM file ourselves, so that
+                        // project dependencies between instrumentation libraries use the correct
+                        // coordinates for each variant (e.g. "junit5" vs "junit6")
+                        configurePom(deployConfig)
+                    }
                 }
             }
         }
     }
 }
 
-private fun Node.appendProjectDependencyCoordinates(dep: ProjectDependency) {
+private fun Project.configurePluginDeployment(
+    deployConfig: Deployed,
+    credentials: DeployedCredentials
+) {
+    configureCommonDeployment(deployConfig, credentials)
+
+    // Create artifact tasks
+    val sourcesJar = tasks.register<Jar>("sourcesJar") {
+        archiveClassifier.set("sources")
+
+        // This declaration includes Kotlin & Groovy source directories
+        from(sourceSets.main.allJava.srcDirs)
+    }
+
+    // Create javadoc artifact
+    val javadocJar = tasks.register<Jar>("javadocJar") {
+        archiveClassifier.set("javadoc")
+
+        // Connect to Dokka for generation of docs
+        from(layout.buildDirectory.dir("dokka/html"))
+        dependsOn("dokkaGenerate")
+    }
+
+    artifacts {
+        add("archives", sourcesJar)
+        add("archives", javadocJar)
+    }
+
+    // Connect signing task to the JAR produced by the artifact-producing task
+    tasks.withType<Sign>().configureEach {
+        dependsOn("assemble")
+    }
+
+    publishing {
+        publications {
+            all {
+                if (this is MavenPublication) {
+                    if (name == "pluginMaven") {
+                        // Attach artifacts
+                        artifacts.clear()
+                        artifact(layout.buildDirectory.file("libs/${project.name}-$version.jar"))
+                        artifact(sourcesJar)
+                        artifact(javadocJar)
+
+                        applyPublicationDetails(
+                            project = this@configurePluginDeployment,
+                            deployConfig = deployConfig
+                        )
+                    }
+
+                    // Always extend POM details to satisfy Maven Central's POM validation
+                    // (they require a bunch of metadata that isn't filled out by default)
+                    configurePom(deployConfig)
+                }
+            }
+        }
+    }
+}
+
+private fun MavenPublication.applyPublicationDetails(
+    project: Project,
+    deployConfig: Deployed,
+    junit: SupportedJUnit? = null
+) = also {
+    groupId = deployConfig.groupId
+    artifactId = suffixedArtifactId(deployConfig.artifactId, junit)
+    version = deployConfig.currentVersion
+
+    // Attach dependency information, rewriting it to work around certain inadequacies
+    // with the built-in maven publish POM generation
+    pom {
+        withXml {
+            with(asNode()) {
+                // Replace an existing node or just append a new one.
+                val dependenciesNode = replaceNode("dependencies")
+
+                val compileDeps = project.configurations.getByName("api").allDependencies
+                val runtimeDeps =
+                    project.configurations.getByName("implementation").allDependencies +
+                            project.configurations.getByName("runtimeOnly").allDependencies -
+                            compileDeps
+
+                val dependencies = mapOf(
+                    "runtime" to runtimeDeps,
+                    "compile" to compileDeps
+                )
+
+                dependencies
+                    .mapValues { entry -> entry.value.filter { it.name != "unspecified" } }
+                    .forEach { (scope, dependencies) ->
+                        dependencies.forEach { dep ->
+                            // Do not allow BOM dependencies for our own packaged libraries,
+                            // instead its artifact versions should be unrolled explicitly
+                            require("-bom" !in dep.name) {
+                                "Found a BOM declaration in the dependencies of project" +
+                                        "${project.path}: $dep. Prefer declaring its " +
+                                        "transitive artifacts explicitly by " +
+                                        "adding a version constraint to them."
+                            }
+
+                            with(dependenciesNode.appendNode("dependency")) {
+                                if (dep is ProjectDependency) {
+                                    appendProjectDependencyCoordinates(dep, junit)
+                                } else {
+                                    appendExternalDependencyCoordinates(dep)
+                                }
+
+                                appendNode("scope", scope)
+                            }
+                        }
+                    }
+            }
+        }
+    }
+}
+
+private fun Node.appendProjectDependencyCoordinates(
+    dep: ProjectDependency,
+    junit: SupportedJUnit?
+) {
     // Find the external coordinates for the given project dependency
     val projectName = dep.name
 
     val config = Artifacts.Instrumentation::class.java
         .getMethod("get${projectName.uppercaseFirstChar()}")
         .invoke(Artifacts.Instrumentation)
-        as Deployed
+            as Deployed
 
     appendNode("groupId", config.groupId)
-    appendNode("artifactId", config.artifactId)
+    appendNode("artifactId", suffixedArtifactId(config.artifactId, junit))
     appendNode("version", config.currentVersion)
+}
+
+private fun suffixedArtifactId(base: String, junit: SupportedJUnit? = null) = buildString {
+    append(base)
+
+    // Attach optional suffix to Android artifacts
+    // to distinguish between different JUnit targets
+    junit?.artifactIdSuffix?.let {
+        append('-')
+        append(it)
+    }
+}
+
+private fun Node.findNode(name: String): Node? =
+    // This method uses "endsWith()" to ignore XMLNS prefixes
+    children().firstOrNull { it is Node && it.name().toString().endsWith(name) } as? Node
+
+private fun Node.replaceNode(name: String): Node {
+    findNode(name)?.let { remove(it) }
+    return appendNode(name)
 }
 
 private fun Node.appendExternalDependencyCoordinates(dep: Dependency) {
@@ -299,37 +351,44 @@ private val Project.ext: ExtraPropertiesExtension
     get() = extensions.getByName("ext") as ExtraPropertiesExtension
 
 /**
- * Allows us to retain the untyped Groovy API even in the stricter Kotlin context
- * ("android.sourceSets.main.java.srcDirs")
+ * Allows us to access certain APIs without access to the actual plugins. Brittle, but works.
  */
 private class AndroidDsl(project: Project) {
     private val delegate = project.extensions.getByName("android") as ExtensionAware
 
-    val sourceSets = SourceSetDsl(delegate)
+    val publishing = PublishingDsl(delegate)
 
-    class SourceSetDsl(android: ExtensionAware) {
-        private val delegate = android.javaClass.getDeclaredMethod("getSourceSets")
+    class PublishingDsl(android: ExtensionAware) {
+        private val delegate = android.javaClass.getDeclaredMethod("getPublishing")
+            .also { it.isAccessible = true }
+            .invoke(android)
+
+        fun singleVariant(name: String, block: SingleVariantDsl.() -> Unit = {}) {
+            delegate.javaClass
+                .getDeclaredMethod("singleVariant", String::class.java, Closure::class.java)
                 .also { it.isAccessible = true }
-                .invoke(android) as NamedDomainObjectCollection<Any>
+                .invoke(delegate, name, closureOf<Any> {
+                    SingleVariantDsl(this).block()
+                })
+        }
 
-        val main = MainDsl(delegate)
+        class SingleVariantDsl(private val delegate: Any) {
+            fun withSourcesJar() {
+                delegate.javaClass.declaredMethods
+                    .first { it.name.startsWith("withSourcesJar") }
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, true)
+            }
 
-        class MainDsl(sourceSets: NamedDomainObjectCollection<Any>) {
-            private val delegate = sourceSets.named("main").get()
-
-            val kotlin = KotlinDsl(delegate)
-
-            class KotlinDsl(main: Any) {
-                val srcDirs = main.javaClass
-                    .getDeclaredMethod("getKotlinDirectories")
-                    .invoke(main) as Set<File>
+            fun withJavadocJar() {
+                delegate.javaClass.declaredMethods
+                    .first { it.name.startsWith("withJavadocJar") }
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, true)
             }
         }
     }
 }
-
-private val Project.android
-    get() = AndroidDsl(this)
 
 private class SourceSetDsl(project: Project) {
     private val delegate = project.extensions.getByName("sourceSets") as SourceSetContainer
@@ -372,24 +431,30 @@ private fun Project.centralPublishing(
                 val cls = delegate.javaClass
 
                 cls.getDeclaredMethod("setStagingProfileId", Any::class.java)
-                        .also { it.isAccessible = true }
-                        .invoke(delegate, stagingProfileId)
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, stagingProfileId)
 
                 cls.getDeclaredMethod("setUsername", Any::class.java)
-                        .also { it.isAccessible = true }
-                        .invoke(delegate, username)
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, username)
 
                 cls.getDeclaredMethod("setPassword", Any::class.java)
-                        .also { it.isAccessible = true }
-                        .invoke(delegate, password)
+                    .also { it.isAccessible = true }
+                    .invoke(delegate, password)
 
                 cls.getDeclaredMethod("setNexusUrl", Any::class.java)
                     .also { it.isAccessible = true }
-                    .invoke(delegate, uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+                    .invoke(
+                        delegate,
+                        uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
+                    )
 
                 cls.getDeclaredMethod("setSnapshotRepositoryUrl", Any::class.java)
                     .also { it.isAccessible = true }
-                    .invoke(delegate, uri("https://central.sonatype.com/repository/maven-snapshots/"))
+                    .invoke(
+                        delegate,
+                        uri("https://central.sonatype.com/repository/maven-snapshots/")
+                    )
             }
         }
     }

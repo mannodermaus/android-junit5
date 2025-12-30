@@ -4,6 +4,20 @@ import org.gradle.api.Project
 import java.io.File
 import java.util.Properties
 
+enum class SupportedJUnit(
+    val majorVersion: Int,
+    val variant: String,
+    val minSdk: Int,
+    val artifactIdSuffix: String? = null
+) {
+    JUnit5(majorVersion = 5, variant = "five", minSdk = 26),
+    JUnit6(majorVersion = 6, variant = "six", minSdk = 35, artifactIdSuffix = "junit6");
+
+    companion object {
+        fun fromVariant(variant: String): SupportedJUnit = values().first { it.variant == variant }
+    }
+}
+
 enum class SupportedAgp(
     val version: String,
     val gradle: String,
@@ -21,8 +35,8 @@ enum class SupportedAgp(
     AGP_8_11("8.11.2", gradle = "8.13"),
     AGP_8_12("8.12.3", gradle = "8.13"),
     AGP_8_13("8.13.2", gradle = "8.13"),
-    AGP_9_0("9.0.0-rc01", gradle = "9.1.0"),
-    AGP_9_1("9.1.0-alpha01", gradle = "9.1.0"),
+    AGP_9_0("9.0.0-rc02", gradle = "9.1.0"),
+    AGP_9_1("9.1.0-alpha02", gradle = "9.1.0"),
     ;
 
     companion object {
@@ -33,9 +47,7 @@ enum class SupportedAgp(
     val shortVersion: String = run {
         // Extract first two components of the Maven dependency's version string.
         val components = version.split('.')
-        if (components.size < 2) {
-            throw IllegalArgumentException("Cannot derive AGP configuration name from: $this")
-        }
+        require(components.size >= 2) { "Cannot derive AGP configuration name from: $this" }
 
         "${components[0]}.${components[1]}"
     }
@@ -94,9 +106,9 @@ object Artifacts {
         platform = Java,
         groupId = "de.mannodermaus.gradle.plugins",
         artifactId = "android-junit5",
-        currentVersion = "1.14.0.1-SNAPSHOT",
+        currentVersion = "2.0.0-SNAPSHOT",
         latestStableVersion = "1.14.0.0",
-        description = "Unit Testing with JUnit 5 for Android."
+        description = "Unit Testing with the JUnit Framework for Android."
     )
 
     /**
@@ -104,7 +116,7 @@ object Artifacts {
      */
     object Instrumentation {
         const val groupId = "de.mannodermaus.junit5"
-        private const val currentVersion = "1.9.1-SNAPSHOT"
+        private const val currentVersion = "2.0.0-SNAPSHOT"
         private const val latestStableVersion = "1.9.0"
 
         val Core = Deployed(
@@ -113,7 +125,7 @@ object Artifacts {
             artifactId = "android-test-core",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Extensions for instrumented Android tests with JUnit 5."
+            description = "Extensions for instrumented Android tests with the JUnit Framework."
         )
 
         val Extensions = Deployed(
@@ -122,7 +134,7 @@ object Artifacts {
             artifactId = "android-test-extensions",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Optional extensions for instrumented Android tests with JUnit 5."
+            description = "Optional extensions for instrumented Android tests with the JUnit Framework."
         )
 
         val Runner = Deployed(
@@ -131,7 +143,7 @@ object Artifacts {
             artifactId = "android-test-runner",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Runner for integration of instrumented Android tests with JUnit 5."
+            description = "Runner for integration of instrumented Android tests with the JUnit Framework."
         )
 
         val Compose = Deployed(
@@ -140,13 +152,12 @@ object Artifacts {
             artifactId = "android-test-compose",
             currentVersion = currentVersion,
             latestStableVersion = latestStableVersion,
-            description = "Extensions for Jetpack Compose tests with JUnit 5."
+            description = "Extensions for Jetpack Compose tests with the JUnit Framework."
         )
     }
 }
 
 class DeployedCredentials(private val project: Project) {
-
     var signingKeyId: String?
     var signingPassword: String?
     var signingKeyRingFile: String?

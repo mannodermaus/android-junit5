@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val androidGradlePluginVersion: String = "{{ AGP_VERSION }}"
 val kotlinVersion: String = "{{ KOTLIN_VERSION }}"
-val junitJupiterVersion: String = "{{ JUNIT_JUPITER_VERSION }}"
+val junitVersion: String = "{{ JUNIT_VERSION }}"
 val junit5AndroidLibsVersion: String = "{{ JUNIT5_ANDROID_LIBS_VERSION }}"
 val javaVersion = JavaVersion.VERSION_17
 
@@ -158,19 +158,31 @@ junitPlatform {
   }
 {% end %}
 
+// Replace instrumentation libraries with a dynamic version (to satisfy any version constraint for functional tests)
+// TODO: After the first deployment of the -junit6 instrumentation libraries, remove the replace() from here
+configurations.all {
+  resolutionStrategy.dependencySubstitution {
+    all {
+      if (requested.displayName.startsWith("de.mannodermaus.junit5")) {
+        val replacedModule = requested.displayName.substringBeforeLast(':').replace("-junit6", "") + ":+"
+        useTarget(replacedModule)
+      }
+    }
+  }
+}
+
 dependencies {
   {% if USE_KOTLIN %}
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
   {% endif %}
 
-  testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+  testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
+  testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 
   {% if INCLUDE_ANDROID_RESOURCES %}
     androidTestImplementation("androidx.test:runner:1.4.0")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:${junit5AndroidLibsVersion}")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:${junit5AndroidLibsVersion}")
+    androidTestImplementation(platform("org.junit:junit-bom:${junitVersion}"))
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api")
   {% endif %}
 }

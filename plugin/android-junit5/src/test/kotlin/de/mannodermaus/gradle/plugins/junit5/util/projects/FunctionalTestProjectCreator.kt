@@ -5,6 +5,7 @@ import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.toml
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
+import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import org.gradle.util.GradleVersion
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.opentest4j.TestAbortedException
@@ -43,7 +44,7 @@ class FunctionalTestProjectCreator(
             ?: throw IllegalAccessException("No test project named '$name' found in src/test/resources/test-projects")
 
     @Throws(TestAbortedException::class)
-    fun createProject(spec: Spec, agp: TestedAgp): File {
+    fun createProject(spec: Spec, agp: TestedAgp, junit: TestedJUnit): File {
         // Validate the spec requirement against the executing AGP version first
         validateSpec(spec, agp)
 
@@ -51,7 +52,7 @@ class FunctionalTestProjectCreator(
         // If any Gradle or build caches already exist, we keep those around.
         // That's the reason for not doing "projectFolder.deleteRecursively()"
         // and nuking everything at once.
-        val projectName = "${spec.name}_${agp.shortVersion}"
+        val projectName = "${spec.name}_agp${agp.shortVersion}_junit${junit.majorVersion}"
         val projectFolder = File(outputFolder, projectName)
         if (projectFolder.exists()) {
             File(projectFolder, SRC_FOLDER_NAME).deleteRecursively()
@@ -85,6 +86,7 @@ class FunctionalTestProjectCreator(
         replacements["RETURN_DEFAULT_VALUES"] = spec.returnDefaultValues
         replacements["INCLUDE_ANDROID_RESOURCES"] = spec.includeAndroidResources
         replacements["DISABLE_TESTS_FOR_BUILD_TYPES"] = spec.disableTestsForBuildTypes
+        replacements["JUNIT_VERSION"] = junit.fullVersion
 
         agp.requiresCompileSdk?.let {
             replacements["OVERRIDE_SDK_VERSION"] = it
@@ -94,7 +96,8 @@ class FunctionalTestProjectCreator(
             folder = projectRootFolder,
             replacements = replacements,
             agpVersion = agp.version,
-            gradleVersion = agp.requiresGradle
+            gradleVersion = agp.requiresGradle,
+            junitVersion = junit.fullVersion,
         )
 
         processor.process(BUILD_GRADLE_TEMPLATE_NAME).also { result ->
