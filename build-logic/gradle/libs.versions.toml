@@ -19,6 +19,7 @@ korte = "2.4.12"
 kotlin = "2.3.0"
 kotlinBinaryCompValidator = "0.17.0"
 kotlinCoroutines = "1.10.2"
+ktfmt = "0.25.0"
 mockitoCore = "5.16.0"
 mockitoKotlin = "5.4.0"
 nexusPublish = "2.0.0"
@@ -37,6 +38,7 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-binarycompvalidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompValidator" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPublish" }
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 

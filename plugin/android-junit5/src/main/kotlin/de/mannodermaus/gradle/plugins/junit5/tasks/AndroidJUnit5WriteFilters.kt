@@ -6,6 +6,7 @@ import de.mannodermaus.gradle.plugins.junit5.internal.config.INSTRUMENTATION_FIL
 import de.mannodermaus.gradle.plugins.junit5.internal.config.JUnitPlatformTaskConfig
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -14,19 +15,16 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 
 /**
- * Helper task for instrumentation tests.
- * It writes out the filters configured through the Gradle plugin's DSL
- * into a resource file, used at runtime to set up the execution of the JUnit Platform.
+ * Helper task for instrumentation tests. It writes out the filters configured through the Gradle
+ * plugin's DSL into a resource file, used at runtime to set up the execution of the JUnit Platform.
  *
- * Note:
- * This only allows tests to be filtered with @Tag annotations even in the instrumentation test realm.
- * Other plugin DSL settings, like includeEngines/excludeEngines or includePattern/excludePattern
- * are not copied out to file. This has to do with limitations of the backport implementation
- * of the JUnit Platform Runner, as well as some incompatibilities between Gradle and Java
- * regarding how class name patterns are formatted.
+ * Note: This only allows tests to be filtered with @Tag annotations even in the instrumentation
+ * test realm. Other plugin DSL settings, like includeEngines/excludeEngines or
+ * includePattern/excludePattern are not copied out to file. This has to do with limitations of the
+ * backport implementation of the JUnit Platform Runner, as well as some incompatibilities between
+ * Gradle and Java regarding how class name patterns are formatted.
  */
 @CacheableTask
 public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
@@ -39,11 +37,8 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
         ): Boolean {
             val configAction = ConfigAction(project, variant)
 
-            val provider = project.tasks.register(
-                configAction.name,
-                configAction.type,
-                configAction::execute
-            )
+            val provider =
+                project.tasks.register(configAction.name, configAction.type, configAction::execute)
 
             // Connect the output folder of the task to the instrumentation tests
             // so that they are bundled into the built test application
@@ -56,14 +51,11 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
         }
     }
 
-    @get:Input
-    public abstract val includeTags: ListProperty<String>
+    @get:Input public abstract val includeTags: ListProperty<String>
 
-    @get:Input
-    public abstract val excludeTags: ListProperty<String>
+    @get:Input public abstract val excludeTags: ListProperty<String>
 
-    @get:OutputDirectory
-    public abstract val outputFolder: DirectoryProperty
+    @get:OutputDirectory public abstract val outputFolder: DirectoryProperty
 
     @TaskAction
     public fun execute() {
@@ -81,20 +73,15 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
             // the generated file will have a fixed name & is located
             // as a "raw" resource inside the output folder
             val rawFolder = File(folder, "raw").apply { mkdirs() }
-            File(rawFolder, INSTRUMENTATION_FILTER_RES_FILE_NAME)
-                .bufferedWriter()
-                .use { writer ->
-                    // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
-                    includeTags.forEach { tag -> writer.appendLine("-t $tag") }
-                    excludeTags.forEach { tag -> writer.appendLine("-T $tag") }
-                }
+            File(rawFolder, INSTRUMENTATION_FILTER_RES_FILE_NAME).bufferedWriter().use { writer ->
+                // This format is a nod towards the real JUnit 5 ConsoleLauncher's arguments
+                includeTags.forEach { tag -> writer.appendLine("-t $tag") }
+                excludeTags.forEach { tag -> writer.appendLine("-T $tag") }
+            }
         }
     }
 
-    private class ConfigAction(
-        private val project: Project,
-        private val variant: Variant,
-    ) {
+    private class ConfigAction(private val project: Project, private val variant: Variant) {
 
         val name: String = variant.getTaskName(prefix = "writeFilters", suffix = "androidTest")
 
@@ -106,7 +93,8 @@ public abstract class AndroidJUnit5WriteFilters : DefaultTask() {
             task.includeTags.set(configuration.combinedIncludeTags.toList())
             task.excludeTags.set(configuration.combinedExcludeTags.toList())
 
-            // Output folder is applied by Android Gradle Plugin, so there is no reason to provide a value ourselves
+            // Output folder is applied by Android Gradle Plugin, so there is no reason to provide a
+            // value ourselves
         }
     }
 }

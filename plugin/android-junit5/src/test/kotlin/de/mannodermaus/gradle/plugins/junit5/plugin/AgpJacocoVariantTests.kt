@@ -38,153 +38,134 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
     }
 
     @TestFactory
-    fun `do not interfere if task generation is disabled`() = forEachBuildType(
-        beforeBuild = {
-            it.applyJacocoPlugin()
-        },
-        beforeEvaluate = {
-            it.junitPlatform.jacocoOptions {
-                it.taskGenerationEnabled.set(false)
-            }
+    fun `do not interfere if task generation is disabled`() =
+        forEachBuildType(
+            beforeBuild = { it.applyJacocoPlugin() },
+            beforeEvaluate = {
+                it.junitPlatform.jacocoOptions { it.taskGenerationEnabled.set(false) }
+            },
+        ) { project, buildType ->
+            val name = jacocoVariantTaskName(buildType)
+
+            assertWithMessage("do not create a child task for build type $buildType")
+                .that(project.tasks.findByName(name))
+                .isNull()
         }
-    ) { project, buildType ->
-        val name = jacocoVariantTaskName(buildType)
-
-        assertWithMessage("do not create a child task for build type $buildType")
-            .that(project.tasks.findByName(name))
-            .isNull()
-    }
 
     @TestFactory
-    fun `do not interfere with custom Jacoco task if task generation is disabled`() = forEachBuildType(
-        beforeBuild = {
-            it.applyJacocoPlugin()
-        },
-        beforeEvaluate = {
-            it.tasks.register("jacocoTestReport", JacocoReport::class.java) { task ->
-                task.group = "TEST MARKER"
-            }
-            it.junitPlatform.jacocoOptions {
-                it.taskGenerationEnabled.set(false)
-            }
+    fun `do not interfere with custom Jacoco task if task generation is disabled`() =
+        forEachBuildType(
+            beforeBuild = { it.applyJacocoPlugin() },
+            beforeEvaluate = {
+                it.tasks.register("jacocoTestReport", JacocoReport::class.java) { task ->
+                    task.group = "TEST MARKER"
+                }
+                it.junitPlatform.jacocoOptions { it.taskGenerationEnabled.set(false) }
+            },
+        ) { project, buildType ->
+            val name = jacocoVariantTaskName(buildType)
+
+            assertWithMessage("do not create a child task for build type $buildType")
+                .that(project.tasks.findByName(name))
+                .isNull()
+
+            assertWithMessage("do not overwrite the custom task")
+                .that(project.tasks.getByName("jacocoTestReport").group)
+                .isEqualTo("TEST MARKER")
         }
-    ) { project, buildType ->
-        val name = jacocoVariantTaskName(buildType)
-
-        assertWithMessage("do not create a child task for build type $buildType")
-            .that(project.tasks.findByName(name))
-            .isNull()
-
-        assertWithMessage("do not overwrite the custom task")
-            .that(project.tasks.getByName("jacocoTestReport").group)
-            .isEqualTo("TEST MARKER")
-    }
 
     @TestFactory
-    fun `hook in build-type-specific jacoco task to parent`() = forEachBuildType(
-        beforeBuild = { it.applyJacocoPlugin() }
-    ) { project, buildType ->
-        val name = jacocoVariantTaskName(buildType)
+    fun `hook in build-type-specific jacoco task to parent`() =
+        forEachBuildType(beforeBuild = { it.applyJacocoPlugin() }) { project, buildType ->
+            val name = jacocoVariantTaskName(buildType)
 
-        assertThat(
-            project.tasks.getByName(JACOCO_TASK_NAME)
-                .getDependentTaskNames()
-                .contains(name)
-        )
-    }
+            assertThat(
+                project.tasks.getByName(JACOCO_TASK_NAME).getDependentTaskNames().contains(name)
+            )
+        }
 
     @TestFactory
-    fun `create variant-specific jacoco task`() = forEachVariant(
-        beforeBuild = { it.applyJacocoPlugin() }
-    ) { project, variant ->
-        val name = jacocoVariantTaskName(variant)
-        assertThat(project.tasks.findByName(name)).isNotNull()
-    }
+    fun `create variant-specific jacoco task`() =
+        forEachVariant(beforeBuild = { it.applyJacocoPlugin() }) { project, variant ->
+            val name = jacocoVariantTaskName(variant)
+            assertThat(project.tasks.findByName(name)).isNotNull()
+        }
 
     @TestFactory
-    fun `hook in variant-specific jacoco task to parent`() = forEachVariant(
-        beforeBuild = { it.applyJacocoPlugin() }
-    ) { project, variant ->
-        assertThat(
-            project.tasks.getByName(JACOCO_TASK_NAME)
-                .getDependentTaskNames()
-        )
-            .contains(jacocoVariantTaskName(variant))
-    }
+    fun `hook in variant-specific jacoco task to parent`() =
+        forEachVariant(beforeBuild = { it.applyJacocoPlugin() }) { project, variant ->
+            assertThat(project.tasks.getByName(JACOCO_TASK_NAME).getDependentTaskNames())
+                .contains(jacocoVariantTaskName(variant))
+        }
 
     @TestFactory
-    fun `jacoco task includes main-scoped source directories`() = forEachBuildType(
-        beforeBuild = { it.applyJacocoPlugin() }
-    ) { project, buildType ->
-        val name = jacocoVariantTaskName(buildType)
-        val sourceDirs = project.tasks.get<AndroidJUnit5JacocoReport>(name)
-            .sourceDirectories!!
-            .map { it.absolutePath }
+    fun `jacoco task includes main-scoped source directories`() =
+        forEachBuildType(beforeBuild = { it.applyJacocoPlugin() }) { project, buildType ->
+            val name = jacocoVariantTaskName(buildType)
+            val sourceDirs =
+                project.tasks.get<AndroidJUnit5JacocoReport>(name).sourceDirectories!!.map {
+                    it.absolutePath
+                }
 
-        // Expected items: "src/main/java" & "src/<TypeName>/java"
-        val mainDir = sourceDirs.find { it.endsWith("src/main/java") }
-        val typeDir = sourceDirs.find { it.endsWith("src/$buildType/java") }
+            // Expected items: "src/main/java" & "src/<TypeName>/java"
+            val mainDir = sourceDirs.find { it.endsWith("src/main/java") }
+            val typeDir = sourceDirs.find { it.endsWith("src/$buildType/java") }
 
-        assertAll(
-            "Mismatch! Actual dirs: $sourceDirs",
-            { assertWithMessage("main").that(mainDir).isNotNull() },
-            { assertWithMessage(buildType).that(typeDir).isNotNull() }
-        )
-    }
-
-    @TestFactory
-    fun `jacoco task does not include test-scoped source directories`() = forEachBuildType(
-        beforeBuild = { it.applyJacocoPlugin() }
-    ) { project, buildType ->
-        val name = jacocoVariantTaskName(buildType)
-        val sourceDirs = project.tasks.get<AndroidJUnit5JacocoReport>(name)
-            .sourceDirectories!!.asPath
-
-        // Expected omissions: "src/test/java" & "src/test<TypeName>/java"
-        assertAll(
-            "Mismatch! Actual dirs: $sourceDirs",
-            { assertThat(sourceDirs).doesNotContain("src/test/java") },
-            {
-                assertThat(sourceDirs).doesNotContain("src/test${buildType.capitalized()}/java")
-            }
-        )
-    }
+            assertAll(
+                "Mismatch! Actual dirs: $sourceDirs",
+                { assertWithMessage("main").that(mainDir).isNotNull() },
+                { assertWithMessage(buildType).that(typeDir).isNotNull() },
+            )
+        }
 
     @TestFactory
-    fun `jacoco task does not include test-scoped class directories`() = forEachBuildType(
-        beforeBuild = { it.applyJacocoPlugin() }
-    ) { project, buildType ->
-        val name = jacocoVariantTaskName(buildType)
-        val classDirs = project.tasks.get<AndroidJUnit5JacocoReport>(name)
-            .classDirectories!!.asPath
+    fun `jacoco task does not include test-scoped source directories`() =
+        forEachBuildType(beforeBuild = { it.applyJacocoPlugin() }) { project, buildType ->
+            val name = jacocoVariantTaskName(buildType)
+            val sourceDirs =
+                project.tasks.get<AndroidJUnit5JacocoReport>(name).sourceDirectories!!.asPath
 
-        // Expected omissions: "classes/test"
-        assertThat(classDirs).doesNotContain("classes/test")
-    }
+            // Expected omissions: "src/test/java" & "src/test<TypeName>/java"
+            assertAll(
+                "Mismatch! Actual dirs: $sourceDirs",
+                { assertThat(sourceDirs).doesNotContain("src/test/java") },
+                { assertThat(sourceDirs).doesNotContain("src/test${buildType.capitalized()}/java") },
+            )
+        }
+
+    @TestFactory
+    fun `jacoco task does not include test-scoped class directories`() =
+        forEachBuildType(beforeBuild = { it.applyJacocoPlugin() }) { project, buildType ->
+            val name = jacocoVariantTaskName(buildType)
+            val classDirs =
+                project.tasks.get<AndroidJUnit5JacocoReport>(name).classDirectories!!.asPath
+
+            // Expected omissions: "classes/test"
+            assertThat(classDirs).doesNotContain("classes/test")
+        }
 
     @TestFactory
     fun `only generate jacoco task for debug builds`(): List<DynamicTest> {
         val project = createProject().applyJacocoPlugin().build()
-        project.junitPlatform.jacocoOptions {
-            it.onlyGenerateTasksForVariants.add("debug")
-        }
+        project.junitPlatform.jacocoOptions { it.onlyGenerateTasksForVariants.add("debug") }
         project.evaluate()
 
         return listOf(
-            JACOCO_TASK_NAME to true,
-            "${JACOCO_TASK_NAME}Debug" to true,
-            "${JACOCO_TASK_NAME}Release" to false
-        ).map { (taskName, shouldExist) ->
-            dynamicTest("$taskName task is${if (shouldExist) " " else " not"} generated") {
-                val task = project.tasks.findByName(taskName)
+                JACOCO_TASK_NAME to true,
+                "${JACOCO_TASK_NAME}Debug" to true,
+                "${JACOCO_TASK_NAME}Release" to false,
+            )
+            .map { (taskName, shouldExist) ->
+                dynamicTest("$taskName task is${if (shouldExist) " " else " not"} generated") {
+                    val task = project.tasks.findByName(taskName)
 
-                if (shouldExist) {
-                    assertThat(task).isNotNull()
-                } else {
-                    assertThat(task).isNull()
+                    if (shouldExist) {
+                        assertThat(task).isNotNull()
+                    } else {
+                        assertThat(task).isNull()
+                    }
                 }
             }
-        }
     }
 
     @TestFactory
@@ -197,22 +178,23 @@ interface AgpJacocoVariantTests : AgpVariantAwareTests {
         project.evaluate()
 
         return listOf(
-            JACOCO_TASK_NAME to true,
-            "${JACOCO_TASK_NAME}PaidDebug" to true,
-            "${JACOCO_TASK_NAME}FreeRelease" to true,
-            "${JACOCO_TASK_NAME}PaidRelease" to false,
-            "${JACOCO_TASK_NAME}FreeDebug" to false
-        ).map { (taskName, shouldExist) ->
-            dynamicTest("$taskName task is${if (shouldExist) " " else " not"} generated") {
-                val task = project.tasks.findByName(taskName)
+                JACOCO_TASK_NAME to true,
+                "${JACOCO_TASK_NAME}PaidDebug" to true,
+                "${JACOCO_TASK_NAME}FreeRelease" to true,
+                "${JACOCO_TASK_NAME}PaidRelease" to false,
+                "${JACOCO_TASK_NAME}FreeDebug" to false,
+            )
+            .map { (taskName, shouldExist) ->
+                dynamicTest("$taskName task is${if (shouldExist) " " else " not"} generated") {
+                    val task = project.tasks.findByName(taskName)
 
-                if (shouldExist) {
-                    assertThat(task).isNotNull()
-                } else {
-                    assertThat(task).isNull()
+                    if (shouldExist) {
+                        assertThat(task).isNotNull()
+                    } else {
+                        assertThat(task).isNull()
+                    }
                 }
             }
-        }
     }
 
     @Test

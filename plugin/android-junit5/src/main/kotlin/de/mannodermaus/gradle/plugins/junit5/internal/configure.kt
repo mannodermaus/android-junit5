@@ -18,7 +18,6 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensions.getTaskName
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.instrumentationTestVariant
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junit5Warn
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.namedOrNull
-import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesComposeIn
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesJUnitJupiterIn
 import de.mannodermaus.gradle.plugins.junit5.internal.usage.DependencyUsageDetector
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
@@ -92,19 +91,22 @@ private fun AndroidJUnitPlatformExtension.prepareVariantDsl(variant: Variant) {
     }
 }
 
-private fun AndroidJUnitPlatformExtension.prepareUnitTests(project: Project, android: AndroidExtension) {
+private fun AndroidJUnitPlatformExtension.prepareUnitTests(
+    project: Project,
+    android: AndroidExtension,
+) {
     // Add default ignore rules for JUnit 5 metadata files to the packaging options of the plugin,
     // so that consumers don't need to do this explicitly
     android.packaging.resources.excludes.addAll(
-        listOf(
-            "/META-INF/LICENSE.md",
-            "/META-INF/LICENSE-notice.md"
-        )
+        listOf("/META-INF/LICENSE.md", "/META-INF/LICENSE-notice.md")
     )
     attachDependencies(project, "testImplementation")
 }
 
-private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: Project, android: AndroidExtension) {
+private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(
+    project: Project,
+    android: AndroidExtension,
+) {
     // Automatically configure instrumentation tests when JUnit 5 is detected in that configuration
     if (!instrumentationTests.enabled.get()) return
     if (!project.usesJUnitJupiterIn("androidTestImplementation")) return
@@ -114,10 +116,11 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
     // Attach the JUnit 5 RunnerBuilder to the list, unless it's already added
     val runnerBuilders = runnerArgs.getAsList("runnerBuilder")
     if (ANDROID_JUNIT5_RUNNER_BUILDER_CLASS !in runnerBuilders) {
-        runnerArgs["runnerBuilder"] = runnerBuilders
-            .toMutableList()
-            .also { it.add(ANDROID_JUNIT5_RUNNER_BUILDER_CLASS) }
-            .joinToString(",")
+        runnerArgs["runnerBuilder"] =
+            runnerBuilders
+                .toMutableList()
+                .also { it.add(ANDROID_JUNIT5_RUNNER_BUILDER_CLASS) }
+                .joinToString(",")
     }
 
     // Copy over configuration parameters to instrumentation tests
@@ -135,8 +138,9 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(project: P
 }
 
 /**
- * Construct an artifact ID (i.e. `de.mannodermaus:hoge:1.2.3`) compatible with the given supported JUnit version.
- * Depending on the JUnit version, the artifact ID may include a version-specific suffix string as well.
+ * Construct an artifact ID (i.e. `de.mannodermaus:hoge:1.2.3`) compatible with the given supported
+ * JUnit version. Depending on the JUnit version, the artifact ID may include a version-specific
+ * suffix string as well.
  */
 internal fun Libraries.JUnit.artifact(base: String, version: String?) = buildString {
     append(base)
@@ -147,7 +151,10 @@ internal fun Libraries.JUnit.artifact(base: String, version: String?) = buildStr
     }
 }
 
-private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, configurationName: String) {
+private fun AndroidJUnitPlatformExtension.attachDependencies(
+    project: Project,
+    configurationName: String,
+) {
     val detector = DependencyUsageDetector(project)
 
     detector.isUsingJUnit(configurationName)?.let { usage ->
@@ -156,29 +163,38 @@ private fun AndroidJUnitPlatformExtension.attachDependencies(project: Project, c
         val version = instrumentationTests.version.get()
 
         // First, apply the core library
-        project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.core, version))
+        project.dependencies.add(
+            configurationName,
+            usage.junit.artifact(Instrumentation.core, version),
+        )
 
         // Add some runtime dependencies, including a reference to the JUnit BOM
         project.dependencies.add(
             runtimeOnly,
-            project.dependencies.platform("org.junit:junit-bom:${usage.junit.fullVersion}")
+            project.dependencies.platform("org.junit:junit-bom:${usage.junit.fullVersion}"),
         )
         project.dependencies.add(runtimeOnly, Libraries.junitPlatformLauncher)
 
         if (includeRunner) {
             project.dependencies.add(
                 runtimeOnly,
-                usage.junit.artifact(Instrumentation.runner, version)
+                usage.junit.artifact(Instrumentation.runner, version),
             )
         }
 
         // Add optional artifacts
         if (instrumentationTests.includeExtensions.get()) {
-            project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.extensions, version))
+            project.dependencies.add(
+                configurationName,
+                usage.junit.artifact(Instrumentation.extensions, version),
+            )
         }
 
         if (detector.isUsingCompose(configurationName)) {
-            project.dependencies.add(configurationName, usage.junit.artifact(Instrumentation.compose, version))
+            project.dependencies.add(
+                configurationName,
+                usage.junit.artifact(Instrumentation.compose, version),
+            )
         }
     }
 }
@@ -201,7 +217,8 @@ private fun AndroidJUnitPlatformExtension.configureUnitTests(project: Project, v
         // From the User Guide:
         // "The standard Gradle test task currently does not provide a dedicated DSL
         // to set JUnit Platform configuration parameters to influence test discovery and execution.
-        // However, you can provide configuration parameters within the build script via system properties"
+        // However, you can provide configuration parameters within the build script via system
+        // properties"
         testTask.systemProperties(configurationParameters.get())
     }
 }
@@ -209,7 +226,7 @@ private fun AndroidJUnitPlatformExtension.configureUnitTests(project: Project, v
 private fun AndroidJUnitPlatformExtension.configureJacoco(
     project: Project,
     config: PluginConfig,
-    variant: Variant
+    variant: Variant,
 ) {
     // Connect a Code Coverage report to it if Jacoco is enabled
     if (jacocoOptions.taskGenerationEnabled.get() && config.hasJacocoPlugin) {
@@ -222,19 +239,20 @@ private fun AndroidJUnitPlatformExtension.configureJacoco(
                 // the unavailability of Jacoco integration on certain AGP versions
                 // (namely, AGP 9.0.0+ with the new DSL). This feature is effectively deprecated
                 val directoryProviders = config.directoryProvidersOf(variant)
-                val registeredTask = AndroidJUnit5JacocoReport.register(
-                    project = project,
-                    variant = variant,
-                    testTask = testTask,
-                    directoryProviders = directoryProviders
-                )
+                val registeredTask =
+                    AndroidJUnit5JacocoReport.register(
+                        project = project,
+                        variant = variant,
+                        testTask = testTask,
+                        directoryProviders = directoryProviders,
+                    )
 
                 if (directoryProviders.isNotEmpty()) {
                     // Log a warning if Jacoco tasks already existed
                     if (registeredTask == null) {
                         project.logger.junit5Warn(
                             "Jacoco task for variant '${variant.name}' already exists." +
-                                    "Disabling customization for JUnit 5..."
+                                "Disabling customization for JUnit 5..."
                         )
                     }
                 } else {
@@ -251,12 +269,8 @@ private fun AndroidJUnitPlatformExtension.configureJacoco(
                                 append(
                                     " This integration is deprecated from AGP 9.0.0 onwards because of the new DSL."
                                 )
-                                append(
-                                    " Please consult the link below for more information: "
-                                )
-                                append(
-                                    "https://developer.android.com/build/releases/agp-preview"
-                                )
+                                append(" Please consult the link below for more information: ")
+                                append("https://developer.android.com/build/releases/agp-preview")
                             }
                         }
                     )

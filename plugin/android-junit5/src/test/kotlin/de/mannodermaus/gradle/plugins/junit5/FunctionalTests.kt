@@ -10,6 +10,7 @@ import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
 import de.mannodermaus.gradle.plugins.junit5.util.prettyPrint
 import de.mannodermaus.gradle.plugins.junit5.util.projects.FunctionalTestProjectCreator
 import de.mannodermaus.gradle.plugins.junit5.util.withPrunedPluginClasspath
+import java.io.File
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.fail
-import java.io.File
 
 @TestInstance(PER_CLASS)
 @DisabledOnCI
@@ -31,16 +31,13 @@ class FunctionalTests {
     private lateinit var folder: File
 
     // Test permutations for AGP (default: empty set, which will exercise all)
-    private val testedAgpVersions: Set<String> = setOf(
-    )
+    private val testedAgpVersions: Set<String> = setOf()
 
     // Test permutations for JUnit (default: empty set, which will exercise all)
-    private val testedJUnitVersions: Set<Int> = setOf(
-    )
+    private val testedJUnitVersions: Set<Int> = setOf()
 
     // Test permutations for projects (default: empty set, which will exercise all)
-    private val testedProjects: Set<String> = setOf(
-    )
+    private val testedProjects: Set<String> = setOf()
 
     // Whether to pass "-i" to the Gradle runners, increasing insight into their output
     private val verboseOutput = false
@@ -84,24 +81,27 @@ class FunctionalTests {
                             dynamicTest("${spec.name} ($junit)") {
                                 // Required for visibility inside the IntelliJ logging console
                                 // (display names are still bugged in the IDE)
-                                println(buildList {
-                                    add("JUnit ${junit.majorVersion}")
-                                    add("AGP: ${agp.version}")
-                                    add("Project: ${spec.name}")
-                                    add("Gradle: ${agp.requiresGradle}")
-                                    agp.requiresCompileSdk?.let { add("SDK: $it") }
-                                }.joinToString())
+                                println(
+                                    buildList {
+                                            add("JUnit ${junit.majorVersion}")
+                                            add("AGP: ${agp.version}")
+                                            add("Project: ${spec.name}")
+                                            add("Gradle: ${agp.requiresGradle}")
+                                            agp.requiresCompileSdk?.let { add("SDK: $it") }
+                                        }
+                                        .joinToString()
+                                )
 
                                 // Create a virtual project with the given settings & AGP version.
-                                // This call will throw a TestAbortedException if the spec is not eligible for this version,
+                                // This call will throw a TestAbortedException if the spec is not
+                                // eligible for this version,
                                 // marking the test as ignored in the process
                                 val project = projectCreator.createProject(spec, agp, junit)
 
                                 // Execute the tests of the virtual project with Gradle
                                 val taskName = spec.task ?: "test"
-                                val result = runGradle(agp, taskName)
-                                    .withProjectDir(project)
-                                    .build()
+                                val result =
+                                    runGradle(agp, taskName).withProjectDir(project).build()
 
                                 // Print Gradle logs from the embedded invocation
                                 result.prettyPrint()
@@ -116,30 +116,34 @@ class FunctionalTests {
 
                                     outcome == TaskOutcome.SUCCESS -> {
                                         // Based on the spec's configuration in the test project,
-                                        // assert that all test classes have been executed as expected
+                                        // assert that all test classes have been executed as
+                                        // expected
                                         for (expectation in spec.expectedTests) {
                                             result.assertAgpTests(
                                                 buildType = expectation.buildType,
                                                 productFlavor = expectation.productFlavor,
-                                                tests = expectation.testsList
+                                                tests = expectation.testsList,
                                             )
                                         }
                                     }
 
                                     outcome == TaskOutcome.SKIPPED && spec.allowSkipped -> {
-                                        // It might be acceptable to allow "skipped" as the result depending on the test spec
+                                        // It might be acceptable to allow "skipped" as the result
+                                        // depending on the test spec
                                         println("Task '$taskName' was skipped.")
                                     }
 
                                     else -> {
                                         // Unexpected result; fail
-                                        fail { "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}" }
+                                        fail {
+                                            "Unexpected task outcome: $outcome\n\nRaw output:\n\n${result.output}"
+                                        }
                                     }
                                 }
                             }
-                        }
+                        },
                     )
-                }
+                },
             )
         }
     }
@@ -152,9 +156,7 @@ class FunctionalTests {
             // (but in reverse order, so that the newest AGP is tested first)
             reversed()
         } else {
-            filter { agp ->
-                testedAgpVersions.any { it == agp.shortVersion }
-            }
+            filter { agp -> testedAgpVersions.any { it == agp.shortVersion } }
         }
 
     private fun List<TestedJUnit>.filterJUnitVersions(): List<TestedJUnit> =
@@ -163,19 +165,16 @@ class FunctionalTests {
             // (but in reverse order, so that the newest JUnit is tested first)
             reversed()
         } else {
-            filter { junit ->
-                testedJUnitVersions.any { it == junit.majorVersion }
-            }
+            filter { junit -> testedJUnitVersions.any { it == junit.majorVersion } }
         }
 
-    private fun List<FunctionalTestProjectCreator.Spec>.filterSpecs(): List<FunctionalTestProjectCreator.Spec> =
+    private fun List<FunctionalTestProjectCreator.Spec>.filterSpecs():
+        List<FunctionalTestProjectCreator.Spec> =
         if (testedProjects.isEmpty()) {
             // Nothing to do, exercise all different projects
             this
         } else {
-            filter { spec ->
-                testedProjects.any { it == spec.name }
-            }
+            filter { spec -> testedProjects.any { it == spec.name } }
         }
 
     private fun runGradle(agpVersion: TestedAgp, task: String): GradleRunner {
@@ -196,13 +195,14 @@ class FunctionalTests {
     private fun BuildResult.assertAgpTests(
         buildType: String,
         productFlavor: String? = null,
-        tests: List<String>
+        tests: List<String>,
     ) {
         // Construct task name from given build type and/or product flavor
         // Examples:
         // - buildType="debug", productFlavor=null --> ":testDebugUnitTest"
         // - buildType="debug", productFlavor="free" --> ":testFreeDebugUnitTest"
-        val taskName = ":test${productFlavor?.capitalized() ?: ""}${buildType.capitalized()}UnitTest"
+        val taskName =
+            ":test${productFlavor?.capitalized() ?: ""}${buildType.capitalized()}UnitTest"
 
         // Perform assertions
         assertWithMessage("AGP Tests for '$taskName' did not match expectations")

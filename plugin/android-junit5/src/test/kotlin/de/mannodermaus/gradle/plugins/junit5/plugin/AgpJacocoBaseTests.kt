@@ -39,24 +39,24 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
         project.evaluate()
 
         assertThat(project.tasks.findByName(JACOCO_TASK_NAME)).isNotNull()
-        assertThat(project.tasks.findByName("${JACOCO_TASK_NAME}Debug")).isInstanceOf(JacocoReport::class.java)
-        assertThat(project.tasks.findByName("${JACOCO_TASK_NAME}Release")).isInstanceOf(AndroidJUnit5JacocoReport::class.java)
+        assertThat(project.tasks.findByName("${JACOCO_TASK_NAME}Debug"))
+            .isInstanceOf(JacocoReport::class.java)
+        assertThat(project.tasks.findByName("${JACOCO_TASK_NAME}Release"))
+            .isInstanceOf(AndroidJUnit5JacocoReport::class.java)
     }
 
     @TestFactory
     fun `acknowledge disabling of jacoco task generation`(): List<DynamicTest> {
         val project = createProject().applyJacocoPlugin().build()
-        project.junitPlatform.jacocoOptions {
-            it.taskGenerationEnabled.set(false)
-        }
+        project.junitPlatform.jacocoOptions { it.taskGenerationEnabled.set(false) }
         project.evaluate()
 
         return listOf(JACOCO_TASK_NAME, "${JACOCO_TASK_NAME}Debug", "${JACOCO_TASK_NAME}Release")
-                .map { task ->
-                    dynamicTest("does not generate $task task if generation is disabled") {
-                        assertThat(project.tasks.findByName(task)).isNull()
-                    }
+            .map { task ->
+                dynamicTest("does not generate $task task if generation is disabled") {
+                    assertThat(project.tasks.findByName(task)).isNull()
                 }
+            }
     }
 
     // Reporting
@@ -71,15 +71,22 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
         }
         project.evaluate()
 
-        project.tasks.withType(AndroidJUnit5JacocoReport::class.java)
-                .map { it.reports }
-                .forEach { report ->
-                    assertAll(
-                            { assertThat(report.xml.outputLocationFilePath).endsWith("build/other-jacoco-folder/xml") },
-                            { assertThat(report.csv.outputLocationFilePath).endsWith("build/CSVISDABEST") },
-                            { assertThat(report.html.outputLocationFilePath).endsWith("build/html-reports/jacoco") },
-                    )
-                }
+        project.tasks
+            .withType(AndroidJUnit5JacocoReport::class.java)
+            .map { it.reports }
+            .forEach { report ->
+                assertAll(
+                    {
+                        assertThat(report.xml.outputLocationFilePath)
+                            .endsWith("build/other-jacoco-folder/xml")
+                    },
+                    { assertThat(report.csv.outputLocationFilePath).endsWith("build/CSVISDABEST") },
+                    {
+                        assertThat(report.html.outputLocationFilePath)
+                            .endsWith("build/html-reports/jacoco")
+                    },
+                )
+            }
     }
 
     @ValueSource(booleans = [true, false])
@@ -93,19 +100,20 @@ interface AgpJacocoBaseTests : AgpVariantAwareTests {
         }
         project.evaluate()
 
-        project.tasks.withType(AndroidJUnit5JacocoReport::class.java)
-                .map { it.reports }
-                .forEach {
-                    assertAll(
-                            { assertThat(it.xml.required.get() == required) },
-                            { assertThat(it.csv.required.get() == required) },
-                            { assertThat(it.html.required.get() == required) }
-                    )
-                }
+        project.tasks
+            .withType(AndroidJUnit5JacocoReport::class.java)
+            .map { it.reports }
+            .forEach {
+                assertAll(
+                    { assertThat(it.xml.required.get() == required) },
+                    { assertThat(it.csv.required.get() == required) },
+                    { assertThat(it.html.required.get() == required) },
+                )
+            }
     }
 
     /* Private */
 
-    private val ConfigurableReport.outputLocationFilePath get() =
-        outputLocationFile.asFile.orNull?.absolutePath
+    private val ConfigurableReport.outputLocationFilePath
+        get() = outputLocationFile.asFile.orNull?.absolutePath
 }

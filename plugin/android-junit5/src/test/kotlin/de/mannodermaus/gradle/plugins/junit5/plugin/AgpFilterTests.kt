@@ -24,34 +24,33 @@ interface AgpFilterTests : AgpVariantAwareTests {
     }
 
     @TestFactory
-    fun `apply global filter configuration correctly`() = forEachBuildType(
-        beforeEvaluate = { project ->
-            project.junitPlatform.filters {
-                it.includeTags("global-include-tag")
-                it.excludeTags("global-exclude-tag")
-                it.includeEngines("global-include-engine")
-                it.excludeEngines("global-exclude-engine")
-                it.includePattern("com.example.package1")
-                it.excludePattern("com.example.package2")
+    fun `apply global filter configuration correctly`() =
+        forEachBuildType(
+            beforeEvaluate = { project ->
+                project.junitPlatform.filters {
+                    it.includeTags("global-include-tag")
+                    it.excludeTags("global-exclude-tag")
+                    it.includeEngines("global-include-engine")
+                    it.excludeEngines("global-exclude-engine")
+                    it.includePattern("com.example.package1")
+                    it.excludePattern("com.example.package2")
+                }
             }
+        ) { project, buildType ->
+            val task = project.tasks.get<Test>("test${buildType.capitalized()}UnitTest")
+            assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
+            assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
+            assertThat(task.junitPlatformOptions.includeEngines).contains("global-include-engine")
+            assertThat(task.junitPlatformOptions.excludeEngines).contains("global-exclude-engine")
+            assertThat(task.includes).contains("com.example.package1")
+            assertThat(task.excludes).contains("com.example.package2")
         }
-    ) { project, buildType ->
-        val task = project.tasks.get<Test>("test${buildType.capitalized()}UnitTest")
-        assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
-        assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
-        assertThat(task.junitPlatformOptions.includeEngines).contains("global-include-engine")
-        assertThat(task.junitPlatformOptions.excludeEngines).contains("global-exclude-engine")
-        assertThat(task.includes).contains("com.example.package1")
-        assertThat(task.excludes).contains("com.example.package2")
-    }
 
     @TestFactory
     fun `using custom build types & multiple flavor dimensions`(): List<DynamicTest> {
         val project = createProject().build()
         project.registerProductFlavors(advancedFlavorList)
-        with(project.android.buildTypes) {
-            create("ci").initWith(getByName("debug"))
-        }
+        with(project.android.buildTypes) { create("ci").initWith(getByName("debug")) }
         project.evaluate()
 
         return advancedFilterDslNames.map { filterName ->
@@ -76,9 +75,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
                 it.includePattern("com.example.paid")
                 it.excludePattern("com.example.package1")
             }
-            filters("freeDebug") {
-                it.includeTags("freeDebug-include-tag")
-            }
+            filters("freeDebug") { it.includeTags("freeDebug-include-tag") }
             filters("paidRelease") {
                 it.includeTags("paidRelease-include-tag")
                 it.includeTags("global-exclude-tag")
@@ -94,8 +91,7 @@ interface AgpFilterTests : AgpVariantAwareTests {
                     .containsAtLeast("global-include-tag", "freeDebug-include-tag")
                 assertThat(task.junitPlatformOptions.includeTags)
                     .doesNotContain("paidRelease-include-tag")
-                assertThat(task.junitPlatformOptions.excludeTags)
-                    .contains("global-exclude-tag")
+                assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
 
                 assertThat(task.junitPlatformOptions.includeEngines)
                     .doesNotContain("paid-include-engine")
@@ -104,17 +100,14 @@ interface AgpFilterTests : AgpVariantAwareTests {
                 assertThat(task.includes).doesNotContain("com.example.paid")
                 assertThat(task.includes).doesNotContain("com.example.paid.release")
             },
-
             dynamicTest("apply freeRelease filters correctly") {
                 val task = project.tasks.get<Test>("testFreeReleaseUnitTest")
-                assertThat(task.junitPlatformOptions.includeTags)
-                    .contains("global-include-tag")
+                assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
                 assertThat(task.junitPlatformOptions.includeTags)
                     .doesNotContain("freeDebug-include-tag")
                 assertThat(task.junitPlatformOptions.includeTags)
                     .doesNotContain("paidRelease-include-tag")
-                assertThat(task.junitPlatformOptions.excludeTags)
-                    .contains("global-exclude-tag")
+                assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
 
                 assertThat(task.junitPlatformOptions.includeEngines)
                     .doesNotContain("paid-include-engine")
@@ -123,52 +116,42 @@ interface AgpFilterTests : AgpVariantAwareTests {
                 assertThat(task.includes).doesNotContain("com.example.paid")
                 assertThat(task.includes).doesNotContain("com.example.paid.release")
             },
-
             dynamicTest("apply paidDebug filters correctly") {
                 val task = project.tasks.get<Test>("testPaidDebugUnitTest")
+                assertThat(task.junitPlatformOptions.includeTags).contains("global-include-tag")
                 assertThat(task.junitPlatformOptions.includeTags)
-                    .contains("global-include-tag")
+                    .doesNotContain("freeDebug-include-tag")
                 assertThat(task.junitPlatformOptions.includeTags)
-                    .doesNotContain(
-                        "freeDebug-include-tag"
-                    )
-                assertThat(task.junitPlatformOptions.includeTags)
-                    .doesNotContain(
-                        "paidRelease-include-tag"
-                    )
-                assertThat(task.junitPlatformOptions.excludeTags)
-                    .contains("global-exclude-tag")
+                    .doesNotContain("paidRelease-include-tag")
+                assertThat(task.junitPlatformOptions.excludeTags).contains("global-exclude-tag")
 
-                assertThat(task.junitPlatformOptions.includeEngines)
-                    .contains("paid-include-engine")
+                assertThat(task.junitPlatformOptions.includeEngines).contains("paid-include-engine")
 
                 assertThat(task.includes).contains("com.example.paid")
                 assertThat(task.excludes).contains("com.example.package1")
                 assertThat(task.includes).doesNotContain("com.example.package1")
                 assertThat(task.includes).doesNotContain("com.example.paid.release")
             },
-
             dynamicTest("apply paidRelease filters correctly") {
                 val task = project.tasks.get<Test>("testPaidReleaseUnitTest")
                 assertThat(task.junitPlatformOptions.includeTags)
                     .containsAtLeast(
                         "global-include-tag",
                         "global-exclude-tag",
-                        "paidRelease-include-tag"
+                        "paidRelease-include-tag",
                     )
                 assertThat(task.junitPlatformOptions.includeTags)
                     .doesNotContain("freeDebug-include-tag")
                 assertThat(task.junitPlatformOptions.excludeTags)
                     .doesNotContain("global-exclude-tag")
 
-                assertThat(task.junitPlatformOptions.includeEngines)
-                    .contains("paid-include-engine")
+                assertThat(task.junitPlatformOptions.includeEngines).contains("paid-include-engine")
 
                 assertThat(task.includes)
                     .containsAtLeast("com.example.paid", "com.example.paid.release")
                 assertThat(task.includes).doesNotContain("com.example.package1")
                 assertThat(task.excludes).contains("com.example.package1")
-            }
+            },
         )
     }
 
@@ -203,34 +186,34 @@ interface AgpFilterTests : AgpVariantAwareTests {
                 assertThat(task.junitPlatformOptions.includeTags).doesNotContain("rel-include-tag")
                 assertThat(task.junitPlatformOptions.excludeTags).contains("debug-exclude-tag")
 
-                assertThat(task.junitPlatformOptions.includeEngines).contains("global-include-engine")
-                assertThat(task.junitPlatformOptions.includeEngines).doesNotContain(
-                    "rel-include-engine"
-                )
-                assertThat(task.junitPlatformOptions.excludeEngines).contains("debug-exclude-engine")
+                assertThat(task.junitPlatformOptions.includeEngines)
+                    .contains("global-include-engine")
+                assertThat(task.junitPlatformOptions.includeEngines)
+                    .doesNotContain("rel-include-engine")
+                assertThat(task.junitPlatformOptions.excludeEngines)
+                    .contains("debug-exclude-engine")
 
                 assertThat(task.includes).doesNotContain("pattern123")
                 assertThat(task.excludes).containsAtLeast("pattern123", "debug-pattern")
             },
-
             dynamicTest("apply release filters correctly") {
                 val task = project.tasks.get<Test>("testReleaseUnitTest")
                 assertThat(task.junitPlatformOptions.includeTags)
                     .containsAtLeast("global-include-tag", "rel-include-tag")
-                assertThat(task.junitPlatformOptions.excludeTags).doesNotContain("debug-exclude-tag")
+                assertThat(task.junitPlatformOptions.excludeTags)
+                    .doesNotContain("debug-exclude-tag")
 
                 assertThat(task.junitPlatformOptions.includeEngines).contains("rel-include-engine")
-                assertThat(task.junitPlatformOptions.includeEngines).doesNotContain(
-                    "global-include-engine"
-                )
-                assertThat(task.junitPlatformOptions.excludeEngines).contains("global-include-engine")
-                assertThat(task.junitPlatformOptions.excludeEngines).doesNotContain(
-                    "debug-exclude-engine"
-                )
+                assertThat(task.junitPlatformOptions.includeEngines)
+                    .doesNotContain("global-include-engine")
+                assertThat(task.junitPlatformOptions.excludeEngines)
+                    .contains("global-include-engine")
+                assertThat(task.junitPlatformOptions.excludeEngines)
+                    .doesNotContain("debug-exclude-engine")
 
                 assertThat(task.includes).containsAtLeast("pattern123", "release-pattern")
                 assertThat(task.excludes).doesNotContain("pattern123")
-            }
+            },
         )
     }
 }
@@ -242,26 +225,21 @@ private val advancedFlavorList =
         FlavorSpec(name = "development", dimension = "environment"),
         FlavorSpec(name = "production", dimension = "environment"),
         FlavorSpec(name = "free", dimension = "payment"),
-        FlavorSpec(name = "paid", dimension = "payment")
+        FlavorSpec(name = "paid", dimension = "payment"),
     )
 
 private val advancedFilterDslNames =
     listOf(
         "filters",
-
         "debugFilters",
         "releaseFilters",
         "ciFilters",
-
         "brandAFilters",
         "brandBFilters",
-
         "developmentFilters",
         "productionFilters",
-
         "freeFilters",
         "paidFilters",
-
         "brandADevelopmentPaidDebugFilters",
         "brandADevelopmentPaidReleaseFilters",
         "brandADevelopmentPaidCiFilters",
@@ -274,7 +252,6 @@ private val advancedFilterDslNames =
         "brandAProductionFreeDebugFilters",
         "brandAProductionFreeReleaseFilters",
         "brandAProductionFreeCiFilters",
-
         "brandBDevelopmentPaidDebugFilters",
         "brandBDevelopmentPaidReleaseFilters",
         "brandBDevelopmentPaidCiFilters",
@@ -286,5 +263,5 @@ private val advancedFilterDslNames =
         "brandBProductionPaidCiFilters",
         "brandBProductionFreeDebugFilters",
         "brandBProductionFreeReleaseFilters",
-        "brandBProductionFreeCiFilters"
+        "brandBProductionFreeCiFilters",
     )

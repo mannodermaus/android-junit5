@@ -21,23 +21,27 @@ internal class PluginConfig
 private constructor(
     private val project: Project,
     private val legacyPlugin: BasePlugin,
-    private val componentsExtension: AndroidComponentsExtension<*, *, *>
+    private val componentsExtension: AndroidComponentsExtension<*, *, *>,
 ) {
 
     companion object {
         fun find(project: Project, plugin: BasePlugin): PluginConfig? {
-            val componentsExtension = project.extensions
-                .findByName("androidComponents") as? AndroidComponentsExtension<*, *, *>
-                ?: return null
+            val componentsExtension =
+                project.extensions.findByName("androidComponents")
+                    as? AndroidComponentsExtension<*, *, *> ?: return null
 
             return PluginConfig(project, plugin, componentsExtension)
         }
     }
 
-    val hasJacocoPlugin get() = project.plugins.hasPlugin("jacoco")
-    private val hasKotlinPlugin get() = project.plugins.findPlugin("kotlin-android") != null
+    val hasJacocoPlugin
+        get() = project.plugins.hasPlugin("jacoco")
 
-    val currentAgpVersion get() = componentsExtension.pluginVersion
+    private val hasKotlinPlugin
+        get() = project.plugins.findPlugin("kotlin-android") != null
+
+    val currentAgpVersion
+        get() = componentsExtension.pluginVersion
 
     fun finalizeDsl(block: (CommonExtension<*, *, *, *, *>) -> Unit) {
         componentsExtension.finalizeDsl(block)
@@ -52,19 +56,21 @@ private constructor(
         // does not give access to variant-specific source sets and class outputs
         val legacyExtension = project.extensions.findByName("android")
 
-        val legacyVariants = try {
-            when (legacyPlugin) {
-                is AppPlugin -> (legacyExtension as AppExtension).applicationVariants
-                is LibraryPlugin -> (legacyExtension as LibraryExtension).libraryVariants
-                is DynamicFeaturePlugin -> (legacyExtension as AppExtension).applicationVariants
-                else -> null
+        val legacyVariants =
+            try {
+                when (legacyPlugin) {
+                    is AppPlugin -> (legacyExtension as AppExtension).applicationVariants
+                    is LibraryPlugin -> (legacyExtension as LibraryExtension).libraryVariants
+                    is DynamicFeaturePlugin -> (legacyExtension as AppExtension).applicationVariants
+                    else -> null
+                }
+            } catch (_: ClassCastException) {
+                // AGP 9 removes access to the legacy API and thus, Jacoco integration
+                // is deprecated henceforth. When the above block yields a ClassCastException,
+                // we know that we're using exclusively against the new DSL and return an empty set
+                // to the caller
+                null
             }
-        } catch (_: ClassCastException) {
-            // AGP 9 removes access to the legacy API and thus, Jacoco integration
-            // is deprecated henceforth. When the above block yields a ClassCastException,
-            // we know that we're using exclusively against the new DSL and return an empty set to the caller
-            null
-        }
 
         return legacyVariants
             ?.firstOrNull { it.name == variant.name }

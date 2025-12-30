@@ -3,10 +3,10 @@ package de.mannodermaus.gradle.plugins.junit5.internal.extensions
 import com.android.build.gradle.BasePlugin
 import de.mannodermaus.gradle.plugins.junit5.dsl.AndroidJUnitPlatformExtension
 import de.mannodermaus.gradle.plugins.junit5.internal.config.EXTENSION_NAME
-import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.contracts.ExperimentalContracts
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
 
 internal val Project.junitPlatform
     get() = extensionByName<AndroidJUnitPlatformExtension>(EXTENSION_NAME)
@@ -24,12 +24,17 @@ internal fun Project.whenAndroidPluginAdded(block: (BasePlugin) -> Unit) {
     afterEvaluate {
         // If no Android plugin was applied by this point, fail
         if (!configured.get()) {
-            throw IllegalStateException("An Android plugin must be applied in order for android-junit5 to work correctly!")
+            throw IllegalStateException(
+                "An Android plugin must be applied in order for android-junit5 to work correctly!"
+            )
         }
     }
 }
 
-internal fun Project.hasDependency(configurationName: String, matching: (Dependency) -> Boolean): Boolean {
+internal fun Project.hasDependency(
+    configurationName: String,
+    matching: (Dependency) -> Boolean,
+): Boolean {
     val configuration = project.configurations.getByName(configurationName)
 
     return configuration.dependencies.any(matching)

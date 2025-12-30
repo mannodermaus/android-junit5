@@ -8,17 +8,19 @@ internal fun Variant.getTaskName(prefix: String = "", suffix: String = ""): Stri
     // At least one value must be provided
     require(prefix.isNotEmpty() || suffix.isNotEmpty())
 
-    return StringBuilder().apply {
-        append(prefix)
-        append(
-            if (isEmpty()) {
-                name
-            } else {
-                name.capitalized()
-            }
-        )
-        append(suffix.capitalized())
-    }.toString()
+    return StringBuilder()
+        .apply {
+            append(prefix)
+            append(
+                if (isEmpty()) {
+                    name
+                } else {
+                    name.capitalized()
+                }
+            )
+            append(suffix.capitalized())
+        }
+        .toString()
 }
 
 internal val Variant.instrumentationTestVariant: AndroidTest?
