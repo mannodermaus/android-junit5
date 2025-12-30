@@ -40,13 +40,8 @@ kotlin {
 // ------------------------------------------------------------------------------------------------
 gradlePlugin {
     plugins {
-        register("pluginOld") {
-            id = "de.mannodermaus.android-junit5"
-            implementationClass = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
-        }
-
         register("plugin") {
-            id = "de.mannodermaus.android-junit"
+            id = "de.mannodermaus.android-junit5"
             implementationClass = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
         }
     }
