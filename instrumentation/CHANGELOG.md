@@ -6,6 +6,8 @@ Change Log
 - Removed deprecated `runComposeTest` API from `ComposeExtension`
 - Update to Kotlin 2.3
 - Update to Compose 1.10
+- Support instrumentation with JUnit 5 and 6 (the plugin will choose the correct runtime accordingly)
+- Avoid error when a client doesn't include junit-jupiter-params on the runtime classpath
 
 ## 1.9.0 (2025-10-10)
 

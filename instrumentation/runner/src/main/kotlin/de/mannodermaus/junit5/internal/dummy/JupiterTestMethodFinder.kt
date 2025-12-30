@@ -16,15 +16,26 @@ import java.lang.reflect.Modifier
  * As they rely on Java 8 stuff, we're unable to rely on JUnit Platform's own reflection utilities.
  */
 internal object JupiterTestMethodFinder {
-    private val jupiterTestAnnotations = listOf(
-        Test::class.java,
-        TestFactory::class.java,
-        RepeatedTest::class.java,
-        TestTemplate::class.java,
-        ParameterizedTest::class.java,
-    )
+    // Carefully access the Jupiter annotations, since it's possible that they aren't on
+    // the runtime classpath (esp. "ParameterizedTest" could be absent if the consumer
+    // didn't include a dependency on junit-jupiter-params)
+    private val jupiterTestAnnotations = buildList {
+        addSafely { Test::class.java }
+        addSafely { TestFactory::class.java }
+        addSafely { RepeatedTest::class.java }
+        addSafely { TestTemplate::class.java }
+        addSafely { ParameterizedTest::class.java }
+    }
 
     fun find(cls: Class<*>): Set<Method> = cls.doFind(includeInherited = true)
+
+    private fun <T> MutableList<T>.addSafely(valueCreator: () -> T) {
+        try {
+            add(valueCreator())
+        } catch (_: NoClassDefFoundError) {
+            // No-op
+        }
+    }
 
     private fun Class<*>.doFind(includeInherited: Boolean): Set<Method> = buildSet {
         try {
