@@ -1,5 +1,3 @@
-import java.util.concurrent.atomic.AtomicBoolean
-
 plugins {
     alias(libs.plugins.android.junit)
     alias(libs.plugins.android.library)

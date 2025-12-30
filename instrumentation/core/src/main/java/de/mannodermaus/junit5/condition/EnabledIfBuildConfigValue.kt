@@ -6,7 +6,4 @@ import org.junit.jupiter.api.extension.ExtendWith
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @ExtendWith(EnabledIfBuildConfigValueCondition::class)
-public annotation class EnabledIfBuildConfigValue(
-    val named: String,
-    val matches: String
-)
+public annotation class EnabledIfBuildConfigValue(val named: String, val matches: String)

@@ -11,5 +11,5 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(EnabledOnSdkVersionCondition::class)
 public annotation class EnabledOnSdkVersion(
     @IntRange(from = JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION.toLong()) val from: Int = NOT_SET,
-    @IntRange(from = JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION.toLong()) val until: Int = NOT_SET
+    @IntRange(from = JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION.toLong()) val until: Int = NOT_SET,
 )

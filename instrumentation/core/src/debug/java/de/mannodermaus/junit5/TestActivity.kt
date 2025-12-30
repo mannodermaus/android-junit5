@@ -6,14 +6,14 @@ import android.widget.TextView
 
 internal class TestActivity : Activity() {
 
-  private val textView by lazy { findViewById<TextView>(R.id.textView) }
+    private val textView by lazy { findViewById<TextView>(R.id.textView) }
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_test)
-  }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_test)
+    }
 
-  fun changeText(label: String) {
-    textView.text = label
-  }
+    fun changeText(label: String) {
+        textView.text = label
+    }
 }

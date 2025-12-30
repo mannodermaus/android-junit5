@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.gradle.BaseExtension
+import com.ncorti.ktfmt.gradle.KtfmtExtension
 import extensions.capitalized
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
@@ -17,6 +18,7 @@ plugins {
     alias(libs.plugins.dokka).apply(false)
     alias(libs.plugins.kotlin.android).apply(false)
     alias(libs.plugins.kotlin.jvm).apply(false)
+    alias(libs.plugins.ktfmt).apply(false)
 
     alias(libs.plugins.kotlin.binarycompvalidator)
     alias(libs.plugins.publish)
@@ -35,6 +37,12 @@ subprojects {
 
     val jvmTarget = JvmTarget.JVM_17
     val javaVersion = JavaVersion.toVersion(jvmTarget.target)
+
+    // Configure code formatting
+    apply(plugin = "com.ncorti.ktfmt.gradle")
+    configure<KtfmtExtension> {
+        kotlinLangStyle()
+    }
 
     // Configure Kotlin
     plugins.withType<KotlinBasePlugin> {

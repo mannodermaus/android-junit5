@@ -15,48 +15,58 @@ import androidx.compose.ui.test.waitUntilExactlyOneExists
 import androidx.compose.ui.test.waitUntilNodeCount
 import androidx.compose.ui.unit.Density
 
-/**
- * A context through which composable blocks can be orchestrated within a [ComposeExtension].
- */
+/** A context through which composable blocks can be orchestrated within a [ComposeExtension]. */
 public sealed interface ComposeContext : SemanticsNodeInteractionsProvider {
     // Internal note: The below method list is a copy of `ComposeContentTestRule`,
     // preventing the viral spread of its ExperimentalTestApi annotation
     // into the consumer's codebase and separating it from JUnit 4's TestRule
     public val density: Density
     public val mainClock: MainTestClock
+
     public fun <T> runOnUiThread(action: () -> T): T
+
     public fun <T> runOnIdle(action: () -> T): T
+
     public fun waitForIdle()
+
     public suspend fun awaitIdle()
+
     public fun waitUntil(timeoutMillis: Long = 1_000L, condition: () -> Boolean)
+
     public fun waitUntil(
         conditionDescription: String,
         timeoutMillis: Long = 1_000L,
-        condition: () -> Boolean
+        condition: () -> Boolean,
     )
 
     public fun waitUntilNodeCount(
         matcher: SemanticsMatcher,
         count: Int,
-        timeoutMillis: Long = 1_000L
+        timeoutMillis: Long = 1_000L,
     )
 
     public fun waitUntilAtLeastOneExists(matcher: SemanticsMatcher, timeoutMillis: Long = 1_000L)
+
     public fun waitUntilExactlyOneExists(matcher: SemanticsMatcher, timeoutMillis: Long = 1_000L)
+
     public fun waitUntilDoesNotExist(matcher: SemanticsMatcher, timeoutMillis: Long = 1_000L)
+
     public fun registerIdlingResource(idlingResource: IdlingResource)
+
     public fun unregisterIdlingResource(idlingResource: IdlingResource)
+
     public fun setContent(composable: @Composable () -> Unit)
 }
 
 @OptIn(ExperimentalTestApi::class)
-internal class ComposeContextImpl(
-    private val delegate: ComposeUiTest
-) : ComposeContext, SemanticsNodeInteractionsProvider by delegate {
+internal class ComposeContextImpl(private val delegate: ComposeUiTest) :
+    ComposeContext, SemanticsNodeInteractionsProvider by delegate {
 
-    override val density: Density get() = delegate.density
+    override val density: Density
+        get() = delegate.density
 
-    override val mainClock: MainTestClock get() = delegate.mainClock
+    override val mainClock: MainTestClock
+        get() = delegate.mainClock
 
     override fun <T> runOnUiThread(action: () -> T): T = delegate.runOnUiThread(action)
 
@@ -72,7 +82,7 @@ internal class ComposeContextImpl(
     override fun waitUntil(
         conditionDescription: String,
         timeoutMillis: Long,
-        condition: () -> Boolean
+        condition: () -> Boolean,
     ) {
         delegate.waitUntil(conditionDescription, timeoutMillis, condition)
     }
@@ -97,12 +107,12 @@ internal class ComposeContextImpl(
 
     override fun onNode(
         matcher: SemanticsMatcher,
-        useUnmergedTree: Boolean
+        useUnmergedTree: Boolean,
     ): SemanticsNodeInteraction = delegate.onNode(matcher, useUnmergedTree)
 
     override fun onAllNodes(
         matcher: SemanticsMatcher,
-        useUnmergedTree: Boolean
+        useUnmergedTree: Boolean,
     ): SemanticsNodeInteractionCollection = delegate.onAllNodes(matcher, useUnmergedTree)
 
     override fun setContent(composable: @Composable () -> Unit) = delegate.setContent(composable)

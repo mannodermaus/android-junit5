@@ -4,14 +4,12 @@ import org.junit.runner.Description
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunListener
 
-/**
- * A JUnit 4 [RunListener] that collects information about executed and failed tests.
- */
+/** A JUnit 4 [RunListener] that collects information about executed and failed tests. */
 public class CollectingRunListener : RunListener() {
     public data class Results(
         val successfulTests: List<Description>,
         val failedTests: List<Failure>,
-        val ignoredTests: List<Description>
+        val ignoredTests: List<Description>,
     )
 
     private val success = mutableListOf<Description>()

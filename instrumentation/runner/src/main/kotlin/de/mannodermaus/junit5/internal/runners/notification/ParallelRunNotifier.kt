@@ -8,26 +8,25 @@ import android.util.Log
 import androidx.test.internal.runner.listener.InstrumentationResultPrinter
 import de.mannodermaus.junit5.internal.LOG_TAG
 import de.mannodermaus.junit5.internal.runners.notification.ParallelRunNotifier.EventThread.Event
-import org.junit.runner.Description
-import org.junit.runner.notification.Failure
-import org.junit.runner.notification.RunListener
-import org.junit.runner.notification.RunNotifier
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import org.junit.runner.Description
+import org.junit.runner.notification.Failure
+import org.junit.runner.notification.RunListener
+import org.junit.runner.notification.RunNotifier
 
 /**
- * Wrapping implementation of JUnit 4's run notifier for parallel test execution
- * (i.e. when "junit.jupiter.execution.parallel.enabled" is active during the run).
- * It unpacks the singular 'instrumentation result printer' assigned by AndroidX
- * and reroutes its notification mechanism. This allows parallel tests to still execute in parallel,
- * but also allows their results to be reported back in the strictly sequential order required by the instrumentation.
+ * Wrapping implementation of JUnit 4's run notifier for parallel test execution (i.e. when
+ * "junit.jupiter.execution.parallel.enabled" is active during the run). It unpacks the singular
+ * 'instrumentation result printer' assigned by AndroidX and reroutes its notification mechanism.
+ * This allows parallel tests to still execute in parallel, but also allows their results to be
+ * reported back in the strictly sequential order required by the instrumentation.
  */
 internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotifier() {
     private companion object {
-        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-        private val doneLock = Object()
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") private val doneLock = Object()
         private val nopPrinter = InstrumentationResultPrinter()
         private val nopTestState = TestState("", Bundle(), 0)
 
@@ -52,7 +51,8 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
     private val states = mutableMapOf<String, TestState>()
 
     // Even though parallelism is the name of the game under the hood for this RunNotifier,
-    // the nature of the Android Instrumentation is very much bound to synchronous execution internally.
+    // the nature of the Android Instrumentation is very much bound to synchronous execution
+    // internally.
     // Therefore, a single-threaded executor must be used to project the multithreaded notifications
     // from JUnit 5 onto this legacy thread model, resulting in some funky test reporting
     // but allowing the awesome performance benefits of parallel test execution!
@@ -70,10 +70,9 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
         delegate.fireTestSuiteStarted(description)
 
         // Start asynchronous processing pipeline
-        eventThread = EventThread(
-            onProcessEvent = ::onProcessEvent,
-            onDone = ::onDone,
-        ).also(EventThread::start)
+        eventThread =
+            EventThread(onProcessEvent = ::onProcessEvent, onDone = ::onDone)
+                .also(EventThread::start)
     }
 
     override fun fireTestStarted(description: Description) {
@@ -112,54 +111,55 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
 
     /* Private */
 
-    private fun onProcessEvent(event: Event) = executor.submit {
-        val description = event.description
+    private fun onProcessEvent(event: Event) =
+        executor.submit {
+            val description = event.description
 
-        when (event) {
-            is Event.Started -> {
-                delegate.fireTestStarted(description)
-                printer.testStarted(description)
+            when (event) {
+                is Event.Started -> {
+                    delegate.fireTestStarted(description)
+                    printer.testStarted(description)
 
-                // Persist the current printer state for this test
-                // (for later, when this test's finish event comes in)
-                states[description.uniqueIdentifier] = printer.captureTestState()
-            }
+                    // Persist the current printer state for this test
+                    // (for later, when this test's finish event comes in)
+                    states[description.uniqueIdentifier] = printer.captureTestState()
+                }
 
-            is Event.Ignored -> {
-                delegate.fireTestIgnored(description)
-                printer.testIgnored(description)
-            }
+                is Event.Ignored -> {
+                    delegate.fireTestIgnored(description)
+                    printer.testIgnored(description)
+                }
 
-            is Event.Finished -> {
-                // Restore the printer state to the current test case,
-                // then fire the relevant lifecycle methods of the delegate notifier
-                printer.restoreTestState(description)
+                is Event.Finished -> {
+                    // Restore the printer state to the current test case,
+                    // then fire the relevant lifecycle methods of the delegate notifier
+                    printer.restoreTestState(description)
 
-                // For failed test cases, always invoke the failure methods first,
-                // but invoke the 'finished' method pair for all cases
-                when {
-                    event.testFailure != null -> {
-                        delegate.fireTestFailure(event.testFailure)
-                        printer.testFailure(event.testFailure)
-                        delegate.fireTestFinished(description)
-                        printer.testFinished(description)
-                    }
+                    // For failed test cases, always invoke the failure methods first,
+                    // but invoke the 'finished' method pair for all cases
+                    when {
+                        event.testFailure != null -> {
+                            delegate.fireTestFailure(event.testFailure)
+                            printer.testFailure(event.testFailure)
+                            delegate.fireTestFinished(description)
+                            printer.testFinished(description)
+                        }
 
-                    event.assumptionFailure != null -> {
-                        delegate.fireTestAssumptionFailed(event.assumptionFailure)
-                        printer.testAssumptionFailure(event.assumptionFailure)
-                        delegate.fireTestFinished(description)
-                        printer.testFinished(description)
-                    }
+                        event.assumptionFailure != null -> {
+                            delegate.fireTestAssumptionFailed(event.assumptionFailure)
+                            printer.testAssumptionFailure(event.assumptionFailure)
+                            delegate.fireTestFinished(description)
+                            printer.testFinished(description)
+                        }
 
-                    else -> {
-                        delegate.fireTestFinished(description)
-                        printer.testFinished(description)
+                        else -> {
+                            delegate.fireTestFinished(description)
+                            printer.testFinished(description)
+                        }
                     }
                 }
             }
         }
-    }
 
     private fun onDone(description: Description?) {
         synchronized(doneLock) {
@@ -191,8 +191,7 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
     }
 
     private val Description.uniqueIdentifier
-        get() =
-            "$className-$displayName"
+        get() = "$className-$displayName"
 
     private class EventThread(
         private val onProcessEvent: (Event) -> Unit,
@@ -202,6 +201,7 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
             val description: Description
 
             data class Started(override val description: Description) : Event
+
             data class Finished(
                 override val description: Description,
                 val testFailure: Failure? = null,
@@ -285,21 +285,29 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
 
     @Suppress("UNCHECKED_CAST")
     private class Reflection {
-        private fun <T : Any> Class<T>.field(name: String) = this.getDeclaredField(name).also { it.isAccessible = true }
+        private fun <T : Any> Class<T>.field(name: String) =
+            this.getDeclaredField(name).also { it.isAccessible = true }
 
-        private val synchronizedRunListenerClass = Class.forName("org.junit.runner.notification.SynchronizedRunListener")
-        private val synchronizedListenerDelegateField = synchronizedRunListenerClass.field("listener")
+        private val synchronizedRunListenerClass =
+            Class.forName("org.junit.runner.notification.SynchronizedRunListener")
+        private val synchronizedListenerDelegateField =
+            synchronizedRunListenerClass.field("listener")
         private val runNotifierListenersField = RunNotifier::class.java.field("listeners")
-        private val resultPrinterTestResultField = InstrumentationResultPrinter::class.java.field("testResult")
-        private val resultPrinterTestResultCodeField = InstrumentationResultPrinter::class.java.field("testResultCode")
-        private val resultPrinterTestClassField = InstrumentationResultPrinter::class.java.field("testClass")
+        private val resultPrinterTestResultField =
+            InstrumentationResultPrinter::class.java.field("testResult")
+        private val resultPrinterTestResultCodeField =
+            InstrumentationResultPrinter::class.java.field("testResultCode")
+        private val resultPrinterTestClassField =
+            InstrumentationResultPrinter::class.java.field("testClass")
 
         private var cached: InstrumentationResultPrinter? = null
 
         fun initialize(notifier: RunNotifier): InstrumentationResultPrinter? {
             try {
                 // The printer needs to be retrieved only once per test run
-                cached?.let { return it }
+                cached?.let {
+                    return it
+                }
 
                 // The Android system registers a global listener
                 // for communicating status events back to the instrumentation.
@@ -311,9 +319,10 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
                 // The Android instrumentation may wrap the printer inside another JUnit listener,
                 // so make sure to search for the result inside its toString() representation
                 // (rather than through an 'it is X' check)
-                val candidate = listeners?.firstOrNull {
-                    InstrumentationResultPrinter::class.java.name in it.toString()
-                }
+                val candidate =
+                    listeners?.firstOrNull {
+                        InstrumentationResultPrinter::class.java.name in it.toString()
+                    }
 
                 if (candidate != null) {
                     // Replace the original listener with a wrapped version of itself,
@@ -326,11 +335,13 @@ internal class ParallelRunNotifier(private val delegate: RunNotifier) : RunNotif
                 // The Android instrumentation may wrap the printer inside another JUnit listener,
                 // so make sure to search for the result inside its toString() representation
                 // (rather than through an 'it is X' check)
-                val result = if (synchronizedRunListenerClass.isInstance(candidate)) {
-                    synchronizedListenerDelegateField.get(candidate) as? InstrumentationResultPrinter
-                } else {
-                    candidate as? InstrumentationResultPrinter
-                }
+                val result =
+                    if (synchronizedRunListenerClass.isInstance(candidate)) {
+                        synchronizedListenerDelegateField.get(candidate)
+                            as? InstrumentationResultPrinter
+                    } else {
+                        candidate as? InstrumentationResultPrinter
+                    }
 
                 cached = result
                 return result

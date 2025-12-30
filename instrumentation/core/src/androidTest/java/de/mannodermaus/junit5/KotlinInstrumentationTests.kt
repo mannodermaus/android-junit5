@@ -18,50 +18,33 @@ import org.junit.jupiter.params.provider.ValueSource
 
 internal class KotlinInstrumentationTests {
 
-  @JvmField
-  @RegisterExtension
-  val scenarioExtension = ActivityScenarioExtension.launch<TestActivity>()
+    @JvmField
+    @RegisterExtension
+    val scenarioExtension = ActivityScenarioExtension.launch<TestActivity>()
 
-  @Test
-  fun testUsingGetScenario() {
-    val scenario = scenarioExtension.scenario
-    onView(withText("TestActivity")).check(matches(isDisplayed()))
-    scenario.onActivity { it.changeText("New Text") }
-    onView(withText("New Text")).check(matches(isDisplayed()))
-  }
+    @Test
+    fun testUsingGetScenario() {
+        val scenario = scenarioExtension.scenario
+        onView(withText("TestActivity")).check(matches(isDisplayed()))
+        scenario.onActivity { it.changeText("New Text") }
+        onView(withText("New Text")).check(matches(isDisplayed()))
+    }
 
-  @DisplayName("cool display name")
-  @Test
-  fun testWithDisplayName() {
-  }
+    @DisplayName("cool display name") @Test fun testWithDisplayName() {}
 
-  @Test
-  fun testUsingMethodParameter(scenario: ActivityScenario<TestActivity>) {
-    onView(withText("TestActivity")).check(matches(isDisplayed()))
-    scenario.onActivity { it.changeText("New Text") }
-    onView(withText("New Text")).check(matches(isDisplayed()))
-  }
+    @Test
+    fun testUsingMethodParameter(scenario: ActivityScenario<TestActivity>) {
+        onView(withText("TestActivity")).check(matches(isDisplayed()))
+        scenario.onActivity { it.changeText("New Text") }
+        onView(withText("New Text")).check(matches(isDisplayed()))
+    }
 
-  @ParameterizedTest
-  @ValueSource(ints = [1, 4, 6, 7])
-  fun kotlinTestWithParameters(value: Int) {
+    @ParameterizedTest @ValueSource(ints = [1, 4, 6, 7]) fun kotlinTestWithParameters(value: Int) {}
 
-  }
+    @RepeatedTest(3) fun kotlinRepeatedTest(info: RepetitionInfo) {}
 
-  @RepeatedTest(3)
-  fun kotlinRepeatedTest(info: RepetitionInfo) {
+    @TestFactory
+    fun kotlinTestFactory() = listOf(dynamicTest("Dynamic 1") {}, dynamicTest("Dynamic 2") {})
 
-  }
-
-  @TestFactory
-  fun kotlinTestFactory() = listOf(
-    dynamicTest("Dynamic 1") {},
-    dynamicTest("Dynamic 2") {}
-  )
-
-  @EnabledOnManufacturer(["Samsung"])
-  @Test
-  fun onlyOnSamsung() {
-
-  }
+    @EnabledOnManufacturer(["Samsung"]) @Test fun onlyOnSamsung() {}
 }

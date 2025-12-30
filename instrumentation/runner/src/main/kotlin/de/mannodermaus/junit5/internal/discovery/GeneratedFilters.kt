@@ -9,9 +9,8 @@ import org.junit.platform.launcher.TagFilter
 private const val INSTRUMENTATION_FILTER_RES_FILE_NAME = "de_mannodermaus_junit5_filters"
 
 /**
- * Holder object for the filters of a test plan.
- * It converts the contents of a resource file into JUnit Platform [Filter] objects
- * for the [AndroidJUnitFramework] runner.
+ * Holder object for the filters of a test plan. It converts the contents of a resource file into
+ * JUnit Platform [Filter] objects for the [AndroidJUnitFramework] runner.
  */
 internal object GeneratedFilters {
 
@@ -21,21 +20,23 @@ internal object GeneratedFilters {
         // Look up the resource file written by the Gradle plugin
         // and open it.
         // (See Constants.kt inside the plugin's repository for the value used here)
-        val identifier = context.resources.getIdentifier(
-            INSTRUMENTATION_FILTER_RES_FILE_NAME,
-            "raw",
-            context.packageName
-        )
-        val inputStream = if (identifier != 0) {
-            try {
-                context.resources.openRawResource(identifier)
-            } catch (_: Resources.NotFoundException) {
-                // Ignore
+        val identifier =
+            context.resources.getIdentifier(
+                INSTRUMENTATION_FILTER_RES_FILE_NAME,
+                "raw",
+                context.packageName,
+            )
+        val inputStream =
+            if (identifier != 0) {
+                try {
+                    context.resources.openRawResource(identifier)
+                } catch (_: Resources.NotFoundException) {
+                    // Ignore
+                    null
+                }
+            } else {
                 null
             }
-        } else {
-            null
-        }
 
         if (inputStream == null) {
             // File doesn't exist, or couldn't be located; return

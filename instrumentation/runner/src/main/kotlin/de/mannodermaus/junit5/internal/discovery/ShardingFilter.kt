@@ -2,23 +2,21 @@ package de.mannodermaus.junit5.internal.discovery
 
 import android.os.Bundle
 import de.mannodermaus.junit5.internal.extensions.isDynamicTest
+import kotlin.math.abs
 import org.junit.platform.engine.FilterResult
 import org.junit.platform.engine.TestDescriptor
 import org.junit.platform.launcher.PostDiscoveryFilter
 import org.junit.platform.launcher.TestIdentifier
-import kotlin.math.abs
 
 /**
  * JUnit 5 implementation of the default instrumentation's
- * `androidx.test.internal.runner.TestRequestBuilder$ShardingFilter`,
- * ported to the new API to support dynamic test templates, too.
+ * `androidx.test.internal.runner.TestRequestBuilder$ShardingFilter`, ported to the new API to
+ * support dynamic test templates, too.
  *
  * Based on a draft by KyoungJoo Jeon (@jkj8790).
  */
-internal class ShardingFilter(
-    private val numShards: Int,
-    private val shardIndex: Int,
-) : PostDiscoveryFilter {
+internal class ShardingFilter(private val numShards: Int, private val shardIndex: Int) :
+    PostDiscoveryFilter {
 
     companion object {
         private const val ARG_NUM_SHARDS = "numShards"

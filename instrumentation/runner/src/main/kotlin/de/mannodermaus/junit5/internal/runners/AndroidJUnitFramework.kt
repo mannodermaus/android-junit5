@@ -11,9 +11,8 @@ import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
 
 /**
- * JUnit Runner implementation using the JUnit Platform as its backbone.
- * Serves as an intermediate solution to writing JUnit 5-based instrumentation tests
- * until official support arrives for this.
+ * JUnit Runner implementation using the JUnit Platform as its backbone. Serves as an intermediate
+ * solution to writing JUnit 5-based instrumentation tests until official support arrives for this.
  */
 @RequiresApi(26)
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
@@ -46,25 +45,27 @@ internal class AndroidJUnitFramework(
         if (isUsingOrchestrator && params.isParallelExecutionEnabled) {
             throw RuntimeException(
                 """
-                    Running tests with the Android Test Orchestrator does not work with parallel tests,
-                    since some information must be retained across parallel test execution,
-                    and the isolated nature of the Android Test Orchestrator thwarts these efforts.
-                    Please disable either setting and try again.
-                """.trimIndent(),
+                Running tests with the Android Test Orchestrator does not work with parallel tests,
+                since some information must be retained across parallel test execution,
+                and the isolated nature of the Android Test Orchestrator thwarts these efforts.
+                Please disable either setting and try again.
+                """
+                    .trimIndent()
             )
         }
 
-        val testPlan = try {
-            launcher.discover(request)
-        } catch (e: JUnitException) {
-            // Each class in scope is given to the runner,
-            // but some may fail to be loaded by the class loader
-            // (e.g. when they are tailored to JVM work and reference sun.* classes
-            // or anything else not present in the Android runtime).
-            // Log those to console, but discard them from being considered at all
-            e.printStackTrace()
-            EmptyTestPlan
-        }
+        val testPlan =
+            try {
+                launcher.discover(request)
+            } catch (e: JUnitException) {
+                // Each class in scope is given to the runner,
+                // but some may fail to be loaded by the class loader
+                // (e.g. when they are tailored to JVM work and reference sun.* classes
+                // or anything else not present in the Android runtime).
+                // Log those to console, but discard them from being considered at all
+                e.printStackTrace()
+                EmptyTestPlan
+            }
 
         return AndroidJUnitPlatformTestTree(
             testPlan = testPlan,

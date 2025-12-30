@@ -8,73 +8,76 @@ import de.mannodermaus.junit5.HasTestFactory
 import de.mannodermaus.junit5.HasTestTemplate
 import de.mannodermaus.junit5.discoverTests
 import de.mannodermaus.junit5.internal.extensions.format
+import kotlin.reflect.KClass
 import org.junit.jupiter.api.Test
-import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
-import org.junit.platform.launcher.core.LauncherFactory
-import kotlin.reflect.KClass
 
 class TestNameFormatterTests {
 
     @Test
-    fun `normal junit5 test`() = runTestWith(HasTest::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method")
-        assertThat(identifier.format(true)).isEqualTo("method")
-    }
+    fun `normal junit5 test`() =
+        runTestWith(HasTest::class) { identifier ->
+            assertThat(identifier.format(false)).isEqualTo("method")
+            assertThat(identifier.format(true)).isEqualTo("method")
+        }
 
     @Test
-    fun `repeated test`() = runTestWith(HasRepeatedTest::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method[RepetitionInfo]")
-        assertThat(identifier.format(true)).isEqualTo("method")
+    fun `repeated test`() =
+        runTestWith(HasRepeatedTest::class) { identifier ->
+            assertThat(identifier.format(false)).isEqualTo("method[RepetitionInfo]")
+            assertThat(identifier.format(true)).isEqualTo("method")
 
-        // Inspect individual executions, too
-        assertChildren(identifier, expectedCount = 5) { index, child ->
-            val number = index + 1
-            assertThat(child.format(false)).isEqualTo("repetition $number of 5")
-            assertThat(child.format(true)).isEqualTo("method[$number]")
+            // Inspect individual executions, too
+            assertChildren(identifier, expectedCount = 5) { index, child ->
+                val number = index + 1
+                assertThat(child.format(false)).isEqualTo("repetition $number of 5")
+                assertThat(child.format(true)).isEqualTo("method[$number]")
+            }
         }
-    }
 
     @Test
-    fun `test factory`() = runTestWith(HasTestFactory::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method")
-        assertThat(identifier.format(true)).isEqualTo("method")
+    fun `test factory`() =
+        runTestWith(HasTestFactory::class) { identifier ->
+            assertThat(identifier.format(false)).isEqualTo("method")
+            assertThat(identifier.format(true)).isEqualTo("method")
 
-        // Inspect individual executions, too
-        assertChildren(identifier, expectedCount = 2) { index, child ->
-            val number = index + 1
-            assertThat(child.format(false)).isEqualTo(if (index == 0) "a" else "b")
-            assertThat(child.format(true)).isEqualTo("method[$number]")
+            // Inspect individual executions, too
+            assertChildren(identifier, expectedCount = 2) { index, child ->
+                val number = index + 1
+                assertThat(child.format(false)).isEqualTo(if (index == 0) "a" else "b")
+                assertThat(child.format(true)).isEqualTo("method[$number]")
+            }
         }
-    }
 
     @Test
-    fun `test template`() = runTestWith(HasTestTemplate::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method[String]")
-        assertThat(identifier.format(true)).isEqualTo("method")
+    fun `test template`() =
+        runTestWith(HasTestTemplate::class) { identifier ->
+            assertThat(identifier.format(false)).isEqualTo("method[String]")
+            assertThat(identifier.format(true)).isEqualTo("method")
 
-        // Inspect individual executions, too
-        assertChildren(identifier, expectedCount = 2) { index, child ->
-            val number = index + 1
-            assertThat(child.format(false)).isEqualTo("param$number")
-            assertThat(child.format(true)).isEqualTo("method[$number]")
+            // Inspect individual executions, too
+            assertChildren(identifier, expectedCount = 2) { index, child ->
+                val number = index + 1
+                assertThat(child.format(false)).isEqualTo("param$number")
+                assertThat(child.format(true)).isEqualTo("method[$number]")
+            }
         }
-    }
 
     @Test
-    fun `parameterized test`() = runTestWith(HasParameterizedTest::class) { identifier ->
-        assertThat(identifier.format(false)).isEqualTo("method[String]")
-        assertThat(identifier.format(true)).isEqualTo("method")
+    fun `parameterized test`() =
+        runTestWith(HasParameterizedTest::class) { identifier ->
+            assertThat(identifier.format(false)).isEqualTo("method[String]")
+            assertThat(identifier.format(true)).isEqualTo("method")
 
-        // Inspect individual executions, too
-        assertChildren(identifier, expectedCount = 2) { index, child ->
-            val number = index + 1
-            assertThat(child.format(false)).isEqualTo("[$number] " + if (index == 0) "a" else "b")
-            assertThat(child.format(true)).isEqualTo("method[$number]")
+            // Inspect individual executions, too
+            assertChildren(identifier, expectedCount = 2) { index, child ->
+                val number = index + 1
+                assertThat(child.format(false))
+                    .isEqualTo("[$number] " + if (index == 0) "a" else "b")
+                assertThat(child.format(true)).isEqualTo("method[$number]")
+            }
         }
-    }
 
     /* Private */
 
@@ -98,7 +101,7 @@ class TestNameFormatterTests {
     private fun TestPlan.assertChildren(
         of: TestIdentifier,
         expectedCount: Int,
-        block: (Int, TestIdentifier) -> Unit
+        block: (Int, TestIdentifier) -> Unit,
     ) {
         with(getChildren(of)) {
             assertThat(size).isEqualTo(expectedCount)

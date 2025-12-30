@@ -31,5 +31,6 @@ class KotlinInterfaceTest : KotlinInterface {
 
 class KotlinMixedInterfaceTest : KotlinInterface, JavaInterface {
     override val kotlinValue: Int = 1337
+
     override fun getJavaValue(): Long = 1234L
 }

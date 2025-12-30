@@ -15,9 +15,7 @@ android {
             "de.mannodermaus.junit5.AndroidJUnitFrameworkBuilder"
     }
 
-    buildFeatures {
-        compose = true
-    }
+    buildFeatures { compose = true }
 }
 
 junitPlatform {

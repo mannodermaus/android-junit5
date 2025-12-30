@@ -19,11 +19,12 @@ internal object BuildConfigValueUtils {
 
         fun getValue(key: String): String? {
             return try {
-                fieldCache.getOrPut(key) {
-                    buildConfigClass.getField(key).also {
-                        it.isAccessible = true
+                fieldCache
+                    .getOrPut(key) {
+                        buildConfigClass.getField(key).also { it.isAccessible = true }
                     }
-                }.get(null)?.toString()
+                    .get(null)
+                    ?.toString()
             } catch (ignored: Throwable) {
                 throw IllegalAccessException("Cannot access BuildConfig field '$key'")
             }
@@ -40,8 +41,9 @@ internal object BuildConfigValueUtils {
     }
 
     /**
-     * Reflectively look up a BuildConfig field's value.
-     * This caches previous lookups to maximize performance.
+     * Reflectively look up a BuildConfig field's value. This caches previous lookups to maximize
+     * performance.
+     *
      * @param key Key of the entry to obtain
      * @return The value of this entry, if any
      */

@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
 class TaggedTests {
-    @Test
-    fun includedTest() {
-    }
+    @Test fun includedTest() {}
 
     @Tag("nope")
     @Test

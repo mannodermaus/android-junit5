@@ -7,18 +7,15 @@ import de.mannodermaus.junit5.HasTest
 import de.mannodermaus.junit5.HasTestFactory
 import de.mannodermaus.junit5.HasTestTemplate
 import de.mannodermaus.junit5.discoverTests
+import kotlin.reflect.KClass
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.platform.launcher.TestExecutionListener
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.core.LauncherFactory
-import kotlin.reflect.KClass
 
 class AndroidJUnitPlatformTestTreeTests {
-    @CsvSource(
-        "false, method",
-        "true, method",
-    )
+    @CsvSource("false, method", "true, method")
     @ParameterizedTest
     fun test(isolated: Boolean, expected: String) =
         runTestWith(HasTest::class, isolated) { identifier ->
@@ -26,10 +23,7 @@ class AndroidJUnitPlatformTestTreeTests {
             assertThat(description.methodName).isEqualTo(expected)
         }
 
-    @CsvSource(
-        "false, method[RepetitionInfo] - repetition %d of 5",
-        "true, method[%d]",
-    )
+    @CsvSource("false, method[RepetitionInfo] - repetition %d of 5", "true, method[%d]")
     @ParameterizedTest
     fun `repeated test`(isolated: Boolean, expected: String) =
         runTestWith(HasRepeatedTest::class, isolated) { identifier ->
@@ -40,10 +34,7 @@ class AndroidJUnitPlatformTestTreeTests {
             }
         }
 
-    @CsvSource(
-        "false, method - %s",
-        "true, method[%d]",
-    )
+    @CsvSource("false, method - %s", "true, method[%d]")
     @ParameterizedTest
     fun `test factory`(isolated: Boolean, expected: String) =
         runTestWith(HasTestFactory::class, isolated) { identifier ->
@@ -56,15 +47,13 @@ class AndroidJUnitPlatformTestTreeTests {
                 if (isolated) {
                     assertThat(childDescription.methodName).isEqualTo(expected.format(num))
                 } else {
-                    assertThat(childDescription.methodName).isEqualTo(expected.format(childMethodNames[index]))
+                    assertThat(childDescription.methodName)
+                        .isEqualTo(expected.format(childMethodNames[index]))
                 }
             }
         }
 
-    @CsvSource(
-        "false, method[String] - %s",
-        "true, method[%d]",
-    )
+    @CsvSource("false, method[String] - %s", "true, method[%d]")
     @ParameterizedTest
     fun `test template`(isolated: Boolean, expected: String) =
         runTestWith(HasTestTemplate::class, isolated) { identifier ->
@@ -77,15 +66,13 @@ class AndroidJUnitPlatformTestTreeTests {
                 if (isolated) {
                     assertThat(childDescription.methodName).isEqualTo(expected.format(num))
                 } else {
-                    assertThat(childDescription.methodName).isEqualTo(expected.format(childMethodNames[index]))
+                    assertThat(childDescription.methodName)
+                        .isEqualTo(expected.format(childMethodNames[index]))
                 }
             }
         }
 
-    @CsvSource(
-        "false, method[String] - [%d] %s",
-        "true, method[%d]",
-    )
+    @CsvSource("false, method[String] - [%d] %s", "true, method[%d]")
     @ParameterizedTest
     fun `parameterized test`(isolated: Boolean, expected: String) =
         runTestWith(HasParameterizedTest::class, isolated) { identifier ->
@@ -98,7 +85,8 @@ class AndroidJUnitPlatformTestTreeTests {
                 if (isolated) {
                     assertThat(childDescription.methodName).isEqualTo(expected.format(num))
                 } else {
-                    assertThat(childDescription.methodName).isEqualTo(expected.format(num, childMethodNames[index]))
+                    assertThat(childDescription.methodName)
+                        .isEqualTo(expected.format(num, childMethodNames[index]))
                 }
             }
         }
@@ -113,20 +101,24 @@ class AndroidJUnitPlatformTestTreeTests {
         // Prepare a test plan to launch
         val launcher = LauncherFactory.create()
         val plan = discoverTests(cls, launcher, executeAsWell = false)
-        val tree = AndroidJUnitPlatformTestTree(
-            testPlan = plan,
-            testClass = cls.java,
-            needLegacyFormat = isIsolatedMethodRun,
-            isParallelExecutionEnabled = false,
-        )
+        val tree =
+            AndroidJUnitPlatformTestTree(
+                testPlan = plan,
+                testClass = cls.java,
+                needLegacyFormat = isIsolatedMethodRun,
+                isParallelExecutionEnabled = false,
+            )
 
         // Execute the test plan, adding dynamic tests with the tree
         // as they are registered during execution
-        launcher.execute(plan, object : TestExecutionListener {
-            override fun dynamicTestRegistered(testIdentifier: TestIdentifier) {
-                tree.addDynamicDescription(testIdentifier, testIdentifier.parentId.get())
-            }
-        })
+        launcher.execute(
+            plan,
+            object : TestExecutionListener {
+                override fun dynamicTestRegistered(testIdentifier: TestIdentifier) {
+                    tree.addDynamicDescription(testIdentifier, testIdentifier.parentId.get())
+                }
+            },
+        )
 
         // For concrete assertions, delegate to the given block
         val root = plan.roots.first()
@@ -138,7 +130,7 @@ class AndroidJUnitPlatformTestTreeTests {
     private fun AndroidJUnitPlatformTestTree.assertChildren(
         identifier: TestIdentifier,
         expectedCount: Int,
-        block: (Int, TestIdentifier) -> Unit
+        block: (Int, TestIdentifier) -> Unit,
     ) {
         with(getChildren(identifier)) {
             assertThat(size).isEqualTo(expectedCount)

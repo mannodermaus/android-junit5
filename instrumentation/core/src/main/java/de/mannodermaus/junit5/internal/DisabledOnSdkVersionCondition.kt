@@ -1,7 +1,7 @@
 package de.mannodermaus.junit5.internal
 
-import androidx.annotation.RequiresApi
 import android.os.Build
+import androidx.annotation.RequiresApi
 import de.mannodermaus.junit5.condition.DisabledOnSdkVersion
 import de.mannodermaus.junit5.internal.EnabledOnSdkVersionCondition.Companion.disabled
 import de.mannodermaus.junit5.internal.EnabledOnSdkVersionCondition.Companion.enabled
@@ -30,11 +30,12 @@ internal class DisabledOnSdkVersionCondition : ExecutionCondition {
             val hasUpperBound = untilApi != NOT_SET
             Preconditions.condition(
                 hasLowerBound || hasUpperBound,
-                "At least one value must be provided in @DisabledOnSdkVersion"
+                "At least one value must be provided in @DisabledOnSdkVersion",
             )
 
             // Constrain the current API Level based on the presence of "fromApi" & "untilApi":
-            // If either one is not set at all, that part of the conditional becomes true automatically
+            // If either one is not set at all, that part of the conditional becomes true
+            // automatically
             val lowerCheck = !hasLowerBound || Build.VERSION.SDK_INT >= fromApi
             val upperCheck = !hasUpperBound || Build.VERSION.SDK_INT <= untilApi
             return if (lowerCheck && upperCheck) {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.testutil.AndroidBuildUtils.withMockedInstrumentation
 import de.mannodermaus.junit5.testutil.CollectingRunListener
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -15,7 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.junit.runner.RunWith
 import org.junit.runner.notification.RunNotifier
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidJUnitFrameworkTests {
@@ -25,16 +25,17 @@ class AndroidJUnitFrameworkTests {
         val results = runTests()
         val successNames = results.runTestNames
 
-        assertThat(successNames).containsExactly(
-            "normal test",
-            "testFactory - container - test 1",
-            "testFactory - container - test 2",
-            "repeatedTest - repetition 1 of 3",
-            "repeatedTest - repetition 2 of 3",
-            "repeatedTest - repetition 3 of 3",
-            "parameterizedTest(String) - [1] hello",
-            "parameterizedTest(String) - [2] world",
-        )
+        assertThat(successNames)
+            .containsExactly(
+                "normal test",
+                "testFactory - container - test 1",
+                "testFactory - container - test 2",
+                "repeatedTest - repetition 1 of 3",
+                "repeatedTest - repetition 2 of 3",
+                "repeatedTest - repetition 3 of 3",
+                "parameterizedTest(String) - [1] hello",
+                "parameterizedTest(String) - [2] world",
+            )
     }
 
     @org.junit.Test
@@ -48,13 +49,15 @@ class AndroidJUnitFrameworkTests {
         val allResults = mutableListOf<CollectingRunListener.Results>()
 
         for (i in 0..4) {
-            val results = runTests(
-                shardingConfig = if (i < 4) {
-                    ShardingConfig(num = 4, index = i)
-                } else {
-                    null
-                }
-            )
+            val results =
+                runTests(
+                    shardingConfig =
+                        if (i < 4) {
+                            ShardingConfig(num = 4, index = i)
+                        } else {
+                            null
+                        }
+                )
 
             if (i == 4) {
                 // Last execution should execute all tests together
@@ -67,9 +70,7 @@ class AndroidJUnitFrameworkTests {
             }
         }
 
-        allResults.forEach { results ->
-            assertThat(results.runCount).isLessThan(totalTests)
-        }
+        allResults.forEach { results -> assertThat(results.runCount).isLessThan(totalTests) }
     }
 
     /* Private */
@@ -90,12 +91,13 @@ class AndroidJUnitFrameworkTests {
         return resultRef.get()
     }
 
-    private fun buildArgs(shardingConfig: ShardingConfig?) = Bundle().apply {
-        if (shardingConfig != null) {
-            putString("numShards", shardingConfig.num.toString())
-            putString("shardIndex", shardingConfig.index.toString())
+    private fun buildArgs(shardingConfig: ShardingConfig?) =
+        Bundle().apply {
+            if (shardingConfig != null) {
+                putString("numShards", shardingConfig.num.toString())
+                putString("shardIndex", shardingConfig.index.toString())
+            }
         }
-    }
 
     // JUnit Vintage Engine reports an empty event and must be excluded.
     // Because of this, only count tests with an attached method name
@@ -104,32 +106,21 @@ class AndroidJUnitFrameworkTests {
 
     private val CollectingRunListener.Results.runCount
         get() = runTestNames.size
-
 }
 
 /* Data */
 
 @Suppress("ClassName")
 internal class Sample_NormalTests {
-    @Test
-    fun `normal test`() {
-    }
+    @Test fun `normal test`() {}
 
     @TestFactory
-    fun testFactory(): DynamicContainer = dynamicContainer(
-        "container",
-        listOf(
-            dynamicTest("test 1") {},
-            dynamicTest("test 2") {},
-        )
-    )
+    fun testFactory(): DynamicContainer =
+        dynamicContainer("container", listOf(dynamicTest("test 1") {}, dynamicTest("test 2") {}))
 
-    @RepeatedTest(3)
-    fun repeatedTest() {
-    }
+    @RepeatedTest(3) fun repeatedTest() {}
 
     @ValueSource(strings = ["hello", "world"])
     @ParameterizedTest
-    fun parameterizedTest(param: String) {
-    }
+    fun parameterizedTest(param: String) {}
 }

@@ -2,11 +2,11 @@
 
 package de.mannodermaus.junit5.testutil.reflect
 
-import sun.misc.Unsafe
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.security.AccessController
 import java.security.PrivilegedAction
+import sun.misc.Unsafe
 
 /**
  * Adapted from Paparazzi:

@@ -1,7 +1,7 @@
 package de.mannodermaus.junit5.internal
 
-import androidx.annotation.RequiresApi
 import android.os.Build
+import androidx.annotation.RequiresApi
 import de.mannodermaus.junit5.condition.DisabledOnManufacturer
 import de.mannodermaus.junit5.internal.EnabledOnManufacturerCondition.Companion.disabled
 import de.mannodermaus.junit5.internal.EnabledOnManufacturerCondition.Companion.enabled
@@ -29,7 +29,7 @@ internal class DisabledOnManufacturerCondition : ExecutionCondition {
 
             Preconditions.condition(
                 patterns.isNotEmpty(),
-                "You must declare at least one Manufacturer in @DisabledOnManufacturer"
+                "You must declare at least one Manufacturer in @DisabledOnManufacturer",
             )
 
             return if (patterns.any { Build.MANUFACTURER.equals(it, ignoreCase = ignoreCase) }) {
