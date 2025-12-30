@@ -3,35 +3,27 @@ package de.mannodermaus.gradle.plugins.junit5.dsl
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 
-/**
- * Options for controlling instrumentation test execution
- */
+/** Options for controlling instrumentation test execution */
 public abstract class InstrumentationTestOptions {
 
     /**
-     * Whether to configure JUnit 5 instrumentation tests automatically
-     * when junit-jupiter-api is added as an androidTestImplementation dependency.
+     * Whether to configure JUnit 5 instrumentation tests automatically when junit-jupiter-api is
+     * added as an androidTestImplementation dependency.
      */
-    @get:Input
-    public abstract val enabled: Property<Boolean>
+    @get:Input public abstract val enabled: Property<Boolean>
+
+    /** The version of the instrumentation libraries to autoconfigure. */
+    @get:Input public abstract val version: Property<String>
 
     /**
-     * The version of the instrumentation libraries to autoconfigure.
+     * Whether to include a dependency on the android-test-extensions library on top of the main
+     * instrumentation artifacts.
      */
-    @get:Input
-    public abstract val version: Property<String>
+    @get:Input public abstract val includeExtensions: Property<Boolean>
 
     /**
-     * Whether to include a dependency on the android-test-extensions library
-     * on top of the main instrumentation artifacts.
+     * Whether to use configuration parameters configured via the plugin DSL for instrumentation
+     * tests, too.
      */
-    @get:Input
-    public abstract val includeExtensions: Property<Boolean>
-
-    /**
-     * Whether to use configuration parameters configured via the plugin DSL
-     * for instrumentation tests, too.
-     */
-    @get:Input
-    public abstract val useConfigurationParameters: Property<Boolean>
+    @get:Input public abstract val useConfigurationParameters: Property<Boolean>
 }

@@ -1,7 +1,7 @@
 package de.mannodermaus.junit5.internal
 
-import androidx.annotation.RequiresApi
 import android.os.Build
+import androidx.annotation.RequiresApi
 import de.mannodermaus.junit5.condition.EnabledOnSdkVersion
 import org.junit.jupiter.api.extension.ConditionEvaluationResult
 import org.junit.jupiter.api.extension.ExecutionCondition
@@ -36,11 +36,12 @@ internal class EnabledOnSdkVersionCondition : ExecutionCondition {
             val hasUpperBound = untilApi != NOT_SET
             Preconditions.condition(
                 hasLowerBound || hasUpperBound,
-                "At least one value must be provided in @EnabledOnSdkVersion"
+                "At least one value must be provided in @EnabledOnSdkVersion",
             )
 
             // Constrain the current API Level based on the presence of "fromApi" & "untilApi":
-            // If either one is not set at all, that part of the conditional becomes true automatically
+            // If either one is not set at all, that part of the conditional becomes true
+            // automatically
             val lowerCheck = !hasLowerBound || Build.VERSION.SDK_INT >= fromApi
             val upperCheck = !hasUpperBound || Build.VERSION.SDK_INT <= untilApi
             return if (lowerCheck && upperCheck) {

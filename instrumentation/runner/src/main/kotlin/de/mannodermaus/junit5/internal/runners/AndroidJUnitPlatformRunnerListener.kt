@@ -13,13 +13,11 @@ import org.junit.runner.Description
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunNotifier
 
-/**
- * Required, public extension to allow access to package-private RunnerListener class
- */
+/** Required, public extension to allow access to package-private RunnerListener class */
 @SuppressLint("NewApi")
 internal class AndroidJUnitPlatformRunnerListener(
     private val testTree: AndroidJUnitPlatformTestTree,
-    private val notifier: RunNotifier
+    private val notifier: RunNotifier,
 ) : TestExecutionListener {
 
     override fun reportingEntryPublished(testIdentifier: TestIdentifier, entry: ReportEntry) {
@@ -45,12 +43,13 @@ internal class AndroidJUnitPlatformRunnerListener(
         when {
             testIdentifier.isTest -> fireTestIgnored(testIdentifier, reason)
             testIdentifier.isDynamicTest -> fireTestIgnored(testIdentifier, reason)
-            testIdentifier.isContainer -> testTree.getChildren(testIdentifier).forEach { childIdentifier ->
-                // Only report leaf tests as skipped
-                if (childIdentifier.isTest || childIdentifier.isDynamicTest) {
-                    fireTestIgnored(childIdentifier, reason)
+            testIdentifier.isContainer ->
+                testTree.getChildren(testIdentifier).forEach { childIdentifier ->
+                    // Only report leaf tests as skipped
+                    if (childIdentifier.isTest || childIdentifier.isDynamicTest) {
+                        fireTestIgnored(childIdentifier, reason)
+                    }
                 }
-            }
         }
     }
 
@@ -62,7 +61,7 @@ internal class AndroidJUnitPlatformRunnerListener(
 
     override fun executionFinished(
         testIdentifier: TestIdentifier,
-        testExecutionResult: TestExecutionResult
+        testExecutionResult: TestExecutionResult,
     ) {
         val description = testTree.getDescription(testIdentifier)
         val status = testExecutionResult.status
@@ -84,6 +83,6 @@ internal class AndroidJUnitPlatformRunnerListener(
 
     private fun toFailure(
         testExecutionResult: TestExecutionResult,
-        description: Description
+        description: Description,
     ): Failure = Failure(description, testExecutionResult.throwable.orElse(null))
 }

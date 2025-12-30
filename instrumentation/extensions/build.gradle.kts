@@ -7,9 +7,7 @@ plugins {
 android {
     namespace = "de.mannodermaus.junit5.extensions"
 
-    defaultConfig {
-        minSdk = Android.testRunnerMinSdkVersion
-    }
+    defaultConfig { minSdk = Android.testRunnerMinSdkVersion }
 }
 
 dependencies {

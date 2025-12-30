@@ -1,7 +1,6 @@
 package de.mannodermaus.gradle.plugins.junit5.plugin
 
 import com.google.common.truth.Truth.assertThat
-import de.mannodermaus.Libraries
 import de.mannodermaus.Libraries.Instrumentation
 import de.mannodermaus.Libraries.JUnit
 import de.mannodermaus.Libraries.JUnit.JUnit5
@@ -20,18 +19,14 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class InstrumentationSupportTests {
 
-    @RegisterExtension
-    @JvmField
-    val projectExtension = TestProjectProviderExtension()
+    @RegisterExtension @JvmField val projectExtension = TestProjectProviderExtension()
 
     private lateinit var project: Project
 
     @BeforeEach
     fun beforeEach() {
-        project = projectExtension.newProject()
-            .asAndroidApplication()
-            .applyJUnit5Plugin(true)
-            .build()
+        project =
+            projectExtension.newProject().asAndroidApplication().applyJUnit5Plugin(true).build()
     }
 
     /* RunnerBuilder */
@@ -41,17 +36,22 @@ internal class InstrumentationSupportTests {
         project.addJUnit(JUnit5, "androidTest")
         project.evaluate()
 
-        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
+        assertThat(
+                project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]
+            )
             .isEqualTo(ANDROID_JUNIT5_RUNNER_BUILDER_CLASS)
     }
 
     @Test
     fun `maintain any existing RunnerBuilder`() {
         project.addJUnit(JUnit5, "androidTest")
-        project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"] = "something.else"
+        project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"] =
+            "something.else"
         project.evaluate()
 
-        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"])
+        assertThat(
+                project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]
+            )
             .isEqualTo("something.else,$ANDROID_JUNIT5_RUNNER_BUILDER_CLASS")
     }
 
@@ -61,14 +61,20 @@ internal class InstrumentationSupportTests {
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
-        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]).isNull()
+        assertThat(
+                project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]
+            )
+            .isNull()
     }
 
     @Test
     fun `do not add the RunnerBuilder when Jupiter is not added`() {
         project.evaluate()
 
-        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]).isNull()
+        assertThat(
+                project.android.defaultConfig.testInstrumentationRunnerArguments["runnerBuilder"]
+            )
+            .isNull()
     }
 
     /* Configuration parameters */
@@ -82,7 +88,10 @@ internal class InstrumentationSupportTests {
         }
         project.evaluate()
 
-        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["configurationParameters"])
+        assertThat(
+                project.android.defaultConfig.testInstrumentationRunnerArguments[
+                        "configurationParameters"]
+            )
             .isEqualTo("my.parameter1=true,my.parameter2=1234")
     }
 
@@ -96,7 +105,10 @@ internal class InstrumentationSupportTests {
         }
         project.evaluate()
 
-        assertThat(project.android.defaultConfig.testInstrumentationRunnerArguments["configurationParameters"])
+        assertThat(
+                project.android.defaultConfig.testInstrumentationRunnerArguments[
+                        "configurationParameters"]
+            )
             .isNull()
     }
 
@@ -109,10 +121,16 @@ internal class InstrumentationSupportTests {
         project.evaluate()
 
         assertThat(project).configuration("testImplementation").hasDependency(coreLibrary(junit))
-        assertThat(project).configuration("testRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("testRuntimeOnly")
+            .doesNotHaveDependency(runnerLibrary(junit))
 
-        assertThat(project).configuration("testImplementation").doesNotHaveDependency(extensionsLibrary(junit))
-        assertThat(project).configuration("testImplementation").doesNotHaveDependency(composeLibrary(junit))
+        assertThat(project)
+            .configuration("testImplementation")
+            .doesNotHaveDependency(extensionsLibrary(junit))
+        assertThat(project)
+            .configuration("testImplementation")
+            .doesNotHaveDependency(composeLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
@@ -121,11 +139,19 @@ internal class InstrumentationSupportTests {
         project.addJUnit(junit, "androidTest")
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .hasDependency(runnerLibrary(junit))
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(composeLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .doesNotHaveDependency(extensionsLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .doesNotHaveDependency(composeLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
@@ -135,8 +161,12 @@ internal class InstrumentationSupportTests {
         project.junitPlatform.instrumentationTests.version.set("1.3.3.7")
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit, "1.3.3.7"))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit, "1.3.3.7"))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(coreLibrary(junit, "1.3.3.7"))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .hasDependency(runnerLibrary(junit, "1.3.3.7"))
     }
 
     @EnumSource(JUnit::class)
@@ -149,8 +179,12 @@ internal class InstrumentationSupportTests {
         project.dependencies.add("androidTestRuntimeOnly", addedRunner)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit, "0.1.3.3.7"))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit, "0.1.3.3.7"))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(coreLibrary(junit, "0.1.3.3.7"))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .hasDependency(runnerLibrary(junit, "0.1.3.3.7"))
     }
 
     @EnumSource(JUnit::class)
@@ -160,8 +194,12 @@ internal class InstrumentationSupportTests {
         project.junitPlatform.instrumentationTests.enabled.set(false)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .doesNotHaveDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .doesNotHaveDependency(runnerLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
@@ -169,19 +207,31 @@ internal class InstrumentationSupportTests {
     fun `do not add the dependencies when Jupiter is not added`(junit: JUnit) {
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .doesNotHaveDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .doesNotHaveDependency(runnerLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
     @ParameterizedTest
-    fun `do not add the dependencies when Jupiter is not added, even if extension is configured to be added`(junit: JUnit) {
+    fun `do not add the dependencies when Jupiter is not added, even if extension is configured to be added`(
+        junit: JUnit
+    ) {
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").doesNotHaveDependency(extensionsLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").doesNotHaveDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .doesNotHaveDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .doesNotHaveDependency(extensionsLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .doesNotHaveDependency(runnerLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
@@ -191,9 +241,15 @@ internal class InstrumentationSupportTests {
         project.junitPlatform.instrumentationTests.includeExtensions.set(true)
         project.evaluate()
 
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(extensionsLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .hasDependency(runnerLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
@@ -207,9 +263,15 @@ internal class InstrumentationSupportTests {
 
         assertThat(project).configuration("testImplementation").hasDependency(coreLibrary(junit))
         assertThat(project).configuration("testImplementation").hasDependency(composeLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(composeLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .hasDependency(runnerLibrary(junit))
     }
 
     @EnumSource(JUnit::class)
@@ -224,11 +286,21 @@ internal class InstrumentationSupportTests {
 
         assertThat(project).configuration("testImplementation").hasDependency(coreLibrary(junit))
         assertThat(project).configuration("testImplementation").hasDependency(composeLibrary(junit))
-        assertThat(project).configuration("testImplementation").hasDependency(extensionsLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").hasDependency(coreLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").hasDependency(composeLibrary(junit))
-        assertThat(project).configuration("androidTestImplementation").hasDependency(extensionsLibrary(junit))
-        assertThat(project).configuration("androidTestRuntimeOnly").hasDependency(runnerLibrary(junit))
+        assertThat(project)
+            .configuration("testImplementation")
+            .hasDependency(extensionsLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(coreLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(composeLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestImplementation")
+            .hasDependency(extensionsLibrary(junit))
+        assertThat(project)
+            .configuration("androidTestRuntimeOnly")
+            .hasDependency(runnerLibrary(junit))
     }
 
     @Test
@@ -265,5 +337,6 @@ internal class InstrumentationSupportTests {
     private fun runnerLibrary(junit: JUnit, withVersion: String? = Instrumentation.version) =
         library(Instrumentation.runner, junit, withVersion)
 
-    private fun library(artifactId: String, junit: JUnit, version: String?) = junit.artifact(artifactId, version)
+    private fun library(artifactId: String, junit: JUnit, version: String?) =
+        junit.artifact(artifactId, version)
 }

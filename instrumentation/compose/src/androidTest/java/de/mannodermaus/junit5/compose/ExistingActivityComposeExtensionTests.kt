@@ -19,18 +19,9 @@ class ExistingActivityComposeExtensionTests {
     @OptIn(ExperimentalTestApi::class)
     val extension = createAndroidComposeExtension<ExistingActivity>()
 
-    @BeforeAll
-    fun beforeAll() = extension.use {
-        onNodeWithText("click").performClick()
-    }
+    @BeforeAll fun beforeAll() = extension.use { onNodeWithText("click").performClick() }
 
-    @BeforeEach
-    fun beforeEach() = extension.use {
-        onNodeWithText("click").performClick()
-    }
+    @BeforeEach fun beforeEach() = extension.use { onNodeWithText("click").performClick() }
 
-    @Test
-    fun test() = extension.use {
-        onNodeWithText("Clicked: 2").assertIsDisplayed()
-    }
+    @Test fun test() = extension.use { onNodeWithText("Clicked: 2").assertIsDisplayed() }
 }

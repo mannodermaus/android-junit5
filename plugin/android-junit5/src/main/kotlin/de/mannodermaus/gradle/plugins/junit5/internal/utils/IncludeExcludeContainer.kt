@@ -9,21 +9,22 @@ internal class IncludeExcludeContainer {
     val include
         get() = _include.toSet()
 
-    fun include(vararg items: String) = this.apply {
-        this._include.addAll(items)
-        this._exclude.removeAll(items)
-    }
+    fun include(vararg items: String) =
+        this.apply {
+            this._include.addAll(items)
+            this._exclude.removeAll(items)
+        }
 
     val exclude
         get() = _exclude.toSet()
 
-    fun exclude(vararg items: String) = this.apply {
-        this._exclude.addAll(items)
-        this._include.removeAll(items)
-    }
+    fun exclude(vararg items: String) =
+        this.apply {
+            this._exclude.addAll(items)
+            this._include.removeAll(items)
+        }
 
-    fun isEmpty() =
-        _include.isEmpty() && _exclude.isEmpty()
+    fun isEmpty() = _include.isEmpty() && _exclude.isEmpty()
 
     operator fun plus(other: IncludeExcludeContainer): IncludeExcludeContainer {
         // Fast path, where nothing needs to be merged

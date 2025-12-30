@@ -17,34 +17,25 @@ fun assertThat(actual: BuildResult): BuildResultSubject =
 
 /* Types */
 
-class BuildResultSubject(
-    metadata: FailureMetadata,
-    private val actual: BuildResult?
-) : Subject(metadata, actual) {
+class BuildResultSubject(metadata: FailureMetadata, private val actual: BuildResult?) :
+    Subject(metadata, actual) {
 
-    fun task(name: String): BuildTaskSubject = check("task()")
-        .about(::BuildTaskSubject)
-        .that(actual?.task(name))
+    fun task(name: String): BuildTaskSubject =
+        check("task()").about(::BuildTaskSubject).that(actual?.task(name))
 
-    fun output(): BuildResultOutputSubject = check("output()")
-        .about(::BuildResultOutputSubject)
-        .that(actual?.output)
+    fun output(): BuildResultOutputSubject =
+        check("output()").about(::BuildResultOutputSubject).that(actual?.output)
 }
 
-class BuildTaskSubject(
-    metadata: FailureMetadata,
-    private val actual: BuildTask?
-) : Subject(metadata, actual) {
+class BuildTaskSubject(metadata: FailureMetadata, private val actual: BuildTask?) :
+    Subject(metadata, actual) {
 
-    fun hasOutcome(expected: TaskOutcome) = check("hasOutcome()")
-        .that(actual?.outcome)
-        .isEqualTo(expected)
+    fun hasOutcome(expected: TaskOutcome) =
+        check("hasOutcome()").that(actual?.outcome).isEqualTo(expected)
 }
 
-class BuildResultOutputSubject(
-    metadata: FailureMetadata,
-    private val actual: String?
-) : StringSubject(metadata, actual) {
+class BuildResultOutputSubject(metadata: FailureMetadata, private val actual: String?) :
+    StringSubject(metadata, actual) {
 
     fun ofTask(name: String): BuildTaskOutputSubject {
         requireNotNull(actual)
@@ -60,16 +51,12 @@ class BuildResultOutputSubject(
         }
 
         val strippedOutput = actual.substring(startIndex, endIndex)
-        return check("ofTask()")
-            .about(::BuildTaskOutputSubject)
-            .that(strippedOutput)
+        return check("ofTask()").about(::BuildTaskOutputSubject).that(strippedOutput)
     }
 }
 
-class BuildTaskOutputSubject(
-    metadata: FailureMetadata,
-    private val actual: String?
-) : StringSubject(metadata, actual) {
+class BuildTaskOutputSubject(metadata: FailureMetadata, private val actual: String?) :
+    StringSubject(metadata, actual) {
 
     fun executedTestCount(): IntegerSubject {
         requireNotNull(actual)

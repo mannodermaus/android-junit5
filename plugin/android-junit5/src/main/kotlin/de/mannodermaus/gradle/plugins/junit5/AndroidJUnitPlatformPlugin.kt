@@ -8,20 +8,21 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Android JUnit Platform plugin for Gradle.
- * Configures JUnit 5 tasks on all unit-tested variants of an Android project.
+ * Android JUnit Platform plugin for Gradle. Configures JUnit 5 tasks on all unit-tested variants of
+ * an Android project.
  */
 public class AndroidJUnitPlatformPlugin : Plugin<Project> {
 
-    override fun apply(project: Project): Unit = with(project) {
-        whenAndroidPluginAdded { plugin ->
-            PluginConfig.find(this, plugin)?.let { config ->
-                require(config.currentAgpVersion >= MIN_REQUIRED_AGP_VERSION) {
-                    "android-junit5 plugin requires Android Gradle Plugin $MIN_REQUIRED_AGP_VERSION or later"
-                }
+    override fun apply(project: Project): Unit =
+        with(project) {
+            whenAndroidPluginAdded { plugin ->
+                PluginConfig.find(this, plugin)?.let { config ->
+                    require(config.currentAgpVersion >= MIN_REQUIRED_AGP_VERSION) {
+                        "android-junit5 plugin requires Android Gradle Plugin $MIN_REQUIRED_AGP_VERSION or later"
+                    }
 
-                configureJUnitFramework(config)
+                    configureJUnitFramework(config)
+                }
             }
         }
-    }
 }

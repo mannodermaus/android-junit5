@@ -4,12 +4,13 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logger
 
 internal fun Logger.agpLog(level: LogLevel, message: String) {
-    val pair: Pair<String, (String) -> Unit> = when (level) {
-        LogLevel.ERROR -> "error" to { s -> error(s) }
-        LogLevel.WARN -> "warning" to { s -> warn(s) }
-        LogLevel.INFO -> "info" to { s -> info(s) }
-        else -> "debug" to { s -> debug(s) }
-    }
+    val pair: Pair<String, (String) -> Unit> =
+        when (level) {
+            LogLevel.ERROR -> "error" to { s -> error(s) }
+            LogLevel.WARN -> "warning" to { s -> warn(s) }
+            LogLevel.INFO -> "info" to { s -> info(s) }
+            else -> "debug" to { s -> debug(s) }
+        }
     val (kind, log) = pair
     log("""AGBPI: {"kind": "$kind","text":"$message"}""")
 }

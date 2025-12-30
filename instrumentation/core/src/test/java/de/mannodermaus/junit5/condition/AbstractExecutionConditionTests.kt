@@ -1,6 +1,8 @@
 package de.mannodermaus.junit5.condition
 
 import com.google.common.truth.Truth.assertThat
+import java.lang.reflect.AnnotatedElement
+import java.util.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInfo
@@ -10,50 +12,47 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.platform.commons.util.ReflectionUtils
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.lang.reflect.AnnotatedElement
-import java.util.*
 
 abstract class AbstractExecutionConditionTests {
 
-  private val context = mock<ExtensionContext>()
-  private var result: ConditionEvaluationResult? = null
+    private val context = mock<ExtensionContext>()
+    private var result: ConditionEvaluationResult? = null
 
-  /* Lifecycle */
+    /* Lifecycle */
 
-  @BeforeEach
-  fun beforeEach(testInfo: TestInfo) {
-    whenever(context.element).thenReturn(method(testInfo))
-  }
+    @BeforeEach
+    fun beforeEach(testInfo: TestInfo) {
+        whenever(context.element).thenReturn(method(testInfo))
+    }
 
-  /* Abstract */
+    /* Abstract */
 
-  abstract fun getTestClass(): Class<*>
+    abstract fun getTestClass(): Class<*>
 
-  abstract fun getExecutionCondition(): ExecutionCondition
+    abstract fun getExecutionCondition(): ExecutionCondition
 
-  /* Protected */
+    /* Protected */
 
-  protected fun evaluateCondition() {
-    this.result = getExecutionCondition().evaluateExecutionCondition(context)
-  }
+    protected fun evaluateCondition() {
+        this.result = getExecutionCondition().evaluateExecutionCondition(context)
+    }
 
-  protected fun assertEnabled() {
-    assertTrue(!result!!.isDisabled, "Should be enabled")
-  }
+    protected fun assertEnabled() {
+        assertTrue(!result!!.isDisabled, "Should be enabled")
+    }
 
-  protected fun assertDisabled() {
-    assertTrue(result!!.isDisabled, "Should be disabled")
-  }
+    protected fun assertDisabled() {
+        assertTrue(result!!.isDisabled, "Should be disabled")
+    }
 
-  protected fun assertReasonEquals(text: String) {
-    assertThat(result!!.reason).hasValue(text)
-  }
+    protected fun assertReasonEquals(text: String) {
+        assertThat(result!!.reason).hasValue(text)
+    }
 
-  /* Private */
+    /* Private */
 
-  private fun method(testInfo: TestInfo) =
-      method(getTestClass(), testInfo.testMethod.get().name)
+    private fun method(testInfo: TestInfo) = method(getTestClass(), testInfo.testMethod.get().name)
 
-  private fun method(clazz: Class<*>, methodName: String): Optional<AnnotatedElement> =
-      Optional.of(ReflectionUtils.findMethod(clazz, methodName).get())
+    private fun method(clazz: Class<*>, methodName: String): Optional<AnnotatedElement> =
+        Optional.of(ReflectionUtils.findMethod(clazz, methodName).get())
 }

@@ -16,12 +16,13 @@ data class FlavorSpec(val name: String, val dimension: String)
 
 interface AgpVariantAwareTests : AgpTests {
     fun defaultBuildTypes(): List<String>
+
     fun defaultProductFlavors(): List<FlavorSpec>
 
     fun forEachBuildType(
         beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
         beforeEvaluate: (Project) -> Unit = {},
-        testBody: (Project, String) -> Unit
+        testBody: (Project, String) -> Unit,
     ): List<DynamicTest> {
         val parentTestName = parentTestName()
 
@@ -40,7 +41,7 @@ interface AgpVariantAwareTests : AgpTests {
         flavorCreator: () -> List<FlavorSpec> = { defaultProductFlavors() },
         beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
         beforeEvaluate: (Project) -> Unit = {},
-        testBody: (Project, String) -> Unit
+        testBody: (Project, String) -> Unit,
     ): List<DynamicTest> {
         val parentTestName = parentTestName()
         val flavors = flavorCreator()
@@ -61,7 +62,7 @@ interface AgpVariantAwareTests : AgpTests {
         flavorCreator: () -> List<FlavorSpec> = { defaultProductFlavors() },
         beforeBuild: ((PluginSpecProjectCreator.Builder) -> Unit) = {},
         beforeEvaluate: (Project) -> Unit = {},
-        testBody: (Project, String) -> Unit
+        testBody: (Project, String) -> Unit,
     ): List<DynamicTest> {
         val parentTestName = parentTestName()
         val flavors = flavorCreator()
@@ -71,13 +72,15 @@ interface AgpVariantAwareTests : AgpTests {
         beforeEvaluate.invoke(project)
         project.evaluate()
 
-        return (defaultBuildTypes() * flavors).map { (buildType, flavor) ->
-            val variantName = "${flavor.name}${buildType.capitalized()}"
+        return (defaultBuildTypes() * flavors)
+            .map { (buildType, flavor) ->
+                val variantName = "${flavor.name}${buildType.capitalized()}"
 
-            DynamicTest.dynamicTest("$parentTestName for '$variantName'") {
-                testBody(project, variantName)
+                DynamicTest.dynamicTest("$parentTestName for '$variantName'") {
+                    testBody(project, variantName)
+                }
             }
-        }.toList()
+            .toList()
     }
 
     // Helpers and extensions
@@ -87,9 +90,7 @@ interface AgpVariantAwareTests : AgpTests {
         return Exception().stackTrace.getOrNull(5)?.methodName ?: "unknown test"
     }
 
-    fun Project.registerProductFlavors(
-        flavors: List<FlavorSpec> = defaultProductFlavors()
-    ) {
+    fun Project.registerProductFlavors(flavors: List<FlavorSpec> = defaultProductFlavors()) {
         val dimensions = flavors.map(FlavorSpec::dimension).distinct()
 
         with(project.android) {

@@ -9,15 +9,13 @@ import org.junit.runner.Runner
 import org.junit.runners.model.RunnerBuilder
 
 /**
- * Custom RunnerBuilder hooked into the main Test Instrumentation Runner
- * provided by the Android Test Support Library, which allows to run
- * the JUnit Platform for instrumented tests. With this,
- * the default JUnit 4-based Runner for Android instrumented tests is,
- * in a way, tricked into detecting JUnit Jupiter tests as well.
+ * Custom RunnerBuilder hooked into the main Test Instrumentation Runner provided by the Android
+ * Test Support Library, which allows to run the JUnit Platform for instrumented tests. With this,
+ * the default JUnit 4-based Runner for Android instrumented tests is, in a way, tricked into
+ * detecting JUnit Jupiter tests as well.
  *
- * The RunnerBuilder is added to the instrumentation runner
- * through a custom "testInstrumentationRunnerArgument" in the build.gradle script:
- *
+ * The RunnerBuilder is added to the instrumentation runner through a custom
+ * "testInstrumentationRunnerArgument" in the build.gradle script:
  * <pre>
  *   android {
  *     defaultConfig {
@@ -27,8 +25,8 @@ import org.junit.runners.model.RunnerBuilder
  *   }
  * </pre>
  *
- * (Suppressing unused, since this is hooked into the
- * project configuration via a Test Instrumentation Runner Argument.)
+ * (Suppressing unused, since this is hooked into the project configuration via a Test
+ * Instrumentation Runner Argument.)
  */
 public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBuilder() {
     private val junitFrameworkAvailable by lazy {
@@ -73,9 +71,9 @@ public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBu
             Log.e(LOG_TAG, "JUnitPlatform not found on runtime classpath")
             throw IllegalStateException(
                 "junit-platform-runner not found on runtime classpath of instrumentation tests; " +
-                        "please review your androidTest dependencies or raise an issue.", e
+                    "please review your androidTest dependencies or raise an issue.",
+                e,
             )
-
         } catch (e: Throwable) {
             Log.e(LOG_TAG, "Error constructing runner", e)
             throw e
@@ -84,18 +82,13 @@ public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBu
 
     /* Private */
 
-    private val ignorablePackages = setOf(
-        "java.",
-        "javax.",
-        "androidx.",
-        "com.android.",
-        "kotlin.",
-        "kotlinx.",
-    )
+    private val ignorablePackages =
+        setOf("java.", "javax.", "androidx.", "com.android.", "kotlin.", "kotlinx.")
 
-    private val Class<*>.isInIgnorablePackage: Boolean get() {
-        return ignorablePackages.any { name.startsWith(it) }
-    }
+    private val Class<*>.isInIgnorablePackage: Boolean
+        get() {
+            return ignorablePackages.any { name.startsWith(it) }
+        }
 
     private fun JUnitFrameworkRunnerParams.registerEnvironmentVariables() {
         environmentVariables.forEach { (key, value) ->
@@ -119,15 +112,13 @@ public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBu
 }
 
 /**
- * Custom RunnerBuilder hooked into the main Test Instrumentation Runner
- * provided by the Android Test Support Library, which allows to run
- * the JUnit Platform for instrumented tests. With this,
- * the default JUnit 4-based Runner for Android instrumented tests is,
- * in a way, tricked into detecting JUnit Jupiter tests as well.
+ * Custom RunnerBuilder hooked into the main Test Instrumentation Runner provided by the Android
+ * Test Support Library, which allows to run the JUnit Platform for instrumented tests. With this,
+ * the default JUnit 4-based Runner for Android instrumented tests is, in a way, tricked into
+ * detecting JUnit Jupiter tests as well.
  *
- * The RunnerBuilder is added to the instrumentation runner
- * through a custom "testInstrumentationRunnerArgument" in the build.gradle script:
- *
+ * The RunnerBuilder is added to the instrumentation runner through a custom
+ * "testInstrumentationRunnerArgument" in the build.gradle script:
  * <pre>
  *   android {
  *     defaultConfig {
@@ -137,11 +128,11 @@ public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBu
  *   }
  * </pre>
  *
- * (Suppressing unused, since this is hooked into the
- * project configuration via a Test Instrumentation Runner Argument.)
+ * (Suppressing unused, since this is hooked into the project configuration via a Test
+ * Instrumentation Runner Argument.)
  */
 @Deprecated(
     message = "Renamed to AndroidJUnitFrameworkBuilder",
-    replaceWith = ReplaceWith("AndroidJUnitFrameworkBuilder")
+    replaceWith = ReplaceWith("AndroidJUnitFrameworkBuilder"),
 )
 public class AndroidJUnit5Builder : AndroidJUnitFrameworkBuilder()

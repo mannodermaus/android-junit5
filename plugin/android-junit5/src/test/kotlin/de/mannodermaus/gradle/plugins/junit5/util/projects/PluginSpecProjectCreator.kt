@@ -15,13 +15,13 @@ enum class Type(val pluginId: String? = null) {
     Unset,
     Application("com.android.application"),
     Library("com.android.library"),
-    DynamicFeature("com.android.dynamic-feature")
+    DynamicFeature("com.android.dynamic-feature"),
 }
 
 /**
- * Creator class for test projects used specifically in the plugin-verification checks
- * described by PluginSpec. This is different to the FunctionalTestProjectCreator,
- * which utilizes actual source code located as a test resource.
+ * Creator class for test projects used specifically in the plugin-verification checks described by
+ * PluginSpec. This is different to the FunctionalTestProjectCreator, which utilizes actual source
+ * code located as a test resource.
  */
 class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
@@ -47,9 +47,8 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
         private var applyJacocoPlugin = false
         private var applyKotlinPlugin = false
 
-        private val project = ProjectBuilder.builder()
-            .withParent(parent)
-            .run {
+        private val project =
+            ProjectBuilder.builder().withParent(parent).run {
                 if (name != null) {
                     this.withName(name)
                 }
@@ -63,22 +62,21 @@ class PluginSpecProjectCreator(private val environment: TestEnvironment) {
 
         fun asAndroidLibrary() = setProjectTypeIfUnsetTo(Type.Library)
 
-        fun applyJUnit5Plugin(state: Boolean = true, configuration: ((AndroidJUnitPlatformExtension) -> Unit)? = null) =
-            apply {
-                this.applyJUnit5Plugin = if (state) {
+        fun applyJUnit5Plugin(
+            state: Boolean = true,
+            configuration: ((AndroidJUnitPlatformExtension) -> Unit)? = null,
+        ) = apply {
+            this.applyJUnit5Plugin =
+                if (state) {
                     configuration ?: {}
                 } else {
                     null
                 }
-            }
-
-        fun applyJacocoPlugin(state: Boolean = true) = apply {
-            this.applyJacocoPlugin = state
         }
 
-        fun applyKotlinPlugin(state: Boolean = true) = apply {
-            this.applyKotlinPlugin = state
-        }
+        fun applyJacocoPlugin(state: Boolean = true) = apply { this.applyJacocoPlugin = state }
+
+        fun applyKotlinPlugin(state: Boolean = true) = apply { this.applyKotlinPlugin = state }
 
         fun build(): Project {
             // Write out required Android file structure

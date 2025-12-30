@@ -5,9 +5,9 @@ import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunListener
 
 /**
- * A wrapper implementation around JUnit's [RunListener] class
- * which only works selectively. In other words, this implementation only delegates
- * to its parameter for test descriptors that pass the given [filter].
+ * A wrapper implementation around JUnit's [RunListener] class which only works selectively. In
+ * other words, this implementation only delegates to its parameter for test descriptors that pass
+ * the given [filter].
  */
 internal class FilteredRunListener(
     private val delegate: RunListener,

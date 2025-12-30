@@ -19,13 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource
 @ExtendWith(AndroidComposeExtension::class)
 class ClassComposeExtensionTests {
 
-    @ValueSource(
-        strings = [
-            "click me",
-            "touch me",
-            "jfc it actually works"
-        ]
-    )
+    @ValueSource(strings = ["click me", "touch me", "jfc it actually works"])
     @ParameterizedTest
     fun test(buttonLabel: String, extension: AndroidComposeExtension<ComponentActivity>) =
         extension.use {
@@ -34,9 +28,7 @@ class ClassComposeExtensionTests {
                     var counter by remember { mutableStateOf(0) }
 
                     Text(text = "Clicked: $counter")
-                    Button(onClick = { counter++ }) {
-                        Text(text = buttonLabel)
-                    }
+                    Button(onClick = { counter++ }) { Text(text = buttonLabel) }
                 }
             }
 
@@ -46,24 +38,23 @@ class ClassComposeExtensionTests {
         }
 
     @Test
-    fun anotherTest(extension: ComposeExtension) = extension.use {
-        setContent {
-            Column {
-                var showDetails by remember { mutableStateOf(false) }
+    fun anotherTest(extension: ComposeExtension) =
+        extension.use {
+            setContent {
+                Column {
+                    var showDetails by remember { mutableStateOf(false) }
 
-                Text("Hello world")
-                if (showDetails) {
-                    Text("Extra details")
-                }
+                    Text("Hello world")
+                    if (showDetails) {
+                        Text("Extra details")
+                    }
 
-                Button(onClick = { showDetails = !showDetails }) {
-                    Text("click")
+                    Button(onClick = { showDetails = !showDetails }) { Text("click") }
                 }
             }
-        }
 
-        onNodeWithText("Extra details").assertDoesNotExist()
-        onNodeWithText("click").performClick()
-        onNodeWithText("Extra details").assertIsDisplayed()
-    }
+            onNodeWithText("Extra details").assertDoesNotExist()
+            onNodeWithText("click").performClick()
+            onNodeWithText("Extra details").assertIsDisplayed()
+        }
 }

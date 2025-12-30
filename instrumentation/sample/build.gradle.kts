@@ -15,7 +15,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // Make sure to use the AndroidJUnitRunner (or a sub-class) in order to hook in the JUnit 5 Test Builder
+        // Make sure to use the AndroidJUnitRunner (or a sub-class) in order to hook in the JUnit 5
+        // Test Builder
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // These two lines are not needed for a normal integration;
@@ -25,23 +26,17 @@ android {
         testInstrumentationRunnerArguments["configurationParameters"] =
             "junit.jupiter.execution.parallel.enabled=true,junit.jupiter.execution.parallel.mode.default=concurrent"
 
-        buildFeatures {
-            buildConfig = true
-        }
+        buildFeatures { buildConfig = true }
 
         buildConfigField("boolean", "MY_VALUE", "true")
 
-        testOptions {
-            animationsDisabled = true
-        }
+        testOptions { animationsDisabled = true }
     }
 }
 
 junitPlatform {
     // Configure JUnit 5 tests here
-    filters("debug") {
-        excludeTags("slow")
-    }
+    filters("debug") { excludeTags("slow") }
 
     // Using local dependency instead of Maven coordinates
     instrumentationTests.enabled = false

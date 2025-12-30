@@ -6,10 +6,9 @@ import com.uchuhimo.konf.source.toml
 import de.mannodermaus.gradle.plugins.junit5.util.TestEnvironment
 import de.mannodermaus.gradle.plugins.junit5.util.TestedAgp
 import de.mannodermaus.gradle.plugins.junit5.util.TestedJUnit
-import org.gradle.util.GradleVersion
+import java.io.File
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.opentest4j.TestAbortedException
-import java.io.File
 
 private const val TEST_PROJECTS_RESOURCE = "/test-projects"
 private const val BUILD_GRADLE_TEMPLATE_NAME = "build.gradle.kts.template"
@@ -21,7 +20,7 @@ private const val SRC_FOLDER_NAME = "src"
 
 class FunctionalTestProjectCreator(
     private val outputFolder: File,
-    private val environment: TestEnvironment
+    private val environment: TestEnvironment,
 ) {
 
     private val projectRootFolder: File
@@ -33,15 +32,18 @@ class FunctionalTestProjectCreator(
         projectRootFolder = File(rootUrl.toURI())
 
         // Collect all eligible test folders
-        allSpecs = projectRootFolder.listFiles()
-            ?.filter { it.isDirectory }
-            ?.mapNotNull { folder -> Spec.tryCreate(folder) }
-            ?: emptyList()
+        allSpecs =
+            projectRootFolder
+                .listFiles()
+                ?.filter { it.isDirectory }
+                ?.mapNotNull { folder -> Spec.tryCreate(folder) } ?: emptyList()
     }
 
     fun specNamed(name: String): Spec =
         allSpecs.firstOrNull { it.name == name }
-            ?: throw IllegalAccessException("No test project named '$name' found in src/test/resources/test-projects")
+            ?: throw IllegalAccessException(
+                "No test project named '$name' found in src/test/resources/test-projects"
+            )
 
     @Throws(TestAbortedException::class)
     fun createProject(spec: Spec, agp: TestedAgp, junit: TestedJUnit): File {
@@ -68,7 +70,8 @@ class FunctionalTestProjectCreator(
         File(projectFolder, "gradle.properties").bufferedWriter().use { file ->
             file.appendLine("android.useAndroidX = true")
 
-            // From AGP 9, test components are only generated for the debug build type; disable this behavior
+            // From AGP 9, test components are only generated for the debug build type; disable this
+            // behavior
             file.appendLine("android.onlyEnableUnitTestForTheTestedBuildType = false")
         }
 
@@ -76,7 +79,8 @@ class FunctionalTestProjectCreator(
         val targetSrcFolder = File(projectFolder, "src").also { it.mkdir() }
         spec.srcFolder.copyRecursively(targetSrcFolder)
 
-        // Construct the build script from its raw template, using the environment properties as placeholders
+        // Construct the build script from its raw template, using the environment properties as
+        // placeholders
         val replacements = environment.envProps.mapKeys { it.key.toString() }.toMutableMap()
         replacements["AGP_VERSION"] = agp.version
         replacements["USE_KOTLIN"] = spec.useKotlin
@@ -88,17 +92,16 @@ class FunctionalTestProjectCreator(
         replacements["DISABLE_TESTS_FOR_BUILD_TYPES"] = spec.disableTestsForBuildTypes
         replacements["JUNIT_VERSION"] = junit.fullVersion
 
-        agp.requiresCompileSdk?.let {
-            replacements["OVERRIDE_SDK_VERSION"] = it
-        }
+        agp.requiresCompileSdk?.let { replacements["OVERRIDE_SDK_VERSION"] = it }
 
-        val processor = BuildScriptTemplateProcessor(
-            folder = projectRootFolder,
-            replacements = replacements,
-            agpVersion = agp.version,
-            gradleVersion = agp.requiresGradle,
-            junitVersion = junit.fullVersion,
-        )
+        val processor =
+            BuildScriptTemplateProcessor(
+                folder = projectRootFolder,
+                replacements = replacements,
+                agpVersion = agp.version,
+                gradleVersion = agp.requiresGradle,
+                junitVersion = junit.fullVersion,
+            )
 
         processor.process(BUILD_GRADLE_TEMPLATE_NAME).also { result ->
             File(projectFolder, OUTPUT_BUILD_GRADLE_NAME).writeText(result)
@@ -117,18 +120,14 @@ class FunctionalTestProjectCreator(
             // disable the test for plugin versions below that minimum requirement
             assumeTrue(
                 SemanticVersion(agp.version) >= SemanticVersion(spec.minAgpVersion),
-                "This project requires AGP ${spec.minAgpVersion} and was disabled on this version."
+                "This project requires AGP ${spec.minAgpVersion} and was disabled on this version.",
             )
         }
     }
 
     /* Types */
 
-    class Spec private constructor(
-        val name: String,
-        val srcFolder: File,
-        config: Config
-    ) {
+    class Spec private constructor(val name: String, val srcFolder: File, config: Config) {
         val task = config[TomlSpec.Settings.task]
         val minAgpVersion = config[TomlSpec.Settings.minAgpVersion]
         val useKotlin = config[TomlSpec.Settings.useKotlin]
@@ -140,9 +139,9 @@ class FunctionalTestProjectCreator(
         val allowSkipped = config[TomlSpec.Settings.allowSkipped]
         val expectedTests = config[TomlSpec.expectations]
 
-        val disableTestsForBuildTypes = config[TomlSpec.Settings.disableTestsForBuildTypes]
-            ?.split(",")?.map(String::trim)
-            ?: emptyList()
+        val disableTestsForBuildTypes =
+            config[TomlSpec.Settings.disableTestsForBuildTypes]?.split(",")?.map(String::trim)
+                ?: emptyList()
 
         companion object {
             fun tryCreate(folder: File): Spec? {
@@ -184,13 +183,11 @@ class FunctionalTestProjectCreator(
         }
     }
 
-    /**
-     * Data holder for one set of expected tests within the virtual project
-     */
+    /** Data holder for one set of expected tests within the virtual project */
     data class ExpectedTests(
         val buildType: String,
         val productFlavor: String?,
-        private val tests: String
+        private val tests: String,
     ) {
         val testsList = tests.split(",").map(String::trim)
     }

@@ -3,36 +3,30 @@ package de.mannodermaus.gradle.plugins.junit5.dsl
 import de.mannodermaus.Libraries
 import groovy.lang.Closure
 import groovy.lang.GroovyObjectSupport
+import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
-import javax.inject.Inject
 
-public abstract class AndroidJUnitPlatformExtension @Inject constructor(
-    project: Project,
-    private val objects: ObjectFactory
-) : GroovyObjectSupport() {
+public abstract class AndroidJUnitPlatformExtension
+@Inject
+constructor(project: Project, private val objects: ObjectFactory) : GroovyObjectSupport() {
     internal operator fun invoke(block: AndroidJUnitPlatformExtension.() -> Unit) {
         this.block()
     }
 
-    @get:Input
-    public abstract val configurationParameters: MapProperty<String, String>
+    @get:Input public abstract val configurationParameters: MapProperty<String, String>
 
-    /**
-     * Add a configuration parameter
-     */
+    /** Add a configuration parameter */
     public fun configurationParameter(key: String, value: String) {
         require(key.isNotBlank()) { "key must not be blank" }
         require('=' !in key) { "key must not contain '=': \"$key\"" }
         configurationParameters.put(key, value)
     }
 
-    /**
-     * Add a map of configuration parameters
-     */
+    /** Add a map of configuration parameters */
     public fun configurationParameters(parameters: Map<String, String>) {
         parameters.forEach { configurationParameter(it.key, it.value) }
     }
@@ -42,24 +36,19 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
     private val _filters = mutableMapOf<String?, FiltersExtension>()
 
     /**
-     * Configure the {@link FiltersExtension}
-     * for tests that belong to the provided build variant
+     * Configure the {@link FiltersExtension} for tests that belong to the provided build variant
      */
     public fun filters(qualifier: String?, action: Action<FiltersExtension>) {
         action.execute(filters(qualifier))
     }
 
-    /**
-     * Configure the global {@link FiltersExtension} for all variants.
-     */
+    /** Configure the global {@link FiltersExtension} for all variants. */
     public fun filters(action: Action<FiltersExtension>) {
         filters(null, action)
     }
 
     internal fun filters(qualifier: String? = null): FiltersExtension {
-        return _filters.getOrPut(qualifier) {
-            objects.newInstance(FiltersExtension::class.java)
-        }
+        return _filters.getOrPut(qualifier) { objects.newInstance(FiltersExtension::class.java) }
     }
 
     @Suppress("unused")
@@ -81,9 +70,7 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
 
     /* Android Instrumentation Test support */
 
-    /**
-     * Options for controlling instrumentation test execution with JUnit 5
-     */
+    /** Options for controlling instrumentation test execution with JUnit 5 */
     public val instrumentationTests: InstrumentationTestOptions =
         objects.newInstance(InstrumentationTestOptions::class.java).apply {
             enabled.convention(true)
@@ -98,9 +85,7 @@ public abstract class AndroidJUnitPlatformExtension @Inject constructor(
 
     /* Jacoco Reporting Integration */
 
-    /**
-     * Options for controlling Jacoco reporting
-     */
+    /** Options for controlling Jacoco reporting */
     public val jacocoOptions: JacocoOptions =
         objects.newInstance(JacocoOptions::class.java).apply {
             taskGenerationEnabled.convention(true)

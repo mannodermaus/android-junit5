@@ -7,19 +7,20 @@ import org.junit.runner.Runner
 /**
  * Since we can't reference [AndroidJUnitFramework] directly, use this factory for instantiation.
  *
- * On devices with sufficient API levels, delegate to the real implementation to drive
- * the execution of JUnit Framework tests. Below this threshold, they wouldn't work, however;
- * for this case, delegate to a dummy runner which will highlight these tests as ignored.
+ * On devices with sufficient API levels, delegate to the real implementation to drive the execution
+ * of JUnit Framework tests. Below this threshold, they wouldn't work, however; for this case,
+ * delegate to a dummy runner which will highlight these tests as ignored.
  */
 internal fun tryCreateJUnitFrameworkRunner(
     klass: Class<*>,
-    paramsSupplier: () -> JUnitFrameworkRunnerParams
+    paramsSupplier: () -> JUnitFrameworkRunnerParams,
 ): Runner? {
-    val runner = if (Build.VERSION.SDK_INT >= JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION) {
-        AndroidJUnitFramework(klass, paramsSupplier)
-    } else {
-        DummyJUnitFramework(klass)
-    }
+    val runner =
+        if (Build.VERSION.SDK_INT >= JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION) {
+            AndroidJUnitFramework(klass, paramsSupplier)
+        } else {
+            DummyJUnitFramework(klass)
+        }
 
     // It's still possible for the runner to not be relevant to the test run,
     // which is related to how further filters are applied (e.g. via @Tag).
@@ -29,5 +30,4 @@ internal fun tryCreateJUnitFrameworkRunner(
     return runner.takeIf(Runner::hasExecutableTests)
 }
 
-private fun Runner.hasExecutableTests() =
-    this.description.children.isNotEmpty()
+private fun Runner.hasExecutableTests() = this.description.children.isNotEmpty()

@@ -7,12 +7,13 @@ internal object LibcoreAccess {
     private class Wrapper {
         private val libcoreClass = Class.forName("libcore.io.Libcore")
         private val libcoreOsObject = libcoreClass.getField("os").get(null)
-        private val setEnvMethod = libcoreOsObject.javaClass.getMethod(
-            "setenv",
-            String::class.java,
-            String::class.java,
-            Boolean::class.java
-        )
+        private val setEnvMethod =
+            libcoreOsObject.javaClass.getMethod(
+                "setenv",
+                String::class.java,
+                String::class.java,
+                Boolean::class.java,
+            )
 
         fun setenv(key: String, value: String, overwrite: Boolean) {
             setEnvMethod.invoke(libcoreOsObject, key, value, overwrite)
@@ -29,11 +30,12 @@ internal object LibcoreAccess {
     }
 
     /**
-     * Invokes the method "libcore.io.Libcore.os.setenv(String, String)" with the provided key/value pair.
-     * This effectively adds a custom environment variable to the running process,
-     * allowing instrumentation tests to honor JUnit 5's @EnabledIfEnvironmentVariable and @DisabledIfEnvironmentVariable annotations.
+     * Invokes the method "libcore.io.Libcore.os.setenv(String, String)" with the provided key/value
+     * pair. This effectively adds a custom environment variable to the running process, allowing
+     * instrumentation tests to honor JUnit 5's @EnabledIfEnvironmentVariable
+     * and @DisabledIfEnvironmentVariable annotations.
      *
-     * @param key   Key of the variable
+     * @param key Key of the variable
      * @param value Value of the variable
      * @throws IllegalAccessException If Libcore is not available
      */

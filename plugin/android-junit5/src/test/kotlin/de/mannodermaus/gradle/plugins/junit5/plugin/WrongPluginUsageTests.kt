@@ -8,16 +8,17 @@ import org.junit.jupiter.api.extension.RegisterExtension
 
 class WrongPluginUsageTests {
 
-    @RegisterExtension
-    @JvmField
-    val projectExtension = TestProjectProviderExtension()
+    @RegisterExtension @JvmField val projectExtension = TestProjectProviderExtension()
 
     @Test
     fun `not applying any supported Android plugin`() {
-        val exception = assertThrows<ProjectConfigurationException> {
-            projectExtension.newProject().buildAndEvaluate()
-        }
+        val exception =
+            assertThrows<ProjectConfigurationException> {
+                projectExtension.newProject().buildAndEvaluate()
+            }
         assertThat(exception.cause?.message)
-            .contains("An Android plugin must be applied in order for android-junit5 to work correctly!")
+            .contains(
+                "An Android plugin must be applied in order for android-junit5 to work correctly!"
+            )
     }
 }

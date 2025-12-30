@@ -63,7 +63,7 @@ Depending on the Java requirements of the JUnit Framework version, these instrum
 that meet these requirements, however. These tests are ignored and their execution will be skipped on older devices.
 
 - JUnit 5 requires Java 8 and is only supported by devices running Android 8.0 (API 26) or newer
-- JUnit 6 requires Java 17 and is only supported by devices running Android 15 (API 35) or newer
+- **(Coming soon)** JUnit 6 requires Java 17 and is only supported by devices running Android 15 (API 35) or newer
 
 Before you can write instrumentation tests with JUnit Jupiter,
 make sure that your module is using the `androidx.test.runner.AndroidJUnitRunner`
@@ -120,9 +120,11 @@ dependencies {
 By default, the plugin will make sure to use a compatible version of the instrumentation test libraries
 when it sets up the artifacts automatically. However, it is possible to choose a custom version instead via its DSL:
 
+```kotlin
 junitPlatform {
     instrumentationTests.version.set("1.9.0")
 }
+```
 
 ## Official Support
 

@@ -4,16 +4,16 @@ import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.gradle.plugins.junit5.internal.extensions.junitPlatform
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.platform.commons.PreconditionViolationException
 
 interface AgpConfigurationParameterTests : AgpTests {
     @Test
     fun `throw exception if configuration parameter key is empty`() {
         val project = createProject().build()
 
-        val exception = assertThrows<IllegalArgumentException> {
-            project.junitPlatform.configurationParameter("", "some-value")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                project.junitPlatform.configurationParameter("", "some-value")
+            }
         assertThat(exception.message).contains("key must not be blank")
     }
 
@@ -21,9 +21,10 @@ interface AgpConfigurationParameterTests : AgpTests {
     fun `throw exception if configuration parameter key contains illegal characters`() {
         val project = createProject().build()
 
-        val exception = assertThrows<IllegalArgumentException> {
-            project.junitPlatform.configurationParameter("illegal=key", "some-value")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                project.junitPlatform.configurationParameter("illegal=key", "some-value")
+            }
         assertThat(exception.message).contains("key must not contain '='")
     }
 }

@@ -7,37 +7,34 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
 /**
- * Common baseline for AGP-based testing. Different subclasses extend this
- * for every type of Android Gradle Plugin supported by JUnit 5.
+ * Common baseline for AGP-based testing. Different subclasses extend this for every type of Android
+ * Gradle Plugin supported by JUnit 5.
  */
 abstract class AbstractProjectTests(
-        private val pluginApplier: ((PluginSpecProjectCreator.Builder) -> PluginSpecProjectCreator.Builder)
+    private val pluginApplier:
+        ((PluginSpecProjectCreator.Builder) -> PluginSpecProjectCreator.Builder)
 ) :
-        AgpConfigurationParameterTests,
-        AgpFilterTests,
-        AgpInstrumentationSupportTests,
-        AgpJacocoBaseTests,
-        AgpJacocoExclusionRuleTests,
-        AgpJacocoVariantTests,
-        AgpVariantTests {
+    AgpConfigurationParameterTests,
+    AgpFilterTests,
+    AgpInstrumentationSupportTests,
+    AgpJacocoBaseTests,
+    AgpJacocoExclusionRuleTests,
+    AgpJacocoVariantTests,
+    AgpVariantTests {
 
-    @RegisterExtension
-    @JvmField
-    val projectExtension = TestProjectProviderExtension()
+    @RegisterExtension @JvmField val projectExtension = TestProjectProviderExtension()
 
     override fun createProject(): PluginSpecProjectCreator.Builder {
-        return projectExtension.newProject()
-                .also { pluginApplier(it) }
+        return projectExtension.newProject().also { pluginApplier(it) }
     }
 
-    override fun defaultBuildTypes() = listOf(
-            "debug", "release"
-    )
+    override fun defaultBuildTypes() = listOf("debug", "release")
 
-    override fun defaultProductFlavors() = listOf(
+    override fun defaultProductFlavors() =
+        listOf(
             FlavorSpec(name = "free", dimension = "tier"),
-            FlavorSpec(name = "paid", dimension = "tier")
-    )
+            FlavorSpec(name = "paid", dimension = "tier"),
+        )
 
     @Test
     fun `add an extension to testOptions`() {

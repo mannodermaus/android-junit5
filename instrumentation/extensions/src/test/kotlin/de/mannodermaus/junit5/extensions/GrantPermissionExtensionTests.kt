@@ -5,13 +5,13 @@ import android.os.Build
 import androidx.test.internal.platform.content.PermissionGranter
 import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.junit5.testutil.AndroidBuildUtils.withApiLevel
+import java.lang.reflect.Modifier
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.mockito.Mockito.mock
-import java.lang.reflect.Modifier
 
 class GrantPermissionExtensionTests {
 
@@ -21,8 +21,7 @@ class GrantPermissionExtensionTests {
     fun `single permission`() {
         runExtension(Manifest.permission.CAMERA)
 
-        assertThat(granter.grantedPermissions)
-            .containsExactly(Manifest.permission.CAMERA)
+        assertThat(granter.grantedPermissions).containsExactly(Manifest.permission.CAMERA)
     }
 
     @Test
@@ -36,7 +35,8 @@ class GrantPermissionExtensionTests {
             .containsExactly(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-            ).inOrder()
+            )
+            .inOrder()
     }
 
     @TestFactory
@@ -53,7 +53,8 @@ class GrantPermissionExtensionTests {
                         .containsExactly(
                             Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.READ_EXTERNAL_STORAGE,
-                        ).inOrder()
+                        )
+                        .inOrder()
                 }
             }
         }
@@ -65,7 +66,9 @@ class GrantPermissionExtensionTests {
         // Look inside Build.VERSION_CODES and locate
         // the static int field with the highest value,
         // except for the 'CUR_DEVELOPMENT' test field
-        return Build.VERSION_CODES::class.java.declaredFields
+        return Build.VERSION_CODES::class
+            .java
+            .declaredFields
             .filter { Modifier.isStatic(it.modifiers) }
             .filter { it.type == Int::class.java }
             .filter { it.name != "CUR_DEVELOPMENT" }

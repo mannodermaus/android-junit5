@@ -10,27 +10,21 @@ import de.mannodermaus.junit5.testutil.reflect.setStaticValue
 public object AndroidBuildUtils {
 
     public fun withApiLevel(api: Int, block: () -> Unit) {
-        withMockedStaticField<Build.VERSION>(
-            fieldName = "SDK_INT",
-            value = api,
-            block = block,
-        )
+        withMockedStaticField<Build.VERSION>(fieldName = "SDK_INT", value = api, block = block)
     }
 
     public fun withManufacturer(name: String, block: () -> Unit) {
-        withMockedStaticField<Build>(
-            fieldName = "MANUFACTURER",
-            value = name,
-            block = block,
-        )
+        withMockedStaticField<Build>(fieldName = "MANUFACTURER", value = name, block = block)
     }
 
     public fun withMockedInstrumentation(arguments: Bundle = Bundle(), block: () -> Unit) {
-        val (oldInstrumentation, oldArguments) = try {
-            InstrumentationRegistry.getInstrumentation() to InstrumentationRegistry.getArguments()
-        } catch (_: Throwable) {
-            null to null
-        }
+        val (oldInstrumentation, oldArguments) =
+            try {
+                InstrumentationRegistry.getInstrumentation() to
+                    InstrumentationRegistry.getArguments()
+            } catch (_: Throwable) {
+                null to null
+            }
 
         try {
             val instrumentation = StubInstrumentation()

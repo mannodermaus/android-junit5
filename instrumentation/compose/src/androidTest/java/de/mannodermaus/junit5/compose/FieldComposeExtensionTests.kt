@@ -22,28 +22,21 @@ class FieldComposeExtensionTests {
     @OptIn(ExperimentalTestApi::class)
     val extension = createComposeExtension()
 
-    @ValueSource(
-        strings = [
-            "click me",
-            "touch me",
-            "jfc it actually works"
-        ]
-    )
+    @ValueSource(strings = ["click me", "touch me", "jfc it actually works"])
     @ParameterizedTest
-    fun test(buttonLabel: String) = extension.use {
-        setContent {
-            Column {
-                var counter by remember { mutableStateOf(0) }
+    fun test(buttonLabel: String) =
+        extension.use {
+            setContent {
+                Column {
+                    var counter by remember { mutableStateOf(0) }
 
-                Text(text = "Clicked: $counter")
-                Button(onClick = { counter++ }) {
-                    Text(text = buttonLabel)
+                    Text(text = "Clicked: $counter")
+                    Button(onClick = { counter++ }) { Text(text = buttonLabel) }
                 }
             }
-        }
 
-        onNodeWithText("Clicked: 0").assertIsDisplayed()
-        onNodeWithText(buttonLabel).performClick()
-        onNodeWithText("Clicked: 1").assertIsDisplayed()
-    }
+            onNodeWithText("Clicked: 0").assertIsDisplayed()
+            onNodeWithText(buttonLabel).performClick()
+            onNodeWithText("Clicked: 1").assertIsDisplayed()
+        }
 }

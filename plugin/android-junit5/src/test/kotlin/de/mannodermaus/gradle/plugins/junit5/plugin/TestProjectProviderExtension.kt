@@ -8,9 +8,8 @@ import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
 /**
- * A Junit 5 extension to provide the handle
- * to a Gradle project structure for testing.
- * Cleans up automatically after each test.
+ * A Junit 5 extension to provide the handle to a Gradle project structure for testing. Cleans up
+ * automatically after each test.
  */
 class TestProjectProviderExtension : BeforeEachCallback, AfterEachCallback {
 

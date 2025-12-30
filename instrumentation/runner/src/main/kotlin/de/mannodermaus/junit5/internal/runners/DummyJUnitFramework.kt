@@ -5,14 +5,14 @@ import android.util.Log
 import de.mannodermaus.junit5.internal.JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION
 import de.mannodermaus.junit5.internal.LOG_TAG
 import de.mannodermaus.junit5.internal.dummy.JupiterTestMethodFinder
+import java.lang.reflect.Method
 import org.junit.runner.Description
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
-import java.lang.reflect.Method
 
 /**
- * Fake Runner that marks all JUnit Framework methods as ignored,
- * used for old devices without the required Java capabilities.
+ * Fake Runner that marks all JUnit Framework methods as ignored, used for old devices without the
+ * required Java capabilities.
  */
 internal class DummyJUnitFramework(private val testClass: Class<*>) : Runner() {
 
@@ -22,9 +22,9 @@ internal class DummyJUnitFramework(private val testClass: Class<*>) : Runner() {
         Log.w(
             LOG_TAG,
             "JUnit Framework is not supported on this device: " +
-                    "API level ${Build.VERSION.SDK_INT} is less than " +
-                    "${JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION}, the minimum requirement. " +
-                    "All Jupiter tests for ${testClass.name} will be disabled."
+                "API level ${Build.VERSION.SDK_INT} is less than " +
+                "${JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION}, the minimum requirement. " +
+                "All Jupiter tests for ${testClass.name} will be disabled.",
         )
 
         for (testMethod in testMethods) {

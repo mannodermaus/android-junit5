@@ -12,29 +12,31 @@ internal class JUnitPlatformTaskConfig(
     private val extension: AndroidJUnitPlatformExtension,
 ) {
 
-    // There is a distinct application order, which determines how values are merged and overwritten.
+    // There is a distinct application order, which determines how values are merged and
+    // overwritten.
     // From top to bottom, this list goes as follows (values on the bottom will override conflicting
     // entries specified above them):
     // 1) Default ("filters")
     // 2) Build-type-specific (e.g. "debug")
     // 3) Flavor-specific (e.g. "free")
     // 4) Variant-specific (e.g. "freeDebug")
-    private fun collect(func: FiltersExtension.() -> IncludeExcludeContainer): IncludeExcludeContainer {
+    private fun collect(
+        func: FiltersExtension.() -> IncludeExcludeContainer
+    ): IncludeExcludeContainer {
         // 1)
         val layer1 = filtersOf(null, func)
         // 2)
         val layer2 = layer1 + filtersOf(variant.buildType, func)
         // 3)
-        val layer3 = variant.productFlavors
-            .map { filtersOf(it.second, func) }
-            .fold(layer2) { a, b -> a + b }
+        val layer3 =
+            variant.productFlavors.map { filtersOf(it.second, func) }.fold(layer2) { a, b -> a + b }
         // 4)
         return layer3 + filtersOf(variant.name, func)
     }
 
     private inline fun filtersOf(
         qualifier: String?,
-        func: FiltersExtension.() -> IncludeExcludeContainer
+        func: FiltersExtension.() -> IncludeExcludeContainer,
     ): IncludeExcludeContainer = extension.filters(qualifier).run { func() }
 
     val combinedIncludePatterns = this.collect { patterns }.include.toTypedArray()

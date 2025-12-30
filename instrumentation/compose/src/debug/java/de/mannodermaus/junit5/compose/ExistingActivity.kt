@@ -20,9 +20,7 @@ public class ExistingActivity : ComponentActivity() {
                 var counter by remember { mutableIntStateOf(0) }
 
                 Text(text = "Clicked: $counter")
-                Button(onClick = { counter++ }) {
-                    Text("click")
-                }
+                Button(onClick = { counter++ }) { Text("click") }
             }
         }
     }

@@ -16,7 +16,7 @@ internal data class JUnitFrameworkRunnerParams(
     private val filters: List<Filter<*>> = emptyList(),
     val environmentVariables: Map<String, String> = emptyMap(),
     val systemProperties: Map<String, String> = emptyMap(),
-    private val configurationParameters: Map<String, String> = emptyMap()
+    private val configurationParameters: Map<String, String> = emptyMap(),
 ) {
     fun createSelectors(testClass: Class<*>): List<DiscoverySelector> {
         return ParsedSelectors.fromBundle(testClass, arguments)
@@ -42,25 +42,30 @@ internal data class JUnitFrameworkRunnerParams(
             val arguments = InstrumentationRegistry.getArguments()
 
             // Parse environment variables & pass them to the JVM
-            val environmentVariables = arguments.getString(ARG_ENVIRONMENT_VARIABLES)
-                ?.run { PropertiesParser.fromString(this) }
-                ?: emptyMap()
+            val environmentVariables =
+                arguments.getString(ARG_ENVIRONMENT_VARIABLES)?.run {
+                    PropertiesParser.fromString(this)
+                } ?: emptyMap()
 
             // Parse system properties & pass them to the JVM
-            val systemProperties = arguments.getString(ARG_SYSTEM_PROPERTIES)
-                ?.run { PropertiesParser.fromString(this) }
-                ?: emptyMap()
+            val systemProperties =
+                arguments.getString(ARG_SYSTEM_PROPERTIES)?.run {
+                    PropertiesParser.fromString(this)
+                } ?: emptyMap()
 
             // Parse configuration parameters
-            val configurationParameters = arguments.getString(ARG_CONFIGURATION_PARAMETERS)
-                ?.run { PropertiesParser.fromString(this) }
-                ?: emptyMap()
+            val configurationParameters =
+                arguments.getString(ARG_CONFIGURATION_PARAMETERS)?.run {
+                    PropertiesParser.fromString(this)
+                } ?: emptyMap()
 
-            // The user may apply test filters to their instrumentation tests through the Gradle plugin's DSL,
+            // The user may apply test filters to their instrumentation tests through the Gradle
+            // plugin's DSL,
             // which aren't subject to the filtering imposed through adb.
             // A special resource file may be looked up at runtime, containing
             // the filters to apply by the AndroidJUnit5 runner.
-            val filters = GeneratedFilters.fromContext(instrumentation.context) +
+            val filters =
+                GeneratedFilters.fromContext(instrumentation.context) +
                     listOfNotNull(ShardingFilter.fromArguments(arguments))
 
             return JUnitFrameworkRunnerParams(
@@ -68,7 +73,7 @@ internal data class JUnitFrameworkRunnerParams(
                 filters,
                 environmentVariables,
                 systemProperties,
-                configurationParameters
+                configurationParameters,
             )
         }
     }

@@ -8,5 +8,5 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(EnabledOnManufacturerCondition::class)
 public annotation class EnabledOnManufacturer(
     val value: Array<String>,
-    val ignoreCase: Boolean = true
+    val ignoreCase: Boolean = true,
 )

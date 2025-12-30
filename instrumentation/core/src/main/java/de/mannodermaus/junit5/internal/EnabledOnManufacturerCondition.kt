@@ -1,7 +1,7 @@
 package de.mannodermaus.junit5.internal
 
-import androidx.annotation.RequiresApi
 import android.os.Build
+import androidx.annotation.RequiresApi
 import de.mannodermaus.junit5.condition.EnabledOnManufacturer
 import org.junit.jupiter.api.extension.ConditionEvaluationResult
 import org.junit.jupiter.api.extension.ExecutionCondition
@@ -16,11 +16,15 @@ internal class EnabledOnManufacturerCondition : ExecutionCondition {
             ConditionEvaluationResult.enabled("@EnabledOnManufacturer is not present")
 
         fun enabled(): ConditionEvaluationResult {
-            return ConditionEvaluationResult.enabled("Enabled on Manufacturer: " + Build.MANUFACTURER)
+            return ConditionEvaluationResult.enabled(
+                "Enabled on Manufacturer: " + Build.MANUFACTURER
+            )
         }
 
         fun disabled(): ConditionEvaluationResult {
-            return ConditionEvaluationResult.disabled("Disabled on Manufacturer: " + Build.MANUFACTURER)
+            return ConditionEvaluationResult.disabled(
+                "Disabled on Manufacturer: " + Build.MANUFACTURER
+            )
         }
     }
 
@@ -35,7 +39,7 @@ internal class EnabledOnManufacturerCondition : ExecutionCondition {
 
             Preconditions.condition(
                 patterns.isNotEmpty(),
-                "You must declare at least one Manufacturer in @EnabledOnManufacturer"
+                "You must declare at least one Manufacturer in @EnabledOnManufacturer",
             )
 
             return if (patterns.any { Build.MANUFACTURER.equals(it, ignoreCase = ignoreCase) }) {

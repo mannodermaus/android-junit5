@@ -33,10 +33,11 @@ internal class StubInstrumentation : Instrumentation() {
         @SuppressLint("DiscouragedApi")
         private fun createMockContext(): Context {
             // Needed by AndroidJUnit5Tests in module ':runner'
-            val resources = mock<Resources> {
-                on { getIdentifier(any(), any(), any()) } doReturn 0
-                on { openRawResource(any()) } doThrow Resources.NotFoundException("mocked call")
-            }
+            val resources =
+                mock<Resources> {
+                    on { getIdentifier(any(), any(), any()) } doReturn 0
+                    on { openRawResource(any()) } doThrow Resources.NotFoundException("mocked call")
+                }
 
             return mock {
                 on { packageName } doReturn "de.mannodermaus.junit5.instrumentation"

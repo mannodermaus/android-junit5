@@ -2,18 +2,18 @@ package de.mannodermaus.junit5.internal.dummy
 
 import android.util.Log
 import de.mannodermaus.junit5.internal.LOG_TAG
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.params.ParameterizedTest
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 
 /**
- * Algorithm to find all methods annotated with a JUnit Jupiter annotation
- * for devices running below the API level requirement of the JUnit Framework.
- * As they rely on Java 8 stuff, we're unable to rely on JUnit Platform's own reflection utilities.
+ * Algorithm to find all methods annotated with a JUnit Jupiter annotation for devices running below
+ * the API level requirement of the JUnit Framework. As they rely on Java 8 stuff, we're unable to
+ * rely on JUnit Platform's own reflection utilities.
  */
 internal object JupiterTestMethodFinder {
     // Carefully access the Jupiter annotations, since it's possible that they aren't on
@@ -57,7 +57,7 @@ internal object JupiterTestMethodFinder {
             Log.w(
                 LOG_TAG,
                 "Encountered ${t.javaClass.simpleName} while finding Jupiter test methods for ${this@doFind.name}",
-                t
+                t,
             )
         }
     }
