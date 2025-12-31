@@ -30,8 +30,8 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/FiltersExtension
 	public final fun includeTags ([Ljava/lang/String;)V
 }
 
-public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationTestOptions {
-	public fun <init> ()V
+public abstract interface class de/mannodermaus/gradle/plugins/junit5/dsl/InstrumentationTestOptions {
+	public abstract fun getBehaviorForUnsupportedDevices ()Lorg/gradle/api/provider/Property;
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public abstract fun getIncludeExtensions ()Lorg/gradle/api/provider/Property;
 	public abstract fun getUseConfigurationParameters ()Lorg/gradle/api/provider/Property;
@@ -63,6 +63,14 @@ public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Fi
 public abstract class de/mannodermaus/gradle/plugins/junit5/dsl/JacocoOptions$Report {
 	public abstract fun getDestination ()Lorg/gradle/api/file/FileSystemLocationProperty;
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
+}
+
+public final class de/mannodermaus/gradle/plugins/junit5/dsl/UnsupportedDeviceBehavior : java/lang/Enum {
+	public static final field Fail Lde/mannodermaus/gradle/plugins/junit5/dsl/UnsupportedDeviceBehavior;
+	public static final field Skip Lde/mannodermaus/gradle/plugins/junit5/dsl/UnsupportedDeviceBehavior;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lde/mannodermaus/gradle/plugins/junit5/dsl/UnsupportedDeviceBehavior;
+	public static fun values ()[Lde/mannodermaus/gradle/plugins/junit5/dsl/UnsupportedDeviceBehavior;
 }
 
 public abstract class de/mannodermaus/gradle/plugins/junit5/tasks/AndroidJUnit5JacocoReport : org/gradle/testing/jacoco/tasks/JacocoReport {
