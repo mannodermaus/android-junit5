@@ -63,7 +63,7 @@ public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBu
 
         try {
             return if (junitFrameworkAvailable) {
-                tryCreateJUnitFrameworkRunner(testClass) { params }
+                tryCreateJUnitFrameworkRunner(testClass, params)
             } else {
                 null
             }

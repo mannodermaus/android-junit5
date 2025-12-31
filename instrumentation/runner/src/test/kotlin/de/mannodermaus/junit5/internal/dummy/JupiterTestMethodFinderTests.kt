@@ -96,8 +96,8 @@ class JupiterTestMethodFinderTests {
         val listener = CountingRunListener()
         notifier.addListener(listener)
 
-        val params = JUnitFrameworkRunnerParams(filters = listOfNotNull(filter))
-        AndroidJUnitFramework(cls) { params }.run(notifier)
+        val params = JUnitFrameworkRunnerParams(filtersSupplier = { listOfNotNull(filter) })
+        AndroidJUnitFramework(cls, params).run(notifier)
 
         return listener
     }

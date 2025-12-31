@@ -22,6 +22,9 @@ import de.mannodermaus.gradle.plugins.junit5.internal.extensions.usesJUnitJupite
 import de.mannodermaus.gradle.plugins.junit5.internal.usage.DependencyUsageDetector
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5JacocoReport
 import de.mannodermaus.gradle.plugins.junit5.tasks.AndroidJUnit5WriteFilters
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.forEach
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 
@@ -125,16 +128,26 @@ private fun AndroidJUnitPlatformExtension.prepareInstrumentationTests(
 
     // Copy over configuration parameters to instrumentation tests
     if (instrumentationTests.useConfigurationParameters.get()) {
-        val instrumentationParams = runnerArgs.getAsList("configurationParameters").toMutableList()
-
-        this.configurationParameters.get().forEach { (key, value) ->
-            instrumentationParams.add("$key=$value")
-        }
-
-        runnerArgs["configurationParameters"] = instrumentationParams.joinToString(",")
+        runnerArgs.addConfigurationParameters(this.configurationParameters.get())
     }
 
+    // Supply behavior value for unsupported devices (i.e. how to react when running on old devices)
+    runnerArgs.addConfigurationParameter(
+        "de.mannodermaus.junit.unsupported.behavior",
+        instrumentationTests.behaviorForUnsupportedDevices.get().value,
+    )
+
     attachDependencies(project, "androidTestImplementation")
+}
+
+private fun MutableMap<String, String>.addConfigurationParameters(values: Map<String, String>) {
+    val instrumentationParams = this.getAsList("configurationParameters").toMutableList()
+    values.forEach { (key, value) -> instrumentationParams.add("$key=$value") }
+    this["configurationParameters"] = instrumentationParams.joinToString(",")
+}
+
+private fun MutableMap<String, String>.addConfigurationParameter(key: String, value: String) {
+    addConfigurationParameters(mapOf(key to value))
 }
 
 /**

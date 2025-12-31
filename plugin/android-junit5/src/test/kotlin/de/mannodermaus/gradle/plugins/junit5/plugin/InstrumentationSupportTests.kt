@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import de.mannodermaus.Libraries.Instrumentation
 import de.mannodermaus.Libraries.JUnit
 import de.mannodermaus.Libraries.JUnit.JUnit5
+import de.mannodermaus.gradle.plugins.junit5.dsl.UnsupportedDeviceBehavior
 import de.mannodermaus.gradle.plugins.junit5.extensions.android
 import de.mannodermaus.gradle.plugins.junit5.internal.artifact
 import de.mannodermaus.gradle.plugins.junit5.internal.config.ANDROID_JUNIT5_RUNNER_BUILDER_CLASS
@@ -80,6 +81,31 @@ internal class InstrumentationSupportTests {
     /* Configuration parameters */
 
     @Test
+    fun `always includes config param for unsupported device behavior`() {
+        project.addJUnit(JUnit5, "androidTest")
+        project.evaluate()
+
+        val runnerArgs =
+            project.android.defaultConfig.testInstrumentationRunnerArguments[
+                    "configurationParameters"]
+        assertThat(runnerArgs).contains("de.mannodermaus.junit.unsupported.behavior=skip")
+    }
+
+    @Test
+    fun `can configure the unsupported device behavior via dsl`() {
+        project.addJUnit(JUnit5, "androidTest")
+        project.junitPlatform.instrumentationTests.behaviorForUnsupportedDevices.set(
+            UnsupportedDeviceBehavior.Fail
+        )
+        project.evaluate()
+
+        val runnerArgs =
+            project.android.defaultConfig.testInstrumentationRunnerArguments[
+                    "configurationParameters"]
+        assertThat(runnerArgs).contains("de.mannodermaus.junit.unsupported.behavior=fail")
+    }
+
+    @Test
     fun `copy configuration parameters to test runner arguments`() {
         project.addJUnit(JUnit5, "androidTest")
         with(project.junitPlatform) {
@@ -88,11 +114,11 @@ internal class InstrumentationSupportTests {
         }
         project.evaluate()
 
-        assertThat(
-                project.android.defaultConfig.testInstrumentationRunnerArguments[
-                        "configurationParameters"]
-            )
-            .isEqualTo("my.parameter1=true,my.parameter2=1234")
+        val runnerArgs =
+            project.android.defaultConfig.testInstrumentationRunnerArguments[
+                    "configurationParameters"]
+        assertThat(runnerArgs).contains("my.parameter1=true")
+        assertThat(runnerArgs).contains("my.parameter2=1234")
     }
 
     @Test
@@ -105,11 +131,11 @@ internal class InstrumentationSupportTests {
         }
         project.evaluate()
 
-        assertThat(
-                project.android.defaultConfig.testInstrumentationRunnerArguments[
-                        "configurationParameters"]
-            )
-            .isNull()
+        val runnerArgs =
+            project.android.defaultConfig.testInstrumentationRunnerArguments[
+                    "configurationParameters"]
+        assertThat(runnerArgs).doesNotContain("my.parameter1=true")
+        assertThat(runnerArgs).doesNotContain("my.parameter2=1234")
     }
 
     /* Dependencies */

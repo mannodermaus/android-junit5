@@ -2,6 +2,7 @@ package de.mannodermaus.junit5.internal.runners
 
 import android.os.Bundle
 import androidx.test.platform.app.InstrumentationRegistry
+import de.mannodermaus.junit5.internal.ConfigurationParameters
 import de.mannodermaus.junit5.internal.discovery.GeneratedFilters
 import de.mannodermaus.junit5.internal.discovery.ParsedSelectors
 import de.mannodermaus.junit5.internal.discovery.PropertiesParser
@@ -13,7 +14,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 
 internal data class JUnitFrameworkRunnerParams(
     private val arguments: Bundle = Bundle(),
-    private val filters: List<Filter<*>> = emptyList(),
+    private val filtersSupplier: () -> List<Filter<*>> = { emptyList() },
     val environmentVariables: Map<String, String> = emptyMap(),
     val systemProperties: Map<String, String> = emptyMap(),
     private val configurationParameters: Map<String, String> = emptyMap(),
@@ -25,13 +26,16 @@ internal data class JUnitFrameworkRunnerParams(
     fun createDiscoveryRequest(selectors: List<DiscoverySelector>): LauncherDiscoveryRequest {
         return LauncherDiscoveryRequestBuilder.request()
             .selectors(selectors)
-            .filters(*this.filters.toTypedArray())
+            .filters(*this.filtersSupplier().toTypedArray())
             .configurationParameters(this.configurationParameters)
             .build()
     }
 
     val isParallelExecutionEnabled: Boolean
         get() = configurationParameters["junit.jupiter.execution.parallel.enabled"] == "true"
+
+    val behaviorForUnsupportedDevices: String?
+        get() = configurationParameters[ConfigurationParameters.BEHAVIOR_FOR_UNSUPPORTED_DEVICES]
 
     val isUsingOrchestrator: Boolean
         get() = arguments.getString("orchestratorService") != null
@@ -64,16 +68,19 @@ internal data class JUnitFrameworkRunnerParams(
             // which aren't subject to the filtering imposed through adb.
             // A special resource file may be looked up at runtime, containing
             // the filters to apply by the AndroidJUnit5 runner.
-            val filters =
+            // This requires lazy access because it reaches into JUnit internals,
+            // which may need Java functionality not supported by the current device
+            val filtersSupplier = {
                 GeneratedFilters.fromContext(instrumentation.context) +
                     listOfNotNull(ShardingFilter.fromArguments(arguments))
+            }
 
             return JUnitFrameworkRunnerParams(
-                arguments,
-                filters,
-                environmentVariables,
-                systemProperties,
-                configurationParameters,
+                arguments = arguments,
+                filtersSupplier = filtersSupplier,
+                environmentVariables = environmentVariables,
+                systemProperties = systemProperties,
+                configurationParameters = configurationParameters,
             )
         }
     }

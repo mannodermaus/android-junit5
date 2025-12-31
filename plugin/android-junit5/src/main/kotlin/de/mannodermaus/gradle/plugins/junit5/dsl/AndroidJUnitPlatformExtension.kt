@@ -75,6 +75,7 @@ constructor(project: Project, private val objects: ObjectFactory) : GroovyObject
         objects.newInstance(InstrumentationTestOptions::class.java).apply {
             enabled.convention(true)
             version.convention(Libraries.Instrumentation.version)
+            behaviorForUnsupportedDevices.convention(UnsupportedDeviceBehavior.Skip)
             includeExtensions.convention(false)
             useConfigurationParameters.convention(true)
         }

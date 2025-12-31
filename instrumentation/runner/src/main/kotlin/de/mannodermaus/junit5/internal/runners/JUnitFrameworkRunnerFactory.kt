@@ -13,13 +13,13 @@ import org.junit.runner.Runner
  */
 internal fun tryCreateJUnitFrameworkRunner(
     klass: Class<*>,
-    paramsSupplier: () -> JUnitFrameworkRunnerParams,
+    params: JUnitFrameworkRunnerParams,
 ): Runner? {
     val runner =
         if (Build.VERSION.SDK_INT >= JUNIT_FRAMEWORK_MINIMUM_SDK_VERSION) {
-            AndroidJUnitFramework(klass, paramsSupplier)
+            AndroidJUnitFramework(klass, params)
         } else {
-            DummyJUnitFramework(klass)
+            DummyJUnitFramework(klass, params)
         }
 
     // It's still possible for the runner to not be relevant to the test run,

@@ -8,6 +8,7 @@ Change Log
 - Update to Compose 1.10
 - Support instrumentation with JUnit 5 and 6 (the plugin will choose the correct runtime accordingly)
 - Avoid error when a client doesn't include junit-jupiter-params on the runtime classpath
+- New: Instead of silently skipping tests when running on unsupported devices, fail test execution via configuration parameter `de.mannodermaus.junit.unsupported.behavior`
 
 ## 1.9.0 (2025-10-10)
 
