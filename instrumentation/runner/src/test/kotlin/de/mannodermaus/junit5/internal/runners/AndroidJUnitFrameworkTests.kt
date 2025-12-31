@@ -81,7 +81,11 @@ class AndroidJUnitFrameworkTests {
         val resultRef = AtomicReference<CollectingRunListener.Results>()
         val args = buildArgs(shardingConfig)
         withMockedInstrumentation(args) {
-            val runner = AndroidJUnitFramework(Sample_NormalTests::class.java)
+            val runner =
+                AndroidJUnitFramework(
+                    testClass = Sample_NormalTests::class.java,
+                    params = JUnitFrameworkRunnerParams(),
+                )
             val listener = CollectingRunListener()
             val notifier = RunNotifier().also { it.addListener(listener) }
             runner.run(notifier)

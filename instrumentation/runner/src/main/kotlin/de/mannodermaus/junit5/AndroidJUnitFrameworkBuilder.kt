@@ -48,12 +48,13 @@ public open class AndroidJUnitFrameworkBuilder internal constructor() : RunnerBu
     }
 
     // One-time parsing setup for runner params, taken from instrumentation arguments
-    private val params =
+    private val params by lazy {
         JUnitFrameworkRunnerParams.create().also { params ->
             // Apply all environment variables & system properties to the running process
             params.registerEnvironmentVariables()
             params.registerSystemProperties()
         }
+    }
 
     @Throws(Throwable::class)
     override fun runnerForClass(testClass: Class<*>): Runner? {
