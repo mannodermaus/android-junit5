@@ -39,6 +39,12 @@ kotlin { explicitApi() }
 gradlePlugin {
     plugins {
         register("plugin") {
+            id = "de.mannodermaus.android-junit"
+            implementationClass = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
+        }
+
+        // Old plugin ID
+        register("plugin2") {
             id = "de.mannodermaus.android-junit5"
             implementationClass = "de.mannodermaus.gradle.plugins.junit5.AndroidJUnitPlatformPlugin"
         }

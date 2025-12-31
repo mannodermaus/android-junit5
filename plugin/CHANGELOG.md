@@ -2,6 +2,8 @@ Change Log
 ==========
 
 ## Unreleased
+
+## 2.0.0 (2025-12-31)
 - Update to Kotlin 2.3
 - Internal: Replace deprecated `OutputDirectoryProvider` with its correct replacement
 - Support instrumentation with JUnit 5 and 6 (the plugin will choose the correct runtime accordingly)

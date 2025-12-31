@@ -3,6 +3,8 @@ Change Log
 
 ## Unreleased
 
+## 2.0.0 (2025-12-31)
+
 - Removed deprecated `runComposeTest` API from `ComposeExtension`
 - Update to Kotlin 2.3
 - Update to Compose 1.10
