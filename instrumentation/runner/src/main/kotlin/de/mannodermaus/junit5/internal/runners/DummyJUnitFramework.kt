@@ -25,18 +25,14 @@ internal class DummyJUnitFramework(
 
     override fun run(notifier: RunNotifier) {
         when (behaviorForUnsupportedDevices) {
-            "skip" -> skipTests(notifier)
             "fail" -> failExecution(unsupportedDeviceMessage)
-            else -> {
-                Log.w(
-                    LOG_TAG,
+            "skip" -> skipTests(notifier)
+            else ->
+                failExecution(
                     "Unknown value found for configuration parameter " +
                         "'${ConfigurationParameters.BEHAVIOR_FOR_UNSUPPORTED_DEVICES}': " +
-                        "$behaviorForUnsupportedDevices. Apply default behavior " +
-                        "and skip tests for this class.",
+                        "$behaviorForUnsupportedDevices"
                 )
-                skipTests(notifier)
-            }
         }
     }
 

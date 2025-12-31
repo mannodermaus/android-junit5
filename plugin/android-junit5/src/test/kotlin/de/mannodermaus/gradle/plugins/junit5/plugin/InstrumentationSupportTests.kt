@@ -88,21 +88,21 @@ internal class InstrumentationSupportTests {
         val runnerArgs =
             project.android.defaultConfig.testInstrumentationRunnerArguments[
                     "configurationParameters"]
-        assertThat(runnerArgs).contains("de.mannodermaus.junit.unsupported.behavior=skip")
+        assertThat(runnerArgs).contains("de.mannodermaus.junit.unsupported.behavior=fail")
     }
 
     @Test
     fun `can configure the unsupported device behavior via dsl`() {
         project.addJUnit(JUnit5, "androidTest")
         project.junitPlatform.instrumentationTests.behaviorForUnsupportedDevices.set(
-            UnsupportedDeviceBehavior.Fail
+            UnsupportedDeviceBehavior.Skip
         )
         project.evaluate()
 
         val runnerArgs =
             project.android.defaultConfig.testInstrumentationRunnerArguments[
                     "configurationParameters"]
-        assertThat(runnerArgs).contains("de.mannodermaus.junit.unsupported.behavior=fail")
+        assertThat(runnerArgs).contains("de.mannodermaus.junit.unsupported.behavior=skip")
     }
 
     @Test
