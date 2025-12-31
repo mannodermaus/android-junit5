@@ -4,6 +4,11 @@ Change Log
 ## Unreleased
 - Update to Kotlin 2.3
 - Internal: Replace deprecated `OutputDirectoryProvider` with its correct replacement
+- Support instrumentation with JUnit 5 and 6 (the plugin will choose the correct runtime accordingly)
+- Introduce `de.mannodermaus.android-junit-framework` as the new plugin ID
+- New: Control behavior of test execution on unsupported devices via `instrumentationTests.behaviorForUnsupportedDevices`
+  - "Skip": Skip tests and mark them as ignored (default and equal to previous behavior)
+  - "Fail": Throw an exception and fail test execution
 
 ## 1.14.0.0 (2025-10-10)
 - JUnit 5.14.0

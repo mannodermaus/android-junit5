@@ -21,6 +21,10 @@ android {
 junitPlatform {
     // Using local dependency instead of Maven coordinates
     instrumentationTests.enabled = false
+
+    // Fail test execution when running on unsupported device
+    // (TODO: Change this to the proper instrumentationTests API once released as stable)
+    configurationParameter("de.mannodermaus.junit.unsupported.behavior", "fail")
 }
 
 dependencies {

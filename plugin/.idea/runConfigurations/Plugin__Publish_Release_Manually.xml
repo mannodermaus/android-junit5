@@ -10,16 +10,19 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="publishToSonatype" />
-          <option value="closeAndReleaseSonatypeStagingRepository" />
+          <option value="publishAllPublicationsToSonatypeRepository" />
+          <option value="closeAndReleaseStagingRepositories" />
         </list>
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
     <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
     <DebugAllEnabled>false</DebugAllEnabled>
     <RunAsTest>false</RunAsTest>
+    <GradleProfilingDisabled>false</GradleProfilingDisabled>
+    <GradleCoverageDisabled>false</GradleCoverageDisabled>
     <method v="2" />
   </configuration>
 </component>

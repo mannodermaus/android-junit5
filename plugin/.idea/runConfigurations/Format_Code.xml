@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Plugin: Update Public API File" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Format Code" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="apiDump" />
+          <option value="ktfmtFormat" />
         </list>
       </option>
       <option name="vmOptions" />

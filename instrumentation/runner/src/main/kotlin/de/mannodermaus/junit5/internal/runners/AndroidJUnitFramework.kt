@@ -18,10 +18,10 @@ import org.junit.runner.notification.RunNotifier
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 internal class AndroidJUnitFramework(
     private val testClass: Class<*>,
-    paramsSupplier: () -> JUnitFrameworkRunnerParams = JUnitFrameworkRunnerParams::create,
+    params: JUnitFrameworkRunnerParams,
 ) : Runner() {
     private val launcher = LauncherFactory.create()
-    private val testTree by lazy { generateTestTree(paramsSupplier()) }
+    private val testTree by lazy { generateTestTree(params) }
 
     override fun getDescription() = testTree.suiteDescription
 

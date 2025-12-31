@@ -18,6 +18,10 @@ junitPlatform {
         // See TaggedTests.kt for usage of this tag
         excludeTags("nope")
     }
+
+    // Fail test execution when running on unsupported device
+    // (TODO: Change this to the proper instrumentationTests API once released as stable)
+    configurationParameter("de.mannodermaus.junit.unsupported.behavior", "fail")
 }
 
 // Use local project dependencies on android-test instrumentation libraries
