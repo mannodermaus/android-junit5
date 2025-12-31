@@ -11,7 +11,7 @@
   </picture>
 </h1>
 
-[![CircleCI](https://circleci.com/gh/mannodermaus/android-junit5/tree/main.svg?style=svg)][circleci]
+[![CircleCI](https://circleci.com/gh/mannodermaus/android-junit-framework/tree/main.svg?style=svg)][circleci]
 
 A Gradle plugin that allows for the execution of [JUnit Framework][junit-framework-github] tests in Android environments using **Android Gradle Plugin 8.2 or later.**
 
@@ -198,9 +198,9 @@ See also the [full License text](LICENSE).
 
  [junit-framework-github]: https://github.com/junit-team/junit-framework
  [junit-framework-guide]: https://docs.junit.org
- [circleci]: https://circleci.com/gh/mannodermaus/android-junit5
+ [circleci]: https://circleci.com/gh/mannodermaus/android-junit-framework
  [sonatyperepo]: https://central.sonatype.com/repository/maven-snapshots
  [sampletests]: instrumentation/sample
- [wiki-home]: https://github.com/mannodermaus/android-junit5/wiki
- [wiki-dsl]: https://github.com/mannodermaus/android-junit5/wiki/Configuration
- [wiki-gettingstarted]: https://github.com/mannodermaus/android-junit5/wiki/Getting-Started
+ [wiki-home]: https://github.com/mannodermaus/android-junit-framework/wiki
+ [wiki-dsl]: https://github.com/mannodermaus/android-junit-framework/wiki/Configuration
+ [wiki-gettingstarted]: https://github.com/mannodermaus/android-junit-framework/wiki/Getting-Started
