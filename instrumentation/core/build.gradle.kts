@@ -18,25 +18,9 @@ junitPlatform {
         // See TaggedTests.kt for usage of this tag
         excludeTags("nope")
     }
-
-    // Fail test execution when running on unsupported device
-    // (TODO: Change this to the proper instrumentationTests API once released as stable)
-    configurationParameter("de.mannodermaus.junit.unsupported.behavior", "fail")
 }
 
-// Use local project dependencies on android-test instrumentation libraries
-// instead of relying on their Maven coordinates for this module
-val instrumentationLibraryRegex = Regex("de\\.mannodermaus\\.junit5:android-test-(.+):")
-
-configurations.all {
-    if ("DebugAndroidTestRuntimeClasspath" in name) {
-        resolutionStrategy.dependencySubstitution.all {
-            instrumentationLibraryRegex.find(requested.toString())?.let { result ->
-                useTarget(project(":${result.groupValues[1]}"))
-            }
-        }
-    }
-}
+replaceAndroidTestLibsWithLocalProjectDependencies()
 
 dependencies {
     implementation(libs.kotlin.stdlib)
