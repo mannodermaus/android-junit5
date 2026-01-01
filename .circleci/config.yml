@@ -32,7 +32,13 @@ jobs:
           command: cd plugin && ./gradlew :build-logic:test :android-junit5:check --stacktrace
       - run:
           name: (Instrumentation) Download Dependencies
-          command: cd instrumentation && ./gradlew androidDependencies
+          command: >
+            cd instrumentation && ./gradlew \
+              :core:dependencies \
+              :compose:dependencies \
+              :extensions:dependencies \
+              :runner:dependencies \
+              :testutil:dependencies
       - run:
           name: (Instrumentation) Build
           command: cd instrumentation && ./gradlew assemble :core:assembleAndroidTest --stacktrace
