@@ -55,6 +55,4 @@ dependencies {
     androidTestImplementation(libs.junit.jupiter.api)
     androidTestImplementation(libs.junit.jupiter.params)
     androidTestImplementation(libs.espresso)
-    androidTestImplementation(project(":core"))
-    androidTestRuntimeOnly(project(":runner"))
 }
