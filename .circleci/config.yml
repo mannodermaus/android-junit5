@@ -117,12 +117,12 @@ jobs:
           name: (Instrumentation) Build & Deploy
           command: |
             cd instrumentation
-            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseStagingRepositories --stacktrace
+            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository --info --stacktrace
       - run:
           name: (Plugin) Build & Deploy
           command: |
             cd plugin
-            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseStagingRepositories --stacktrace
+            ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository --info --stacktrace
       - store_artifacts:
           path: plugin/android-junit5/build/publications
           destination: plugin/publications/snapshots

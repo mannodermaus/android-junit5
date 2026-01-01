@@ -13,6 +13,7 @@ import org.gradle.api.publish.internal.PublicationInternal
 import org.gradle.api.publish.maven.MavenArtifact
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.jvm.tasks.Jar
@@ -142,6 +143,11 @@ private fun Project.configureAndroidDeployment(
                 }
             }
         }
+    }
+
+    // Disable main publication
+    tasks.withType<AbstractPublishToMaven>().configureEach {
+        isEnabled = "Main" !in name
     }
 }
 
