@@ -10,9 +10,9 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
-    alias(libs.plugins.android.app).version(SupportedAgp.newestStable.version).apply(false)
+    alias(libs.plugins.android.app).version(SupportedAgp.latestAgp8.version).apply(false)
     alias(libs.plugins.android.junit).version(Artifacts.Plugin.latestStableVersion).apply(false)
-    alias(libs.plugins.android.library).version(SupportedAgp.newestStable.version).apply(false)
+    alias(libs.plugins.android.library).version(SupportedAgp.latestAgp8.version).apply(false)
 
     alias(libs.plugins.compose).apply(false)
     alias(libs.plugins.dokka).apply(false)
